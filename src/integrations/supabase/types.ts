@@ -14,16 +14,289 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          college: string | null
+          course: string | null
+          created_at: string
+          domain: string
+          email: string
+          full_name: string
+          id: string
+          intern_id: string
+          offer_issued_at: string
+          phone: string | null
+          photo_url: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          user_id: string
+          year: string | null
+        }
+        Insert: {
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          domain: string
+          email: string
+          full_name: string
+          id?: string
+          intern_id: string
+          offer_issued_at?: string
+          phone?: string | null
+          photo_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          user_id: string
+          year?: string | null
+        }
+        Update: {
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          domain?: string
+          email?: string
+          full_name?: string
+          id?: string
+          intern_id?: string
+          offer_issued_at?: string
+          phone?: string | null
+          photo_url?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          user_id?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      certificates: {
+        Row: {
+          application_id: string
+          certificate_id: string
+          id: string
+          issued_at: string
+          verification_hash: string
+        }
+        Insert: {
+          application_id: string
+          certificate_id: string
+          id?: string
+          issued_at?: string
+          verification_hash: string
+        }
+        Update: {
+          application_id?: string
+          certificate_id?: string
+          id?: string
+          issued_at?: string
+          verification_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          application_id: string
+          id: string
+          screenshot_url: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          submitted_at: string
+          utr_number: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount?: number
+          application_id: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          submitted_at?: string
+          utr_number: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount?: number
+          application_id?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          submitted_at?: string
+          utr_number?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          college: string | null
+          course: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          photo_url: string | null
+          updated_at: string
+          year: string | null
+        }
+        Insert: {
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          photo_url?: string | null
+          updated_at?: string
+          year?: string | null
+        }
+        Update: {
+          college?: string | null
+          course?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          photo_url?: string | null
+          updated_at?: string
+          year?: string | null
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          application_id: string
+          deployed_url: string | null
+          feedback: string | null
+          github_url: string | null
+          id: string
+          notes: string | null
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+          task_id: string
+        }
+        Insert: {
+          application_id: string
+          deployed_url?: string | null
+          feedback?: string | null
+          github_url?: string | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+          task_id: string
+        }
+        Update: {
+          application_id?: string
+          deployed_url?: string | null
+          feedback?: string | null
+          github_url?: string | null
+          id?: string
+          notes?: string | null
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          description: string
+          domain: string
+          id: string
+          resources: string | null
+          task_number: number
+          title: string
+        }
+        Insert: {
+          description: string
+          domain: string
+          id?: string
+          resources?: string | null
+          task_number: number
+          title: string
+        }
+        Update: {
+          description?: string
+          domain?: string
+          id?: string
+          resources?: string | null
+          task_number?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
+      application_status: "pending" | "approved"
+      payment_status: "pending" | "verified" | "rejected"
+      submission_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +423,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+      application_status: ["pending", "approved"],
+      payment_status: ["pending", "verified", "rejected"],
+      submission_status: ["pending", "approved", "rejected"],
+    },
   },
 } as const
