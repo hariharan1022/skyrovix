@@ -1,4 +1,5 @@
-import { Document, Page, Text, View, StyleSheet, Image, pdf, Font } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image, pdf, type DocumentProps } from "@react-pdf/renderer";
+import type { ReactElement } from "react";
 import logo from "@/assets/logo.jpg";
 import seal from "@/assets/seal.jpg";
 import msme from "@/assets/msme.png";
@@ -149,7 +150,7 @@ export function CertificateDoc({ fullName, internId, domain, certId, issuedAt, v
   );
 }
 
-export async function downloadPdf(doc: React.ReactElement, filename: string) {
+export async function downloadPdf(doc: ReactElement<DocumentProps>, filename: string) {
   const blob = await pdf(doc).toBlob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
