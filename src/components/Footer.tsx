@@ -28,8 +28,9 @@ export function Footer() {
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Registered with</h4>
-          <div className="flex items-center justify-center rounded-lg bg-white p-4">
-            <img src={msme} alt="MSME" className="h-16 w-auto object-contain" />
+          <div className="flex flex-col items-center justify-center rounded-lg bg-white p-4">
+            <img src={msme} alt="MSME" className="h-12 w-auto object-contain" />
+            <p className="mt-2 text-[10px] text-gray-500 text-center leading-tight">UDYAM-TN-17-0076606</p>
           </div>
         </div>
       </div>
