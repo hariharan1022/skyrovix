@@ -1,11 +1,15 @@
-import { Code2, Database, Palette, Shield, Brain, CircuitBoard, Award } from "lucide-react";
+import { CircuitBoard, Award } from "lucide-react";
+import { DOMAINS } from "@/lib/constants";
 
-const DOMAIN_CARDS = [
-  { name: "Full Stack", icon: Code2, color: "from-blue-500 to-blue-600", delay: "animate-float-3", cls: "-top-4 -left-28" },
-  { name: "Data Science", icon: Database, color: "from-emerald-500 to-emerald-600", delay: "animate-float", cls: "top-12 -right-24" },
-  { name: "UI/UX Design", icon: Palette, color: "from-pink-500 to-rose-600", delay: "animate-float-2", cls: "top-32 -left-24" },
-  { name: "Cyber Security", icon: Shield, color: "from-purple-500 to-purple-600", delay: "animate-float-4", cls: "top-52 -right-26" },
-  { name: "AI", icon: Brain, color: "from-orange-500 to-orange-600", delay: "animate-float-5", cls: "bottom-0 -left-20" },
+const FLOATING_SLUGS = ["fullstack", "datascience", "aiml", "uiux", "python", "java", "cybersecurity"];
+const FLOATING_POSITIONS = [
+  { delay: "animate-float-3", cls: "-top-6 -left-28" },
+  { delay: "animate-float", cls: "top-6 -right-28" },
+  { delay: "animate-float-2", cls: "top-28 -left-24" },
+  { delay: "animate-float-4", cls: "top-32 -right-24" },
+  { delay: "animate-float-5", cls: "top-60 -left-26" },
+  { delay: "animate-float-3", cls: "top-64 -right-22" },
+  { delay: "animate-float", cls: "-bottom-2 -left-20" },
 ];
 
 export function HeroVisual() {
@@ -109,19 +113,23 @@ export function HeroVisual() {
         </div>
 
         {/* Floating Domain Cards */}
-        {DOMAIN_CARDS.map((card) => (
-          <div
-            key={card.name}
-            className={`${card.delay} ${card.cls} absolute z-20 hidden md:block`}
-          >
-            <div className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-lg shadow-blue-900/5 backdrop-blur">
-              <div className={`grid size-8 place-items-center rounded-lg bg-gradient-to-br ${card.color}`}>
-                <card.icon className="size-4 text-white" />
+        {FLOATING_SLUGS.map((slug, i) => {
+          const d = DOMAINS.find((x) => x.slug === slug);
+          if (!d) return null;
+          return (
+            <div
+              key={d.slug}
+              className={`${FLOATING_POSITIONS[i].delay} ${FLOATING_POSITIONS[i].cls} absolute z-20 hidden md:block`}
+            >
+              <div className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-lg shadow-blue-900/5 backdrop-blur">
+                <div className={`grid size-8 place-items-center rounded-lg bg-gradient-to-br ${d.color} text-xs font-bold text-white`}>
+                  {d.icon}
+                </div>
+                <span className="whitespace-nowrap text-xs font-medium text-gray-800">{d.name}</span>
               </div>
-              <span className="whitespace-nowrap text-xs font-medium text-gray-800">{card.name}</span>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
