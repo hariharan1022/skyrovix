@@ -34,6 +34,10 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border/60 py-4 text-center text-xs text-muted-foreground">
+        <div className="mb-2 flex items-center justify-center gap-4">
+          <Link to="/privacy" className="hover:text-foreground underline underline-offset-2">Privacy Policy</Link>
+          <Link to="/terms" className="hover:text-foreground underline underline-offset-2">Terms of Service</Link>
+        </div>
         © {new Date().getFullYear()} Skyrovix IT Solutions. All rights reserved.
       </div>
     </footer>
