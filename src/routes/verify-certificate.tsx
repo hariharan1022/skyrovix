@@ -34,27 +34,39 @@ function VerifyPage() {
 
     const trimmed = id.trim();
 
-    // Try certificate lookup first
-    const { data: cert } = await supabase
+    // 1. Try certificate lookup
+    const { data: cert, error: certErr } = await supabase
       .from("certificates")
-      .select("certificate_id, issued_at, applications(full_name, domain, intern_id, status)")
+      .select("certificate_id, issued_at, application_id")
       .eq("certificate_id", trimmed)
       .maybeSingle();
 
-    if (cert?.applications) {
-      const app = cert.applications as unknown as { full_name: string; domain: string; intern_id: string; status: string };
-      return setResult({
-        state: "found",
-        data: { ...app, cert_id: cert.certificate_id, issued_at: cert.issued_at },
-      });
+    if (certErr) console.error(certErr);
+
+    if (cert) {
+      // Fetch the application separately
+      const { data: app } = await supabase
+        .from("applications")
+        .select("full_name, domain, intern_id, status")
+        .eq("id", cert.application_id)
+        .maybeSingle();
+
+      if (app) {
+        return setResult({
+          state: "found",
+          data: { ...app, cert_id: cert.certificate_id, issued_at: cert.issued_at },
+        });
+      }
     }
 
-    // Try intern ID lookup
-    const { data: app } = await supabase
+    // 2. Try intern ID lookup
+    const { data: app, error: appErr } = await supabase
       .from("applications")
       .select("full_name, domain, intern_id, status")
       .eq("intern_id", trimmed)
       .maybeSingle();
+
+    if (appErr) console.error(appErr);
 
     if (app) {
       return setResult({
