@@ -1,11 +1,11 @@
-import { CheckCircle2, Code2, Database, Palette, Shield, Brain, CircuitBoard, ArrowRight, Award } from "lucide-react";
+import { Code2, Database, Palette, Shield, Brain, CircuitBoard, Award } from "lucide-react";
 
 const DOMAIN_CARDS = [
-  { name: "Full Stack", icon: Code2, color: "from-blue-500 to-blue-600", bg: "bg-blue-50", text: "text-blue-600", top: "top-2", left: "-left-8", delay: "animate-float-3" },
-  { name: "Data Science", icon: Database, color: "from-emerald-500 to-emerald-600", bg: "bg-emerald-50", text: "text-emerald-600", top: "top-24", right: "-right-6", delay: "animate-float" },
-  { name: "UI/UX Design", icon: Palette, color: "from-pink-500 to-rose-600", bg: "bg-pink-50", text: "text-pink-600", top: "top-44", left: "-left-6", delay: "animate-float-2" },
-  { name: "Cyber Security", icon: Shield, color: "from-purple-500 to-purple-600", bg: "bg-purple-50", text: "text-purple-600", top: "top-64", right: "-right-8", delay: "animate-float-4" },
-  { name: "AI", icon: Brain, color: "from-orange-500 to-orange-600", bg: "bg-orange-50", text: "text-orange-600", bottom: "bottom-8", left: "-left-4", delay: "animate-float-5" },
+  { name: "Full Stack", icon: Code2, color: "from-blue-500 to-blue-600", delay: "animate-float-3", cls: "top-0 -left-10" },
+  { name: "Data Science", icon: Database, color: "from-emerald-500 to-emerald-600", delay: "animate-float", cls: "top-20 -right-8" },
+  { name: "UI/UX Design", icon: Palette, color: "from-pink-500 to-rose-600", delay: "animate-float-2", cls: "top-40 -left-8" },
+  { name: "Cyber Security", icon: Shield, color: "from-purple-500 to-purple-600", delay: "animate-float-4", cls: "top-60 -right-10" },
+  { name: "AI", icon: Brain, color: "from-orange-500 to-orange-600", delay: "animate-float-5", cls: "bottom-4 -left-6" },
 ];
 
 export function HeroVisual() {
@@ -112,13 +112,7 @@ export function HeroVisual() {
         {DOMAIN_CARDS.map((card) => (
           <div
             key={card.name}
-            className={`${card.delay} absolute z-20 hidden md:block`}
-            style={{
-              top: card.top,
-              bottom: card.bottom,
-              left: card.left,
-              right: card.right,
-            }}
+            className={`${card.delay} ${card.cls} absolute z-20 hidden md:block`}
           >
             <div className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-lg shadow-blue-900/5 backdrop-blur">
               <div className={`grid size-8 place-items-center rounded-lg bg-gradient-to-br ${card.color}`}>
