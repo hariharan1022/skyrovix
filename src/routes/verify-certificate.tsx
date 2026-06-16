@@ -37,12 +37,12 @@ function VerifyPage() {
     // Try certificate lookup first
     const { data: cert } = await supabase
       .from("certificates")
-      .select("certificate_id, issued_at, applications!inner(full_name, domain, intern_id, status)")
+      .select("certificate_id, issued_at, applications(full_name, domain, intern_id, status)")
       .eq("certificate_id", trimmed)
       .maybeSingle();
 
     if (cert?.applications) {
-      const app = cert.applications as { full_name: string; domain: string; intern_id: string; status: string };
+      const app = cert.applications as unknown as { full_name: string; domain: string; intern_id: string; status: string };
       return setResult({
         state: "found",
         data: { ...app, cert_id: cert.certificate_id, issued_at: cert.issued_at },
