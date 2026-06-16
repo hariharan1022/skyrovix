@@ -10,7 +10,8 @@ import { DOMAINS, generateInternId } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { ArrowRight, Award, FileCheck, Rocket, ShieldCheck, GraduationCap, IndianRupee, FileText, CreditCard } from "lucide-react";
+import { ArrowRight, Award, FileCheck, Rocket, ShieldCheck, GraduationCap, IndianRupee } from "lucide-react";
+import { HeroVisual } from "@/components/HeroVisual";
 import logo from "@/assets/logo.jpg";
 
 export const Route = createFileRoute("/")({
@@ -111,43 +112,87 @@ function Landing() {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,oklch(0.55_0.22_295/0.05),transparent_40%),radial-gradient(ellipse_at_top_left,oklch(0.60_0.25_300/0.08),transparent_50%),radial-gradient(ellipse_at_top_right,oklch(0.50_0.20_285/0.06),transparent_50%),radial-gradient(ellipse_at_bottom,oklch(0.40_0.15_270/0.04),transparent_60%)]" />
-        <div className="absolute inset-0 -z-10 bg-[image:radial-gradient(oklch(0.55_0.22_295/0.06)_1px,transparent_0)] bg-[size:32px_32px]" />
-        <div className="absolute -top-64 left-1/2 -z-10 size-[700px] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-purple-500/15 to-transparent blur-[140px]" />
-        <div className="absolute -bottom-48 left-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-transparent blur-[120px]" />
-        <div className="absolute right-0 top-1/4 -z-10 size-[400px] rounded-full bg-gradient-to-bl from-fuchsia-500/10 via-transparent to-transparent blur-[100px]" />
-        <div className="mx-auto max-w-4xl px-4 pt-20 pb-24 text-center md:pt-28">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur">
-            <ShieldCheck className="size-3.5 text-primary" /> MSME Registered · Skyrovix IT Solutions
-          </div>
-          <h1 className="font-display text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-            Learn by building.<br />
-            <span className="brand-text">Get certified.</span>
-          </h1>
-          <p className="mt-3 text-base text-muted-foreground sm:text-lg">
-            Build in{" "}
-            <RotatingText
-              texts={["Full Stack", "AI/ML", "Cyber Security", "UI/UX", "Data Science"]}
-            />
-            .
-          </p>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Task-based virtual internships — apply in minutes, get an instant offer letter and
-            ID card, complete 5 real-world projects, and earn a QR-verified certificate.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Button asChild size="lg" className="brand-gradient text-white border-0 glow">
-              <Link to="/auth">Start your internship <ArrowRight className="ml-1 size-4" /></Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/domains">Browse domains</Link>
-            </Button>
-          </div>
-          <div className="mt-12 flex items-center justify-center gap-8 text-xs text-muted-foreground">
-            <Stat n="10" label="Domains" />
-            <Stat n="50+" label="Projects" />
-            <Stat n="100%" label="Online" />
+      <section className="relative overflow-hidden pb-16 pt-24 md:pb-24 md:pt-32">
+        {/* Background */}
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#FFFFFF_0%,#F8F7FF_40%,#EEF2FF_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[image:radial-gradient(#7C3AED10_1px,transparent_0)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]" />
+        <div className="absolute -top-48 left-1/2 -z-10 size-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-400/20 via-purple-400/20 to-transparent blur-[150px]" />
+        <div className="absolute -bottom-64 left-1/4 -z-10 size-[600px] rounded-full bg-gradient-to-tr from-purple-400/15 via-blue-400/10 to-transparent blur-[130px]" />
+        <div className="absolute right-0 top-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-bl from-fuchsia-400/10 via-transparent to-transparent blur-[120px]" />
+        <div className="absolute left-0 top-1/2 -z-10 size-[300px] rounded-full bg-blue-400/10 blur-[100px]" />
+
+        {/* Floating gradient circles */}
+        <div className="absolute left-[15%] top-[20%] -z-10 size-32 rounded-full bg-gradient-to-br from-blue-400/20 to-purple-400/20 blur-3xl" />
+        <div className="absolute right-[20%] top-[10%] -z-10 size-40 rounded-full bg-gradient-to-br from-purple-400/20 to-fuchsia-400/20 blur-3xl" />
+        <div className="absolute bottom-[30%] right-[10%] -z-10 size-24 rounded-full bg-gradient-to-br from-blue-400/15 to-cyan-400/15 blur-3xl" />
+
+        {/* Wave shape at bottom */}
+        <div className="absolute bottom-0 left-0 -z-10 h-32 w-full bg-[linear-gradient(to_top,#F8F7FF,transparent)]" />
+
+        <div className="mx-auto max-w-7xl px-4">
+          <div className="grid items-center gap-16 md:grid-cols-2">
+            {/* LEFT */}
+            <div className="text-center md:text-left">
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-200/60 bg-white/70 px-4 py-1.5 text-xs text-gray-600 shadow-sm backdrop-blur">
+                <ShieldCheck className="size-3.5 text-blue-600" /> MSME Registered · Skyrovix IT Solutions
+              </div>
+
+              <h1 className="font-display text-5xl font-bold tracking-tight text-gray-900 md:text-6xl lg:text-7xl">
+                Learn by building.<br />
+                <span className="brand-text-blue">Get certified.</span>
+              </h1>
+
+              <div className="mt-6 h-8">
+                <p className="text-lg text-gray-600">
+                  Build in{" "}
+                  <TypingText
+                    texts={["Full Stack Development", "Data Science", "Cyber Security", "UI/UX Design"]}
+                  />
+                </p>
+              </div>
+
+              <p className="mt-6 max-w-lg text-base leading-relaxed text-gray-500">
+                Task-based virtual internships — apply in minutes, get an instant offer letter and
+                ID card, complete real-world projects, and earn a QR-verified certificate.
+              </p>
+
+              <div className="mt-10 flex flex-wrap items-center gap-4">
+                <Link to="/auth">
+                  <Button size="lg" className="rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-base font-semibold text-white shadow-lg shadow-blue-600/25 transition hover:shadow-xl hover:shadow-blue-600/30 hover:scale-105 active:scale-95 glow-blue">
+                    Start your internship <ArrowRight className="ml-2 size-4" />
+                  </Button>
+                </Link>
+                <Link to="/domains">
+                  <Button size="lg" variant="outline" className="rounded-xl border-2 border-purple-200 bg-white px-8 py-6 text-base font-semibold text-gray-700 shadow-sm transition hover:border-purple-300 hover:bg-purple-50/50 hover:shadow-md">
+                    Browse domains
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="mt-14 flex items-center gap-10 md:justify-start">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900">10</div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400">Domains</div>
+                </div>
+                <div className="h-10 w-px bg-gray-200" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900">50+</div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400">Projects</div>
+                </div>
+                <div className="h-10 w-px bg-gray-200" />
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-gray-900">100%</div>
+                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-gray-400">Online</div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT */}
+            <div className="hidden md:block">
+              <div className="animate-in fade-in slide-in-from-right-4 duration-700">
+                <HeroVisual />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -256,24 +301,37 @@ function Landing() {
   );
 }
 
-function RotatingText({ texts }: { texts: string[] }) {
+function TypingText({ texts }: { texts: string[] }) {
   const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % texts.length), 2200);
-    return () => clearInterval(t);
-  }, [texts.length]);
-  return (
-    <span key={index} className="brand-text font-semibold animate-in fade-in slide-in-from-bottom-1 duration-300">
-      {texts[index]}
-    </span>
-  );
-}
+  const [display, setDisplay] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
-function Stat({ n, label }: { n: string; label: string }) {
+  useEffect(() => {
+    const current = texts[index];
+    let timer: ReturnType<typeof setTimeout>;
+
+    if (!isDeleting) {
+      if (display.length < current.length) {
+        timer = setTimeout(() => setDisplay(current.slice(0, display.length + 1)), 50);
+      } else {
+        timer = setTimeout(() => setIsDeleting(true), 2000);
+      }
+    } else {
+      if (display.length > 0) {
+        timer = setTimeout(() => setDisplay(display.slice(0, -1)), 25);
+      } else {
+        setIsDeleting(false);
+        setIndex((i) => (i + 1) % texts.length);
+      }
+    }
+
+    return () => clearTimeout(timer);
+  }, [display, isDeleting, index, texts]);
+
   return (
-    <div className="text-center">
-      <div className="text-2xl font-bold text-foreground">{n}</div>
-      <div className="uppercase tracking-wider">{label}</div>
-    </div>
+    <span className="font-semibold text-blue-600">
+      {display}
+      <span className="ml-0.5 animate-pulse text-blue-400">|</span>
+    </span>
   );
 }
