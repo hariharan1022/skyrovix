@@ -1,11 +1,11 @@
 import { Code2, Database, Palette, Shield, Brain, CircuitBoard, Award } from "lucide-react";
 
 const DOMAIN_CARDS = [
-  { name: "Full Stack", icon: Code2, color: "from-blue-500 to-blue-600", delay: "animate-float-3", cls: "top-0 -left-10" },
-  { name: "Data Science", icon: Database, color: "from-emerald-500 to-emerald-600", delay: "animate-float", cls: "top-20 -right-8" },
-  { name: "UI/UX Design", icon: Palette, color: "from-pink-500 to-rose-600", delay: "animate-float-2", cls: "top-40 -left-8" },
-  { name: "Cyber Security", icon: Shield, color: "from-purple-500 to-purple-600", delay: "animate-float-4", cls: "top-60 -right-10" },
-  { name: "AI", icon: Brain, color: "from-orange-500 to-orange-600", delay: "animate-float-5", cls: "bottom-4 -left-6" },
+  { name: "Full Stack", icon: Code2, color: "from-blue-500 to-blue-600", delay: "animate-float-3", cls: "-top-4 -left-28" },
+  { name: "Data Science", icon: Database, color: "from-emerald-500 to-emerald-600", delay: "animate-float", cls: "top-12 -right-24" },
+  { name: "UI/UX Design", icon: Palette, color: "from-pink-500 to-rose-600", delay: "animate-float-2", cls: "top-32 -left-24" },
+  { name: "Cyber Security", icon: Shield, color: "from-purple-500 to-purple-600", delay: "animate-float-4", cls: "top-52 -right-26" },
+  { name: "AI", icon: Brain, color: "from-orange-500 to-orange-600", delay: "animate-float-5", cls: "bottom-0 -left-20" },
 ];
 
 export function HeroVisual() {
