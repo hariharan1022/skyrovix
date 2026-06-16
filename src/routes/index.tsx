@@ -112,11 +112,11 @@ function Landing() {
 
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,oklch(0.55_0.22_295/0.08),transparent_70%),radial-gradient(ellipse_at_bottom_left,oklch(0.50_0.20_285/0.06),transparent_60%),radial-gradient(ellipse_at_bottom_right,oklch(0.38_0.16_270/0.05),transparent_60%)]" />
-        <div className="absolute inset-0 -z-10 bg-[image:radial-gradient(oklch(0.55_0.22_295/0.08)_1px,transparent_0)] bg-[size:24px_24px]" />
-        <div className="absolute -top-48 left-1/4 -z-10 size-[500px] rounded-full bg-primary/20 blur-[120px]" />
-        <div className="absolute -bottom-32 right-1/4 -z-10 size-[400px] rounded-full bg-purple-400/15 blur-[100px]" />
-        <div className="absolute left-1/3 top-1/3 -z-10 size-[300px] rounded-full bg-indigo-400/10 blur-[80px]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_bottom,oklch(0.55_0.22_295/0.05),transparent_40%),radial-gradient(ellipse_at_top_left,oklch(0.60_0.25_300/0.08),transparent_50%),radial-gradient(ellipse_at_top_right,oklch(0.50_0.20_285/0.06),transparent_50%),radial-gradient(ellipse_at_bottom,oklch(0.40_0.15_270/0.04),transparent_60%)]" />
+        <div className="absolute inset-0 -z-10 bg-[image:radial-gradient(oklch(0.55_0.22_295/0.06)_1px,transparent_0)] bg-[size:32px_32px]" />
+        <div className="absolute -top-64 left-1/2 -z-10 size-[700px] -translate-x-1/2 rounded-full bg-gradient-to-br from-primary/25 via-purple-500/15 to-transparent blur-[140px]" />
+        <div className="absolute -bottom-48 left-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-tr from-indigo-500/10 via-purple-500/10 to-transparent blur-[120px]" />
+        <div className="absolute right-0 top-1/4 -z-10 size-[400px] rounded-full bg-gradient-to-bl from-fuchsia-500/10 via-transparent to-transparent blur-[100px]" />
         <div className="mx-auto max-w-4xl px-4 pt-20 pb-24 text-center md:pt-28">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/40 px-4 py-1.5 text-xs text-muted-foreground backdrop-blur">
             <ShieldCheck className="size-3.5 text-primary" /> MSME Registered · Skyrovix IT Solutions
