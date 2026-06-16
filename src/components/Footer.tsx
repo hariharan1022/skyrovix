@@ -28,8 +28,8 @@ export function Footer() {
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Registered with</h4>
-          <div className="flex items-center gap-3 rounded-lg bg-white p-3 max-w-[180px]">
-            <img src={msme} alt="MSME" className="h-12 object-contain" />
+          <div className="flex items-center justify-center rounded-lg bg-white p-4">
+            <img src={msme} alt="MSME" className="h-16 w-auto object-contain" />
           </div>
         </div>
       </div>
