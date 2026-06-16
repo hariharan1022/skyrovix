@@ -3,13 +3,13 @@ import { DOMAINS } from "@/lib/constants";
 
 const FLOATING_SLUGS = ["fullstack", "datascience", "aiml", "uiux", "python", "java", "cybersecurity"];
 const FLOATING_POSITIONS = [
-  { delay: "animate-float-3", cls: "-top-6 -left-28" },
-  { delay: "animate-float", cls: "top-6 -right-28" },
-  { delay: "animate-float-2", cls: "top-28 -left-24" },
-  { delay: "animate-float-4", cls: "top-32 -right-24" },
-  { delay: "animate-float-5", cls: "top-60 -left-26" },
-  { delay: "animate-float-3", cls: "top-64 -right-22" },
-  { delay: "animate-float", cls: "-bottom-2 -left-20" },
+  { delay: "animate-float-3", cls: "-top-8 -left-36" },
+  { delay: "animate-float", cls: "top-4 -right-36" },
+  { delay: "animate-float-2", cls: "top-24 -left-32" },
+  { delay: "animate-float-4", cls: "top-28 -right-32" },
+  { delay: "animate-float-5", cls: "top-56 -left-34" },
+  { delay: "animate-float-3", cls: "top-60 -right-30" },
+  { delay: "animate-float", cls: "-bottom-1 -left-28" },
 ];
 
 export function HeroVisual() {

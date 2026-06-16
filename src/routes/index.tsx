@@ -10,7 +10,8 @@ import { DOMAINS, generateInternId } from "@/lib/constants";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { ArrowRight, Award, FileCheck, Rocket, ShieldCheck, GraduationCap, IndianRupee } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowRight, Award, FileCheck, Rocket, ShieldCheck, GraduationCap, IndianRupee, HelpCircle } from "lucide-react";
 import { HeroVisual } from "@/components/HeroVisual";
 import logo from "@/assets/logo.jpg";
 
@@ -284,6 +285,23 @@ function Landing() {
         </DialogContent>
       </Dialog>
 
+      {/* FAQ */}
+      <section className="mx-auto max-w-3xl px-4 py-20">
+        <div className="text-center">
+          <HelpCircle className="mx-auto size-8 text-primary" />
+          <h2 className="mt-3 text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
+          <p className="mt-2 text-muted-foreground">Everything you need to know about the Skyrovix internship program.</p>
+        </div>
+        <Accordion type="single" collapsible className="mt-10 space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <AccordionItem key={i} value={`faq-${i}`} className="rounded-xl border border-border/60 bg-card/40 px-6">
+              <AccordionTrigger className="py-4 text-left font-medium hover:no-underline">{item.q}</AccordionTrigger>
+              <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground">{item.a}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </section>
+
       {/* CTA */}
       <section className="mx-auto max-w-5xl px-4 py-20">
         <div className="relative overflow-hidden rounded-3xl border border-border/60 brand-gradient p-10 text-center text-white">
@@ -300,6 +318,17 @@ function Landing() {
     </div>
   );
 }
+
+const FAQ_ITEMS = [
+  { q: "What is the Skyrovix internship program?", a: "It is a task-based virtual internship where you complete 5 real-world projects in your chosen domain. You get an instant offer letter, digital ID card, mentor reviews, and a verified certificate with QR code upon completion." },
+  { q: "Is there any application fee?", a: "No. Applying and receiving the offer letter and ID card is completely free. A ₹100 certification fee is payable only after completing all 5 tasks, just before the certificate is issued." },
+  { q: "How long does the internship take?", a: "The internship is self-paced. Most students complete it in 2–4 weeks, but you can finish faster or take more time depending on your schedule." },
+  { q: "What domains are available?", a: "We offer 10 domains: Full Stack Development, Frontend, Backend, Data Science, AI & ML, UI/UX Design, Python, Java, Cyber Security, and Digital Marketing." },
+  { q: "Will I get an offer letter and ID card?", a: "Yes. Immediately after applying, you receive an instant offer letter and a digital ID card with your name, domain, intern ID, and a QR code." },
+  { q: "Is the certificate verifiable?", a: "Yes. Every certificate has a unique ID and QR code. Employers can verify its authenticity on our Verify Certificate page." },
+  { q: "Who reviews my task submissions?", a: "Each task is reviewed by our mentor team. You'll receive feedback and can resubmit if needed. A task is marked approved once it meets the required standards." },
+  { q: "Do I get a certificate if I don't complete all tasks?", a: "The certificate is issued only after you complete and get approval on all 5 tasks and pay the ₹100 certification fee." },
+];
 
 function TypingText({ texts }: { texts: string[] }) {
   const [index, setIndex] = useState(0);
