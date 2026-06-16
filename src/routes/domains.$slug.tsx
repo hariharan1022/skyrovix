@@ -35,7 +35,7 @@ function DomainPage() {
       <main className="mx-auto max-w-4xl px-4 py-16">
         <Link to="/domains" className="text-sm text-muted-foreground hover:text-foreground">← All domains</Link>
         <div className="mt-6 flex items-start gap-6">
-          <div className={`grid size-20 place-items-center rounded-2xl bg-gradient-to-br ${d.color} text-4xl`}>{d.icon}</div>
+          <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${d.color} text-lg font-bold text-white sm:size-20`}>{d.icon}</div>
           <div className="flex-1">
             <h1 className="text-4xl font-bold">{d.name}</h1>
             <p className="mt-2 text-muted-foreground">{d.description}</p>
