@@ -1,6 +1,7 @@
 import { Logo } from "./Logo";
 import msme from "@/assets/msme.png";
 import { Link } from "@tanstack/react-router";
+import { Linkedin, Instagram, MessageCircle, Mail } from "lucide-react";
 
 export function Footer() {
   return (
@@ -22,9 +23,15 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li>skyrovix@gmail.com</li>
+            <li><a href="mailto:skyrovix@gmail.com" className="flex items-center gap-2 hover:text-foreground"><Mail className="size-3.5" /> skyrovix@gmail.com</a></li>
             <li>India</li>
           </ul>
+          <h4 className="mb-3 mt-5 text-sm font-semibold">Follow Us</h4>
+          <div className="flex items-center gap-3">
+            <a href="https://www.linkedin.com/in/hariharan-s-92b566381" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50"><Linkedin className="size-3.5" /> LinkedIn</a>
+            <a href="https://www.instagram.com/skyrovix_web" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition hover:border-pink-300 hover:text-pink-600 hover:bg-pink-50"><Instagram className="size-3.5" /> Instagram</a>
+            <a href="https://wa.me/919940773204" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground transition hover:border-green-300 hover:text-green-600 hover:bg-green-50"><MessageCircle className="size-3.5" /> WhatsApp</a>
+          </div>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Registered with</h4>
