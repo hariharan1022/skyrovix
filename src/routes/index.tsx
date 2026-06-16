@@ -112,7 +112,7 @@ function Landing() {
       <Navbar />
 
       {/* HERO */}
-      <section className="relative overflow-hidden pb-16 pt-24 md:pb-24 md:pt-32">
+      <section className="relative overflow-hidden pb-16 pt-16 md:pb-24 md:pt-20">
         {/* Background */}
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#FFFFFF_0%,#F8F7FF_40%,#EEF2FF_100%)]" />
         <div className="absolute inset-0 -z-10 bg-[image:radial-gradient(#7C3AED10_1px,transparent_0)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_70%)]" />
