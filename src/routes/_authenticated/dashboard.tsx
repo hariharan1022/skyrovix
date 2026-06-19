@@ -208,6 +208,10 @@ function ActiveDashboard({ app }: { app: Application }) {
         </CardContent>
       </Card>
 
+      <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-application"] })} />
+
+
+
       <Tabs defaultValue="onboarding">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
