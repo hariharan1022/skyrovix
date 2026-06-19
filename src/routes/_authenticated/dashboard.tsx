@@ -8,8 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +16,7 @@ import { DOMAINS, PAYMENT, COMPANY, generateInternId, getDomain } from "@/lib/co
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { IDCard } from "@/components/IDCard";
+import { TasksSection } from "@/components/TasksSection";
 import { OfferLetterDoc, CertificateDoc, downloadPdf } from "@/components/pdf-docs";
 import { Copy, Download, FileText, CheckCircle2, Clock, XCircle, Upload, Award } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -241,12 +240,12 @@ function ActiveDashboard({ app }: { app: Application }) {
           </Card>
         </TabsContent>
 
-        <TabsContent value="tasks" className="mt-6 space-y-4">
-          {tasks?.map((t, i) => {
-            const sub = submissions?.find((s) => s.task_id === t.id);
-            const prevDone = i === 0 || submissions?.find((s) => s.task_id === tasks[i - 1].id)?.status === "approved";
-            return <TaskCard key={t.id} task={t} submission={sub} appId={app.id} unlocked={!!prevDone} onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })} />;
-          })}
+        <TabsContent value="tasks" className="mt-6">
+          {tasks && tasks.length > 0 ? (
+            <TasksSection tasks={tasks} submissions={submissions ?? []} appId={app.id} onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })} />
+          ) : (
+            <p className="text-muted-foreground">No tasks available yet for your domain.</p>
+          )}
         </TabsContent>
 
         <TabsContent value="payment" className="mt-6">
@@ -272,70 +271,6 @@ function ActiveDashboard({ app }: { app: Application }) {
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function TaskCard({ task, submission, appId, unlocked, onChange }: { task: { id: string; task_number: number; title: string; description: string }; submission: { id: string; status: string; github_url: string | null; deployed_url: string | null; notes: string | null; feedback: string | null } | undefined; appId: string; unlocked: boolean; onChange: () => void }) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    const fd = new FormData(e.currentTarget);
-    const payload = { application_id: appId, task_id: task.id, github_url: String(fd.get("github_url")), deployed_url: String(fd.get("deployed_url")), notes: String(fd.get("notes")), status: "pending" as const };
-    const { error } = submission
-      ? await supabase.from("submissions").update({ ...payload, submitted_at: new Date().toISOString() }).eq("id", submission.id)
-      : await supabase.from("submissions").insert(payload);
-    setLoading(false);
-    if (error) return toast.error(error.message);
-    toast.success("Submission sent for review");
-    setOpen(false);
-    onChange();
-  };
-
-  const statusBadge = !submission ? null
-    : submission.status === "approved" ? <Badge className="bg-green-600">Approved</Badge>
-    : submission.status === "rejected" ? <Badge variant="destructive">Rejected</Badge>
-    : <Badge variant="secondary">Under review</Badge>;
-
-  return (
-    <Card className={!unlocked ? "opacity-60" : ""}>
-      <CardHeader>
-        <div className="flex items-start gap-3">
-          <div className="grid size-9 place-items-center rounded-full brand-gradient font-bold text-white">{task.task_number}</div>
-          <div className="flex-1">
-            <div className="flex items-center justify-between gap-2">
-              <CardTitle className="text-base">{task.title}</CardTitle>
-              {statusBadge}
-            </div>
-            <CardDescription className="mt-1">{task.description}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {!unlocked ? <p className="text-sm text-muted-foreground">Complete the previous task to unlock.</p>
-          : submission?.status === "approved" ? <p className="text-sm text-green-500 flex items-center gap-1"><CheckCircle2 className="size-4" /> Approved on {submission.id && new Date().toLocaleDateString()}</p>
-          : (
-            <div className="space-y-3">
-              {submission?.feedback && submission.status === "rejected" && (
-                <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                  <p className="font-semibold text-destructive flex items-center gap-1"><XCircle className="size-4" /> Feedback</p>
-                  <p className="mt-1">{submission.feedback}</p>
-                </div>
-              )}
-              <Button variant="outline" size="sm" onClick={() => setOpen(!open)}>{submission ? "Resubmit" : "Submit task"}</Button>
-              {open && (
-                <form onSubmit={submit} className="space-y-3 rounded-md border border-border bg-card/40 p-4">
-                  <div><Label>GitHub URL</Label><Input name="github_url" type="url" defaultValue={submission?.github_url ?? ""} required /></div>
-                  <div><Label>Deployed / Demo URL</Label><Input name="deployed_url" type="url" defaultValue={submission?.deployed_url ?? ""} /></div>
-                  <div><Label>Notes</Label><Textarea name="notes" defaultValue={submission?.notes ?? ""} rows={3} /></div>
-                  <Button type="submit" disabled={loading} className="brand-gradient text-white border-0">{loading ? "Sending…" : "Submit"}</Button>
-                </form>
-              )}
-            </div>
-          )}
-      </CardContent>
-    </Card>
   );
 }
 
