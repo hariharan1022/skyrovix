@@ -241,11 +241,7 @@ function ActiveDashboard({ app }: { app: Application }) {
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-6">
-          {tasks && tasks.length > 0 ? (
-            <TasksSection tasks={tasks} submissions={submissions ?? []} appId={app.id} onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })} />
-          ) : (
-            <p className="text-muted-foreground">No tasks available yet for your domain.</p>
-          )}
+          <TasksSection domainSlug={app.domain} submissions={submissions ?? []} appId={app.id} onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })} />
         </TabsContent>
 
         <TabsContent value="payment" className="mt-6">
