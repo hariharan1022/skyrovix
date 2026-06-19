@@ -121,10 +121,8 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
           .from("profile-photos")
           .upload(path, photoFile, { upsert: true });
         if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage
-          .from("profile-photos")
-          .createSignedUrl(path, 60 * 60 * 24 * 365);
-        photo_url = signed?.signedUrl ?? null;
+        const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
+        photo_url = publicUrl?.publicUrl ?? null;
       }
       const intern_id = generateInternId();
       const payload = {
@@ -598,10 +596,8 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
           .from("profile-photos")
           .upload(path, photoFile, { upsert: true });
         if (upErr) throw upErr;
-        const { data: signed } = await supabase.storage
-          .from("profile-photos")
-          .createSignedUrl(path, 60 * 60 * 24 * 365);
-        photo_url = signed?.signedUrl ?? photo_url;
+        const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
+        photo_url = publicUrl?.publicUrl ?? photo_url;
       }
       const updates = {
         full_name: String(fd.get("full_name")),

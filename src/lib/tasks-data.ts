@@ -585,6 +585,21 @@ export const ALL_DOMAINS_TASKS: DomainTasks[] = [
   },
 ];
 
+export const LINKEDIN_TASK: TaskData = {
+  taskNumber: 0,
+  title: "Share Your Offer Letter on LinkedIn",
+  description:
+    "Post your Skyrovix offer letter on LinkedIn to celebrate your internship and inspire others.",
+  features: [
+    "Download your offer letter from the Onboarding tab",
+    "Take a screenshot or share as PDF",
+    "Post on LinkedIn with a professional caption",
+    "Tag @Skyrovix and use #SkyrovixInternship",
+  ],
+  outcome:
+    "Build your professional brand on LinkedIn and showcase your internship journey with your network.",
+};
+
 export function getDomainTasks(slug: string): DomainTasks | undefined {
   return ALL_DOMAINS_TASKS.find((d) => d.slug === slug);
 }

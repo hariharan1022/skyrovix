@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getDomainTasks } from "@/lib/tasks-data";
+import { getDomainTasks, LINKEDIN_TASK } from "@/lib/tasks-data";
 import {
   Search,
   SlidersHorizontal,
@@ -34,6 +34,10 @@ const FEATURE_ICONS: Record<string, string> = {
   jwt: "🔑",
   tailwind: "🎨",
   crud: "📝",
+  linkedin: "💼",
+  network: "🤝",
+  post: "📢",
+  share: "📤",
 };
 
 function getFeatureIcon(feature: string): string {
@@ -195,21 +199,80 @@ export function TasksSection({
   const [sort, setSort] = useState<"default" | "due" | "number">("default");
   const [showSort, setShowSort] = useState(false);
   const [confettiTask, setConfettiTask] = useState<string | null>(null);
+  const [linkedinTaskId, setLinkedinTaskId] = useState<string | null>(null);
 
   const domainData = getDomainTasks(domainSlug);
   const allTasks = domainData?.tasks ?? [];
 
+  // Ensure LinkedIn task exists in Supabase tasks table
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: existing } = await supabase
+        .from("tasks")
+        .select("id")
+        .eq("domain", domainSlug)
+        .eq("task_number", 0)
+        .maybeSingle();
+      if (cancelled) return;
+      if (existing) {
+        setLinkedinTaskId(existing.id);
+        return;
+      }
+      const { data: created } = await supabase
+        .from("tasks")
+        .insert({
+          domain: domainSlug,
+          task_number: 0,
+          title: LINKEDIN_TASK.title,
+          description: LINKEDIN_TASK.description,
+        })
+        .select("id")
+        .maybeSingle();
+      if (!cancelled && created) setLinkedinTaskId(created.id);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [domainSlug]);
+
   const tasksWithMeta = useMemo(() => {
-    return allTasks.map((t) => {
+    // LinkedIn task (Task 0) — universal for all domains
+    const linkedinSub = linkedinTaskId
+      ? rawSubmissions.find((s) => s.task_id === linkedinTaskId)
+      : undefined;
+    const linkedinDue = computeDueDate(1);
+    const linkedinStatus = getTaskStatus(linkedinSub, linkedinDue);
+    const linkedinMeta = {
+      ...LINKEDIN_TASK,
+      id: linkedinTaskId ?? "",
+      submission: linkedinSub,
+      dueDate: linkedinDue,
+      status: linkedinStatus,
+      remaining: daysRemaining(linkedinDue),
+    };
+    const linkedinDone = linkedinStatus === "completed";
+
+    const domainTasks = allTasks.map((t) => {
       const realTask = supabaseTasks.find((st) => st.task_number === t.taskNumber);
       const id = realTask?.id ?? `${domainSlug}-${t.taskNumber}`;
       const sub = rawSubmissions.find((s) => s.task_id === id);
       const dueDate = computeDueDate(t.taskNumber);
       const status = getTaskStatus(sub, dueDate);
       const remaining = daysRemaining(dueDate);
-      return { ...t, id, submission: sub, dueDate, status, remaining };
+      return {
+        ...t,
+        id,
+        submission: sub,
+        dueDate,
+        status,
+        remaining,
+        lockedByLinkedin: !linkedinDone,
+      };
     });
-  }, [allTasks, rawSubmissions, supabaseTasks, domainSlug]);
+
+    return [linkedinMeta, ...domainTasks];
+  }, [allTasks, rawSubmissions, supabaseTasks, domainSlug, linkedinTaskId]);
 
   const stats = useMemo(() => {
     const completed = tasksWithMeta.filter((t) => t.status === "completed").length;
@@ -399,6 +462,7 @@ function TaskCard({
     dueDate: Date;
     status: TaskStatus;
     remaining: number;
+    lockedByLinkedin?: boolean;
   };
   domain: { slug: string; name: string; icon: string; color: string } | undefined;
   appId: string;
@@ -406,10 +470,19 @@ function TaskCard({
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { submission, status, dueDate, remaining } = task;
+  const { submission, status, dueDate, remaining, lockedByLinkedin } = task;
   const isOverdue = status === "overdue";
+  const isLocked = lockedByLinkedin && task.taskNumber > 0;
 
   const borderColor = isOverdue
+    ? "#EF4444"
+    : status === "completed"
+      ? "#16A34A"
+      : status === "ongoing"
+        ? "#2563EB"
+        : "#D97706";
+
+  const glowColor = isOverdue
     ? "#EF4444"
     : status === "completed"
       ? "#22C55E"
@@ -446,13 +519,15 @@ function TaskCard({
 
   return (
     <div
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08),0_20px_48px_rgba(0,0,0,0.12)]"
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08),0_20px_48px_rgba(0,0,0,0.12)] ${
+        isLocked ? "opacity-60 pointer-events-none" : ""
+      }`}
       style={{ borderLeft: `4px solid ${borderColor}` }}
     >
       {/* Hover glow */}
       <div
         className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ boxShadow: `0 0 60px ${borderColor}20, inset 0 0 60px ${borderColor}08` }}
+        style={{ boxShadow: `0 0 60px ${glowColor}25, inset 0 0 60px ${glowColor}08` }}
       />
 
       {/* Progress bar at top */}
@@ -461,7 +536,7 @@ function TaskCard({
           className="h-full rounded-full transition-all duration-700 ease-out"
           style={{
             width: `${progressPct}%`,
-            background: `linear-gradient(90deg, ${borderColor}88, ${borderColor})`,
+            background: `linear-gradient(90deg, ${glowColor}99, ${glowColor})`,
           }}
         />
       </div>
@@ -539,8 +614,10 @@ function TaskCard({
       {/* Footer */}
       <div className="mt-6 border-t border-border/40 px-5 py-4">
         {status === "completed" ? (
-          <div className="flex items-center gap-2.5 rounded-xl bg-green-50 px-4 py-3">
-            <CheckCircle2 className="size-5 shrink-0 text-green-500" />
+          <div className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 ring-1 ring-green-200/60">
+            <div className="flex size-8 items-center justify-center rounded-full bg-green-500 text-white shadow-sm">
+              <CheckCircle2 className="size-5" />
+            </div>
             <div>
               <p className="text-sm font-semibold text-green-700">Completed Successfully</p>
               {submission?.submitted_at && (
@@ -550,10 +627,14 @@ function TaskCard({
               )}
             </div>
           </div>
+        ) : isLocked ? (
+          <p className="text-center text-xs text-muted-foreground py-2">
+            Complete the LinkedIn post task first to unlock.
+          </p>
         ) : (
           <div className="space-y-3">
             {submission?.status === "rejected" && submission.feedback && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+              <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-rose-50 p-3">
                 <p className="mb-1 text-xs font-semibold text-red-700">Feedback</p>
                 <p className="text-xs text-red-600">{submission.feedback}</p>
               </div>
@@ -635,19 +716,43 @@ function TaskCard({
 /* ─────────── STATUS PILL ─────────── */
 function StatusPill({ status, isOverdue }: { status: TaskStatus; isOverdue: boolean }) {
   const config = isOverdue
-    ? { label: "Overdue", bg: "rgba(239,68,68,0.1)", color: "#DC2626", icon: AlertCircle }
+    ? {
+        label: "Overdue",
+        bg: "rgba(239,68,68,0.12)",
+        color: "#DC2626",
+        border: "#FCA5A5",
+        icon: AlertCircle,
+      }
     : status === "completed"
-      ? { label: "Completed", bg: "rgba(34,197,94,0.1)", color: "#16A34A", icon: CheckCircle2 }
+      ? {
+          label: "Completed",
+          bg: "rgba(22,163,74,0.12)",
+          color: "#16A34A",
+          border: "#86EFAC",
+          icon: CheckCircle2,
+        }
       : status === "ongoing"
-        ? { label: "In Progress", bg: "rgba(59,130,246,0.1)", color: "#2563EB", icon: Clock }
-        : { label: "Pending", bg: "rgba(245,158,11,0.1)", color: "#D97706", icon: AlertCircle };
+        ? {
+            label: "In Progress",
+            bg: "rgba(37,99,235,0.12)",
+            color: "#2563EB",
+            border: "#93C5FD",
+            icon: Clock,
+          }
+        : {
+            label: "Pending",
+            bg: "rgba(217,119,6,0.12)",
+            color: "#D97706",
+            border: "#FCD34D",
+            icon: AlertCircle,
+          };
 
   const Icon = config.icon;
 
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold backdrop-blur-sm transition-all duration-300"
-      style={{ backgroundColor: config.bg, color: config.color, borderColor: `${config.color}30` }}
+      style={{ backgroundColor: config.bg, color: config.color, borderColor: config.border }}
     >
       <Icon className="size-3" />
       {config.label}
