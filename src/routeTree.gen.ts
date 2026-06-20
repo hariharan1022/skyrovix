@@ -13,14 +13,17 @@ import { Route as VerifyCertificateRouteImport } from './routes/verify-certifica
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DomainsRouteImport } from './routes/domains'
+import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
+import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as CoursesSlugQuizRouteImport } from './routes/courses.$slug.quiz'
 
 const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
   id: '/verify-certificate',
@@ -40,6 +43,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const DomainsRoute = DomainsRouteImport.update({
   id: '/domains',
   path: '/domains',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoursesRoute = CoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -71,6 +79,11 @@ const DomainsSlugRoute = DomainsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => DomainsRoute,
 } as any)
+const CoursesSlugRoute = CoursesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => CoursesRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -81,32 +94,43 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const CoursesSlugQuizRoute = CoursesSlugQuizRouteImport.update({
+  id: '/quiz',
+  path: '/quiz',
+  getParentRoute: () => CoursesSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,13 +139,16 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
+  '/courses': typeof CoursesRouteWithChildren
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -130,26 +157,32 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/courses'
     | '/domains'
     | '/privacy'
     | '/terms'
     | '/verify-certificate'
     | '/admin'
     | '/dashboard'
+    | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses/$slug/quiz'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
     | '/auth'
     | '/contact'
+    | '/courses'
     | '/domains'
     | '/privacy'
     | '/terms'
     | '/verify-certificate'
     | '/admin'
     | '/dashboard'
+    | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses/$slug/quiz'
   id:
     | '__root__'
     | '/'
@@ -157,13 +190,16 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
+    | '/courses'
     | '/domains'
     | '/privacy'
     | '/terms'
     | '/verify-certificate'
     | '/_authenticated/admin'
     | '/_authenticated/dashboard'
+    | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses/$slug/quiz'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -172,6 +208,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
+  CoursesRoute: typeof CoursesRouteWithChildren
   DomainsRoute: typeof DomainsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
@@ -206,6 +243,13 @@ declare module '@tanstack/react-router' {
       path: '/domains'
       fullPath: '/domains'
       preLoaderRoute: typeof DomainsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/courses': {
+      id: '/courses'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof CoursesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -250,6 +294,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DomainsSlugRouteImport
       parentRoute: typeof DomainsRoute
     }
+    '/courses/$slug': {
+      id: '/courses/$slug'
+      path: '/$slug'
+      fullPath: '/courses/$slug'
+      preLoaderRoute: typeof CoursesSlugRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -263,6 +314,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin'
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/courses/$slug/quiz': {
+      id: '/courses/$slug/quiz'
+      path: '/quiz'
+      fullPath: '/courses/$slug/quiz'
+      preLoaderRoute: typeof CoursesSlugQuizRouteImport
+      parentRoute: typeof CoursesSlugRoute
     }
   }
 }
@@ -279,6 +337,29 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface CoursesSlugRouteChildren {
+  CoursesSlugQuizRoute: typeof CoursesSlugQuizRoute
+}
+
+const CoursesSlugRouteChildren: CoursesSlugRouteChildren = {
+  CoursesSlugQuizRoute: CoursesSlugQuizRoute,
+}
+
+const CoursesSlugRouteWithChildren = CoursesSlugRoute._addFileChildren(
+  CoursesSlugRouteChildren,
+)
+
+interface CoursesRouteChildren {
+  CoursesSlugRoute: typeof CoursesSlugRouteWithChildren
+}
+
+const CoursesRouteChildren: CoursesRouteChildren = {
+  CoursesSlugRoute: CoursesSlugRouteWithChildren,
+}
+
+const CoursesRouteWithChildren =
+  CoursesRoute._addFileChildren(CoursesRouteChildren)
 
 interface DomainsRouteChildren {
   DomainsSlugRoute: typeof DomainsSlugRoute
@@ -297,6 +378,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
+  CoursesRoute: CoursesRouteWithChildren,
   DomainsRoute: DomainsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
