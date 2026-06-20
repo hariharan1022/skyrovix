@@ -28,7 +28,7 @@ type Q = { id: string; question: string; options: string[]; correct_index: numbe
 function QuizPage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // navigation handled via <Link>
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [marked, setMarked] = useState<Set<string>>(new Set());
   const [current, setCurrent] = useState(0);
