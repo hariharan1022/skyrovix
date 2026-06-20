@@ -1,80 +1,47 @@
-# Skyrovix Internship Portal — MVP Build Plan
+# Courses & LMS — Implementation Plan
 
-A task-based virtual internship platform with user + admin dashboards, auto offer letters, digital ID cards, payment verification, and auto certificate generation — built on TanStack Start + Lovable Cloud (Supabase).
+A full LMS would be a multi-week build. I'll ship a focused, premium MVP in this turn that covers the entire student journey end-to-end, then we can layer admin authoring and richer content in follow-ups.
 
-## Brand & Assets (provided)
-- Logo (purple/silver Skyrovix SK mark) → `src/assets/logo.jpg`
-- Seal stamp → `src/assets/seal.jpg`
-- MSME logo → `src/assets/msme.png`
-- Founder signature (Hariharan S, Founder & CEO) → `src/assets/sig-founder.jpg`
-- Co-founder signature (Maheshwaran S, Co-founder) → `src/assets/sig-cofounder.jpg`
-- Theme: deep navy + electric purple gradient (matches logo), silver accents, dark mode first.
-- Fonts: Space Grotesk (headings) + Inter (body).
+## What ships now
 
-## Roles
-- **admin** — seeded for `hariharan@skyrovix.com` on first signup
-- **user** — default for everyone else
+### Database (Lovable Cloud)
+New tables (all RLS-enabled, admin-managed, student-readable):
 
-## Domains (10)
-Full Stack · Frontend · Backend · Data Science · AI/ML · UI/UX · Python · Java · Cyber Security · Digital Marketing. Each has a 5-task curriculum.
+- `courses` — slug, name, description, icon, total_topics, total_tasks, quiz_marks, pass_marks, duration_weeks, difficulty, domain
+- `course_topics` — course_id, order_index, title, content_md, code_example, key_points[]
+- `course_tasks` — course_id, task_number, title, description, requirements, due_days
+- `course_quiz_questions` — course_id, question, options jsonb, correct_index, type, marks
+- `enrollments` — user_id, course_id, status (enrolled / in_progress / completed), progress_percent, current_topic_id, started_at, completed_at
+- `lesson_progress` — enrollment_id, topic_id, completed_at
+- `course_task_submissions` — enrollment_id, task_id, project_url, file_path, status, feedback
+- `quiz_attempts` — enrollment_id, score, total, passed, started_at, submitted_at, answers jsonb
+- `course_certificates` — enrollment_id, certificate_id (SKY-{DOMAIN}-YYYY-NNNNNN), verification_hash, score, issued_at
 
-## Payment
-GPay UPI: `hariharanmahesh34@okhdfcbank` · Payee: Hariharan Mahesh · Fee: ₹100 · QR generated client-side from UPI string.
+Plus a `course-task-files` private storage bucket and seed data for one Full Stack Development course (12 topics, 5 tasks, 10 sample quiz questions) so the flow is demonstrable immediately.
 
----
+### Routes (all responsive, light theme, no emojis)
 
-## Phase 1 — Foundation
-1. Enable Lovable Cloud.
-2. Design system: tokens in `src/styles.css` (navy/purple/silver), Skyrovix branded `Navbar`, `Footer`, `Logo` components.
-3. Save logos/signatures/seal as project assets.
+- `/courses` — modern card grid (icon, name, description, topics/tasks/quiz/duration/difficulty, progress bar, Enroll / Continue button)
+- `/courses/$slug` — course details + W3Schools-style left sidebar with topics, lesson content area (theory, code block, key points), Previous/Next buttons, auto-saved progress, "Important Tasks" section unlocked after all lessons, quiz unlocked after all 5 tasks submitted
+- `/courses/$slug/quiz` — timed quiz runner (60 min, prev/next, mark for review, auto-submit)
+- `/courses/$slug/result` — pass/fail screen, score, certificate download (PDF) when passed; retake after 24h when failed
+- `/verify-certificate` — already exists; extended to look up `course_certificates` too
 
-## Phase 2 — Database (one migration)
-Tables (all with RLS + grants):
-- `profiles` (id→auth.users, full_name, email, phone, college, course, year, photo_url, created_at)
-- `user_roles` (id, user_id, role enum: admin|user) + `has_role()` security-definer
-- `applications` (id, user_id, domain, status: pending|approved, intern_id [SKX-YYYY-####], offer_issued_at, created_at)
-- `tasks` (id, domain, task_number 1-5, title, description, resources) — seeded
-- `submissions` (id, application_id, task_id, github_url, deployed_url, notes, status: pending|approved|rejected, feedback, submitted_at, reviewed_at)
-- `payments` (id, application_id, utr_number, screenshot_url, amount, status: pending|verified|rejected, verified_at)
-- `certificates` (id, application_id, certificate_id [SKX-CERT-####], issued_at, verification_hash)
-- Storage buckets: `profile-photos`, `payment-screenshots` (public read for cert verification only on certs)
-- Trigger: on `auth.users` insert → create profile + assign role (admin if email matches seed, else user)
+### Components
+- `CourseCard`, `LessonSidebar`, `LessonViewer`, `TaskList`, `QuizRunner`, `QuizResult`, `CourseCertificateDoc` (react-pdf, brand-themed with QR for `/verify-certificate?id=...`)
 
-## Phase 3 — Auth + Public Pages
-- Landing page (`/`) — hero with logo, domain grid, "How it works" (Apply → Offer → 5 Tasks → Payment → Certificate), testimonials placeholder, footer with MSME badge.
-- `/auth` — email/password sign-in & sign-up.
-- `/domains`, `/domains/$slug`, `/verify-certificate` (public).
-- SEO: per-route titles, descriptions, OG tags.
+### Navbar
+Add "Courses" link.
 
-## Phase 4 — User Dashboard (`/_authenticated/dashboard/*`)
-- Dashboard home: status timeline (Applied → Offer → Tasks → Payment → Certificate).
-- **Apply**: form (name, phone, college, course, year, photo, domain) → on submit creates application + generates intern ID `SKX-YYYY-####` + immediately renders:
-  - **Offer Letter** (PDF via `@react-pdf/renderer`) with seal, both signatures, MSME footer, downloadable.
-  - **Digital ID Card** (gradient card with photo, intern ID, domain, QR to verify).
-- **Tasks**: 5 sequential tasks for chosen domain; unlock next on approval. Submission form: GitHub URL + deployed URL + notes.
-- **Payment**: shown only after all 5 tasks approved. GPay QR (qrcode.react) + UPI ID copy button + UTR input + screenshot upload.
-- **Certificate**: shown after payment verified. Auto-generated PDF certificate with cert ID, QR code linking to `/verify-certificate?id=…`, seal, both signatures, MSME logo.
+## Explicitly out of scope this turn (follow-ups)
+- Full admin authoring UI for courses/topics/quiz (data can be seeded via migrations for now; admin task-approval reuses existing admin panel pattern in a later turn).
+- Tab-switching prevention, randomized question shuffling per attempt, glassmorphism dark-mode polish.
+- Additional course catalogs beyond the Full Stack seed (easy to add once schema is approved).
 
-## Phase 5 — Admin Dashboard (`/_authenticated/admin/*`, gated by `has_role('admin')`)
-- Overview: counts of applications, pending submissions, pending payments, certificates issued.
-- **Applications**: list/search/filter.
-- **Submissions Review**: pending queue, approve/reject with feedback.
-- **Payments**: pending queue with screenshot preview + UTR, verify/reject. Verifying auto-issues certificate.
-- **Certificates**: list with revoke option.
+## Technical notes
+- Progress auto-saves via a debounced server fn on lesson scroll/next.
+- Quiz scoring is server-side in a `createServerFn` to prevent client tampering.
+- Certificate PDF reuses the existing `@react-pdf/renderer` setup in `src/components/pdf-docs.tsx`.
+- All new public-schema tables get explicit `GRANT` + RLS policies (student reads own rows, admin via `has_role`).
 
-## Phase 6 — Certificate Verification
-- Public `/verify-certificate` page: input cert ID → shows intern name, domain, issue date, "Verified ✓" with seal.
-
-## Technical Notes
-- PDFs: `@react-pdf/renderer` (works in browser, no native deps).
-- QR: `qrcode.react`.
-- Server functions (`createServerFn` + `requireSupabaseAuth`) for: create application/issue intern ID, submit task, approve/reject (admin), verify payment + issue certificate (admin), public `verifyCertificate` (admin client, no auth).
-- Storage uploads via browser supabase client with RLS-scoped policies.
-- All admin actions check `has_role(userId, 'admin')` server-side.
-
-## Out of scope for v1 (can add later)
-- Email notifications, real payment gateway, plagiarism checks, chat/mentorship.
-
----
-
-I'll build this in the order above, starting by enabling Cloud and saving your brand assets. Approve to proceed.
+Approve and I'll build it.
