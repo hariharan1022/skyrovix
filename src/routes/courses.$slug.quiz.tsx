@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import {
-  Brain, Clock, ChevronLeft, ChevronRight, Flag, CheckCircle2, XCircle, Trophy, Download,
+  Clock, ChevronLeft, ChevronRight, Flag, XCircle, Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/courses/$slug/quiz")({

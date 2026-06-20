@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import {
   CheckCircle2, Circle, ChevronLeft, ChevronRight, Lock, ListChecks,
-  Brain, BookOpen, Clock, Award, FileText, UploadCloud,
+  Brain, BookOpen, Award, FileText, UploadCloud,
 } from "lucide-react";
 
 export const Route = createFileRoute("/courses/$slug")({

@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import {
   BookOpen, Layers, Monitor, Server, BarChart3, Brain, Palette,
-  Code2, Shield, TrendingUp, Clock, ListChecks, GraduationCap, Trophy,
+  Code2, Shield, TrendingUp, ListChecks, GraduationCap, Trophy,
 } from "lucide-react";
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
