@@ -11,7 +11,9 @@ import { toast } from "sonner";
 import { GraduationCap, Sparkles, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: { redirect?: string }) => search,
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  }),
   head: () => ({ meta: [{ title: "Sign in — Skyrovix Internship Portal" }, { name: "description", content: "Sign in or create your Skyrovix internship account." }] }),
   component: AuthPage,
 });
