@@ -306,49 +306,51 @@ function Dashboard() {
               <AnimatedSection delay={200}>
                 <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-application"] })} />
               </AnimatedSection>
-              <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-                <div className="space-y-8">
-                  <AnimatedSection delay={300}>
-                    <TimelineSection steps={timelineSteps} currentStep={currentStep} />
-                  </AnimatedSection>
-                  <AnimatedSection delay={400}>
-                    <LmsCoursesSection
-                      enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
-                      completedTopics={completedTopics} topics={topics ?? []}
-                      taskSubmissions={taskSubmissions ?? []} tasks={tasks ?? []}
-                      quizAttempts={quizAttempts ?? []} course={course} enrollment={enrollment}
-                    />
-                  </AnimatedSection>
-                  {enrollment && course && (
-                    <AnimatedSection delay={500}>
-                      <CurrentTopicWidget topics={topics ?? []} completedTopics={completedTopics} enrollment={enrollment} course={course} />
-                    </AnimatedSection>
-                  )}
-                  {enrollment && (
-                    <AnimatedSection delay={600}>
-                      <TasksSectionWidget tasks={tasks ?? []} submissions={taskSubmissions ?? []} enrollmentId={enrollment.id} courseSlug={course?.slug ?? ""} onChange={() => qc.invalidateQueries({ queryKey: ["my-course-subs"] })} />
-                    </AnimatedSection>
-                  )}
-                  {enrollment && (
-                    <AnimatedSection delay={700}>
-                      <QuizSectionWidget course={course} lastAttempt={lastAttempt} enrollment={enrollment} completedTaskCount={completedTaskCount} totalTasks={totalTasks} />
-                    </AnimatedSection>
-                  )}
-                </div>
-                <div className="space-y-6">
-                  <AnimatedSection delay={350}>
-                    <CertificateSection cert={cert} app={app} course={course} enrollment={enrollment} lastAttempt={lastAttempt} />
-                  </AnimatedSection>
-                  <AnimatedSection delay={450}>
-                    <IDCardSection app={app} />
-                  </AnimatedSection>
-                  <AnimatedSection delay={550}>
-                    <ActivityFeed app={app} enrollment={enrollment} taskSubmissions={taskSubmissions ?? []} lastAttempt={lastAttempt} topics={topics ?? []} completedTopics={completedTopics} cert={cert} lmsCert={lmsCert} />
-                  </AnimatedSection>
-                </div>
-              </div>
             </div>
           )}
+          <div className={`mt-8 ${app ? "grid gap-8 lg:grid-cols-[1fr_360px]" : ""}`}>
+            <div className="space-y-8">
+              <AnimatedSection delay={app ? 300 : 0}>
+                <LmsCoursesSection
+                  enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
+                  completedTopics={completedTopics} topics={topics ?? []}
+                  taskSubmissions={taskSubmissions ?? []} tasks={tasks ?? []}
+                  quizAttempts={quizAttempts ?? []} course={course} enrollment={enrollment}
+                />
+              </AnimatedSection>
+              {enrollment && course && (
+                <AnimatedSection delay={app ? 500 : 100}>
+                  <CurrentTopicWidget topics={topics ?? []} completedTopics={completedTopics} enrollment={enrollment} course={course} />
+                </AnimatedSection>
+              )}
+              {enrollment && (
+                <AnimatedSection delay={app ? 600 : 200}>
+                  <TasksSectionWidget tasks={tasks ?? []} submissions={taskSubmissions ?? []} enrollmentId={enrollment.id} courseSlug={course?.slug ?? ""} onChange={() => qc.invalidateQueries({ queryKey: ["my-course-subs"] })} />
+                </AnimatedSection>
+              )}
+              {enrollment && (
+                <AnimatedSection delay={app ? 700 : 300}>
+                  <QuizSectionWidget course={course} lastAttempt={lastAttempt} enrollment={enrollment} completedTaskCount={completedTaskCount} totalTasks={totalTasks} />
+                </AnimatedSection>
+              )}
+            </div>
+            {app && (
+              <div className="space-y-6">
+                <AnimatedSection delay={350}>
+                  <TimelineSection steps={timelineSteps} currentStep={currentStep} />
+                </AnimatedSection>
+                <AnimatedSection delay={450}>
+                  <CertificateSection cert={cert} app={app} course={course} enrollment={enrollment} lastAttempt={lastAttempt} />
+                </AnimatedSection>
+                <AnimatedSection delay={550}>
+                  <IDCardSection app={app} />
+                </AnimatedSection>
+                <AnimatedSection delay={650}>
+                  <ActivityFeed app={app} enrollment={enrollment} taskSubmissions={taskSubmissions ?? []} lastAttempt={lastAttempt} topics={topics ?? []} completedTopics={completedTopics} cert={cert} lmsCert={lmsCert} />
+                </AnimatedSection>
+              </div>
+            )}
+          </div>
         </main>
         <Footer />
 

@@ -21,6 +21,8 @@ export function useAuth() {
       setUser(data.session?.user ?? null);
       if (data.session?.user) loadRole(data.session.user.id);
       setLoading(false);
+    }).catch(() => {
+      if (!cancelled) setLoading(false);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_evt, session) => {
       setUser(session?.user ?? null);
