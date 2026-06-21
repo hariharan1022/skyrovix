@@ -29,7 +29,7 @@ import {
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
   ListChecks, Flag, AlertTriangle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LayoutDashboard, LogOut, PanelRightClose,
-  PanelRightOpen, Settings, Menu, X, Moon, Wallet,
+  PanelRightOpen, Settings, Menu, X, Moon, Wallet, CreditCard, ScrollText,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -470,7 +470,7 @@ function Dashboard() {
                 <CheckCircle2 className="mr-1 size-3.5" /> Completed
               </Badge>
             </div>
-            <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs">
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
               <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
                 <p className="text-muted-foreground">Started</p>
                 <p className="font-semibold mt-0.5">{new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
@@ -483,7 +483,40 @@ function Dashboard() {
                 <p className="text-muted-foreground">Payment</p>
                 <p className="font-semibold mt-0.5 capitalize">{payment?.status ?? "—"}</p>
               </div>
+              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
+                <p className="text-muted-foreground">Domain</p>
+                <p className="font-semibold mt-0.5 capitalize">{domain?.name ?? app.domain}</p>
+              </div>
             </div>
+          </div>
+
+          {/* Payment Details */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <h3 className="flex items-center gap-2 font-bold mb-4"><CreditCard className="size-4 text-primary" /> Payment Details</h3>
+            {payment ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs">Status</p>
+                  <Badge className={`mt-1 text-[10px] ${payment.status === "verified" ? "bg-emerald-600" : "bg-amber-500"} text-white`}>
+                    {payment.status === "verified" ? "Verified" : payment.status === "pending" ? "Pending" : payment.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">UTR Number</p>
+                  <p className="font-semibold mt-0.5 font-mono text-xs">{payment.utr_number ?? "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Amount</p>
+                  <p className="font-semibold mt-0.5">{payment.amount ? `₹${payment.amount}` : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Verified On</p>
+                  <p className="font-semibold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No payment record found.</p>
+            )}
           </div>
 
           {/* Offer Letter */}
@@ -508,8 +541,79 @@ function Dashboard() {
             </div>
           </div>
 
+          {/* ID Card */}
           <IDCardSection app={app} />
-          <CertificateSection cert={cert} app={app} course={course} enrollment={enrollment} lastAttempt={lastAttempt} />
+
+          {/* Certificates */}
+          {(cert || (lmsCerts && lmsCerts.length > 0)) && (
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 font-bold mb-4"><Award className="size-4 text-primary" /> Certificates</h3>
+
+              {/* Internship Certificate */}
+              {cert && <CertificateSection compact cert={cert} app={app} course={course} enrollment={enrollment} lastAttempt={lastAttempt} />}
+
+              {/* Course Certificates */}
+              {lmsCerts && lmsCerts.length > 0 && enrollments && (
+                <>
+                  {cert && <div className="border-t border-border/40 my-4" />}
+                  <h4 className="text-sm font-semibold mb-3">Course Certificates</h4>
+                  <div className="grid gap-3">
+                    {lmsCerts.map((lc: any) => {
+                      const ec = enrollments.find((e: any) => e.id === lc.enrollment_id);
+                      const c = courses?.find((co: any) => co.id === ec?.course_id);
+                      return (
+                        <div key={lc.enrollment_id} className="flex items-center justify-between rounded-xl border border-border/40 bg-secondary/30 p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="grid size-8 place-items-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                              <BookOpen className="size-4" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-semibold">{c?.name ?? "Course"}</p>
+                              <p className="text-[10px] text-muted-foreground font-mono">{lc.certificate_id} · {new Date(lc.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline" className="rounded-lg h-7 text-[10px] border-border/60"
+                            onClick={() => downloadPdf(
+                              <CourseCertificateDoc fullName={app.full_name} courseName={c?.name ?? "Course"}
+                                score={lc.score ?? 0} total={100}
+                                certId={lc.certificate_id} issuedAt={lc.issued_at}
+                                verifyUrl={`${window.location.origin}/verify-certificate`} />,
+                              `Certificate_${lc.certificate_id}.pdf`
+                            )}>
+                            <Download className="mr-1 size-3" /> PDF
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {(certificate || payment) && (
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 font-bold mb-4"><ScrollText className="size-4 text-primary" /> Completion Summary</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground text-xs">Intern ID</p>
+                  <p className="font-semibold mt-0.5 font-mono text-xs">{app.intern_id}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Full Name</p>
+                  <p className="font-semibold mt-0.5">{app.full_name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Domain</p>
+                  <p className="font-semibold mt-0.5">{domain?.name ?? app.domain}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground text-xs">Duration</p>
+                  <p className="font-semibold mt-0.5">{cert?.issued_at ? Math.ceil((new Date(cert.issued_at).getTime() - new Date(app.created_at).getTime()) / (1000 * 60 * 60 * 24)) : "—"} days</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -1223,14 +1327,12 @@ function QuizSectionWidget({ course, lastAttempt, enrollment, completedTaskCount
 
 // ─── CERTIFICATES ───
 
-function CertificateSection({ cert, app, course, enrollment, lastAttempt }: any) {
+function CertificateSection({ cert, app, course, enrollment, lastAttempt, compact }: any) {
   if (!cert) return null;
   const isInternCert = cert.certificate_id?.startsWith("SKX-");
   const domain = getDomain(app?.domain);
-
-  return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <h3 className="flex items-center gap-2 font-bold mb-4"><Award className="size-4 text-primary" /> Certificate</h3>
+  const inner = (
+    <>
       <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
         <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3">
           <Award className="size-7" />
@@ -1268,8 +1370,10 @@ function CertificateSection({ cert, app, course, enrollment, lastAttempt }: any)
           <Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link>
         </Button>
       </div>
-    </div>
+    </>
   );
+  if (compact) return <div className="border-b border-border/40 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">{inner}</div>;
+  return <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">{inner}</div>;
 }
 
 // ─── ID CARD ───
