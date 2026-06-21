@@ -73,7 +73,11 @@ function getTaskStatus(submission: Submission | undefined, dueDate: Date): TaskS
 
 function computeDueDate(taskNumber: number): Date {
   const d = new Date();
-  d.setDate(d.getDate() + taskNumber * 7);
+  if (taskNumber === 0) {
+    d.setDate(d.getDate() + 3);
+  } else {
+    d.setDate(d.getDate() + taskNumber * 6);
+  }
   return d;
 }
 
@@ -208,7 +212,7 @@ export function TasksSection({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: existing } = await supabase
+      const { data: existing, error: fetchErr } = await supabase
         .from("tasks")
         .select("id")
         .eq("domain", domainSlug)
@@ -219,7 +223,8 @@ export function TasksSection({
         setLinkedinTaskId(existing.id);
         return;
       }
-      const { data: created } = await supabase
+      if (fetchErr && fetchErr.code !== "PGRST116") return;
+      const { data: created, error: insertErr } = await supabase
         .from("tasks")
         .insert({
           domain: domainSlug,
@@ -230,6 +235,7 @@ export function TasksSection({
         .select("id")
         .maybeSingle();
       if (!cancelled && created) setLinkedinTaskId(created.id);
+      if (insertErr) console.error("Failed to create LinkedIn task:", insertErr);
     })();
     return () => {
       cancelled = true;
@@ -499,9 +505,9 @@ function TaskCard({
     const payload = {
       application_id: appId,
       task_id: task.id,
-      github_url: String(fd.get("github_url")),
-      deployed_url: String(fd.get("deployed_url")),
-      notes: String(fd.get("notes")),
+      github_url: String(fd.get("github_url") || ""),
+      deployed_url: String(fd.get("deployed_url") || ""),
+      notes: String(fd.get("notes") || ""),
       status: "pending" as const,
     };
     const { error } = submission

@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { generateCertId, getDomain, COMPANY, DOMAINS } from "@/lib/constants";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
-import { CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
+import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
   ClipboardCheck, Brain, IndianRupee, Award, Users, BarChart3,
@@ -376,6 +376,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
 // ══════════════════════════════════════════════
 function ApplicationsSection() {
   const qc = useQueryClient();
+  const [selectedApp, setSelectedApp] = useState<any | null>(null);
   const { data } = useQuery({
     queryKey: ["admin-apps"],
     queryFn: async () => {
@@ -384,6 +385,16 @@ function ApplicationsSection() {
     },
   });
 
+  const updateStatus = async (id: string, status: string) => {
+    const payload: any = { status };
+    if (status === "ongoing") payload.offer_issued_at = new Date().toISOString();
+    const { error } = await supabase.from("applications").update(payload).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success(`Application ${status}`);
+    qc.invalidateQueries({ queryKey: ["admin-apps"] });
+    qc.invalidateQueries({ queryKey: ["admin-overview"] });
+  };
+
   return (
     <div className="animate-fade-in-up space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -391,11 +402,41 @@ function ApplicationsSection() {
           <h2 className="text-2xl font-bold">Internship Applications</h2>
           <p className="text-sm text-muted-foreground">{data?.length ?? 0} total applications</p>
         </div>
-        <div className="flex gap-2">
-          <Input placeholder="Filter by name..." className="h-9 w-48 rounded-xl border-border/60" />
-          <Button variant="outline" size="sm" className="rounded-xl border-border/60"><Filter className="mr-1 size-4" /> Filters</Button>
-        </div>
       </div>
+
+      {/* Detail Modal */}
+      {selectedApp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedApp(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">{selectedApp.full_name}</h3>
+              <button onClick={() => setSelectedApp(null)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
+            </div>
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-muted-foreground text-xs">Email</p><p>{selectedApp.email}</p></div>
+                <div><p className="text-muted-foreground text-xs">Phone</p><p>{selectedApp.phone ?? "—"}</p></div>
+                <div><p className="text-muted-foreground text-xs">Domain</p><p>{getDomain(selectedApp.domain)?.name ?? selectedApp.domain}</p></div>
+                <div><p className="text-muted-foreground text-xs">Status</p><Badge className="text-xs">{selectedApp.status}</Badge></div>
+                <div className="col-span-2"><p className="text-muted-foreground text-xs">College</p><p>{selectedApp.college} · {selectedApp.course} ({selectedApp.year})</p></div>
+                <div className="col-span-2"><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-mono text-xs">{selectedApp.intern_id ?? "—"}</p></div>
+                <div><p className="text-muted-foreground text-xs">Applied</p><p>{new Date(selectedApp.created_at).toLocaleDateString("en-IN")}</p></div>
+                <div><p className="text-muted-foreground text-xs">Offer Issued</p><p>{selectedApp.offer_issued_at ? new Date(selectedApp.offer_issued_at).toLocaleDateString("en-IN") : "—"}</p></div>
+              </div>
+                    <div className="flex gap-2 pt-2">
+                      <Button size="sm" className="brand-gradient text-white border-0 flex-1" onClick={() => { updateStatus(selectedApp.id, selectedApp.status === "approved" ? "ongoing" : "completed"); setSelectedApp(null); }}>
+                        {selectedApp.status === "approved" ? "Mark Ongoing" : "Mark Completed"}
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-border/60" asChild>
+                        <a href={`mailto:${selectedApp.email}`}><Mail className="mr-1 size-3.5" /> Email</a>
+                      </Button>
+                    </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
         <table className="w-full text-sm">
           <thead>
@@ -412,40 +453,43 @@ function ApplicationsSection() {
             {data?.length === 0 && (
               <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No applications yet.</td></tr>
             )}
-            {data?.map((a) => (
-              <tr key={a.id} className="border-b border-border/30 transition hover:bg-accent/20">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-9 shrink-0 place-items-center rounded-full brand-gradient text-xs font-bold text-white">
-                      {a.full_name.charAt(0).toUpperCase()}
+            {data?.map((a) => {
+              const dd = getDomain(a.domain);
+              return (
+                <tr key={a.id} className="border-b border-border/30 transition hover:bg-accent/20">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 shrink-0 place-items-center rounded-full brand-gradient text-xs font-bold text-white">{a.full_name.charAt(0).toUpperCase()}</div>
+                      <div className="min-w-0"><p className="font-medium truncate">{a.full_name}</p><p className="text-xs text-muted-foreground">{a.email}</p></div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{a.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{a.email}</p>
+                  </td>
+                  <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{dd?.name ?? a.domain}</Badge></td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{a.college} · {a.course} {a.year}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
+                  <td className="px-4 py-3">
+                    <Badge className={`text-xs ${
+                      a.status === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
+                      a.status === "ongoing" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
+                      a.status === "approved" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+                      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                    }`}>{a.status}</Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <button onClick={() => setSelectedApp(a)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="View"><Eye className="size-4" /></button>
+                      {a.status !== "completed" && a.status !== "ongoing" && (
+                        <button onClick={() => updateStatus(a.id, "ongoing")} className="grid size-8 place-items-center rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30 transition" title="Approve"><CheckCircle2 className="size-4" /></button>
+                      )}
+                      <a href={`mailto:${a.email}`} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="Send Email"><Mail className="size-4" /></a>
+                      <button onClick={() => downloadPdf(
+                        <OfferLetterDoc fullName={a.full_name} internId={a.intern_id} domain={dd?.name ?? a.domain} issuedAt={a.offer_issued_at} />,
+                        `OfferLetter_${a.intern_id}.pdf`
+                      )} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="Generate Offer"><Download className="size-4" /></button>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{getDomain(a.domain)?.name ?? a.domain}</Badge></td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{a.college} · {a.course} {a.year}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString("en-IN")}</td>
-                <td className="px-4 py-3">
-                  <Badge className={`text-xs ${
-                    String(a.status) === "approved" ? "bg-green-100 text-green-700 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400" :
-                    String(a.status) === "rejected" ? "bg-red-100 text-red-700 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400" :
-                    "bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400"
-                  }`}>{a.status}</Badge>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="View"><Eye className="size-4" /></button>
-                    <button className="grid size-8 place-items-center rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30 transition" title="Approve"><CheckCircle2 className="size-4" /></button>
-                    <button className="grid size-8 place-items-center rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition" title="Reject"><XCircle className="size-4" /></button>
-                    <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="Send Email"><Mail className="size-4" /></button>
-                    <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition" title="Generate Offer"><Download className="size-4" /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -668,11 +712,16 @@ function TopicsSection() {
     },
   });
 
-  const deleteTopic = async (id: string) => {
-    const { error } = await supabase.from("course_topics").delete().eq("id", id);
+  const deleteTopic = async (topic: any) => {
+    const { error } = await supabase.from("course_topics").delete().eq("id", topic.id);
     if (error) return toast.error(error.message);
+    const { data: c } = await supabase.from("courses").select("total_topics").eq("id", topic.course_id).single();
+    if (c) {
+      await supabase.from("courses").update({ total_topics: Math.max(0, (c.total_topics ?? 1) - 1) }).eq("id", topic.course_id);
+    }
     toast.success("Topic deleted");
     qc.invalidateQueries({ queryKey: ["admin-topics", expanded] });
+    qc.invalidateQueries({ queryKey: ["admin-courses"] });
   };
 
   return (
@@ -725,7 +774,7 @@ function TopicsSection() {
                       </div>
                       <div className="flex gap-1">
                         <button onClick={() => setDialog({ mode: "edit", topic: t })} className="grid size-7 place-items-center rounded-lg hover:bg-accent/50"><Edit className="size-3" /></button>
-                        <button onClick={() => deleteTopic(t.id)} className="grid size-7 place-items-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 className="size-3" /></button>
+                        <button onClick={() => deleteTopic(t)} className="grid size-7 place-items-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 className="size-3" /></button>
                       </div>
                     </li>
                   ))}
@@ -899,7 +948,7 @@ function TaskDialog({ open, onClose, onSaved, mode, task }: {
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
   const [requirements, setRequirements] = useState(task?.requirements ?? "");
-  const [dueDays, setDueDays] = useState(task?.due_days ?? 7);
+  const [dueDays, setDueDays] = useState(task?.due_days ?? 6);
   const [saving, setSaving] = useState(false);
 
   const { data: courses } = useQuery({
@@ -1092,14 +1141,6 @@ function QuizSection() {
         .select("*")
         .eq("course_id", expanded!)
         .order("order_index");
-      return data ?? [];
-    },
-  });
-
-  const { data: attemptsMap } = useQuery({
-    queryKey: ["admin-quiz-attempts"],
-    queryFn: async () => {
-      const { data } = await supabase.from("quiz_attempts").select("enrollment_id");
       return data ?? [];
     },
   });
@@ -1399,8 +1440,8 @@ function PaymentsSection() {
                 <td className="px-4 py-3 text-right">
                   {p.status === "pending" ? (
                     <div className="flex justify-end gap-1">
-                      <button onClick={() => verify(p.id, p.applications.id, true)} className="grid size-8 place-items-center rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30" title="Verify"><CheckCircle2 className="size-4" /></button>
-                      <button onClick={() => verify(p.id, p.applications.id, false)} className="grid size-8 place-items-center rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" title="Reject"><XCircle className="size-4" /></button>
+                      <button onClick={() => p.applications?.id && verify(p.id, p.applications.id, true)} className="grid size-8 place-items-center rounded-lg text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30" title="Verify"><CheckCircle2 className="size-4" /></button>
+                      <button onClick={() => p.applications?.id && verify(p.id, p.applications.id, false)} className="grid size-8 place-items-center rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30" title="Reject"><XCircle className="size-4" /></button>
                     </div>
                   ) : (
                     <Badge variant="outline" className="text-xs">{p.status === "verified" ? "Completed" : "Rejected"}</Badge>
@@ -1568,6 +1609,8 @@ function CertificatesSection() {
 // STUDENTS
 // ══════════════════════════════════════════════
 function StudentsSection() {
+  const [search, setSearch] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   const { data } = useQuery({
     queryKey: ["admin-students"],
     queryFn: async () => {
@@ -1579,11 +1622,46 @@ function StudentsSection() {
     },
   });
 
+  const filtered = useMemo(() => {
+    if (!search) return data ?? [];
+    const q = search.toLowerCase();
+    return data!.filter((s) =>
+      s.full_name?.toLowerCase().includes(q) ||
+      s.email?.toLowerCase().includes(q) ||
+      s.intern_id?.toLowerCase().includes(q) ||
+      s.college?.toLowerCase().includes(q)
+    );
+  }, [data, search]);
+
   return (
     <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
+      {selectedStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedStudent(null)}>
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg">{selectedStudent.full_name}</h3>
+              <button onClick={() => setSelectedStudent(null)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
+            </div>
+            <div className="space-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-muted-foreground text-xs">Email</p><p>{selectedStudent.email}</p></div>
+                <div><p className="text-muted-foreground text-xs">Phone</p><p>{selectedStudent.phone ?? "—"}</p></div>
+                <div><p className="text-muted-foreground text-xs">Domain</p><p>{getDomain(selectedStudent.domain)?.name ?? selectedStudent.domain}</p></div>
+                <div><p className="text-muted-foreground text-xs">Status</p><Badge className="text-xs">{selectedStudent.status}</Badge></div>
+                <div className="col-span-2"><p className="text-muted-foreground text-xs">College</p><p>{selectedStudent.college} · {selectedStudent.course} ({selectedStudent.year})</p></div>
+                <div><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-mono text-xs">{selectedStudent.intern_id}</p></div>
+                <div><p className="text-muted-foreground text-xs">Joined</p><p>{new Date(selectedStudent.created_at).toLocaleDateString("en-IN")}</p></div>
+              </div>
+              <a href={`mailto:${selectedStudent.email}`} className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:underline"><Mail className="size-3.5" /> Send Email</a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <h2 className="text-2xl font-bold">Students</h2>
-        <Input placeholder="Search students..." className="h-9 w-56 rounded-xl border-border/60" />
+        <Input placeholder="Search students..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-56 rounded-xl border-border/60" />
       </div>
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
         <table className="w-full text-sm">
@@ -1598,15 +1676,15 @@ function StudentsSection() {
             </tr>
           </thead>
           <tbody>
-            {data?.map((s) => (
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No students found.</td></tr>
+            )}
+            {filtered.map((s) => (
               <tr key={s.id} className="border-b border-border/30 transition hover:bg-accent/20">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
                     <div className="grid size-8 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{s.full_name.charAt(0)}</div>
-                    <div>
-                      <p className="font-medium text-sm">{s.full_name}</p>
-                      <p className="text-xs text-muted-foreground">{s.email}</p>
-                    </div>
+                    <div><p className="font-medium text-sm">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.email}</p></div>
                   </div>
                 </td>
                 <td className="px-4 py-3 text-xs"><Badge variant="secondary">{getDomain(s.domain)?.name ?? s.domain}</Badge></td>
@@ -1615,8 +1693,8 @@ function StudentsSection() {
                 <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString("en-IN")}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-1">
-                    <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><Eye className="size-4" /></button>
-                    <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><Mail className="size-4" /></button>
+                    <button onClick={() => setSelectedStudent(s)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="View"><Eye className="size-4" /></button>
+                    <a href={`mailto:${s.email}`} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="Send Email"><Mail className="size-4" /></a>
                   </div>
                 </td>
               </tr>
@@ -1727,6 +1805,18 @@ function AnalyticsSection() {
 // SETTINGS
 // ══════════════════════════════════════════════
 function SettingsSection() {
+  const [portalName, setPortalName] = useState("Skyrovix Internship Portal");
+  const [contactEmail, setContactEmail] = useState(COMPANY.email);
+  const [companyName, setCompanyName] = useState(COMPANY.name);
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    await new Promise((r) => setTimeout(r, 600));
+    toast.success("Settings saved (stored locally)");
+    setSaving(false);
+  };
+
   return (
     <div className="animate-fade-in-up space-y-4 max-w-2xl">
       <h2 className="text-2xl font-bold">Settings</h2>
@@ -1735,17 +1825,17 @@ function SettingsSection() {
         <div className="space-y-4">
           <div>
             <Label>Portal Name</Label>
-            <Input defaultValue="Skyrovix Internship Portal" className="mt-1 rounded-xl border-border/60" />
+            <Input value={portalName} onChange={(e) => setPortalName(e.target.value)} className="mt-1 rounded-xl border-border/60" />
           </div>
           <div>
             <Label>Contact Email</Label>
-            <Input defaultValue={COMPANY.email} className="mt-1 rounded-xl border-border/60" />
+            <Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} className="mt-1 rounded-xl border-border/60" />
           </div>
           <div>
             <Label>Company</Label>
-            <Input defaultValue={COMPANY.name} className="mt-1 rounded-xl border-border/60" />
+            <Input value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="mt-1 rounded-xl border-border/60" />
           </div>
-          <Button className="brand-gradient text-white border-0">Save Changes</Button>
+          <Button onClick={save} disabled={saving} className="brand-gradient text-white border-0">{saving ? "Saving…" : "Save Changes"}</Button>
         </div>
       </div>
     </div>

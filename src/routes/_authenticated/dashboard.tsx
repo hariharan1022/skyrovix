@@ -121,6 +121,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!user,
+    refetchInterval: 10_000,
   });
 
   const app = useMemo(() => {
@@ -221,6 +222,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!appsList?.length,
+    refetchInterval: 10_000,
   });
 
   const { data: allAppCerts } = useQuery({
@@ -230,6 +232,23 @@ function Dashboard() {
       const ids = appsList.map((a) => a.id);
       const { data } = await supabase.from("certificates").select("*").in("application_id", ids);
       return data ?? [];
+    },
+    enabled: !!appsList?.length,
+    refetchInterval: 10_000,
+  });
+
+  const { data: allTasksByDomain } = useQuery({
+    queryKey: ["all-tasks-by-domain", appsList?.map((a) => a.domain)],
+    queryFn: async () => {
+      if (!appsList?.length) return {} as Record<string, any[]>;
+      const domains = [...new Set(appsList.map((a) => a.domain))];
+      const { data } = await supabase.from("tasks").select("*").in("domain", domains);
+      const byDomain: Record<string, any[]> = {};
+      for (const t of data ?? []) {
+        if (!byDomain[t.domain]) byDomain[t.domain] = [];
+        byDomain[t.domain].push(t);
+      }
+      return byDomain;
     },
     enabled: !!appsList?.length,
   });
@@ -295,20 +314,27 @@ function Dashboard() {
 
   // Auto-complete internships when all tasks approved + certificate exists
   useEffect(() => {
-    if (!appsList || !allAppSubmissions || !allAppCerts || !internTasks) return;
-    for (const a of appsList) {
-      if (a.status === "completed" || a.status === "pending") continue;
-      const aSubs = allAppSubmissions.filter((s: any) => s.application_id === a.id);
-      const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
-      const aTotal = internTasks.length;
-      const aCert = allAppCerts.find((c: any) => c.application_id === a.id);
-      if (aTotal > 0 && aApproved >= aTotal && aCert) {
-        supabase.from("applications").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", a.id).then(() => {
-          qc.invalidateQueries({ queryKey: ["my-applications"] });
-        });
+    if (!appsList || !allAppSubmissions || !allAppCerts || !allTasksByDomain) return;
+    (async () => {
+      for (const a of appsList) {
+        if (a.status === "completed" || a.status === "pending") continue;
+        try {
+          const domainTasks = allTasksByDomain[a.domain];
+          if (!domainTasks?.length) continue;
+          const aSubs = allAppSubmissions.filter((s: any) => s.application_id === a.id);
+          const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
+          const aCert = allAppCerts.find((c: any) => c.application_id === a.id);
+          if (aApproved >= domainTasks.length && aCert) {
+            const { error: updErr } = await supabase.from("applications").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", a.id);
+            if (updErr) { console.error("Auto-complete update failed:", updErr); continue; }
+            qc.invalidateQueries({ queryKey: ["my-applications"] });
+          }
+        } catch (err) {
+          console.error("Auto-complete error:", err);
+        }
       }
-    }
-  }, [appsList, allAppSubmissions, allAppCerts, internTasks, qc]);
+    })();
+  }, [appsList, allAppSubmissions, allAppCerts, allTasksByDomain, qc]);
 
   // Auto-complete enrollments when progress = 100 and quiz passed
   useEffect(() => {
@@ -455,24 +481,13 @@ function Dashboard() {
             {/* Tasks */}
             {daTotal > 0 && (
               <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><ListChecks className="size-4 text-primary" /> Internship Tasks</h3>
-                <div className="flex items-center gap-3 mb-3">
-                  <Progress value={daTotal > 0 ? Math.round((daApproved / daTotal) * 100) : 0} className="h-2 flex-1" />
-                  <span className="text-xs font-semibold whitespace-nowrap">{daApproved}/{daTotal} completed</span>
-                </div>
-                <div className="grid gap-2">
-                  {(internTasks ?? []).map((t: any) => {
-                    const sub = daSubs.find((s: any) => s.task_id === t.id);
-                    return (
-                      <div key={t.id} className="flex items-center justify-between rounded-xl border border-border/40 bg-secondary/30 p-3">
-                        <span className="text-xs font-medium">Task {t.task_number}</span>
-                        <Badge className={`text-[10px] ${sub?.status === "approved" ? "bg-emerald-600" : sub?.status === "pending" ? "bg-amber-500" : "bg-gray-400"}`}>
-                          {sub?.status === "approved" ? "Done" : sub?.status === "pending" ? "In Review" : "Pending"}
-                        </Badge>
-                      </div>
-                    );
-                  })}
-                </div>
+                <TasksSection
+                  domainSlug={da.domain}
+                  tasks={internTasks ?? []}
+                  submissions={daSubs}
+                  appId={da.id}
+                  onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
+                />
               </div>
             )}
 
@@ -499,7 +514,7 @@ function Dashboard() {
                 <div><p className="text-muted-foreground text-xs">Name</p><p className="font-semibold mt-0.5">{da.full_name}</p></div>
                 <div><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-semibold mt-0.5 font-mono text-xs">{da.intern_id}</p></div>
                 <div><p className="text-muted-foreground text-xs">Domain</p><p className="font-semibold mt-0.5">{dd?.name ?? da.domain}</p></div>
-                <div><p className="text-muted-foreground text-xs">Duration</p><p className="font-semibold mt-0.5">{daCert?.issued_at ? Math.ceil((new Date(daCert.issued_at).getTime() - new Date(da.created_at).getTime()) / (1000 * 60 * 60 * 24)) : "—"} days</p></div>
+                <div><p className="text-muted-foreground text-xs">Duration</p><p className="font-semibold mt-0.5">1 month</p></div>
               </div>
             </div>
           </div>
@@ -602,6 +617,7 @@ function Dashboard() {
                   const aSubs = allAppSubmissions?.filter((s: any) => s.application_id === a.id) ?? [];
                   const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
                   const aCert = allAppCerts?.find((c: any) => c.application_id === a.id) ?? null;
+                  const appTaskCount = allTasksByDomain?.[a.domain]?.length ?? 0;
                   return (
                     <button key={a.id} onClick={() => setDetailView({ type: "app", id: a.id })}
                       className="w-full text-left rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl transition-all hover:shadow-md hover:-translate-y-0.5 dark:bg-[#1E293B]/70 group">
@@ -627,7 +643,7 @@ function Dashboard() {
                           <p className="text-xs text-muted-foreground mt-0.5">{a.intern_id} · {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
                         </div>
                         <div className="hidden sm:flex items-center gap-4 text-xs text-center">
-                          <div><p className="text-muted-foreground">Tasks</p><p className="font-semibold">{aApproved}/{internTasks?.length ?? 0}</p></div>
+                          <div><p className="text-muted-foreground">Tasks</p><p className="font-semibold">{aApproved}/{appTaskCount}</p></div>
                           <div><p className="text-muted-foreground">Cert</p><p className={`font-semibold ${aCert ? "text-emerald-600" : "text-muted-foreground"}`}>{aCert ? "✓" : "—"}</p></div>
                         </div>
                         <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-0.5 transition" />
@@ -698,15 +714,117 @@ function Dashboard() {
     }
 
     if (active === "tasks") {
+      const dd = getDomain(app.domain);
+      const approvedCount = internSubmissions?.filter((s: any) => s.status === "approved").length ?? 0;
+      const totalTasks = internTasks?.length ?? 0;
       return (
-        <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-          <TasksSection
-            domainSlug={app.domain}
-            tasks={internTasks ?? []}
-            submissions={internSubmissions ?? []}
-            appId={app.id}
-            onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
-          />
+        <div className="space-y-6">
+          {/* Internship Header */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
+            <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-purple-500 to-blue-600"} text-white shadow-md`}>
+                <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="font-display text-2xl font-bold">{dd?.name ?? app.domain}</h2>
+                  <Badge className={`text-xs px-3 py-1 rounded-lg ${
+                    app.status === "completed" ? "bg-emerald-600 text-white" :
+                    app.status === "ongoing" ? "bg-blue-600 text-white" :
+                    app.status === "approved" ? "bg-amber-500 text-white" :
+                    "bg-gray-500 text-white"
+                  }`}>
+                    {app.status === "completed" ? "Completed" :
+                     app.status === "ongoing" ? "Ongoing" :
+                     app.status === "approved" ? "Approved" :
+                     app.status === "pending" ? "Pending" : app.status}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">{app.intern_id} · {app.full_name} · {dd?.description ?? ""}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Info Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
+            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Started</p><p className="font-semibold mt-0.5">{new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
+            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Completed</p><p className="font-semibold mt-0.5">{app.completed_at ? new Date(app.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Tasks</p><p className="font-semibold mt-0.5">{approvedCount}/{totalTasks}</p></div>
+            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Certificate</p><p className="font-semibold mt-0.5">{certificate ? "Generated" : "—"}</p></div>
+          </div>
+
+          {/* Payment */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><CreditCard className="size-4 text-primary" /> Payment Details</h3>
+            {payment ? (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div><p className="text-muted-foreground text-xs">Status</p><Badge className={`mt-1 text-[10px] ${payment.status === "verified" ? "bg-emerald-600" : "bg-amber-500"} text-white`}>{payment.status === "verified" ? "Verified" : payment.status === "pending" ? "Pending" : payment.status}</Badge></div>
+                <div><p className="text-muted-foreground text-xs">UTR</p><p className="font-semibold mt-0.5 font-mono text-xs">{payment.utr_number ?? "—"}</p></div>
+                <div><p className="text-muted-foreground text-xs">Amount</p><p className="font-semibold mt-0.5">{payment.amount ? `₹${payment.amount}` : "—"}</p></div>
+                <div><p className="text-muted-foreground text-xs">Verified</p><p className="font-semibold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+              </div>
+            ) : <p className="text-sm text-muted-foreground">No payment record.</p>}
+          </div>
+
+          {/* Offer Letter */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><FileText className="size-5" /></div>
+                <div><p className="font-semibold text-sm">Offer Letter</p><p className="text-xs text-muted-foreground">Issued {new Date(app.offer_issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
+              </div>
+              <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} />, `OfferLetter_${app.intern_id}.pdf`)}><Download className="mr-1.5 size-3.5" /> Download</Button>
+            </div>
+          </div>
+
+          {/* ID Card */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Shield className="size-4 text-primary" /> Digital ID Card</h3>
+            <IDCard internId={app.intern_id} fullName={app.full_name} domain={dd?.name ?? app.domain} photoUrl={app.photo_url} issuedAt={app.offer_issued_at} />
+            <div className="mt-3 flex gap-2">
+              <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs border-border/60" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} />, `OfferLetter_${app.intern_id}.pdf`)}><FileText className="mr-1 size-3" /> Offer Letter</Button>
+              <Button size="sm" className="brand-gradient text-white border-0 rounded-lg h-8 text-xs" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} />, `IDCard_${app.intern_id}.pdf`)}><Download className="mr-1 size-3" /> Download ID</Button>
+            </div>
+          </div>
+
+          {/* Tasks */}
+          {totalTasks > 0 && (
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><ListChecks className="size-4 text-primary" /> Internship Tasks</h3>
+              <div className="flex items-center gap-3 mb-3">
+                <Progress value={totalTasks > 0 ? Math.round((approvedCount / totalTasks) * 100) : 0} className="h-2 flex-1" />
+                <span className="text-xs font-semibold whitespace-nowrap">{approvedCount}/{totalTasks} completed</span>
+              </div>
+            </div>
+          )}
+
+          {/* Task Cards */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <TasksSection
+              domainSlug={app.domain}
+              tasks={internTasks ?? []}
+              submissions={internSubmissions ?? []}
+              appId={app.id}
+              onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
+            />
+          </div>
+
+          {/* Certificate */}
+          {certificate && (
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
+              <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
+                <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
+                <p className="font-bold text-sm">{dd?.name ?? app.domain}</p>
+                <p className="text-[10px] text-muted-foreground font-mono mt-1">{certificate.certificate_id}</p>
+              </div>
+              <div className="mt-4 space-y-2">
+                <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<CertificateDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} certId={certificate.certificate_id} issuedAt={certificate.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />, `Certificate_${certificate.certificate_id}.pdf`)}><Download className="mr-1.5 size-4" /> Download PDF</Button>
+                <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9"><Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link></Button>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -868,7 +986,7 @@ function Dashboard() {
                 </div>
                 <div>
                   <p className="text-muted-foreground text-xs">Duration</p>
-                  <p className="font-semibold mt-0.5">{cert?.issued_at ? Math.ceil((new Date(cert.issued_at).getTime() - new Date(app.created_at).getTime()) / (1000 * 60 * 60 * 24)) : "—"} days</p>
+                  <p className="font-semibold mt-0.5">1 month</p>
                 </div>
               </div>
             </div>
@@ -1794,6 +1912,7 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
   const qc = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [selectedDomain, setSelectedDomain] = useState("");
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -1811,7 +1930,9 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
         photo_url = publicUrl?.publicUrl ?? null;
       }
       const intern_id = generateInternId();
-      const payload = { user_id: user.id, domain: String(fd.get("domain")), intern_id, full_name: String(fd.get("full_name")), email: user.email ?? "", phone: String(fd.get("phone")), college: String(fd.get("college")), course: String(fd.get("course")), year: String(fd.get("year")), photo_url, status: "approved" as const };
+      const domain = selectedDomain || String(fd.get("domain") || "");
+      if (!domain) throw new Error("Please select a domain");
+      const payload = { user_id: user.id, domain, intern_id, full_name: String(fd.get("full_name")), email: user.email ?? "", phone: String(fd.get("phone")), college: String(fd.get("college")), course: String(fd.get("course")), year: String(fd.get("year")), photo_url, status: "approved" as const };
       const { data: inserted, error } = await supabase.from("applications").insert(payload).select().maybeSingle();
       if (error || !inserted) throw error ?? new Error("Failed to create application");
       await supabase.from("profiles").update({ full_name: payload.full_name, phone: payload.phone, college: payload.college, course: payload.course, year: payload.year, photo_url }).eq("id", user.id);
@@ -1831,12 +1952,13 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
           <div className="md:col-span-2"><Label>Full Name</Label><Input name="full_name" required className="mt-1" /></div>
           <div><Label>Phone</Label><Input name="phone" type="tel" required className="mt-1" /></div>
           <div><Label>Domain</Label>
-            <Select name="domain" required>
+            <Select value={selectedDomain} onValueChange={setSelectedDomain} required>
               <SelectTrigger className="mt-1"><SelectValue placeholder="Select a domain" /></SelectTrigger>
               <SelectContent>
                 {DOMAINS.map((d) => <SelectItem key={d.slug} value={d.slug}>{d.icon} {d.name}</SelectItem>)}
               </SelectContent>
             </Select>
+            <input type="hidden" name="domain" value={selectedDomain} />
           </div>
           <div><Label>College</Label><Input name="college" required className="mt-1" /></div>
           <div><Label>Course / Branch</Label><Input name="course" required className="mt-1" /></div>

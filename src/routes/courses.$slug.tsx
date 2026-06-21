@@ -569,7 +569,7 @@ function TaskRow({ task, sub, enrollmentId, onChange }: { task: any; sub: any; e
           {task.due_days && (
             <div className="rounded-lg border border-border bg-secondary/40 p-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Due</p>
-              <p className="mt-1">{task.due_days} days from start</p>
+              <p className="mt-1">Within 1 month from start</p>
             </div>
           )}
         </div>
