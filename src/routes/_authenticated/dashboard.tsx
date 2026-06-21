@@ -272,7 +272,14 @@ function Dashboard() {
         <Navbar />
         <main className="mx-auto max-w-6xl px-4 py-8">
           {!app ? (
-            <AnimatedSection><ApplyForm onCreated={() => qc.invalidateQueries()} /></AnimatedSection>
+            <AnimatedSection>
+              <WelcomeDashboard
+                user={user}
+                enrollments={enrollments ?? []}
+                courses={courses ?? []}
+                onCreated={() => qc.invalidateQueries()}
+              />
+            </AnimatedSection>
           ) : (
             <div className="space-y-8">
               <AnimatedSection delay={0}>
