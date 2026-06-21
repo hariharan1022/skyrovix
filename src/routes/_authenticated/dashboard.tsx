@@ -29,7 +29,7 @@ import {
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
   ListChecks, Flag, AlertTriangle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LayoutDashboard, LogOut, PanelRightClose,
-  PanelRightOpen, Settings, Menu, X, Moon, Wallet, CreditCard, ScrollText,
+  PanelRightOpen, Settings, Menu, X, Moon, Wallet, CreditCard, ScrollText, Briefcase,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -96,7 +96,7 @@ type Application = {
   full_name: string; email: string; phone: string | null;
   college: string | null; course: string | null; year: string | null;
   photo_url: string | null; offer_issued_at: string;
-  created_at: string; status: string;
+  created_at: string; status: string; completed_at?: string | null;
 };
 
 function Dashboard() {
@@ -109,21 +109,29 @@ function Dashboard() {
     else document.documentElement.classList.remove("dark");
   }, [dark]);
 
-  const { data: app, isLoading } = useQuery({
-    queryKey: ["my-application", user?.id],
-    queryFn: async (): Promise<Application | null> => {
-      if (!user) return null;
+  const { data: appsList, isLoading } = useQuery({
+    queryKey: ["my-applications", user?.id],
+    queryFn: async (): Promise<Application[]> => {
+      if (!user) return [];
       const { data } = await supabase
         .from("applications")
         .select("*")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      return data;
+        .order("created_at", { ascending: false });
+      return data ?? [];
     },
     enabled: !!user,
   });
+
+  const app = useMemo(() => {
+    if (!appsList?.length) return null;
+    const active = appsList.find((a) => a.status === "ongoing" || a.status === "approved");
+    return active ?? appsList[0];
+  }, [appsList]);
+
+  const completedApps = useMemo(() => {
+    return appsList?.filter((a) => a.status === "completed") ?? [];
+  }, [appsList]);
 
   const { data: enrollments } = useQuery({
     queryKey: ["my-lms-enrollments", user?.id],
@@ -204,15 +212,32 @@ function Dashboard() {
     },
   });
 
-  const { data: internSubmissions } = useQuery({
-    queryKey: ["my-submissions", app?.id],
+  const { data: allAppSubmissions } = useQuery({
+    queryKey: ["all-submissions", appsList?.map((a) => a.id)],
     queryFn: async () => {
-      if (!app) return [];
-      const { data } = await supabase.from("submissions").select("*").eq("application_id", app.id);
+      if (!appsList?.length) return [];
+      const ids = appsList.map((a) => a.id);
+      const { data } = await supabase.from("submissions").select("*").in("application_id", ids);
       return data ?? [];
     },
-    enabled: !!app,
+    enabled: !!appsList?.length,
   });
+
+  const { data: allAppCerts } = useQuery({
+    queryKey: ["all-certs", appsList?.map((a) => a.id)],
+    queryFn: async () => {
+      if (!appsList?.length) return [];
+      const ids = appsList.map((a) => a.id);
+      const { data } = await supabase.from("certificates").select("*").in("application_id", ids);
+      return data ?? [];
+    },
+    enabled: !!appsList?.length,
+  });
+
+  const internSubmissions = useMemo(() => {
+    if (!app || !allAppSubmissions) return [];
+    return allAppSubmissions.filter((s: any) => s.application_id === app.id);
+  }, [allAppSubmissions, app]);
 
   const { data: internTasks } = useQuery({
     queryKey: ["my-tasks", app?.domain],
@@ -224,25 +249,26 @@ function Dashboard() {
     enabled: !!app,
   });
 
-  const { data: certificate } = useQuery({
-    queryKey: ["my-cert", app?.id],
+  const certificate = useMemo(() => {
+    if (!app || !allAppCerts) return null;
+    return allAppCerts.find((c: any) => c.application_id === app.id) ?? null;
+  }, [allAppCerts, app]);
+
+  const { data: allPayments } = useQuery({
+    queryKey: ["all-payments", appsList?.map((a) => a.id)],
     queryFn: async () => {
-      if (!app) return null;
-      const { data } = await supabase.from("certificates").select("*").eq("application_id", app.id).maybeSingle();
-      return data;
+      if (!appsList?.length) return [];
+      const ids = appsList.map((a) => a.id);
+      const { data } = await supabase.from("payments").select("*").in("application_id", ids);
+      return data ?? [];
     },
-    enabled: !!app,
+    enabled: !!appsList?.length,
   });
 
-  const { data: payment } = useQuery({
-    queryKey: ["my-payment", app?.id],
-    queryFn: async () => {
-      if (!app) return null;
-      const { data } = await supabase.from("payments").select("*").eq("application_id", app.id).maybeSingle();
-      return data;
-    },
-    enabled: !!app,
-  });
+  const payment = useMemo(() => {
+    if (!app || !allPayments) return null;
+    return allPayments.find((p: any) => p.application_id === app.id) ?? null;
+  }, [allPayments, app]);
 
   const course = useMemo(() => {
     if (!enrollments?.length || !courses?.length) return null;
@@ -297,7 +323,7 @@ function Dashboard() {
   if (authLoading || isLoading) return <LoadingSkeleton />;
 
   const renderContent = () => {
-    if (!app) {
+    if (!appsList?.length || !app) {
       return (
         <AnimatedSection>
           <WelcomeDashboard
@@ -313,6 +339,136 @@ function Dashboard() {
     if (active === "overview") {
       return (
         <div className="space-y-8">
+          {/* Stats Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Total Internships", value: appsList?.length ?? 0, icon: Layers, color: "from-purple-500 to-blue-600" },
+              { label: "Completed", value: completedApps.length, icon: CheckCircle2, color: "from-emerald-500 to-teal-600" },
+              { label: "Ongoing", value: app && !completedApps.includes(app as any) ? 1 : 0, icon: Clock, color: "from-amber-500 to-orange-600" },
+              { label: "Certificates Earned", value: (allAppCerts?.length ?? 0) + (lmsCerts?.length ?? 0), icon: Award, color: "from-violet-500 to-purple-600" },
+            ].map((stat) => {
+              const Icon = stat.icon;
+              return (
+                <div key={stat.label} className="rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl dark:bg-[#1E293B]/70">
+                  <div className="flex items-center gap-3">
+                    <div className={`grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-sm`}>
+                      <Icon className="size-4" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stat.value}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{stat.label}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Current Internship */}
+          {app && active === "overview" && (
+            <AnimatedSection>
+              <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-5 sm:p-6 dark:bg-[#1E293B]/70">
+                <div className="absolute -right-12 -top-12 size-36 rounded-full bg-blue-400/10 blur-[60px]" />
+                <div className="relative flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-12 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md">
+                      <Briefcase className="size-6" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Current Internship</p>
+                      <h3 className="font-display text-lg font-bold">{getDomain(app.domain)?.name ?? app.domain}</h3>
+                      <p className="text-xs text-muted-foreground">{app.intern_id} · Started {new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                    </div>
+                  </div>
+                  <Badge className={`text-[10px] px-3 py-1.5 rounded-lg ${
+                    app.status === "completed" ? "bg-emerald-600 text-white" :
+                    app.status === "ongoing" ? "bg-blue-600 text-white" :
+                    app.status === "approved" ? "bg-amber-500 text-white" :
+                    "bg-gray-500 text-white"
+                  }`}>
+                    {app.status === "completed" ? "Completed" :
+                     app.status === "ongoing" ? "Ongoing" :
+                     app.status === "approved" ? "Approved" :
+                     app.status === "pending" ? "Pending" : app.status}
+                  </Badge>
+                </div>
+              </div>
+            </AnimatedSection>
+          )}
+
+          {/* Completed Internships */}
+          {completedApps.length > 0 && (
+            <AnimatedSection delay={100}>
+              <div>
+                <h2 className="text-lg font-display font-bold mb-4">Completed Internships</h2>
+                <div className="grid gap-4">
+                  {completedApps.map((ca) => {
+                    const d = getDomain(ca.domain);
+                    const caSubmissions = allAppSubmissions?.filter((s: any) => s.application_id === ca.id) ?? [];
+                    const caApproved = caSubmissions.filter((s: any) => s.status === "approved").length;
+                    const caTotal = internTasks?.length ?? 0;
+                    const caCert = allAppCerts?.find((c: any) => c.application_id === ca.id) ?? null;
+                    const caPayment = allPayments?.find((p: any) => p.application_id === ca.id) ?? null;
+                    return (
+                      <div key={ca.id} className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${d?.color ?? "from-purple-500 to-blue-600"} text-white shadow-sm`}>
+                              <span className="text-lg font-bold">{d?.icon ?? "?"}</span>
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h3 className="font-semibold">{d?.name ?? ca.domain}</h3>
+                                <Badge className="bg-emerald-600 text-white text-[10px] rounded-lg px-2 py-0.5">
+                                  <CheckCircle2 className="mr-0.5 size-2.5" /> Completed
+                                </Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground mt-0.5">{ca.intern_id} · Completed {ca.completed_at ? new Date(ca.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-6 text-xs text-center shrink-0">
+                            <div>
+                              <p className="text-muted-foreground">Tasks</p>
+                              <p className="font-bold text-sm">{caApproved}/{caTotal}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Certificate</p>
+                              <p className={`font-bold text-sm ${caCert ? "text-emerald-600" : "text-muted-foreground"}`}>{caCert ? "Generated" : "—"}</p>
+                            </div>
+                            <div>
+                              <p className="text-muted-foreground">Payment</p>
+                              <p className={`font-bold text-sm ${caPayment?.status === "verified" ? "text-emerald-600" : "text-muted-foreground"}`}>{caPayment?.status === "verified" ? "Paid" : caPayment?.status ?? "—"}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 shrink-0">
+                            {caCert && (
+                              <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-8 text-xs"
+                                onClick={() => downloadPdf(
+                                  <CertificateDoc fullName={ca.full_name} internId={ca.intern_id} domain={d?.name ?? ca.domain}
+                                    certId={caCert.certificate_id} issuedAt={caCert.issued_at}
+                                    verifyUrl={`${window.location.origin}/verify-certificate`} />,
+                                  `Certificate_${caCert.certificate_id}.pdf`
+                                )}>
+                                <Download className="mr-1 size-3" /> Download PDF
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline" className="rounded-xl h-8 text-xs border-border/60"
+                              onClick={() => {
+                                setActive("certificates");
+                                setMobileOpen(false);
+                              }}>
+                              <Eye className="mr-1 size-3" /> View Details
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </AnimatedSection>
+          )}
+
           <HeroSection
             app={app} enrollment={enrollment} course={course}
             completedTopicCount={completedTopicCount} totalTopics={totalTopics}
@@ -621,7 +777,7 @@ function Dashboard() {
     if (active === "profile") {
       return (
         <div className="space-y-8">
-          <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-application"] })} />
+          <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-applications"] })} />
           <IDCardSection app={app} />
         </div>
       );
@@ -1556,7 +1712,7 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
       const { data: inserted, error } = await supabase.from("applications").insert(payload).select().maybeSingle();
       if (error || !inserted) throw error ?? new Error("Failed to create application");
       await supabase.from("profiles").update({ full_name: payload.full_name, phone: payload.phone, college: payload.college, course: payload.course, year: payload.year, photo_url }).eq("id", user.id);
-      qc.setQueryData(["my-application", user.id], inserted);
+      qc.setQueryData(["my-applications", user.id], [inserted]);
       toast.success("Application approved! Your offer letter is ready.");
       onCreated();
     } catch (err) {

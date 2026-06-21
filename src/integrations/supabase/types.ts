@@ -700,7 +700,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
-      application_status: "pending" | "approved"
+      application_status: "pending" | "approved" | "ongoing" | "completed"
       payment_status: "pending" | "verified" | "rejected"
       submission_status: "pending" | "approved" | "rejected"
     }
@@ -831,7 +831,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
-      application_status: ["pending", "approved"],
+      application_status: ["pending", "approved", "ongoing", "completed"],
       payment_status: ["pending", "verified", "rejected"],
       submission_status: ["pending", "approved", "rejected"],
     },
