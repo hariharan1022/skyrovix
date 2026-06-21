@@ -35,7 +35,7 @@ function CourseDetail() {
   const { slug } = Route.useParams();
   const { user, loading: authLoading } = useAuth();
   const qc = useQueryClient();
-  const navigate = useNavigate();
+  
   const [currentIdx, setCurrentIdx] = useState(0);
 
   const { data: course, isLoading } = useQuery({
