@@ -193,10 +193,80 @@ export function CertificateDoc({ fullName, internId, domain, certId, issuedAt, v
   );
 }
 
+export function CourseCertificateDoc({ fullName, courseName, score, total, certId, issuedAt, verifyUrl }: {
+  fullName: string; courseName: string; score: number; total: number;
+  certId: string; issuedAt: string; verifyUrl: string;
+}) {
+  const date = new Date(issuedAt);
+  return (
+    <Document>
+      <Page size="A4" orientation="landscape" style={{ ...s.page, padding: 28 }}>
+        <View style={{ borderWidth: 6, borderColor: COLOR.brand, padding: 24, height: "100%" }}>
+          <View style={{ borderWidth: 1, borderColor: COLOR.border, padding: 24, height: "100%" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <Image src={logo} style={{ width: 56, height: 56 }} />
+              <View style={{ alignItems: "center" }}>
+                <Text style={{ fontSize: 12, color: COLOR.muted, letterSpacing: 4 }}>SKYROVIX IT SOLUTIONS</Text>
+                <Text style={{ fontSize: 10, color: COLOR.muted }}>{COMPANY.tagline}</Text>
+              </View>
+              <Image src={msme} style={{ height: 40 }} />
+            </View>
+
+            <View style={{ alignItems: "center", marginTop: 18 }}>
+              <Text style={{ fontSize: 36, fontWeight: 700, color: COLOR.brand, letterSpacing: 4 }}>COURSE CERTIFICATE</Text>
+              <Text style={{ fontSize: 12, color: COLOR.muted, letterSpacing: 8, marginTop: 2 }}>OF COMPLETION</Text>
+            </View>
+
+            <View style={{ alignItems: "center", marginTop: 28 }}>
+              <Text style={{ fontSize: 11, color: COLOR.muted }}>This certificate is awarded to</Text>
+              <Text style={{ fontSize: 32, fontWeight: 700, marginTop: 12, marginBottom: 12, color: COLOR.ink }}>{fullName}</Text>
+              <Text style={{ fontSize: 11, color: COLOR.muted, textAlign: "center", maxWidth: 600, lineHeight: 1.6 }}>
+                for successfully completing the {" "}
+                <Text style={{ fontWeight: 700, color: COLOR.ink }}>{courseName}</Text>{" "}
+                course with a score of <Text style={{ fontWeight: 700, color: COLOR.ink }}>{score}/{total}</Text>,
+                demonstrating proficiency and commitment to learning.
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginTop: 40 }}>
+              <View style={s.sigBlock}>
+                <Image src={sigFounder} style={s.sigImg} />
+                <View style={s.sigLine} />
+                <Text style={s.bold}>{COMPANY.founder.name}</Text>
+                <Text style={s.small}>{COMPANY.founder.title}</Text>
+              </View>
+              <View style={{ alignItems: "center" }}>
+                <Image src={seal} style={{ width: 90, height: 90, opacity: 0.9 }} />
+              </View>
+              <View style={s.sigBlock}>
+                <Image src={sigCofounder} style={s.sigImg} />
+                <View style={s.sigLine} />
+                <Text style={s.bold}>{COMPANY.cofounder.name}</Text>
+                <Text style={s.small}>{COMPANY.cofounder.title}</Text>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 16, fontSize: 9, color: COLOR.muted }}>
+              <Text>Certificate ID: {certId}</Text>
+              <Text>Score: {score}/{total}</Text>
+              <Text>Issued: {date.toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })}</Text>
+            </View>
+            <Text style={{ fontSize: 8, color: COLOR.muted, marginTop: 4, textAlign: "center" }}>Verify at: {verifyUrl}</Text>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
 export async function downloadPdf(doc: ReactElement<DocumentProps>, filename: string) {
   const blob = await pdf(doc).toBlob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = filename; a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export async function downloadPdfBlob(doc: ReactElement<DocumentProps>): Promise<Blob> {
+  return pdf(doc).toBlob();
 }
