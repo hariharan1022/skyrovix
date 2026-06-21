@@ -206,48 +206,9 @@ function CourseDetail() {
                   {completedCount}/{totalTopics} lessons · {approvedTasks}/{tasks?.length ?? 0} tasks approved
                 </p>
               </div>
-            ) : enrollOpen ? (
-              <Card className="w-full max-w-sm">
-                <CardContent className="space-y-4 pt-6">
-                  <div className="flex items-center gap-2">
-                    <GraduationCap className="size-5 text-primary" />
-                    <p className="font-semibold">Enroll in {course.name}</p>
-                  </div>
-                  <form onSubmit={handleEnroll} className="space-y-3">
-                    <div>
-                      <Label>Full Name *</Label>
-                      <Input value={enrollName} onChange={(e) => setEnrollName(e.target.value)} placeholder="Your full name" required />
-                    </div>
-                    <div>
-                      <Label>Phone *</Label>
-                      <Input value={enrollPhone} onChange={(e) => setEnrollPhone(e.target.value)} type="tel" placeholder="Phone number" required />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>College / University</Label>
-                        <Input value={enrollCollege} onChange={(e) => setEnrollCollege(e.target.value)} placeholder="College" />
-                      </div>
-                      <div>
-                        <Label>Course / Branch</Label>
-                        <Input value={enrollCourse} onChange={(e) => setEnrollCourse(e.target.value)} placeholder="e.g. B.Tech CSE" />
-                      </div>
-                    </div>
-                    <div>
-                      <Label>Year</Label>
-                      <Input value={enrollYear} onChange={(e) => setEnrollYear(e.target.value)} placeholder="e.g. 3rd year" />
-                    </div>
-                    <div className="flex gap-2 pt-1">
-                      <Button type="submit" disabled={enrolling} className="brand-gradient text-white border-0 flex-1">
-                        {enrolling ? "Enrolling…" : "Confirm & Enroll"}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={() => setEnrollOpen(false)}>Cancel</Button>
-                    </div>
-                  </form>
-                </CardContent>
-              </Card>
             ) : (
-              <Button onClick={() => setEnrollOpen(true)} size="lg" className="brand-gradient text-white border-0 shadow-lg shadow-primary/25">
-                <Sparkles className="mr-2 size-5" />Enroll Now — Free
+              <Button onClick={handleEnroll} disabled={enrolling} size="lg" className="brand-gradient text-white border-0 shadow-lg shadow-primary/25">
+                <Sparkles className="mr-2 size-5" />{enrolling ? "Enrolling…" : "Enroll Now — Free"}
               </Button>
             )}
           </div>
