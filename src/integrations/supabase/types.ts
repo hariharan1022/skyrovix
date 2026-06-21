@@ -17,6 +17,7 @@ export type Database = {
       applications: {
         Row: {
           college: string | null
+          completed_at: string | null
           course: string | null
           created_at: string
           domain: string
@@ -33,6 +34,7 @@ export type Database = {
         }
         Insert: {
           college?: string | null
+          completed_at?: string | null
           course?: string | null
           created_at?: string
           domain: string
@@ -49,6 +51,7 @@ export type Database = {
         }
         Update: {
           college?: string | null
+          completed_at?: string | null
           course?: string | null
           created_at?: string
           domain?: string

@@ -293,6 +293,39 @@ function Dashboard() {
   const internPending = internSubmissions?.filter((s: any) => s.status === "pending").length ?? 0;
   const internCompleted = internApproved;
 
+  // Auto-complete internships when all tasks approved + certificate exists
+  useEffect(() => {
+    if (!appsList || !allAppSubmissions || !allAppCerts || !internTasks) return;
+    for (const a of appsList) {
+      if (a.status === "completed" || a.status === "pending") continue;
+      const aSubs = allAppSubmissions.filter((s: any) => s.application_id === a.id);
+      const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
+      const aTotal = internTasks.length;
+      const aCert = allAppCerts.find((c: any) => c.application_id === a.id);
+      if (aTotal > 0 && aApproved >= aTotal && aCert) {
+        supabase.from("applications").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", a.id).then(() => {
+          qc.invalidateQueries({ queryKey: ["my-applications"] });
+        });
+      }
+    }
+  }, [appsList, allAppSubmissions, allAppCerts, internTasks, qc]);
+
+  // Auto-complete enrollments when progress = 100 and quiz passed
+  useEffect(() => {
+    if (!enrollments || !quizAttempts || !taskSubmissions || !tasks) return;
+    for (const e of enrollments) {
+      if (e.status === "completed") continue;
+      const approvedTasks = taskSubmissions.filter((s: any) => s.status === "approved").length;
+      const allTasks = tasks.length;
+      const passed = quizAttempts.some((q: any) => q.passed);
+      if (e.progress_percent >= 100 && allTasks > 0 && approvedTasks >= allTasks && passed) {
+        supabase.from("enrollments").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", e.id).then(() => {
+          qc.invalidateQueries({ queryKey: ["my-lms-enrollments"] });
+        });
+      }
+    }
+  }, [enrollments, quizAttempts, taskSubmissions, tasks, qc]);
+
   const timelineSteps = [
     { label: "Application Submitted", done: !!app },
     { label: "Offer Letter Received", done: !!app },
@@ -672,7 +705,7 @@ function Dashboard() {
             tasks={internTasks ?? []}
             submissions={internSubmissions ?? []}
             appId={app.id}
-            onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })}
+            onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
           />
         </div>
       );
@@ -847,7 +880,7 @@ function Dashboard() {
     if (active === "profile") {
       return (
         <div className="space-y-8">
-          <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-applications"] })} />
+          <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-applications", user?.id] })} />
           <IDCardSection app={app} />
         </div>
       );
