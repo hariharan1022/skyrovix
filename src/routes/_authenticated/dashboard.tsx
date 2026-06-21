@@ -213,6 +213,16 @@ function Dashboard() {
     enabled: !!app,
   });
 
+  const { data: internTasks } = useQuery({
+    queryKey: ["my-tasks", app?.domain],
+    queryFn: async () => {
+      if (!app) return [];
+      const { data } = await supabase.from("tasks").select("id, task_number").eq("domain", app.domain).order("task_number");
+      return data ?? [];
+    },
+    enabled: !!app,
+  });
+
   const { data: certificate } = useQuery({
     queryKey: ["my-cert", app?.id],
     queryFn: async () => {
@@ -305,6 +315,17 @@ function Dashboard() {
               </AnimatedSection>
               <AnimatedSection delay={200}>
                 <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-application"] })} />
+              </AnimatedSection>
+              <AnimatedSection delay={250}>
+                <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+                  <TasksSection
+                    domainSlug={app.domain}
+                    tasks={internTasks ?? []}
+                    submissions={internSubmissions ?? []}
+                    appId={app.id}
+                    onChange={() => qc.invalidateQueries({ queryKey: ["my-submissions"] })}
+                  />
+                </div>
               </AnimatedSection>
             </div>
           )}
