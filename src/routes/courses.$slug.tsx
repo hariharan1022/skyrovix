@@ -393,7 +393,7 @@ function CourseDetail() {
                 enrollment={enrollment}
                 submissions={submissions ?? []}
                 allLessonsDone={allLessonsDone}
-                onEnroll={() => setEnrollOpen(true)}
+                onEnroll={handleEnroll}
                 user={user}
                 onChange={() => qc.invalidateQueries({ queryKey: ["course-submissions", enrollment?.id] })}
               />
