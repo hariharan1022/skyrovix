@@ -497,6 +497,14 @@ function TaskCard({
       if (task.taskNumber !== 0 && !githubUrl && !pdfFile?.size && !screenshotFile?.size)
         return toast.error("Provide at least a GitHub link, a project PDF, or a screenshot"), setLoading(false);
 
+      if (task.taskNumber === 0) {
+        const raw = String(fd.get("deployed_url") || "").trim();
+        if (!raw) { setLoading(false); return toast.error("Please enter your LinkedIn post URL"); }
+        const normalized = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+        try { new URL(normalized); } catch { setLoading(false); return toast.error("Please enter a valid URL"); }
+        fd.set("deployed_url", normalized);
+      }
+
       let pdfUrl = "";
       let screenshotUrl = "";
 
@@ -697,14 +705,15 @@ function TaskCard({
                 onSubmit={handleSubmit}
                 className="space-y-3 rounded-xl border border-border/50 bg-muted/20 p-4"
               >
-                {task.taskNumber === 0 ? (
+                  {task.taskNumber === 0 ? (
                   <div>
                     <Label className="text-[11px] font-medium text-muted-foreground">
                       LinkedIn Post URL
                     </Label>
                     <Input
                       name="deployed_url"
-                      type="url"
+                      type="text"
+                      placeholder="https://linkedin.com/posts/..."
                       className="mt-1 h-9 text-sm"
                       defaultValue={submission?.deployed_url ?? ""}
                       required
