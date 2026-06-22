@@ -20,6 +20,7 @@ import {
   Target,
   Sparkles,
   TrendingUp,
+  Loader2,
 } from "lucide-react";
 
 const FEATURE_ICONS: Record<string, string> = {
@@ -202,6 +203,7 @@ export function TasksSection({
   const [showSort, setShowSort] = useState(false);
   const [confettiTask, setConfettiTask] = useState<string | null>(null);
   const [taskIdMap, setTaskIdMap] = useState<Record<number, string>>({});
+  const [tasksReady, setTasksReady] = useState(false);
 
   const domainData = getDomainTasks(domainSlug);
   const allTasks = domainData?.tasks ?? [];
@@ -250,6 +252,7 @@ export function TasksSection({
         const fullMap = { ...existingMap };
         for (const c of created) fullMap[c.task_number] = c.id;
         setTaskIdMap(fullMap);
+        setTasksReady(true);
       }
     })();
     return () => { cancelled = true; };
@@ -433,11 +436,12 @@ export function TasksSection({
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {filtered.map((task) => (
-            <TaskCard
+              <TaskCard
               key={task.id}
               task={task}
               domain={domainData}
               appId={appId}
+              tasksReady={tasksReady}
               onSubmitted={() => {
                 handleChange();
                 if (task.submission?.status !== "approved") {
@@ -467,6 +471,7 @@ function TaskCard({
   task,
   domain,
   appId,
+  tasksReady,
   onSubmitted,
 }: {
   task: {
@@ -484,6 +489,7 @@ function TaskCard({
   };
   domain: { slug: string; name: string; icon: string; color: string } | undefined;
   appId: string;
+  tasksReady: boolean;
   onSubmitted: () => void;
 }) {
   const [open, setOpen] = useState(false);
@@ -512,6 +518,7 @@ function TaskCard({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!task.id) return toast.error("Task is still being prepared, please wait…");
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const payload = {
@@ -657,25 +664,35 @@ function TaskCard({
                 <p className="text-xs text-red-600">{submission.feedback}</p>
               </div>
             )}
-            <Button
-              onClick={() => setOpen(!open)}
-              className="w-full text-sm h-10 rounded-xl"
-              variant={status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
-            >
-              {status === "ongoing" ? (
-                <>
-                  <ArrowRight className="mr-1.5 size-4" /> Continue Working
-                </>
-              ) : isOverdue ? (
-                <>
-                  <Clock className="mr-1.5 size-4" /> Submit Late
-                </>
-              ) : (
-                <>
-                  <ExternalLink className="mr-1.5 size-4" /> Submit Task
-                </>
-              )}
-            </Button>
+            {!tasksReady ? (
+              <Button disabled className="w-full text-sm h-10 rounded-xl opacity-60">
+                <Loader2 className="mr-1.5 size-4 animate-spin" /> Syncing tasks…
+              </Button>
+            ) : !task.id ? (
+              <Button disabled className="w-full text-sm h-10 rounded-xl opacity-60">
+                Task not available
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setOpen(!open)}
+                className="w-full text-sm h-10 rounded-xl"
+                variant={status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
+              >
+                {status === "ongoing" ? (
+                  <>
+                    <ArrowRight className="mr-1.5 size-4" /> Continue Working
+                  </>
+                ) : isOverdue ? (
+                  <>
+                    <Clock className="mr-1.5 size-4" /> Submit Late
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="mr-1.5 size-4" /> Submit Task
+                  </>
+                )}
+              </Button>
+            )}
             {open && (
               <form
                 onSubmit={handleSubmit}
