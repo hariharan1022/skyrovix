@@ -212,54 +212,55 @@ export function TasksSection({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: existing } = await supabase
-        .from("tasks")
-        .select("id, task_number")
-        .eq("domain", domainSlug);
+      const fetchAll = async () => {
+        const { data } = await supabase.from("tasks").select("id, task_number").eq("domain", domainSlug);
+        return data ?? [];
+      };
+
+      let allRows = await fetchAll();
       if (cancelled) return;
+
       const existingMap: Record<number, string> = {};
-      for (const t of existing ?? []) existingMap[t.task_number] = t.id;
+      for (const t of allRows) existingMap[t.task_number] = t.id;
 
       const requiredNumbers = [0, ...allTasks.map((t) => t.taskNumber)];
-      const toCreate = requiredNumbers.filter((n) => !existingMap[n]);
+      let missing = requiredNumbers.filter((n) => !existingMap[n]);
 
-      if (toCreate.length === 0) {
-        setTaskIdMap(existingMap);
-        return;
-      }
-
-      const created: { task_number: number; id: string }[] = [];
-      for (const n of toCreate) {
-        if (n === 0) {
-          const { data: ins } = await supabase
-            .from("tasks")
-            .insert({ domain: domainSlug, task_number: 0, title: LINKEDIN_TASK.title, description: LINKEDIN_TASK.description })
-            .select("id, task_number")
-            .maybeSingle();
-          if (ins) created.push(ins);
-        } else {
-          const t = allTasks.find((at) => at.taskNumber === n);
-          if (!t) continue;
-          const { data: ins } = await supabase
-            .from("tasks")
-            .insert({ domain: domainSlug, task_number: n, title: t.title, description: t.description })
-            .select("id, task_number")
-            .maybeSingle();
-          if (ins) created.push(ins);
+      if (missing.length > 0) {
+        for (const n of missing) {
+          if (n === 0) {
+            await supabase
+              .from("tasks")
+              .insert({ domain: domainSlug, task_number: 0, title: LINKEDIN_TASK.title, description: LINKEDIN_TASK.description })
+              .maybeSingle();
+          } else {
+            const t = allTasks.find((at) => at.taskNumber === n);
+            if (t) {
+              await supabase
+                .from("tasks")
+                .insert({ domain: domainSlug, task_number: n, title: t.title, description: t.description })
+                .maybeSingle();
+            }
+          }
         }
+        // Re-fetch after inserts to get IDs (inserts may have failed due to race conditions)
+        allRows = await fetchAll();
+        if (cancelled) return;
+        for (const t of allRows) existingMap[t.task_number] = t.id;
+        missing = requiredNumbers.filter((n) => !existingMap[n]);
       }
+
       if (!cancelled) {
-        const fullMap = { ...existingMap };
-        for (const c of created) fullMap[c.task_number] = c.id;
-        setTaskIdMap(fullMap);
+        setTaskIdMap(existingMap);
         setTasksReady(true);
+        if (missing.length > 0) console.warn("Tasks still missing after sync:", missing);
       }
     })();
     return () => { cancelled = true; };
   }, [domainSlug, allTasks]);
 
   const tasksWithMeta = useMemo(() => {
-    const linkedinId = taskIdMap[0] ?? "";
+    const linkedinId = taskIdMap[0] ?? `${domainSlug}-0`;
     const linkedinSub = linkedinId
       ? rawSubmissions.find((s) => s.task_id === linkedinId)
       : undefined;
@@ -518,7 +519,8 @@ function TaskCard({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!task.id) return toast.error("Task is still being prepared, please wait…");
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(task.id)) return toast.error("Task is still being prepared, please wait…");
     setLoading(true);
     const fd = new FormData(e.currentTarget);
     const payload = {
@@ -667,10 +669,6 @@ function TaskCard({
             {!tasksReady ? (
               <Button disabled className="w-full text-sm h-10 rounded-xl opacity-60">
                 <Loader2 className="mr-1.5 size-4 animate-spin" /> Syncing tasks…
-              </Button>
-            ) : !task.id ? (
-              <Button disabled className="w-full text-sm h-10 rounded-xl opacity-60">
-                Task not available
               </Button>
             ) : (
               <Button
