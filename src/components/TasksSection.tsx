@@ -488,14 +488,27 @@ function TaskCard({
       let taskId = task.id;
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(taskId)) {
+        // Try a regular lookup first
         const { data: resolved } = await supabase
           .from("tasks")
           .select("id")
           .eq("domain", domain?.slug ?? "")
           .eq("task_number", task.taskNumber)
           .maybeSingle();
-        if (!resolved) return toast.error("Task not found. Please try again later.");
-        taskId = resolved.id;
+
+        if (resolved) {
+          taskId = resolved.id;
+        } else if (task.taskNumber === 0) {
+          // LinkedIn task missing from DB — auto-create it via SECURITY DEFINER RPC
+          const { data: rpcId, error: rpcErr } = await supabase
+            .rpc("ensure_linkedin_task", { p_domain: domain?.slug ?? "" });
+          if (rpcErr || !rpcId) {
+            return toast.error("Could not initialise task. Please refresh and try again.");
+          }
+          taskId = rpcId as string;
+        } else {
+          return toast.error("Task not found. Please try again later.");
+        }
       }
       setLoading(true);
       const fd = new FormData(e.currentTarget);
