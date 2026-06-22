@@ -485,8 +485,18 @@ function TaskCard({
     e.preventDefault();
     try {
       if (!user) return toast.error("You must be logged in");
+      let taskId = task.id;
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(task.id)) return toast.error("Task is still being prepared, please wait…");
+      if (!uuidRegex.test(taskId)) {
+        const { data: resolved } = await supabase
+          .from("tasks")
+          .select("id")
+          .eq("domain", domain?.slug ?? "")
+          .eq("task_number", task.taskNumber)
+          .maybeSingle();
+        if (!resolved) return toast.error("Task not found. Please try again later.");
+        taskId = resolved.id;
+      }
       setLoading(true);
       const fd = new FormData(e.currentTarget);
       const githubUrl = String(fd.get("github_url") || "");
@@ -509,7 +519,7 @@ function TaskCard({
       let screenshotUrl = "";
 
       if (pdfFile?.size) {
-        const path = `${user.id}/${task.id}/${Date.now()}_${pdfFile.name}`;
+        const path = `${user.id}/${taskId}/${Date.now()}_${pdfFile.name}`;
         const { data: upload, error: uploadErr } = await supabase.storage.from("task-submissions").upload(path, pdfFile);
         if (uploadErr) { setLoading(false); return toast.error("Failed to upload PDF: " + uploadErr.message); }
         const { data: pub } = supabase.storage.from("task-submissions").getPublicUrl(upload.path);
@@ -517,7 +527,7 @@ function TaskCard({
       }
 
       if (screenshotFile?.size) {
-        const path = `${user.id}/${task.id}/${Date.now()}_${screenshotFile.name}`;
+        const path = `${user.id}/${taskId}/${Date.now()}_${screenshotFile.name}`;
         const { data: upload, error: uploadErr } = await supabase.storage.from("task-submissions").upload(path, screenshotFile);
         if (uploadErr) { setLoading(false); return toast.error("Failed to upload screenshot: " + uploadErr.message); }
         const { data: pub } = supabase.storage.from("task-submissions").getPublicUrl(upload.path);
@@ -527,7 +537,7 @@ function TaskCard({
       const deployedUrl = String(fd.get("deployed_url") || "");
       const payload: Record<string, any> = {
         application_id: appId,
-        task_id: task.id,
+        task_id: taskId,
         github_url: githubUrl,
         notes,
         status: "pending" as const,
