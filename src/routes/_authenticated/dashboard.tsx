@@ -483,7 +483,6 @@ function Dashboard() {
               <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
                 <TasksSection
                   domainSlug={da.domain}
-                  tasks={internTasks ?? []}
                   submissions={daSubs}
                   appId={da.id}
                   onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
@@ -803,7 +802,6 @@ function Dashboard() {
           <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
             <TasksSection
               domainSlug={app.domain}
-              tasks={internTasks ?? []}
               submissions={internSubmissions ?? []}
               appId={app.id}
               onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}

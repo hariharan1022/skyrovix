@@ -187,13 +187,11 @@ function SkeletonCard() {
 /* ─────────── MAIN COMPONENT ─────────── */
 export function TasksSection({
   domainSlug,
-  tasks: supabaseTasks,
   submissions: rawSubmissions,
   appId,
   onChange,
 }: {
   domainSlug: string;
-  tasks: { id: string; task_number: number }[];
   submissions: Submission[];
   appId: string;
   onChange: () => void;
@@ -203,55 +201,70 @@ export function TasksSection({
   const [sort, setSort] = useState<"default" | "due" | "number">("default");
   const [showSort, setShowSort] = useState(false);
   const [confettiTask, setConfettiTask] = useState<string | null>(null);
-  const [linkedinTaskId, setLinkedinTaskId] = useState<string | null>(null);
+  const [taskIdMap, setTaskIdMap] = useState<Record<number, string>>({});
 
   const domainData = getDomainTasks(domainSlug);
   const allTasks = domainData?.tasks ?? [];
 
-  // Ensure LinkedIn task exists in Supabase tasks table
+  // Ensure all domain tasks exist in Supabase tasks table
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data: existing, error: fetchErr } = await supabase
+      const { data: existing } = await supabase
         .from("tasks")
-        .select("id")
-        .eq("domain", domainSlug)
-        .eq("task_number", 0)
-        .maybeSingle();
+        .select("id, task_number")
+        .eq("domain", domainSlug);
       if (cancelled) return;
-      if (existing) {
-        setLinkedinTaskId(existing.id);
+      const existingMap: Record<number, string> = {};
+      for (const t of existing ?? []) existingMap[t.task_number] = t.id;
+
+      const requiredNumbers = [0, ...allTasks.map((t) => t.taskNumber)];
+      const toCreate = requiredNumbers.filter((n) => !existingMap[n]);
+
+      if (toCreate.length === 0) {
+        setTaskIdMap(existingMap);
         return;
       }
-      if (fetchErr && fetchErr.code !== "PGRST116") return;
-      const { data: created, error: insertErr } = await supabase
-        .from("tasks")
-        .insert({
-          domain: domainSlug,
-          task_number: 0,
-          title: LINKEDIN_TASK.title,
-          description: LINKEDIN_TASK.description,
-        })
-        .select("id")
-        .maybeSingle();
-      if (!cancelled && created) setLinkedinTaskId(created.id);
-      if (insertErr) console.error("Failed to create LinkedIn task:", insertErr);
+
+      const created: { task_number: number; id: string }[] = [];
+      for (const n of toCreate) {
+        if (n === 0) {
+          const { data: ins } = await supabase
+            .from("tasks")
+            .insert({ domain: domainSlug, task_number: 0, title: LINKEDIN_TASK.title, description: LINKEDIN_TASK.description })
+            .select("id, task_number")
+            .maybeSingle();
+          if (ins) created.push(ins);
+        } else {
+          const t = allTasks.find((at) => at.taskNumber === n);
+          if (!t) continue;
+          const { data: ins } = await supabase
+            .from("tasks")
+            .insert({ domain: domainSlug, task_number: n, title: t.title, description: t.description })
+            .select("id, task_number")
+            .maybeSingle();
+          if (ins) created.push(ins);
+        }
+      }
+      if (!cancelled) {
+        const fullMap = { ...existingMap };
+        for (const c of created) fullMap[c.task_number] = c.id;
+        setTaskIdMap(fullMap);
+      }
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [domainSlug]);
+    return () => { cancelled = true; };
+  }, [domainSlug, allTasks]);
 
   const tasksWithMeta = useMemo(() => {
-    // LinkedIn task (Task 0) — universal for all domains
-    const linkedinSub = linkedinTaskId
-      ? rawSubmissions.find((s) => s.task_id === linkedinTaskId)
+    const linkedinId = taskIdMap[0] ?? "";
+    const linkedinSub = linkedinId
+      ? rawSubmissions.find((s) => s.task_id === linkedinId)
       : undefined;
     const linkedinDue = computeDueDate(1);
     const linkedinStatus = getTaskStatus(linkedinSub, linkedinDue);
     const linkedinMeta = {
       ...LINKEDIN_TASK,
-      id: linkedinTaskId ?? "",
+      id: linkedinId,
       submission: linkedinSub,
       dueDate: linkedinDue,
       status: linkedinStatus,
@@ -260,8 +273,7 @@ export function TasksSection({
     const linkedinDone = linkedinStatus === "completed";
 
     const domainTasks = allTasks.map((t) => {
-      const realTask = supabaseTasks.find((st) => st.task_number === t.taskNumber);
-      const id = realTask?.id ?? `${domainSlug}-${t.taskNumber}`;
+      const id = taskIdMap[t.taskNumber] ?? `${domainSlug}-${t.taskNumber}`;
       const sub = rawSubmissions.find((s) => s.task_id === id);
       const dueDate = computeDueDate(t.taskNumber);
       const status = getTaskStatus(sub, dueDate);
@@ -278,7 +290,7 @@ export function TasksSection({
     });
 
     return [linkedinMeta, ...domainTasks];
-  }, [allTasks, rawSubmissions, supabaseTasks, domainSlug, linkedinTaskId]);
+  }, [allTasks, rawSubmissions, taskIdMap, domainSlug]);
 
   const stats = useMemo(() => {
     const completed = tasksWithMeta.filter((t) => t.status === "completed").length;
