@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,7 +25,7 @@ const COURSE_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
   BookOpen, Layers, Monitor, Server, BarChart3, Brain, Palette, Code2, Shield, TrendingUp,
 };
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_navbar-layout/")({
   head: () => ({
     meta: [
       { title: "Skyrovix Internship Portal — Task-based virtual internships" },
@@ -147,7 +145,6 @@ function Landing() {
 
   return (
     <div className="min-h-screen">
-      <Navbar />
 
       {/* HERO */}
       <section className="relative overflow-hidden pb-16 pt-16 md:pb-28 md:pt-20">
@@ -409,8 +406,6 @@ function Landing() {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }

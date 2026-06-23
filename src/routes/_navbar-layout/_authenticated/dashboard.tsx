@@ -1,7 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef, useMemo } from "react";
-import { Navbar } from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -86,7 +84,7 @@ function AnimatedSection({ children, className = "", delay = 0 }: { children: Re
   );
 }
 
-export const Route = createFileRoute("/_authenticated/dashboard")({
+export const Route = createFileRoute("/_navbar-layout/_authenticated/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Skyrovix" }] }),
   component: Dashboard,
 });
@@ -1223,7 +1221,6 @@ function Dashboard() {
           <main className="mx-auto max-w-6xl px-4 py-8">
             {renderContent()}
           </main>
-          <Footer />
         </div>
 
         {/* Quick Actions FAB */}
@@ -1251,7 +1248,6 @@ function Dashboard() {
 function LoadingSkeleton() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF]">
-      <Navbar />
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="space-y-6">
           <div className="h-40 animate-pulse rounded-3xl bg-white/60 dark:bg-[#1E293B]/60" />

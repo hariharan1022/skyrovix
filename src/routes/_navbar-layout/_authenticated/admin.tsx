@@ -24,7 +24,7 @@ import {
   PanelRightOpen, FolderTree, FileQuestion, PieChart,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_navbar-layout/_authenticated/admin")({
   ssr: false,
   beforeLoad: async () => {
     const { data: { user } } = await supabase.auth.getUser();
