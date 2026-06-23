@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
+import { CourseCertificateDoc, downloadPdf } from "@/components/pdf-docs";
 import {
   Clock, ChevronLeft, ChevronRight, Flag, XCircle, Trophy,
-  AlertTriangle, Maximize2, Shuffle,
+  AlertTriangle, Shuffle, Download, Award, RotateCcw, CheckCircle2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/courses/$slug/quiz")({
@@ -42,8 +43,9 @@ function QuizPage() {
   const [marked, setMarked] = useState<Set<string>>(new Set());
   const [current, setCurrent] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
-  const [result, setResult] = useState<{ score: number; total: number; passed: boolean; certId?: string } | null>(null);
+  const [result, setResult] = useState<{ score: number; total: number; passed: boolean; certId?: string; attemptNum: number } | null>(null);
   const [tabWarnings, setTabWarnings] = useState(0);
+  const [started, setStarted] = useState(false);
   const [shuffledIds, setShuffledIds] = useState<string[] | null>(null);
   const submitRef = useRef(false);
   const visibilityRef = useRef(0);
@@ -77,6 +79,22 @@ function QuizPage() {
     },
   });
 
+  const { data: prevAttempts } = useQuery({
+    queryKey: ["quiz-attempts", enrollment?.id],
+    enabled: !!enrollment,
+    queryFn: async () => {
+      const { data } = await supabase.from("quiz_attempts").select("*")
+        .eq("enrollment_id", enrollment!.id).order("submitted_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const attemptCount = prevAttempts?.length ?? 0;
+  const lastAttempt = prevAttempts?.[0] ?? null;
+  const maxAttempts = 3;
+  const attemptsLeft = maxAttempts - attemptCount;
+  const passedBefore = prevAttempts?.some((a: any) => a.passed);
+
   const questions = useMemo(() => {
     if (!rawQuestions?.length) return [];
     if (!shuffledIds) return rawQuestions;
@@ -87,22 +105,12 @@ function QuizPage() {
   const totalMarks = useMemo(() => questions.reduce((s, q) => s + q.marks, 0), [questions]);
 
   useEffect(() => {
-    if (!course || quizStartedRef.current) return;
+    if (!course || quizStartedRef.current || !started) return;
     quizStartedRef.current = true;
     if (rawQuestions?.length) {
       setShuffledIds(shuffleArray(rawQuestions.map((q) => q.id)));
     }
-    const fullscreen = () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      }
-    };
-    document.addEventListener("fullscreenchange", fullscreen);
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    }
-    return () => document.removeEventListener("fullscreenchange", fullscreen);
-  }, [course, rawQuestions]);
+  }, [course, rawQuestions, started]);
 
   useEffect(() => {
     if (!course) return;
@@ -110,23 +118,24 @@ function QuizPage() {
   }, [course]);
 
   useEffect(() => {
-    if (secondsLeft === null || result) return;
+    if (secondsLeft === null || result || !started) return;
     if (secondsLeft <= 0) {
-      toast.warning("Time is up! Auto-submitting your quiz.");
+      toast.warning("Time is up! Auto-submitting.");
       handleSubmit();
       return;
     }
     const t = setTimeout(() => setSecondsLeft((s) => (s ?? 0) - 1), 1000);
     return () => clearTimeout(t);
-  }, [secondsLeft, result]);
+  }, [secondsLeft, result, started]);
 
   useEffect(() => {
+    if (!started || result) return;
     const handler = () => {
-      if (document.hidden && !result) {
+      if (document.hidden) {
         visibilityRef.current += 1;
         setTabWarnings(visibilityRef.current);
         if (visibilityRef.current >= 3) {
-          toast.error("Tab switch limit reached. Auto-submitting quiz.");
+          toast.error("Tab switch limit reached. Auto-submitting.");
           handleSubmit();
         } else {
           toast.warning(`Warning ${visibilityRef.current}/3: Do not switch tabs during the quiz!`);
@@ -135,7 +144,7 @@ function QuizPage() {
     };
     document.addEventListener("visibilitychange", handler);
     return () => document.removeEventListener("visibilitychange", handler);
-  }, [questions, enrollment, course, result]);
+  }, [started, questions, enrollment, course, result]);
 
   const handleSubmit = useCallback(async () => {
     if (submitRef.current || !questions.length || !enrollment || !course) return;
@@ -143,7 +152,6 @@ function QuizPage() {
     let score = 0;
     for (const q of questions) if (answers[q.id] === q.correct_index) score += q.marks;
     const passed = score >= course.pass_marks;
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     const { data: att, error } = await supabase.from("quiz_attempts").insert({
       enrollment_id: enrollment.id, score, total: totalMarks, passed, answers, submitted_at: new Date().toISOString(),
     }).select().maybeSingle();
@@ -158,11 +166,81 @@ function QuizPage() {
       await supabase.from("course_certificates").insert({
         enrollment_id: enrollment.id, certificate_id: certId, verification_hash: hash, score,
       });
+      // Leaderboard entry
+      await supabase.from("leaderboard" as any).upsert({
+        user_id: user!.id, course_id: course.id, score, total: totalMarks, quiz_attempt_id: att?.id,
+      }, { onConflict: "user_id, course_id" });
     }
-    setResult({ score, total: totalMarks, passed, certId });
-  }, [questions, answers, enrollment, course, totalMarks]);
+    setResult({ score, total: totalMarks, passed, certId, attemptNum: attemptCount + 1 });
+  }, [questions, answers, enrollment, course, totalMarks, user, attemptCount]);
 
-  if (!course || !rawQuestions) {
+  // Lobby screen - show before starting
+  if (!started) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <main className="mx-auto max-w-2xl px-4 py-16">
+          <Card className="overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-purple-400 to-blue-600" />
+            <CardContent className="space-y-6 pt-8 text-center">
+              <div className="mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40">
+                <Award className="size-10 text-purple-700 dark:text-purple-400" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">{course?.name} — Final Quiz</h1>
+                <p className="mt-2 text-sm text-muted-foreground">Test your knowledge with {rawQuestions?.length ?? 0} questions.</p>
+              </div>
+
+              {passedBefore ? (
+                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200/50 p-4">
+                  <CheckCircle2 className="size-6 text-emerald-600 mx-auto mb-2" />
+                  <p className="font-semibold text-sm">You already passed this quiz!</p>
+                  <p className="text-xs text-muted-foreground mt-1">Your certificate is available on your dashboard.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-3 text-center text-xs">
+                    <div className="rounded-xl border border-border/50 bg-secondary/30 p-3">
+                      <p className="text-muted-foreground">Questions</p>
+                      <p className="font-bold text-lg">{rawQuestions?.length ?? 0}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/50 bg-secondary/30 p-3">
+                      <p className="text-muted-foreground">Pass Marks</p>
+                      <p className="font-bold text-lg">{course?.pass_marks}/{course?.quiz_marks}</p>
+                    </div>
+                    <div className="rounded-xl border border-border/50 bg-secondary/30 p-3">
+                      <p className="text-muted-foreground">Attempts Left</p>
+                      <p className={`font-bold text-lg ${attemptsLeft <= 0 ? "text-red-600" : attemptsLeft === 1 ? "text-amber-600" : ""}`}>{attemptsLeft}/{maxAttempts}</p>
+                    </div>
+                  </div>
+                  {lastAttempt && (
+                    <div className="text-xs text-muted-foreground">
+                      Last attempt: {lastAttempt.score}/{lastAttempt.total} ({lastAttempt.passed ? "Passed" : "Failed"})
+                    </div>
+                  )}
+                  <Button size="lg" className="brand-gradient text-white border-0 rounded-xl px-8 h-12 gap-2"
+                    disabled={attemptsLeft <= 0}
+                    onClick={() => setStarted(true)}>
+                    <Trophy className="size-5" /> Start Quiz
+                  </Button>
+                  {attemptsLeft <= 0 && (
+                    <p className="text-xs text-red-600">No attempts remaining. Contact support for assistance.</p>
+                  )}
+                </>
+              )}
+
+              <Button asChild variant="outline" size="sm"><Link to="/courses/$slug" params={{ slug }}>Back to course</Link></Button>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (result) return <ResultView result={result} course={course} slug={slug} user={user} />;
+
+  if (!course || !rawQuestions?.length || !questions.length) {
     return (
       <div className="min-h-screen">
         <Navbar />
@@ -171,23 +249,6 @@ function QuizPage() {
       </div>
     );
   }
-
-  if (!rawQuestions.length) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <main className="mx-auto max-w-3xl px-4 py-20 text-center">
-          <p className="text-muted-foreground">Quiz questions not configured yet.</p>
-          <Button asChild className="mt-4"><Link to="/courses/$slug" params={{ slug }}>Back to course</Link></Button>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!questions.length) return null;
-
-  if (result) return <ResultView result={result} course={course} slug={slug} />;
 
   const q = questions[current];
   const mm = String(Math.floor((secondsLeft ?? 0) / 60)).padStart(2, "0");
@@ -210,7 +271,7 @@ function QuizPage() {
           <div className="min-w-0">
             <h1 className="truncate font-display text-xl font-bold sm:text-2xl">{course.name} — Final Quiz</h1>
             <p className="text-sm text-muted-foreground">
-              {answeredCount}/{questions.length} answered · {marked.size} marked for review
+              Attempt {attemptCount + 1}/{maxAttempts} · {answeredCount}/{questions.length} answered · {marked.size} marked
               {hasUnanswered > 0 && <span className="ml-2 text-amber-600">· {hasUnanswered} unanswered</span>}
             </p>
           </div>
@@ -228,6 +289,7 @@ function QuizPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">Q{current + 1} / {questions.length}</Badge>
+                  <span className="text-xs text-muted-foreground">{q.marks} mark{q.marks !== 1 ? "s" : ""}</span>
                   {marked.has(q.id) && <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300">Marked</Badge>}
                 </div>
                 <Button size="sm" variant={marked.has(q.id) ? "default" : "outline"} onClick={() => {
@@ -235,11 +297,10 @@ function QuizPage() {
                   next.has(q.id) ? next.delete(q.id) : next.add(q.id);
                   setMarked(next);
                 }}>
-                  <Flag className="mr-1.5 size-4" />{marked.has(q.id) ? "Unmark" : "Mark for review"}
+                  <Flag className="mr-1.5 size-4" />{marked.has(q.id) ? "Unmark" : "Mark"}
                 </Button>
               </div>
               <CardTitle className="mt-3 text-lg leading-relaxed">{q.question}</CardTitle>
-              <p className="text-xs text-muted-foreground">{q.marks} mark{q.marks !== 1 ? "s" : ""}</p>
             </CardHeader>
             <CardContent className="space-y-2.5">
               {q.options.map((opt, i) => {
@@ -305,7 +366,7 @@ function QuizPage() {
                       answered ? "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-300" :
                       "bg-secondary text-muted-foreground hover:bg-secondary/80"
                     }`}
-                    title={`Question ${i + 1}${isMarked ? " (marked)" : answered ? " (answered)" : " (unanswered)"}`}
+                    title={`Question ${i + 1}`}
                   >
                     {i + 1}
                   </button>
@@ -314,22 +375,13 @@ function QuizPage() {
             </div>
 
             <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-xs">
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-sm bg-emerald-100 dark:bg-emerald-900/40" />
-                <span className="text-muted-foreground">Answered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-sm bg-amber-100 dark:bg-amber-900/40" />
-                <span className="text-muted-foreground">Marked for review</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="size-3 rounded-sm bg-secondary" />
-                <span className="text-muted-foreground">Unanswered</span>
-              </div>
+              <div className="flex items-center gap-2"><span className="size-3 rounded-sm bg-emerald-100 dark:bg-emerald-900/40" /><span className="text-muted-foreground">Answered</span></div>
+              <div className="flex items-center gap-2"><span className="size-3 rounded-sm bg-amber-100 dark:bg-amber-900/40" /><span className="text-muted-foreground">Marked</span></div>
+              <div className="flex items-center gap-2"><span className="size-3 rounded-sm bg-secondary" /><span className="text-muted-foreground">Unanswered</span></div>
             </div>
 
             <Button size="sm" className="mt-4 w-full bg-emerald-600 text-white hover:bg-emerald-700" onClick={handleSubmit}>
-              Submit Quiz ({hasUnanswered} unanswered)
+              Submit ({hasUnanswered} unanswered)
             </Button>
           </aside>
         </div>
@@ -339,7 +391,8 @@ function QuizPage() {
   );
 }
 
-function ResultView({ result, course, slug }: { result: { score: number; total: number; passed: boolean; certId?: string }; course: any; slug: string }) {
+function ResultView({ result, course, slug, user }: { result: { score: number; total: number; passed: boolean; certId?: string; attemptNum: number }; course: any; slug: string; user: any }) {
+  const pct = Math.round((result.score / result.total) * 100);
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -358,8 +411,8 @@ function ResultView({ result, course, slug }: { result: { score: number; total: 
               <h1 className="font-display text-3xl font-bold">{result.passed ? "Congratulations!" : "Not this time"}</h1>
               <p className="mt-1 text-muted-foreground">
                 {result.passed
-                  ? `You passed the ${course.name} final quiz.`
-                  : "You did not reach the pass mark. Review and try again."}
+                  ? `You passed the ${course.name} final quiz!`
+                  : "You did not reach the pass mark."}
               </p>
             </div>
             <div className="mx-auto inline-flex flex-col items-center rounded-xl border border-border bg-secondary/40 px-10 py-5">
@@ -367,36 +420,70 @@ function ResultView({ result, course, slug }: { result: { score: number; total: 
               <span className="font-display text-5xl font-bold">
                 {result.score} <span className="text-2xl text-muted-foreground">/ {result.total}</span>
               </span>
+              <div className="mt-2 w-full max-w-[200px]">
+                <div className="flex justify-between text-[10px] text-muted-foreground mb-1"><span>0%</span><span>100%</span></div>
+                <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                  <div className={`h-full rounded-full transition-all ${result.passed ? "bg-emerald-500" : "bg-red-500"}`} style={{ width: `${pct}%` }} />
+                </div>
+              </div>
               <Badge className={`mt-2 px-3 py-1 text-sm ${
-                result.passed
-                  ? "bg-emerald-600 text-white hover:bg-emerald-600"
-                  : "bg-red-600 text-white hover:bg-red-600"
+                result.passed ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
               }`}>
-                {result.passed ? "PASSED" : "FAILED"}
+                {result.passed ? "PASSED" : "FAILED"} — Attempt {result.attemptNum}/3
               </Badge>
             </div>
 
-            {result.passed && result.certId && (
+            {result.passed && (
               <div className="space-y-4 rounded-lg border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-900/30 dark:bg-emerald-950/30">
                 <div>
                   <p className="text-xs text-muted-foreground">Certificate ID</p>
                   <p className="font-mono text-lg font-bold text-emerald-900 dark:text-emerald-300">{result.certId}</p>
                 </div>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <Button asChild className="brand-gradient text-white border-0">
-                    <Link to="/dashboard"><Trophy className="mr-1.5 size-4" />Go to Dashboard</Link>
+                  <Button onClick={() => downloadPdf(
+                    <CourseCertificateDoc
+                      fullName={user?.user_metadata?.full_name ?? user?.email ?? "Student"}
+                      courseName={course.name}
+                      score={result.score}
+                      total={result.total}
+                      certId={result.certId ?? "N/A"}
+                      issuedAt={new Date().toISOString()}
+                      verifyUrl={`${window.location.origin}/verify-certificate`}
+                    />,
+                    `Certificate_${result.certId}.pdf`
+                  )} className="brand-gradient text-white border-0 gap-1.5">
+                    <Download className="size-4" /> Download Certificate
                   </Button>
-                  <Button asChild variant="outline">
-                    <Link to="/verify-certificate">Verify Certificate</Link>
+                  <Button asChild variant="outline" className="gap-1.5">
+                    <Link to="/verify-certificate"><Award className="size-4" /> Verify</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="gap-1.5">
+                    <Link to="/dashboard"><RotateCcw className="size-4" /> Dashboard</Link>
                   </Button>
                 </div>
               </div>
             )}
-            {!result.passed && (
-              <Button asChild variant="outline">
-                <Link to="/courses/$slug" params={{ slug }}>Back to course</Link>
-              </Button>
+
+            {!result.passed && result.attemptNum < 3 && (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  You have {3 - result.attemptNum} attempt{3 - result.attemptNum !== 1 ? "s" : ""} remaining.
+                </p>
+                <Button onClick={() => window.location.reload()} variant="outline" className="gap-1.5">
+                  <RotateCcw className="size-4" /> Try Again
+                </Button>
+              </div>
             )}
+
+            {!result.passed && result.attemptNum >= 3 && (
+              <div className="rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/50 p-4">
+                <XCircle className="size-6 text-red-600 mx-auto mb-2" />
+                <p className="font-semibold text-sm">No attempts remaining</p>
+                <p className="text-xs text-muted-foreground mt-1">Please contact support for assistance.</p>
+              </div>
+            )}
+
+            <Button asChild variant="ghost" size="sm"><Link to="/courses/$slug" params={{ slug }}>Back to course</Link></Button>
           </CardContent>
         </Card>
       </main>

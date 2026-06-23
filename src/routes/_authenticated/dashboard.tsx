@@ -146,6 +146,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!user,
+    refetchInterval: 10_000,
   });
 
   const { data: courses } = useQuery({
@@ -166,6 +167,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!user && (enrollments ?? []).length > 0,
+    refetchInterval: 10_000,
   });
 
   const { data: topics } = useQuery({
@@ -184,6 +186,7 @@ function Dashboard() {
       const { data } = await supabase.from("lesson_progress").select("topic_id, completed_at").eq("enrollment_id", enrollments![0].id);
       return new Map((data ?? []).map((r) => [r.topic_id, r.completed_at]));
     },
+    refetchInterval: 10_000,
   });
 
   const { data: taskSubmissions } = useQuery({
@@ -193,6 +196,7 @@ function Dashboard() {
       const { data } = await supabase.from("course_task_submissions").select("*, course_tasks(task_number, title)").eq("enrollment_id", enrollments![0].id);
       return data ?? [];
     },
+    refetchInterval: 10_000,
   });
 
   const { data: quizAttempts } = useQuery({
@@ -202,6 +206,7 @@ function Dashboard() {
       const { data } = await supabase.from("quiz_attempts").select("*").eq("enrollment_id", enrollments![0].id).order("started_at", { ascending: false });
       return data ?? [];
     },
+    refetchInterval: 10_000,
   });
 
   const { data: tasks } = useQuery({
@@ -366,6 +371,46 @@ function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [detailView, setDetailView] = useState<{ type: "app"; id: string } | { type: "enrollment"; id: string } | null>(null);
+  const [utrNumber, setUtrNumber] = useState("");
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  const handlePaymentSubmit = async () => {
+    if (!app || !utrNumber.trim()) return;
+    setSubmittingPayment(true);
+    try {
+      let screenshotUrl: string | null = null;
+      if (paymentScreenshot) {
+        try {
+          const ext = paymentScreenshot.name.split(".").pop() ?? "png";
+          const path = `${user.id}/${Date.now()}.${ext}`;
+          const { error: uploadErr } = await supabase.storage.from("payment-screenshots").upload(path, paymentScreenshot);
+          if (uploadErr) throw uploadErr;
+          const { data: urlData } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
+          screenshotUrl = urlData.publicUrl;
+        } catch (uploadErr: any) {
+          console.error("Screenshot upload failed:", uploadErr);
+          toast.warning("Screenshot upload failed, but payment will still be submitted.");
+        }
+      }
+      const { error } = await supabase.from("payments").insert({
+        application_id: app.id,
+        utr_number: utrNumber.trim(),
+        screenshot_url: screenshotUrl,
+        amount: PAYMENT.amount,
+        status: "pending",
+      });
+      if (error) throw error;
+      toast.success("Payment submitted successfully! Awaiting verification.");
+      setUtrNumber("");
+      setPaymentScreenshot(null);
+      qc.invalidateQueries({ queryKey: ["all-payments"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit payment");
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
 
   const SIDEBAR_ITEMS = [
     { id: "overview", label: "Overview", icon: LayoutDashboard },
@@ -384,6 +429,39 @@ function Dashboard() {
 
   const renderContent = () => {
     if (!appsList?.length || !app) {
+      if (active === "courses") {
+        return (
+          <div className="space-y-8">
+            <LmsCoursesSection
+              enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
+              completedTopics={completedTopics} topics={topics ?? []}
+              taskSubmissions={taskSubmissions ?? []} tasks={tasks ?? []}
+              quizAttempts={quizAttempts ?? []} course={course} enrollment={enrollment}
+            />
+            {enrollment && course && <CurrentTopicWidget topics={topics ?? []} completedTopics={completedTopics} enrollment={enrollment} course={course} />}
+            {enrollment && <TasksSectionWidget tasks={tasks ?? []} submissions={taskSubmissions ?? []} enrollmentId={enrollment.id} courseSlug={course?.slug ?? ""} onChange={() => qc.invalidateQueries({ queryKey: ["my-course-subs"] })} />}
+            {enrollment && <QuizSectionWidget course={course} lastAttempt={lastAttempt} enrollment={enrollment} completedTaskCount={completedTaskCount} totalTasks={totalTasks} />}
+          </div>
+        );
+      }
+      if (active === "profile") {
+        return (
+          <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <User className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+            <p className="font-semibold text-muted-foreground">Apply for an internship to set up your profile.</p>
+            <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => setActive("overview")}>Go to Overview</Button>
+          </div>
+        );
+      }
+      if (active === "tasks" || active === "certificates") {
+        return (
+          <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
+            <Briefcase className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+            <p className="font-semibold text-muted-foreground">Apply for an internship to access this section.</p>
+            <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => setActive("overview")}>Go to Overview</Button>
+          </div>
+        );
+      }
       return (
         <AnimatedSection>
           <WelcomeDashboard
@@ -586,7 +664,7 @@ function Dashboard() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Total Internships", value: appsList?.length ?? 0, icon: Briefcase, color: "from-purple-500 to-blue-600" },
-              { label: "Completed", value: completedApps.length, icon: CheckCircle2, color: "from-emerald-500 to-teal-600" },
+              { label: "Completed", value: completedApps.length + (enrollments?.filter((e: any) => e.status === "completed").length ?? 0), icon: CheckCircle2, color: "from-emerald-500 to-teal-600" },
               { label: "Active Courses", value: enrollments?.filter((e: any) => e.status !== "completed").length ?? 0, icon: BookOpen, color: "from-amber-500 to-orange-600" },
               { label: "Certificates", value: (allAppCerts?.length ?? 0) + (lmsCerts?.length ?? 0), icon: Award, color: "from-violet-500 to-purple-600" },
             ].map((stat) => {
@@ -889,8 +967,53 @@ function Dashboard() {
                   <p className="font-semibold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
                 </div>
               </div>
+            ) : internTotal > 0 && internApproved >= internTotal ? (
+              <div className="space-y-4">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30">
+                  <Wallet className="size-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-semibold text-amber-800 dark:text-amber-300">Complete Payment to Get Certificate</p>
+                    <p className="text-amber-700 dark:text-amber-400 mt-1">Pay ₹{PAYMENT.amount} via UPI and submit the details below.</p>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="rounded-xl border border-border/40 bg-secondary/30 p-4 flex flex-col items-center gap-3">
+                    <p className="text-xs font-semibold text-muted-foreground">Scan to Pay</p>
+                    <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${PAYMENT.amount}&cu=${PAYMENT.currency}`} size={140} />
+                    <div className="text-center">
+                      <p className="text-xs font-mono font-bold">{PAYMENT.upiId}</p>
+                      <p className="text-[10px] text-muted-foreground">{PAYMENT.payeeName}</p>
+                    </div>
+                    <Button size="sm" variant="outline" className="rounded-lg h-7 text-[10px] gap-1"
+                      onClick={() => {
+                        navigator.clipboard.writeText(PAYMENT.upiId);
+                        toast.success("UPI ID copied");
+                      }}>
+                      <Copy className="size-3" /> Copy UPI ID
+                    </Button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-xs">UTR Number</Label>
+                      <Input placeholder="e.g. HDFC123456789" className="mt-1 h-9 text-xs"
+                        value={utrNumber} onChange={e => setUtrNumber(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Payment Screenshot (optional)</Label>
+                      <Input type="file" accept="image/*" className="mt-1 h-9 text-xs file:text-xs"
+                        onChange={e => setPaymentScreenshot(e.target.files?.[0] ?? null)} />
+                    </div>
+                    <Button className="w-full brand-gradient text-white border-0 rounded-xl h-9 text-xs gap-1.5"
+                      disabled={!utrNumber.trim() || submittingPayment}
+                      onClick={handlePaymentSubmit}>
+                      {submittingPayment ? <Loader2 className="size-3.5 animate-spin" /> : <CreditCard className="size-3.5" />}
+                      {submittingPayment ? "Submitting..." : `Pay ₹${PAYMENT.amount}`}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <p className="text-sm text-muted-foreground">No payment record found.</p>
+              <p className="text-sm text-muted-foreground">Complete all tasks to proceed with payment.</p>
             )}
           </div>
 
@@ -1294,9 +1417,13 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
         const ext = photoFile.name.split(".").pop();
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("profile-photos").upload(path, photoFile, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
-        photo_url = publicUrl?.publicUrl ?? photo_url;
+        if (upErr) {
+          console.warn("Profile photo upload failed:", upErr.message);
+          toast.warning("Photo upload failed, profile saved without photo.");
+        } else {
+          const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
+          photo_url = publicUrl?.publicUrl ?? photo_url;
+        }
       }
       const updates = {
         full_name: String(fd.get("full_name")),
@@ -1923,9 +2050,12 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
         const ext = photoFile.name.split(".").pop();
         const path = `${user.id}/${Date.now()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("profile-photos").upload(path, photoFile, { upsert: true });
-        if (upErr) throw upErr;
-        const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
-        photo_url = publicUrl?.publicUrl ?? null;
+        if (upErr) {
+          console.warn("Profile photo upload failed:", upErr.message);
+        } else {
+          const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
+          photo_url = publicUrl?.publicUrl ?? null;
+        }
       }
       const intern_id = generateInternId();
       const domain = selectedDomain || String(fd.get("domain") || "");

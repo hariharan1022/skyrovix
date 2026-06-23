@@ -19,6 +19,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DomainsIndexRouteImport } from './routes/domains.index'
+import { Route as CoursesIndexRouteImport } from './routes/courses.index'
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -74,6 +76,16 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DomainsIndexRoute = DomainsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DomainsRoute,
+} as any)
+const CoursesIndexRoute = CoursesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CoursesRoute,
+} as any)
 const DomainsSlugRoute = DomainsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -114,6 +126,8 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses/': typeof CoursesIndexRoute
+  '/domains/': typeof DomainsIndexRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesByTo {
@@ -121,8 +135,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
-  '/courses': typeof CoursesRouteWithChildren
-  '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
@@ -130,6 +142,8 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses': typeof CoursesIndexRoute
+  '/domains': typeof DomainsIndexRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesById {
@@ -148,6 +162,8 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/courses/$slug': typeof CoursesSlugRouteWithChildren
   '/domains/$slug': typeof DomainsSlugRoute
+  '/courses/': typeof CoursesIndexRoute
+  '/domains/': typeof DomainsIndexRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRouteTypes {
@@ -166,6 +182,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses/'
+    | '/domains/'
     | '/courses/$slug/quiz'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -173,8 +191,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/auth'
     | '/contact'
-    | '/courses'
-    | '/domains'
     | '/privacy'
     | '/terms'
     | '/verify-certificate'
@@ -182,6 +198,8 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses'
+    | '/domains'
     | '/courses/$slug/quiz'
   id:
     | '__root__'
@@ -199,6 +217,8 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/courses/$slug'
     | '/domains/$slug'
+    | '/courses/'
+    | '/domains/'
     | '/courses/$slug/quiz'
   fileRoutesById: FileRoutesById
 }
@@ -287,6 +307,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/domains/': {
+      id: '/domains/'
+      path: '/'
+      fullPath: '/domains/'
+      preLoaderRoute: typeof DomainsIndexRouteImport
+      parentRoute: typeof DomainsRoute
+    }
+    '/courses/': {
+      id: '/courses/'
+      path: '/'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof CoursesIndexRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/domains/$slug': {
       id: '/domains/$slug'
       path: '/$slug'
@@ -352,10 +386,12 @@ const CoursesSlugRouteWithChildren = CoursesSlugRoute._addFileChildren(
 
 interface CoursesRouteChildren {
   CoursesSlugRoute: typeof CoursesSlugRouteWithChildren
+  CoursesIndexRoute: typeof CoursesIndexRoute
 }
 
 const CoursesRouteChildren: CoursesRouteChildren = {
   CoursesSlugRoute: CoursesSlugRouteWithChildren,
+  CoursesIndexRoute: CoursesIndexRoute,
 }
 
 const CoursesRouteWithChildren =
@@ -363,10 +399,12 @@ const CoursesRouteWithChildren =
 
 interface DomainsRouteChildren {
   DomainsSlugRoute: typeof DomainsSlugRoute
+  DomainsIndexRoute: typeof DomainsIndexRoute
 }
 
 const DomainsRouteChildren: DomainsRouteChildren = {
   DomainsSlugRoute: DomainsSlugRoute,
+  DomainsIndexRoute: DomainsIndexRoute,
 }
 
 const DomainsRouteWithChildren =
