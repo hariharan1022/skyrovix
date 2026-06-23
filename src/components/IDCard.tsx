@@ -1,5 +1,5 @@
 import { QRCodeSVG } from "qrcode.react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 import { COMPANY } from "@/lib/constants";
 
 type Props = {

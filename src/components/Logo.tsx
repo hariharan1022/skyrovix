@@ -1,4 +1,4 @@
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 
 export function Logo({ size = 36, withText = true }: { size?: number; withText?: boolean }) {
   return (

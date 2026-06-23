@@ -21,7 +21,7 @@ import {
   Sparkles, Star, Users, Zap, ChevronRight, CheckCircle2, Quote,
 } from "lucide-react";
 import { HeroVisual } from "@/components/HeroVisual";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 
 const COURSE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen, Layers, Monitor, Server, BarChart3, Brain, Palette, Code2, Shield, TrendingUp,

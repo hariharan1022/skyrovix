@@ -1,6 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, pdf, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 import seal from "@/assets/seal.jpg";
 import msme from "@/assets/msme.png";
 import sigFounder from "@/assets/sig-founder.jpg";
