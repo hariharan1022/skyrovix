@@ -45,9 +45,9 @@ const COURSE_HERO: Record<string, { gradient: string; icon: string }> = {
   python: { gradient: "from-blue-600 to-cyan-500", icon: "Py" },
   java: { gradient: "from-red-600 to-orange-500", icon: "Jv" },
   html: { gradient: "from-orange-500 to-red-500", icon: "</>" },
-  css: { gradient: "from-blue-500 to-purple-600", icon: "#" },
+  css: { gradient: "from-blue-500 to-[#07284a]", icon: "#" },
   javascript: { gradient: "from-yellow-500 to-amber-600", icon: "JS" },
-  php: { gradient: "from-indigo-500 to-purple-600", icon: "PHP" },
+  php: { gradient: "from-indigo-500 to-[#07284a]", icon: "PHP" },
   sql: { gradient: "from-cyan-500 to-blue-600", icon: "SQL" },
 };
 
@@ -116,7 +116,7 @@ function CoursesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text" placeholder="Search courses..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/60 bg-white/70 backdrop-blur text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:bg-[#1E293B]/70"
+              className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/60 bg-white/70 backdrop-blur text-sm focus:outline-none focus:ring-2 focus:ring-[#07284a]/30 dark:bg-[#1E293B]/70"
             />
           </div>
         </header>
@@ -132,7 +132,7 @@ function CoursesPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered?.map((course) => {
               const enrolled = enrollMap.get(course.id);
-              const hero = COURSE_HERO[course.slug] ?? { gradient: "from-purple-500 to-blue-600", icon: "CD" };
+              const hero = COURSE_HERO[course.slug] ?? { gradient: "from-[#07284a] to-blue-600", icon: "CD" };
               const Icon = ICONS[course.icon] ?? BookOpen;
               return (
                 <Link

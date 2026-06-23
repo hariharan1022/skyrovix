@@ -126,9 +126,9 @@ function AdminPanel() {
       <div className="flex min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0F172A] dark:to-[#0F172A]">
         {/* ─── Background Blobs ─── */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-purple-400/20 blur-[120px] dark:bg-purple-600/10" />
+          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-[#07284a]/15 blur-[120px] dark:bg-[#07284a]/20" />
           <div className="absolute top-1/3 -right-32 size-80 rounded-full bg-blue-400/15 blur-[100px] dark:bg-blue-600/10" />
-          <div className="absolute -bottom-40 left-1/3 size-96 rounded-full bg-purple-400/10 blur-[140px] dark:bg-purple-600/5" />
+          <div className="absolute -bottom-40 left-1/3 size-96 rounded-full bg-[#07284a]/10 blur-[140px] dark:bg-[#07284a]/15" />
         </div>
 
         {/* ─── Mobile Overlay ─── */}
@@ -166,8 +166,8 @@ function AdminPanel() {
                       onClick={() => { setActive(item.id); setMobileOpen(false); }}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                         isActive
-                          ? "brand-gradient text-white shadow-md shadow-purple-500/20"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-purple-50/60 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
+                          ? "brand-gradient text-white shadow-md shadow-[#07284a]/20"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-[#07284a]/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
                       }`}
                     >
                       <Icon className="size-5 shrink-0" />
@@ -319,18 +319,18 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
     { label: "Applications", value: counts.apps, icon: Users, change: "+12 Today", color: "from-blue-500 to-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
     { label: "Pending Submissions", value: counts.subs, icon: FileText, change: "Need Review", color: "from-amber-500 to-orange-500", bg: "bg-amber-50 dark:bg-amber-950/30" },
     { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "₹18,000 Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30" },
-    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "+15 This Week", color: "from-purple-500 to-violet-500", bg: "bg-purple-50 dark:bg-purple-950/30" },
+    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "+15 This Week", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
     { label: "Students Enrolled", value: counts.enrolled, icon: GraduationCap, change: "LMS Courses", color: "from-cyan-500 to-teal-500", bg: "bg-cyan-50 dark:bg-cyan-950/30" },
     { label: "Courses Available", value: counts.courses, icon: BookOpen, change: "Published", color: "from-rose-500 to-pink-500", bg: "bg-rose-50 dark:bg-rose-950/30" },
-    { label: "Quiz Attempts", value: overview?.quizAttempts ?? 0, icon: Brain, change: "All Time", color: "from-indigo-500 to-purple-500", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+    { label: "Quiz Attempts", value: overview?.quizAttempts ?? 0, icon: Brain, change: "All Time", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
     { label: "Completion Rate", value: "78%", icon: TrendingUp, change: "+5% vs Last Month", color: "from-emerald-500 to-green-500", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
   ];
 
   return (
     <div className="animate-fade-in-up space-y-6">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-purple-600/10 via-blue-600/5 to-transparent p-6 sm:p-8 dark:from-purple-600/20 dark:via-blue-600/10">
-        <div className="absolute -right-16 -top-16 size-48 rounded-full bg-purple-400/20 blur-[80px]" />
+      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-[#07284a]/15 via-blue-600/5 to-transparent p-6 sm:p-8 dark:from-[#07284a]/30 dark:via-blue-600/10">
+        <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/15 blur-[80px]" />
         <div className="relative">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
@@ -338,7 +338,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
               <p className="mt-1.5 text-muted-foreground">Manage internships, courses, tasks and certificates effortlessly.</p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-purple-500/25" onClick={() => onNavigate("courses")}><Plus className="mr-1 size-4" /> Add Course</Button>
+              <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-[#07284a]/25" onClick={() => onNavigate("courses")}><Plus className="mr-1 size-4" /> Add Course</Button>
               <Button size="sm" variant="outline" className="border-border/60" onClick={() => onNavigate("tasks")}><Plus className="mr-1 size-4" /> Add Task</Button>
               <Button size="sm" variant="outline" className="border-border/60" onClick={() => onNavigate("quiz")}><Brain className="mr-1 size-4" /> Create Quiz</Button>
             </div>
@@ -1788,7 +1788,7 @@ function AnalyticsSection() {
             {chartData.map((v, i) => (
               <div key={i} className="flex flex-1 flex-col items-center">
                 <div
-                  className="w-full rounded-t-lg bg-gradient-to-t from-blue-500 to-purple-500 opacity-80 transition-all hover:opacity-100"
+                  className="w-full rounded-t-lg bg-gradient-to-t from-blue-500 to-[#07284a] opacity-80 transition-all hover:opacity-100"
                   style={{ height: `${(v / maxVal) * 100}%` }}
                 />
                 <span className="mt-1.5 text-[10px] text-muted-foreground">{months[i]}</span>

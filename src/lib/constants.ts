@@ -16,11 +16,11 @@ export const PAYMENT = {
 };
 
 export const DOMAINS = [
-  { slug: "fullstack", name: "Full Stack Development", icon: "FS", description: "End-to-end web apps with React, Node.js, and databases.", color: "from-fuchsia-500 to-purple-600" },
+  { slug: "fullstack", name: "Full Stack Development", icon: "FS", description: "End-to-end web apps with React, Node.js, and databases.", color: "from-fuchsia-500 to-[#07284a]" },
   { slug: "frontend", name: "Frontend Development", icon: "FE", description: "Beautiful, responsive UIs with modern React and Tailwind.", color: "from-pink-500 to-rose-600" },
   { slug: "backend", name: "Backend Development", icon: "BE", description: "APIs, databases, and server architecture.", color: "from-blue-500 to-indigo-600" },
   { slug: "datascience", name: "Data Science", icon: "DS", description: "Turn raw data into actionable insights.", color: "from-cyan-500 to-blue-600" },
-  { slug: "aiml", name: "AI & Machine Learning", icon: "AI", description: "Build intelligent systems with ML and LLMs.", color: "from-violet-500 to-purple-600" },
+  { slug: "aiml", name: "AI & Machine Learning", icon: "AI", description: "Build intelligent systems with ML and LLMs.", color: "from-violet-500 to-[#07284a]" },
   { slug: "uiux", name: "UI / UX Design", icon: "UX", description: "Human-centered design that delights users.", color: "from-amber-500 to-orange-600" },
   { slug: "python", name: "Python Development", icon: "Py", description: "Versatile Python for web, automation, and data.", color: "from-emerald-500 to-teal-600" },
   { slug: "java", name: "Java Development", icon: "Jv", description: "Enterprise-grade backends with Spring Boot.", color: "from-red-500 to-orange-600" },

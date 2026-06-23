@@ -491,7 +491,7 @@ function Dashboard() {
             <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
               <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
               <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-purple-500 to-blue-600"} text-white shadow-md`}>
+                <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
                   <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
                 </div>
                 <div className="flex-1">
@@ -572,7 +572,7 @@ function Dashboard() {
             {daCert && (
               <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
                 <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-                <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
+                <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
                   <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
                   <p className="font-bold text-sm">{dd?.name ?? da.domain}</p>
                   <p className="text-[10px] text-muted-foreground font-mono mt-1">{daCert.certificate_id}</p>
@@ -642,7 +642,7 @@ function Dashboard() {
             {dcCert && (
               <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
                 <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-                <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
+                <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
                   <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
                   <p className="font-bold text-sm">{dc?.name ?? "Course"}</p>
                   <p className="text-[10px] text-muted-foreground font-mono mt-1">{dcCert.certificate_id}</p>
@@ -663,10 +663,10 @@ function Dashboard() {
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Total Internships", value: appsList?.length ?? 0, icon: Briefcase, color: "from-purple-500 to-blue-600" },
+              { label: "Total Internships", value: appsList?.length ?? 0, icon: Briefcase, color: "from-[#07284a] to-blue-600" },
               { label: "Completed", value: completedApps.length + (enrollments?.filter((e: any) => e.status === "completed").length ?? 0), icon: CheckCircle2, color: "from-emerald-500 to-teal-600" },
               { label: "Active Courses", value: enrollments?.filter((e: any) => e.status !== "completed").length ?? 0, icon: BookOpen, color: "from-amber-500 to-orange-600" },
-              { label: "Certificates", value: (allAppCerts?.length ?? 0) + (lmsCerts?.length ?? 0), icon: Award, color: "from-violet-500 to-purple-600" },
+              { label: "Certificates", value: (allAppCerts?.length ?? 0) + (lmsCerts?.length ?? 0), icon: Award, color: "from-[#07284a] to-[#07284a]" },
             ].map((stat) => {
               const Icon = stat.icon;
               return (
@@ -699,7 +699,7 @@ function Dashboard() {
                     <button key={a.id} onClick={() => setDetailView({ type: "app", id: a.id })}
                       className="w-full text-left rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl transition-all hover:shadow-md hover:-translate-y-0.5 dark:bg-[#1E293B]/70 group">
                       <div className="flex items-center gap-4">
-                        <div className={`grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${d?.color ?? "from-purple-500 to-blue-600"} text-white shadow-sm`}>
+                        <div className={`grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${d?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-sm`}>
                           <span className="text-lg font-bold">{d?.icon ?? "?"}</span>
                         </div>
                         <div className="flex-1 min-w-0">
@@ -800,7 +800,7 @@ function Dashboard() {
           <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
             <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
             <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-purple-500 to-blue-600"} text-white shadow-md`}>
+              <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
                 <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
               </div>
               <div className="flex-1">
@@ -890,7 +890,7 @@ function Dashboard() {
           {certificate && (
             <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
               <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-              <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
+              <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
                 <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
                 <p className="font-bold text-sm">{dd?.name ?? app.domain}</p>
                 <p className="text-[10px] text-muted-foreground font-mono mt-1">{certificate.certificate_id}</p>
@@ -1062,7 +1062,7 @@ function Dashboard() {
                       return (
                         <div key={lc.enrollment_id} className="flex items-center justify-between rounded-xl border border-border/40 bg-secondary/30 p-3">
                           <div className="flex items-center gap-3">
-                            <div className="grid size-8 place-items-center rounded-lg bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300">
+                            <div className="grid size-8 place-items-center rounded-lg bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80">
                               <BookOpen className="size-4" />
                             </div>
                             <div>
@@ -1133,7 +1133,7 @@ function Dashboard() {
       <div className="flex min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0B1120] dark:to-[#0F172A]">
         {/* Background blobs */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-purple-400/20 blur-[120px] dark:bg-purple-600/10" />
+          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-[#07284a]/15 blur-[120px] dark:bg-[#07284a]/20" />
           <div className="absolute top-1/3 -right-32 size-80 rounded-full bg-blue-400/15 blur-[100px] dark:bg-blue-600/10" />
           <div className="absolute -bottom-48 left-1/3 size-[500px] rounded-full bg-violet-400/10 blur-[140px] dark:bg-violet-600/5" />
           <div className="absolute top-2/3 left-1/4 size-64 rounded-full bg-emerald-400/5 blur-[80px] dark:bg-emerald-600/5" />
@@ -1176,8 +1176,8 @@ function Dashboard() {
                       onClick={() => { setActive(item.id); setMobileOpen(false); }}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                         isActive
-                          ? "brand-gradient text-white shadow-md shadow-purple-500/20"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-purple-50/60 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
+                          ? "brand-gradient text-white shadow-md shadow-[#07284a]/20"
+                          : "text-gray-600 hover:text-gray-900 hover:bg-[#07284a]/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
                       }`}
                     >
                       <Icon className="size-5 shrink-0" />
@@ -1231,7 +1231,7 @@ function Dashboard() {
           <div className="fixed bottom-8 right-8 z-40 flex flex-col items-end gap-3">
             {enrollment && course && (
               <>
-                <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-purple-500/25 rounded-full px-5 h-11" asChild>
+                <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-[#07284a]/25 rounded-full px-5 h-11" asChild>
                   <Link to="/courses/$slug" params={{ slug: course.slug }}><Play className="mr-1.5 size-4" /> Continue Course</Link>
                 </Button>
                 {cert && (
@@ -1293,7 +1293,7 @@ function HeroSection({ app, enrollment, course, completedTopicCount, totalTopics
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70 dark:border-white/5">
-      <div className="absolute -right-20 -top-20 size-64 rounded-full bg-purple-400/10 blur-[100px]" />
+      <div className="absolute -right-20 -top-20 size-64 rounded-full bg-[#07284a]/10 blur-[100px]" />
       <div className="relative flex flex-wrap items-start justify-between gap-8">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-2">
@@ -1355,7 +1355,7 @@ function StatsCards({ totalTopics, completedTopicCount, totalTasks, completedTas
   const stats = [
     {
       icon: BookOpen, label: "LMS Courses", value: `${completedTopicCount} / ${totalTopics}`,
-      sub: "Topics Completed", color: "from-violet-500 to-purple-600", bg: "bg-violet-50 dark:bg-violet-950/30",
+      sub: "Topics Completed", color: "from-[#07284a] to-[#07284a]", bg: "bg-violet-50 dark:bg-violet-950/30",
     },
     {
       icon: CheckCircle2, label: "Tasks", value: `${completedTaskCount} / ${totalTasks}`,
@@ -1472,9 +1472,9 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="flex items-center gap-5">
             {app.photo_url ? (
-              <img src={app.photo_url} alt="" className="size-16 rounded-2xl border-2 border-purple-200/50 object-cover dark:border-purple-800/30" />
+              <img src={app.photo_url} alt="" className="size-16 rounded-2xl border-2 border-[#07284a]/20 object-cover dark:border-[#07284a]/40" />
             ) : (
-              <div className="grid size-16 place-items-center rounded-2xl brand-gradient text-xl font-bold text-white shadow-md shadow-purple-500/20">
+              <div className="grid size-16 place-items-center rounded-2xl brand-gradient text-xl font-bold text-white shadow-md shadow-[#07284a]/20">
                 {app.full_name.charAt(0).toUpperCase()}
               </div>
             )}
@@ -1504,7 +1504,7 @@ function TimelineSection({ steps, currentStep }: { steps: { label: string; done:
     <div className="rounded-2xl border border-border/50 bg-white/70 p-6 backdrop-blur-xl dark:bg-[#1E293B]/70">
       <h3 className="mb-5 flex items-center gap-2 font-bold"><Flag className="size-4 text-primary" /> Internship Progress</h3>
       <div className="relative">
-        <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-purple-500 via-blue-500 to-emerald-500 dark:from-purple-400 dark:via-blue-400 dark:to-emerald-400" />
+        <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#07284a] via-blue-500 to-emerald-500 dark:from-[#07284a]/80 dark:via-blue-400 dark:to-emerald-400" />
         <ul className="space-y-0">
           {steps.map((s, i) => {
             const isActive = i === currentStep;
@@ -1513,13 +1513,13 @@ function TimelineSection({ steps, currentStep }: { steps: { label: string; done:
               <li key={i} className="relative flex items-center gap-4 pb-6 last:pb-0">
                 <div className={`relative z-10 grid size-6 shrink-0 place-items-center rounded-full transition-all duration-500 ${
                   isDone ? "bg-emerald-500 text-white scale-100" :
-                  isActive ? "bg-purple-500 text-white ring-4 ring-purple-200 dark:ring-purple-900/40 animate-pulse-soft" :
+                  isActive ? "bg-[#07284a] text-white ring-4 ring-[#07284a]/30 dark:ring-[#07284a]/50 animate-pulse-soft" :
                   "bg-gray-200 dark:bg-gray-700 text-gray-400"
                 }`}>
                   {isDone ? <CheckCircle2 className="size-3.5" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
                 </div>
                 <div className={`min-w-0 ${isActive ? "font-semibold text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
-                  <p className={`text-sm ${isActive ? "text-purple-700 dark:text-purple-300" : ""}`}>{s.label}</p>
+                  <p className={`text-sm ${isActive ? "text-[#07284a] dark:text-[#07284a]/80" : ""}`}>{s.label}</p>
                 </div>
               </li>
             );
@@ -1539,8 +1539,8 @@ function LmsCoursesSection({ enrollments, courses, lmsCerts, completedTopics, to
     return (
       <Card className="rounded-2xl border-dashed border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
         <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-          <div className="grid size-16 place-items-center rounded-2xl bg-purple-50 dark:bg-purple-950/30">
-            <GraduationCap className="size-8 text-purple-500" />
+          <div className="grid size-16 place-items-center rounded-2xl bg-[#07284a]/10 dark:bg-[#07284a]/30">
+            <GraduationCap className="size-8 text-[#07284a]" />
           </div>
           <div>
             <h3 className="text-lg font-semibold">No Enrollments Yet</h3>
@@ -1572,7 +1572,7 @@ function LmsCoursesSection({ enrollments, courses, lmsCerts, completedTopics, to
           <div key={enr.id} className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#1E293B]/70">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="grid size-14 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md shadow-purple-500/20">
+                <div className="grid size-14 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md shadow-[#07284a]/20">
                   <GraduationCap className="size-7" />
                 </div>
                 <div className="min-w-0">
@@ -1635,7 +1635,7 @@ function CurrentTopicWidget({ topics, completedTopics, enrollment, course }: any
     <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-md">
+          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#07284a] to-blue-500 text-white shadow-md">
             <Play className="size-6" />
           </div>
           <div>
@@ -1679,18 +1679,18 @@ function TasksSectionWidget({ tasks, submissions, enrollmentId, onChange, course
         const open = expanded === t.id;
 
         return (
-          <div key={t.id} className={`rounded-2xl border border-border/50 bg-white/70 backdrop-blur-xl transition-all dark:bg-[#1E293B]/70 ${open ? "ring-2 ring-purple-200 dark:ring-purple-800/40" : ""}`}>
+          <div key={t.id} className={`rounded-2xl border border-border/50 bg-white/70 backdrop-blur-xl transition-all dark:bg-[#1E293B]/70 ${open ? "ring-2 ring-[#07284a]/30 dark:ring-[#07284a]/50" : ""}`}>
             <button onClick={() => setExpanded(open ? null : t.id)} className="flex w-full items-center justify-between p-4 text-left">
               <div className="flex items-center gap-3 min-w-0">
                 <div className={`grid size-10 shrink-0 place-items-center rounded-xl ${
                   st === "approved" ? "bg-emerald-100 dark:bg-emerald-900/40" :
                   st === "rejected" ? "bg-red-100 dark:bg-red-900/40" :
-                  "bg-purple-100 dark:bg-purple-900/40"
+                  "bg-[#07284a]/10 dark:bg-[#07284a]/30"
                 }`}>
                   <Tag className={`size-5 ${
                     st === "approved" ? "text-emerald-600 dark:text-emerald-400" :
                     st === "rejected" ? "text-red-600 dark:text-red-400" :
-                    "text-purple-600 dark:text-purple-400"
+                    "text-[#07284a] dark:text-[#07284a]/80"
                   }`} />
                 </div>
                 <div className="min-w-0">
@@ -1780,7 +1780,7 @@ function QuizSectionWidget({ course, lastAttempt, enrollment, completedTaskCount
   return (
     <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
       <div className="flex items-center gap-3 mb-4">
-        <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-md">
+        <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#07284a] to-blue-500 text-white shadow-md">
           <Brain className="size-6" />
         </div>
         <div>
@@ -1835,7 +1835,7 @@ function CertificateSection({ cert, app, course, enrollment, lastAttempt, compac
   const domain = getDomain(app?.domain);
   const inner = (
     <>
-      <div className="rounded-xl bg-gradient-to-br from-purple-50 to-blue-50 p-4 text-center dark:from-purple-950/30 dark:to-blue-950/30 border border-purple-200/50 dark:border-purple-800/30">
+      <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
         <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3">
           <Award className="size-7" />
         </div>
@@ -1923,7 +1923,7 @@ function ActivityFeed({ app, enrollment, taskSubmissions, lastAttempt, topics, c
       activities.push({ icon: CheckCircle2, text: `Completed Task ${s.task_number ?? ""}`, time: s.submitted_at ? new Date(s.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400" });
     });
   }
-  if (lastAttempt) activities.push({ icon: Brain, text: `Passed quiz with ${lastAttempt.score}/${lastAttempt.total} marks`, time: lastAttempt.submitted_at ? new Date(lastAttempt.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400" });
+  if (lastAttempt) activities.push({ icon: Brain, text: `Passed quiz with ${lastAttempt.score}/${lastAttempt.total} marks`, time: lastAttempt.submitted_at ? new Date(lastAttempt.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-[#07284a] bg-[#07284a]/10 dark:bg-[#07284a]/30 dark:text-[#07284a]/80" });
   if (cert || lmsCert) activities.push({ icon: Award, text: "Certificate generated", time: (cert?.issued_at ?? lmsCert?.issued_at) ? new Date(cert?.issued_at ?? lmsCert?.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400" });
   if (completedTopics?.size) activities.push({ icon: BookOpen, text: `Completed ${completedTopics.size} course topics`, time: "", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30 dark:text-cyan-400" });
 
@@ -1965,7 +1965,7 @@ function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any
     <div className="space-y-8">
       {/* Hero welcome */}
       <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-10 dark:bg-[#1E293B]/70 dark:border-white/5">
-        <div className="absolute -right-20 -top-20 size-64 rounded-full bg-purple-400/15 blur-[100px]" />
+        <div className="absolute -right-20 -top-20 size-64 rounded-full bg-[#07284a]/15 blur-[100px]" />
         <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-blue-400/15 blur-[100px]" />
         <div className="relative">
           <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> Welcome</Badge>
@@ -1987,7 +1987,7 @@ function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any
       {/* Quick action tiles */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Link to="/courses" className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition hover:shadow-lg hover:-translate-y-0.5 dark:bg-[#1E293B]/70">
-          <div className="grid size-11 place-items-center rounded-xl bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300"><GraduationCap className="size-5" /></div>
+          <div className="grid size-11 place-items-center rounded-xl bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80"><GraduationCap className="size-5" /></div>
           <p className="mt-3 font-semibold">Browse Courses</p>
           <p className="text-sm text-muted-foreground">Topic-wise lessons + verified certificates.</p>
         </Link>

@@ -13,8 +13,9 @@ type Props = {
 export function IDCard({ internId, fullName, domain, photoUrl, issuedAt }: Props) {
   const verifyUrl = `https://skyrovixvirtualinternship.vercel.app/verify-certificate?intern=${internId}`;
   return (
-    <div className="brand-gradient relative mx-auto aspect-[1.6/1] w-full max-w-md overflow-hidden rounded-2xl p-5 text-white shadow-2xl glow">
+    <div className="relative mx-auto aspect-[1.6/1] w-full max-w-md overflow-hidden rounded-2xl bg-gradient-to-br from-[#0a3d6b] via-[#07284a] to-[#041b30] p-5 text-white shadow-2xl glow">
       <div className="absolute -right-12 -top-12 size-40 rounded-full bg-white/10 blur-2xl" />
+      <div className="absolute -bottom-12 -left-12 size-40 rounded-full bg-blue-400/10 blur-2xl" />
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
           <img src={logo} alt="" className="size-8 rounded" />
@@ -28,7 +29,7 @@ export function IDCard({ internId, fullName, domain, photoUrl, issuedAt }: Props
 
       <div className="mt-4 flex items-center gap-4">
         <div className="size-20 overflow-hidden rounded-xl border-2 border-white/40 bg-white/10">
-          {photoUrl ? <img src={photoUrl} alt={fullName} className="size-full object-cover" /> : <div className="grid size-full place-items-center text-2xl">{fullName.charAt(0)}</div>}
+          {photoUrl ? <img src={photoUrl} alt={fullName} className="size-full object-cover" /> : <div className="grid size-full place-items-center text-2xl font-bold">{fullName.charAt(0)}</div>}
         </div>
         <div className="flex-1 min-w-0">
           <div className="text-xs opacity-70">Name</div>

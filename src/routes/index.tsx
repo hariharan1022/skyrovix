@@ -48,11 +48,11 @@ const STEPS = [
 ];
 
 const DOMAIN_COLORS: Record<string, string> = {
-  fullstack: "from-blue-600 to-purple-600",
+  fullstack: "from-blue-600 to-[#07284a]",
   frontend: "from-sky-500 to-blue-600",
   backend: "from-emerald-500 to-teal-600",
   datascience: "from-orange-500 to-red-500",
-  aiml: "from-violet-500 to-purple-600",
+  aiml: "from-violet-500 to-[#07284a]",
   uiux: "from-pink-500 to-rose-500",
   python: "from-blue-500 to-cyan-500",
   cybersecurity: "from-red-500 to-rose-600",
@@ -153,14 +153,14 @@ function Landing() {
       <section className="relative overflow-hidden pb-16 pt-16 md:pb-28 md:pt-20">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#FFFFFF_0%,#F8F7FF_40%,#EEF2FF_100%)]" />
         <div className="absolute inset-0 -z-10 hero-grid" />
-        <div className="absolute -top-48 left-1/2 -z-10 size-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-blue-400/20 via-purple-400/20 to-transparent blur-[150px]" />
-        <div className="absolute -bottom-64 left-1/4 -z-10 size-[600px] rounded-full bg-gradient-to-tr from-purple-400/15 via-blue-400/10 to-transparent blur-[130px]" />
-        <div className="absolute right-0 top-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-bl from-fuchsia-400/10 via-transparent to-transparent blur-[120px]" />
+        <div className="absolute -top-48 left-1/2 -z-10 size-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-[#07284a]/15 via-blue-400/15 to-transparent blur-[150px]" />
+        <div className="absolute -bottom-64 left-1/4 -z-10 size-[600px] rounded-full bg-gradient-to-tr from-[#07284a]/10 via-blue-400/10 to-transparent blur-[130px]" />
+        <div className="absolute right-0 top-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-bl from-[#07284a]/10 via-transparent to-transparent blur-[120px]" />
 
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
             <div className="animate-fade-in-up text-center md:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-purple-200/60 bg-white/70 px-4 py-1.5 text-xs text-purple-700 shadow-sm backdrop-blur">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/20 bg-white/70 px-4 py-1.5 text-xs text-[#07284a] shadow-sm backdrop-blur">
                 <ShieldCheck className="size-3.5" /> MSME Registered · Skyrovix IT Solutions
               </div>
 
@@ -398,7 +398,7 @@ function Landing() {
               <h2 className="text-3xl font-bold md:text-4xl">Ready to build something real?</h2>
               <p className="mt-3 text-white/80 max-w-lg mx-auto">Get your offer letter in seconds. No application fee — pay only ₹100 at certification.</p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Button asChild size="lg" className="bg-white text-purple-900 hover:bg-white/90 border-0 shadow-lg font-semibold">
+                <Button asChild size="lg" className="bg-white text-[#07284a] hover:bg-white/90 border-0 shadow-lg font-semibold">
                   <Link to="/auth">Apply now <ArrowRight className="ml-1 size-4" /></Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white">

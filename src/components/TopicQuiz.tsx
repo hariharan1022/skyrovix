@@ -94,7 +94,7 @@ export function TopicQuiz({ questions, onComplete }: TopicQuizProps) {
                   onClick={() => setAnswers((a) => ({ ...a, [q.id]: oi }))}
                   className={`w-full text-left px-3 py-1.5 rounded-lg text-xs transition ${
                     selected
-                      ? "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300 ring-1 ring-purple-300"
+                      ? "bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80 ring-1 ring-[#07284a]/30"
                       : "bg-muted/30 hover:bg-muted/60"
                   }`}
                 >

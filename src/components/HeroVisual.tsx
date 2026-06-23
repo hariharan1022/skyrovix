@@ -17,11 +17,11 @@ export function HeroVisual() {
     <div className="relative">
       <div className="relative mx-auto w-full max-w-lg">
         {/* Dashboard Preview */}
-        <div className="relative z-10 overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-2xl shadow-blue-900/10 backdrop-blur-xl">
+        <div className="relative z-10 overflow-hidden rounded-3xl border border-white/60 bg-white/80 shadow-2xl shadow-[#07284a]/10 backdrop-blur-xl">
           {/* Dashboard Header */}
           <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
             <div className="flex items-center gap-2">
-              <div className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 text-xs font-bold text-white">S</div>
+              <div className="grid size-8 place-items-center rounded-lg brand-gradient text-xs font-bold text-white">S</div>
               <span className="text-sm font-semibold text-gray-900">Skyrovix</span>
             </div>
             <div className="flex items-center gap-2">
@@ -32,7 +32,7 @@ export function HeroVisual() {
 
           <div className="p-6">
             {/* Welcome Card */}
-            <div className="mb-4 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 p-5 text-white">
+            <div className="mb-4 rounded-2xl brand-gradient p-5 text-white">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-white/70">Welcome back,</p>
@@ -121,7 +121,7 @@ export function HeroVisual() {
               key={d.slug}
               className={`${FLOATING_POSITIONS[i].delay} ${FLOATING_POSITIONS[i].cls} absolute z-20 hidden md:block`}
             >
-              <div className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-lg shadow-blue-900/5 backdrop-blur">
+              <div className="flex items-center gap-2 rounded-xl border border-white/80 bg-white/90 px-3 py-2 shadow-lg shadow-[#07284a]/10 backdrop-blur">
                 <div className={`grid size-8 place-items-center rounded-lg bg-gradient-to-br ${d.color} text-xs font-bold text-white`}>
                   {d.icon}
                 </div>

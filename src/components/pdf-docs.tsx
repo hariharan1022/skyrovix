@@ -7,7 +7,7 @@ import sigFounder from "@/assets/sig-founder.jpg";
 import sigCofounder from "@/assets/sig-cofounder.jpg";
 import { COMPANY } from "@/lib/constants";
 
-const COLOR = { brand: "#7c3aed", ink: "#1e293b", muted: "#64748b", border: "#e2e8f0" };
+const COLOR = { brand: "#07284a", ink: "#1e293b", muted: "#64748b", border: "#e2e8f0" };
 
 const s = StyleSheet.create({
   page: { padding: 36, fontSize: 10.5, color: COLOR.ink, fontFamily: "Helvetica" },

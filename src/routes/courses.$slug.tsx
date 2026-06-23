@@ -266,7 +266,7 @@ function CourseDetail() {
                   <input
                     type="text" placeholder="Search topics..." value={topicSearch}
                     onChange={(e) => setTopicSearch(e.target.value)}
-                    className="w-full h-8 pl-7 pr-2 rounded-lg border border-border/40 bg-background/50 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500/30"
+                    className="w-full h-8 pl-7 pr-2 rounded-lg border border-border/40 bg-background/50 text-xs focus:outline-none focus:ring-1 focus:ring-[#07284a]/30"
                   />
                 </div>
               </div>
@@ -283,7 +283,7 @@ function CourseDetail() {
                     onClick={() => { if (!locked) { setCurrentIdx(i); setShowQuiz(false); setSidebarOpen(false); void supabase.from("enrollments").update({ current_topic_id: t.id }).eq("id", enrollment?.id); } }}
                     disabled={locked}
                     className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-left transition ${
-                      isActive ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300" :
+                      isActive ? "bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80" :
                       locked ? "opacity-40 cursor-not-allowed" :
                       "hover:bg-accent/50"
                     }`}
@@ -448,7 +448,7 @@ function CourseDetail() {
                       placeholder="Write your notes about this topic..."
                       value={topicNote(currentTopic.id)}
                       onChange={(e) => saveNote(e.target.value)}
-                      className="w-full h-20 resize-none rounded-lg border border-border/40 bg-background/50 p-2 text-xs focus:outline-none focus:ring-1 focus:ring-purple-500/30"
+                      className="w-full h-20 resize-none rounded-lg border border-border/40 bg-background/50 p-2 text-xs focus:outline-none focus:ring-1 focus:ring-[#07284a]/30"
                     />
                   </div>
                 )}
@@ -457,7 +457,7 @@ function CourseDetail() {
                 {topicQs.length > 0 ? (
                   <div className="rounded-xl border border-border/50 p-4">
                     <h3 className="text-sm font-semibold flex items-center gap-1.5 mb-3">
-                      <Brain className="size-4 text-purple-600" />
+                      <Brain className="size-4 text-[#07284a]" />
                       Topic Quiz ({topicQs.length} questions)
                     </h3>
                     <TopicQuiz questions={topicQs} onComplete={handleQuizComplete} />

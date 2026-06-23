@@ -91,17 +91,17 @@ function AboutPage() {
           {/* ─── FOUNDER — Full-Width Light Hero ─── */}
           <div className="relative mb-10 overflow-hidden border-y border-border/40">
             {/* Light gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-50 via-indigo-50/60 to-fuchsia-50/40" />
-            <div className="absolute -top-32 -right-32 size-80 rounded-full bg-purple-200/30 blur-3xl animate-pulse" />
-            <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-indigo-200/25 blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
-            <div className="absolute top-1/2 left-1/3 size-48 rounded-full bg-fuchsia-200/20 blur-3xl animate-pulse" style={{ animationDelay: "3s" }} />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#07284a]/5 via-blue-50/60 to-transparent" />
+            <div className="absolute -top-32 -right-32 size-80 rounded-full bg-[#07284a]/10 blur-3xl animate-pulse" />
+            <div className="absolute -bottom-24 -left-24 size-64 rounded-full bg-blue-200/25 blur-3xl animate-pulse" style={{ animationDelay: "1.5s" }} />
+            <div className="absolute top-1/2 left-1/3 size-48 rounded-full bg-[#07284a]/8 blur-3xl animate-pulse" style={{ animationDelay: "3s" }} />
 
             <div className="relative mx-auto grid gap-0 lg:grid-cols-5">
               {/* Photo Column */}
               <div className="relative lg:col-span-2 flex items-end justify-center lg:justify-end">
                 <div className="relative w-full max-w-xs sm:max-w-sm lg:max-w-none">
                   {/* Glow behind photo */}
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-3/4 w-4/5 rounded-full bg-purple-300/20 blur-3xl" />
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-3/4 w-4/5 rounded-full bg-[#07284a]/10 blur-3xl" />
                   <img
                     src={founderPhoto}
                     alt={COMPANY.founder.name}
@@ -109,8 +109,8 @@ function AboutPage() {
                     style={{ maskImage: "linear-gradient(to bottom, black 80%, transparent 100%)" }}
                   />
                   {/* Floating badge */}
-                  <div className="absolute bottom-12 left-4 z-20 flex items-center gap-3 rounded-2xl border border-purple-200/60 bg-white/70 p-3 pr-5 backdrop-blur-xl shadow-xl">
-                    <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-sm font-bold">
+                  <div className="absolute bottom-12 left-4 z-20 flex items-center gap-3 rounded-2xl border border-[#07284a]/20 bg-white/70 p-3 pr-5 backdrop-blur-xl shadow-xl">
+                    <div className="flex size-10 items-center justify-center rounded-xl brand-gradient text-white text-sm font-bold">
                       CEO
                     </div>
                     <div>
@@ -123,7 +123,7 @@ function AboutPage() {
 
               {/* Content Column */}
               <div className="relative lg:col-span-3 flex flex-col justify-center p-8 sm:p-10 lg:p-14">
-                <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-purple-300/40 bg-purple-100/60 px-3 py-1 text-xs font-semibold tracking-widest text-purple-700 uppercase">
+                <p className="inline-flex w-fit items-center gap-1.5 rounded-full border border-[#07284a]/30 bg-[#07284a]/10 px-3 py-1 text-xs font-semibold tracking-widest text-[#07284a] uppercase">
                   Founder &amp; CEO
                 </p>
                 <h3 className="mt-5 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -131,7 +131,7 @@ function AboutPage() {
                 </h3>
 
                 <div className="mt-5 flex items-start gap-3">
-                  <div className="mt-1 h-12 w-0.5 rounded-full bg-gradient-to-b from-purple-500 to-transparent shrink-0" />
+                  <div className="mt-1 h-12 w-0.5 rounded-full bg-gradient-to-b from-[#07284a] to-transparent shrink-0" />
                   <p className="text-base text-muted-foreground italic leading-relaxed sm:text-lg">
                     "Bridging high-speed code with cinematic design — from the 3rd Year of B.Tech IT at Mount Zion College of Engineering and Technology."
                   </p>
@@ -144,7 +144,7 @@ function AboutPage() {
                 {/* Skills */}
                 <div className="mt-8 flex flex-wrap gap-2">
                   {FOUNDER_SKILLS.map((skill) => (
-                    <span key={skill} className="rounded-lg border border-purple-200/60 bg-white/60 px-3 py-1.5 text-xs font-medium text-purple-700 backdrop-blur-sm transition-all hover:bg-purple-100 hover:border-purple-300 hover:shadow-sm">
+                    <span key={skill} className="rounded-lg border border-[#07284a]/20 bg-white/60 px-3 py-1.5 text-xs font-medium text-[#07284a] backdrop-blur-sm transition-all hover:bg-[#07284a]/10 hover:border-[#07284a]/30 hover:shadow-sm">
                       {skill}
                     </span>
                   ))}

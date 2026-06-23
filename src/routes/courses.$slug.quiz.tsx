@@ -181,10 +181,10 @@ function QuizPage() {
         <Navbar />
         <main className="mx-auto max-w-2xl px-4 py-16">
           <Card className="overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-purple-400 to-blue-600" />
+            <div className="h-2 bg-gradient-to-r from-[#07284a] to-blue-600" />
             <CardContent className="space-y-6 pt-8 text-center">
-              <div className="mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-br from-purple-100 to-blue-100 dark:from-purple-900/40 dark:to-blue-900/40">
-                <Award className="size-10 text-purple-700 dark:text-purple-400" />
+              <div className="mx-auto grid size-20 place-items-center rounded-full bg-gradient-to-br from-[#07284a]/10 to-blue-100 dark:from-[#07284a]/40 dark:to-blue-900/40">
+                <Award className="size-10 text-[#07284a] dark:text-[#07284a]/80" />
               </div>
               <div>
                 <h1 className="text-2xl font-bold">{course?.name} — Final Quiz</h1>

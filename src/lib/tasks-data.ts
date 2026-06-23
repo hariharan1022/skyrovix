@@ -19,7 +19,7 @@ export const ALL_DOMAINS_TASKS: DomainTasks[] = [
     slug: "fullstack",
     name: "Full Stack Development",
     icon: "FS",
-    color: "from-fuchsia-500 to-purple-600",
+    color: "from-fuchsia-500 to-[#07284a]",
     tasks: [
       {
         taskNumber: 1,
@@ -247,7 +247,7 @@ export const ALL_DOMAINS_TASKS: DomainTasks[] = [
     slug: "aiml",
     name: "AI & Machine Learning",
     icon: "AI",
-    color: "from-violet-500 to-purple-600",
+    color: "from-violet-500 to-[#07284a]",
     tasks: [
       {
         taskNumber: 1,
