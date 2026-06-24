@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, type ReactNode } from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,11 @@ import { CodeEditor } from "@/components/CodeEditor";
 import { TopicQuiz } from "@/components/TopicQuiz";
 import {
   CheckCircle2, Circle, ChevronLeft, ChevronRight, Lock, BookOpen,
-  Award, Clock, Code2, Search, Bookmark, FileText, Play, Sparkles,
-  GraduationCap, Trophy, Star, ArrowRight, ListChecks, Brain,
-  BookMarked, Lightbulb, Zap, Menu, X,
+  Clock, Code2, Search, Bookmark, FileText, Sparkles,
+  GraduationCap, Trophy, Star, ListChecks, Brain,
+  Lightbulb, Menu, X,
 } from "lucide-react";
+import { getLocalCourseContent } from "@/lib/course-content";
 
 export const Route = createFileRoute("/courses/$slug")({
   ssr: false,
@@ -36,6 +37,23 @@ type Topic = {
 
 type TopicQ = { id: string; question: string; options: string[]; correct_index: number; explanation?: string | null; topic_id: string };
 
+function renderInline(text: string): ReactNode {
+  const parts: ReactNode[] = [];
+  let remaining = text;
+  let idx = 0;
+  const regex = /(`[^`]+`)|(\*\*[^*]+\*\*)/g;
+  let last = 0;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(remaining)) !== null) {
+    if (match.index > last) parts.push(remaining.slice(last, match.index));
+    if (match[1]) parts.push(<code key={idx++} className="bg-muted px-1 py-0.5 rounded text-[10px] font-mono">{match[1].slice(1, -1)}</code>);
+    else if (match[2]) parts.push(<strong key={idx++}>{match[2].slice(2, -2)}</strong>);
+    last = regex.lastIndex;
+  }
+  if (last < remaining.length) parts.push(remaining.slice(last));
+  return parts.length ? parts : text;
+}
+
 function CourseDetail() {
   const { slug } = Route.useParams();
   const { user, loading: authLoading } = useAuth();
@@ -45,22 +63,46 @@ function CourseDetail() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [topicSearch, setTopicSearch] = useState("");
   const [showQuiz, setShowQuiz] = useState(false);
-  const [showEditor, setShowEditor] = useState(false);
+
+  const localContent = useMemo(() => getLocalCourseContent(slug), [slug]);
 
   const { data: course } = useQuery({
     queryKey: ["course", slug],
     queryFn: async () => {
       const { data } = await supabase.from("courses").select("*").eq("slug", slug).maybeSingle();
-      return data;
+      if (data) return data;
+      if (localContent.length > 0) {
+        return { id: `local-${slug}`, slug, name: slug.charAt(0).toUpperCase() + slug.slice(1), total_topics: localContent.length, domain: slug, difficulty: "Intermediate", duration_weeks: 6, is_published: true };
+      }
+      return null;
     },
   });
 
   const { data: topics } = useQuery({
-    queryKey: ["course-topics", course?.id],
+    queryKey: ["course-topics", course?.id || slug],
     enabled: !!course,
     queryFn: async () => {
-      const { data } = await supabase.from("course_topics").select("*").eq("course_id", course!.id).order("order_index");
-      return (data ?? []) as Topic[];
+      if (!course?.id?.startsWith?.("local-")) {
+        const { data } = await supabase.from("course_topics").select("*").eq("course_id", course!.id).order("order_index");
+        const dbTopics = (data ?? []) as Topic[];
+        if (dbTopics.length > 0) {
+          return dbTopics.map((t) => {
+            const local = localContent.find((l) => l.order_index === t.order_index);
+            if (local) {
+              return { ...t, content_md: local.content_md, code_example: local.code_example ?? t.code_example };
+            }
+            return t;
+          });
+        }
+      }
+      return localContent.map((t) => ({
+        id: `local-${t.order_index}`,
+        title: t.title,
+        content_md: t.content_md,
+        code_example: t.code_example,
+        key_points: [],
+        order_index: t.order_index,
+      })) as Topic[];
     },
   });
 
@@ -164,6 +206,10 @@ function CourseDetail() {
 
   const handleEnroll = async () => {
     if (!user || !course) return;
+    if (course.id.startsWith?.("local-")) {
+      toast.success("Content available — enrollment coming soon!");
+      return;
+    }
     const { error } = await supabase.from("enrollments").insert({
       user_id: user.id, course_id: course.id,
     });
@@ -280,7 +326,7 @@ function CourseDetail() {
                 return (
                   <button
                     key={t.id}
-                    onClick={() => { if (!locked) { setCurrentIdx(i); setShowQuiz(false); setSidebarOpen(false); void supabase.from("enrollments").update({ current_topic_id: t.id }).eq("id", enrollment?.id); } }}
+                    onClick={() => { if (!locked) { setCurrentIdx(i); setShowQuiz(false); setSidebarOpen(false); if (enrollment?.id) supabase.from("enrollments").update({ current_topic_id: t.id }).eq("id", enrollment.id); } }}
                     disabled={locked}
                     className={`w-full flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-left transition ${
                       isActive ? "bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80" :
@@ -329,6 +375,10 @@ function CourseDetail() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" className="h-8 text-xs rounded-lg gap-1"
+                  onClick={() => window.location.href = `/courses/${slug}/quiz`}>
+                  <Trophy className="size-3.5" /> Final Quiz
+                </Button>
                 {!enrollment ? (
                   <Button size="sm" className="h-8 text-xs gap-1 brand-gradient text-white border-0 rounded-lg"
                     onClick={handleEnroll}>
@@ -340,8 +390,9 @@ function CourseDetail() {
                       <GraduationCap className="size-3" /> {enrollment.progress_percent}%
                     </Badge>
                     {enrollment.status === "completed" && (
-                      <Button asChild size="sm" variant="outline" className="h-8 text-xs rounded-lg gap-1">
-                        <Link to="/courses/$slug/quiz" params={{ slug }}><Trophy className="size-3.5" /> Certificate</Link>
+                      <Button size="sm" variant="outline" className="h-8 text-xs rounded-lg gap-1"
+                        onClick={() => window.location.href = `/courses/${slug}/quiz`}>
+                        <Trophy className="size-3.5" /> Certificate
                       </Button>
                     )}
                   </>
@@ -379,19 +430,38 @@ function CourseDetail() {
                 </div>
 
                 {/* Content */}
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  {currentTopic.content_md.split("\n").map((line, i) => {
-                    if (line.startsWith("## ")) return <h2 key={i} className="text-lg font-bold mt-6 mb-2">{line.slice(3)}</h2>;
-                    if (line.startsWith("### ")) return <h3 key={i} className="text-base font-semibold mt-4 mb-1">{line.slice(4)}</h3>;
-                    if (line.startsWith("- **")) {
-                      const match = line.match(/- \*\*(.+?)\*\*(.*)/);
-                      if (match) return <p key={i} className="text-sm"><strong>{match[1]}</strong>{match[2]}</p>;
+                {(() => {
+                  const lines = currentTopic.content_md.split("\n");
+                  const elements: ReactNode[] = [];
+                  let inCode = false;
+                  let codeLines: string[] = [];
+                  let codeLang = "";
+                  for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i];
+                    if (line.startsWith("```")) {
+                      if (inCode) {
+                        elements.push(<pre key={i} className="p-4 text-xs font-mono overflow-x-auto bg-[#1e1e1e] text-green-400 leading-relaxed rounded-xl my-3"><code>{codeLines.join("\n")}</code></pre>);
+                        codeLines = [];
+                        inCode = false;
+                      } else {
+                        inCode = true;
+                        codeLang = line.slice(3).trim();
+                      }
+                      continue;
                     }
-                    if (line.startsWith("- ")) return <li key={i} className="text-sm ml-4 list-disc">{line.slice(2)}</li>;
-                    if (line.trim()) return <p key={i} className="text-sm leading-relaxed">{line}</p>;
-                    return <div key={i} className="h-2" />;
-                  })}
-                </div>
+                    if (inCode) { codeLines.push(line); continue; }
+                    if (line.startsWith("## ")) { elements.push(<h2 key={i} className="text-lg font-bold mt-6 mb-2">{line.slice(3)}</h2>); continue; }
+                    if (line.startsWith("### ")) { elements.push(<h3 key={i} className="text-base font-semibold mt-4 mb-1">{line.slice(4)}</h3>); continue; }
+                    if (line.match(/^- \*\*(.+?)\*\*(.*)/)) {
+                      const m = line.match(/- \*\*(.+?)\*\*(.*)/);
+                      if (m) { elements.push(<p key={i} className="text-sm"><strong>{m[1]}</strong>{m[2]}</p>); continue; }
+                    }
+                    if (line.startsWith("- ")) { elements.push(<li key={i} className="text-sm ml-4 list-disc">{renderInline(line.slice(2))}</li>); continue; }
+                    if (line.trim()) { elements.push(<p key={i} className="text-sm leading-relaxed">{renderInline(line)}</p>); continue; }
+                    elements.push(<div key={i} className="h-2" />);
+                  }
+                  return <div className="prose prose-sm dark:prose-invert max-w-none">{elements}</div>;
+                })()}
 
                 {/* Key Points */}
                 {currentTopic.key_points?.length > 0 && (
@@ -408,32 +478,14 @@ function CourseDetail() {
                   </div>
                 )}
 
-                {/* Code Example */}
-                {currentTopic.code_example && (
-                  <div className="rounded-xl border border-border/50 overflow-hidden">
-                    <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border/40">
-                      <span className="text-[10px] font-mono text-muted-foreground uppercase flex items-center gap-1">
-                        <Code2 className="size-3" /> Example
-                      </span>
-                      <button onClick={() => setShowEditor(!showEditor)}
-                        className="text-[10px] text-primary hover:underline flex items-center gap-1">
-                        <Play className="size-3" /> Try it yourself
-                      </button>
-                    </div>
-                    <pre className="p-4 text-xs font-mono overflow-x-auto bg-[#1e1e1e] text-green-400 leading-relaxed">
-                      <code>{currentTopic.code_example}</code>
-                    </pre>
-                  </div>
-                )}
-
                 {/* Interactive Code Editor */}
-                {showEditor && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                {currentTopic.code_example && (
+                  <div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
                       <Code2 className="size-3.5" />
-                      <span>Interactive Editor — modify the code and run it</span>
+                      <span>Edit the code and click <strong>Run</strong> to see the output</span>
                     </div>
-                    <CodeEditor language={course.slug as any} code={currentTopic.code_example ?? undefined} />
+                    <CodeEditor courseSlug={slug} code={currentTopic.code_example} />
                   </div>
                 )}
 
@@ -484,7 +536,7 @@ function CourseDetail() {
                   <Button
                     variant="outline" size="sm" className="h-9 text-xs gap-1 rounded-xl"
                     disabled={currentIdx === 0}
-                    onClick={() => { setCurrentIdx((i) => i - 1); setShowQuiz(false); setShowEditor(false); void supabase.from("enrollments").update({ current_topic_id: topics?.[currentIdx - 1]?.id }).eq("id", enrollment?.id); }}
+                    onClick={() => { setCurrentIdx((i) => i - 1); setShowQuiz(false); if (enrollment?.id) supabase.from("enrollments").update({ current_topic_id: topics?.[currentIdx - 1]?.id }).eq("id", enrollment.id); }}
                   >
                     <ChevronLeft className="size-3.5" /> Previous
                   </Button>
@@ -495,15 +547,14 @@ function CourseDetail() {
                     <Button
                       size="sm" className="h-9 text-xs gap-1 rounded-xl brand-gradient text-white border-0"
                       disabled={isLocked(currentIdx + 1)}
-                      onClick={() => { setCurrentIdx((i) => i + 1); setShowQuiz(false); setShowEditor(false); void supabase.from("enrollments").update({ current_topic_id: topics?.[currentIdx + 1]?.id }).eq("id", enrollment?.id); }}
+                      onClick={() => { setCurrentIdx((i) => i + 1); setShowQuiz(false); if (enrollment?.id) supabase.from("enrollments").update({ current_topic_id: topics?.[currentIdx + 1]?.id }).eq("id", enrollment.id); }}
                     >
                       Next <ChevronRight className="size-3.5" />
                     </Button>
                   ) : (
-                    <Button asChild size="sm" className="h-9 text-xs gap-1 rounded-xl brand-gradient text-white border-0">
-                      <Link to="/courses/$slug/quiz" params={{ slug }}>
-                        <Trophy className="size-3.5" /> Final Quiz
-                      </Link>
+                    <Button size="sm" className="h-9 text-xs gap-1 rounded-xl brand-gradient text-white border-0"
+                      onClick={() => window.location.href = `/courses/${slug}/quiz`}>
+                      <Trophy className="size-3.5" /> Final Quiz
                     </Button>
                   )}
                 </div>

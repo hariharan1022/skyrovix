@@ -1605,6 +1605,10 @@ function LmsCoursesSection({ enrollments, courses, lmsCerts, completedTopics, to
               </div>
             </div>
             <div className="mt-4 flex gap-2">
+              <Button size="sm" variant="outline" className="rounded-xl h-9"
+                onClick={() => window.location.href = `/courses/${c.slug}/quiz`}>
+                <Trophy className="mr-1.5 size-3.5" /> Quiz
+              </Button>
               <Button asChild size="sm" className="brand-gradient text-white border-0 rounded-xl h-9 flex-1">
                 <Link to="/courses/$slug" params={{ slug: c.slug }}><Play className="mr-1.5 size-3.5" /> Continue Learning</Link>
               </Button>

@@ -24,7 +24,7 @@ import { Route as NavbarLayoutIndexRouteImport } from './routes/_navbar-layout/i
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
-import { Route as CoursesSlugQuizRouteImport } from './routes/courses.$slug.quiz'
+import { Route as CoursesSlugQuizRouteImport } from './routes/courses.$slug_.quiz'
 import { Route as NavbarLayoutAuthenticatedDashboardRouteImport } from './routes/_navbar-layout/_authenticated/dashboard'
 import { Route as NavbarLayoutAuthenticatedAdminRouteImport } from './routes/_navbar-layout/_authenticated/admin'
 
@@ -103,9 +103,9 @@ const NavbarLayoutAuthenticatedRouteRoute =
     getParentRoute: () => NavbarLayoutRoute,
   } as any)
 const CoursesSlugQuizRoute = CoursesSlugQuizRouteImport.update({
-  id: '/quiz',
-  path: '/quiz',
-  getParentRoute: () => CoursesSlugRoute,
+  id: '/$slug_/quiz',
+  path: '/$slug/quiz',
+  getParentRoute: () => CoursesRoute,
 } as any)
 const NavbarLayoutAuthenticatedDashboardRoute =
   NavbarLayoutAuthenticatedDashboardRouteImport.update({
@@ -130,7 +130,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
-  '/courses/$slug': typeof CoursesSlugRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
@@ -146,7 +146,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/': typeof NavbarLayoutIndexRoute
-  '/courses/$slug': typeof CoursesSlugRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/courses': typeof CoursesIndexRoute
   '/domains': typeof DomainsIndexRoute
@@ -166,14 +166,14 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/_navbar-layout/_authenticated': typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
-  '/courses/$slug': typeof CoursesSlugRouteWithChildren
+  '/courses/$slug': typeof CoursesSlugRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/_navbar-layout/': typeof NavbarLayoutIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/_navbar-layout/_authenticated/admin': typeof NavbarLayoutAuthenticatedAdminRoute
   '/_navbar-layout/_authenticated/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
-  '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
+  '/courses/$slug_/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -229,7 +229,7 @@ export interface FileRouteTypes {
     | '/domains/'
     | '/_navbar-layout/_authenticated/admin'
     | '/_navbar-layout/_authenticated/dashboard'
-    | '/courses/$slug/quiz'
+    | '/courses/$slug_/quiz'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -351,12 +351,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedRouteRouteImport
       parentRoute: typeof NavbarLayoutRoute
     }
-    '/courses/$slug/quiz': {
-      id: '/courses/$slug/quiz'
-      path: '/quiz'
+    '/courses/$slug_/quiz': {
+      id: '/courses/$slug_/quiz'
+      path: '/$slug/quiz'
       fullPath: '/courses/$slug/quiz'
       preLoaderRoute: typeof CoursesSlugQuizRouteImport
-      parentRoute: typeof CoursesSlugRoute
+      parentRoute: typeof CoursesRoute
     }
     '/_navbar-layout/_authenticated/dashboard': {
       id: '/_navbar-layout/_authenticated/dashboard'
@@ -407,26 +407,16 @@ const NavbarLayoutRouteWithChildren = NavbarLayoutRoute._addFileChildren(
   NavbarLayoutRouteChildren,
 )
 
-interface CoursesSlugRouteChildren {
+interface CoursesRouteChildren {
+  CoursesSlugRoute: typeof CoursesSlugRoute
+  CoursesIndexRoute: typeof CoursesIndexRoute
   CoursesSlugQuizRoute: typeof CoursesSlugQuizRoute
 }
 
-const CoursesSlugRouteChildren: CoursesSlugRouteChildren = {
-  CoursesSlugQuizRoute: CoursesSlugQuizRoute,
-}
-
-const CoursesSlugRouteWithChildren = CoursesSlugRoute._addFileChildren(
-  CoursesSlugRouteChildren,
-)
-
-interface CoursesRouteChildren {
-  CoursesSlugRoute: typeof CoursesSlugRouteWithChildren
-  CoursesIndexRoute: typeof CoursesIndexRoute
-}
-
 const CoursesRouteChildren: CoursesRouteChildren = {
-  CoursesSlugRoute: CoursesSlugRouteWithChildren,
+  CoursesSlugRoute: CoursesSlugRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  CoursesSlugQuizRoute: CoursesSlugQuizRoute,
 }
 
 const CoursesRouteWithChildren =

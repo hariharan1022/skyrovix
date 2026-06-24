@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -10,17 +10,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { CourseCertificateDoc, downloadPdf } from "@/components/pdf-docs";
+import { getLocalQuizQuestions } from "@/lib/quiz-content.generated";
 import {
   Clock, ChevronLeft, ChevronRight, Flag, XCircle, Trophy,
   AlertTriangle, Shuffle, Download, Award, RotateCcw, CheckCircle2,
 } from "lucide-react";
 
-export const Route = createFileRoute("/courses/$slug/quiz")({
+export const Route = createFileRoute("/courses/$slug_/quiz")({
   ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
-  },
   head: ({ params }) => ({ meta: [{ title: `Final Quiz — ${params.slug} — Skyrovix` }] }),
   component: QuizPage,
 });
@@ -51,11 +48,18 @@ function QuizPage() {
   const visibilityRef = useRef(0);
   const quizStartedRef = useRef(false);
 
+  const localQuestions = useMemo(() => getLocalQuizQuestions(slug), [slug]);
+
   const { data: course } = useQuery({
     queryKey: ["course", slug],
     queryFn: async () => {
       const { data } = await supabase.from("courses").select("*").eq("slug", slug).maybeSingle();
-      return data;
+      if (data) return data;
+      if (localQuestions.length > 0) {
+        return { id: `local-${slug}`, slug, name: slug.charAt(0).toUpperCase() + slug.slice(1),
+          quiz_marks: 100, pass_marks: 60, quiz_duration_min: 30, is_published: true };
+      }
+      return null;
     },
   });
 
@@ -70,12 +74,15 @@ function QuizPage() {
   });
 
   const { data: rawQuestions } = useQuery({
-    queryKey: ["quiz-questions", course?.id],
+    queryKey: ["quiz-questions", course?.id || slug],
     enabled: !!course,
     queryFn: async () => {
-      const { data } = await supabase.from("course_quiz_questions")
-        .select("id, question, options, correct_index, marks").eq("course_id", course!.id).order("order_index");
-      return (data ?? []) as Q[];
+      if (!course?.id?.startsWith?.("local-")) {
+        const { data } = await supabase.from("course_quiz_questions")
+          .select("id, question, options, correct_index, marks").eq("course_id", course!.id).order("order_index");
+        if (data?.length) return data as Q[];
+      }
+      return localQuestions.length > 0 ? localQuestions : [];
     },
   });
 
@@ -147,11 +154,18 @@ function QuizPage() {
   }, [started, questions, enrollment, course, result]);
 
   const handleSubmit = useCallback(async () => {
-    if (submitRef.current || !questions.length || !enrollment || !course) return;
+    if (submitRef.current || !questions.length || !course) return;
     submitRef.current = true;
     let score = 0;
     for (const q of questions) if (answers[q.id] === q.correct_index) score += q.marks;
     const passed = score >= course.pass_marks;
+
+    if (course.id.startsWith?.("local-")) {
+      setResult({ score, total: totalMarks, passed, attemptNum: 1 });
+      return;
+    }
+
+    if (!enrollment) { submitRef.current = false; return; }
     const { data: att, error } = await supabase.from("quiz_attempts").insert({
       enrollment_id: enrollment.id, score, total: totalMarks, passed, answers, submitted_at: new Date().toISOString(),
     }).select().maybeSingle();
@@ -166,7 +180,6 @@ function QuizPage() {
       await supabase.from("course_certificates").insert({
         enrollment_id: enrollment.id, certificate_id: certId, verification_hash: hash, score,
       });
-      // Leaderboard entry
       await supabase.from("leaderboard" as any).upsert({
         user_id: user!.id, course_id: course.id, score, total: totalMarks, quiz_attempt_id: att?.id,
       }, { onConflict: "user_id, course_id" });

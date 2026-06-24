@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import {
   BookOpen, Layers, Monitor, Server, BarChart3, Brain, Palette,
   Code2, Shield, TrendingUp, ArrowRight, Award, FileCheck, Rocket,
@@ -147,64 +148,64 @@ function Landing() {
     <div className="min-h-screen">
 
       {/* HERO */}
-      <section className="relative overflow-hidden pb-16 pt-16 md:pb-28 md:pt-20">
+      <section className="relative overflow-hidden pb-16 pt-12 sm:pt-16 md:pb-28 md:pt-20">
         <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#FFFFFF_0%,#F8F7FF_40%,#EEF2FF_100%)]" />
         <div className="absolute inset-0 -z-10 hero-grid" />
-        <div className="absolute -top-48 left-1/2 -z-10 size-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-[#07284a]/15 via-blue-400/15 to-transparent blur-[150px]" />
-        <div className="absolute -bottom-64 left-1/4 -z-10 size-[600px] rounded-full bg-gradient-to-tr from-[#07284a]/10 via-blue-400/10 to-transparent blur-[130px]" />
-        <div className="absolute right-0 top-1/3 -z-10 size-[500px] rounded-full bg-gradient-to-bl from-[#07284a]/10 via-transparent to-transparent blur-[120px]" />
+        <div className="absolute -top-48 left-1/2 -z-10 size-[500px] sm:size-[800px] -translate-x-1/2 rounded-full bg-gradient-to-br from-[#07284a]/15 via-blue-400/15 to-transparent blur-[150px]" />
+        <div className="absolute -bottom-64 left-1/4 -z-10 size-[400px] sm:size-[600px] rounded-full bg-gradient-to-tr from-[#07284a]/10 via-blue-400/10 to-transparent blur-[130px]" />
+        <div className="absolute right-0 top-1/3 -z-10 size-[300px] sm:size-[500px] rounded-full bg-gradient-to-bl from-[#07284a]/10 via-transparent to-transparent blur-[120px]" />
 
         <div className="mx-auto max-w-7xl px-4">
-          <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
+          <div className="grid items-center gap-8 sm:gap-12 md:grid-cols-2 md:gap-16">
             <div className="animate-fade-in-up text-center md:text-left">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/20 bg-white/70 px-4 py-1.5 text-xs text-[#07284a] shadow-sm backdrop-blur">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/20 bg-white/70 px-3 sm:px-4 py-1.5 text-xs text-[#07284a] shadow-sm backdrop-blur">
                 <ShieldCheck className="size-3.5" /> MSME Registered · Skyrovix IT Solutions
               </div>
 
-              <h1 className="font-display text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
                 Learn by building.<br />
                 <span className="brand-text">Get certified.</span>
               </h1>
 
-              <div className="mt-4 h-8">
-                <p className="text-lg text-muted-foreground">
+              <div className="mt-4 h-7 sm:h-8">
+                <p className="text-base sm:text-lg text-muted-foreground">
                   Build in{" "}
                   <TypingText texts={["Full Stack Development", "Data Science", "Cyber Security", "UI/UX Design"]} />
                 </p>
               </div>
 
-              <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
+              <p className="mt-4 sm:mt-5 max-w-lg text-sm sm:text-base leading-relaxed text-muted-foreground mx-auto md:mx-0">
                 Task-based virtual internships — apply in minutes, get an instant offer letter and
                 ID card, complete real-world projects, and earn a QR-verified certificate.
               </p>
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3">
                 <Link to="/auth">
-                  <Button size="lg" className="brand-gradient text-white border-0 px-8 py-6 text-base font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]">
+                  <Button size="lg" className="brand-gradient text-white border-0 px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-lg shadow-primary/25 transition-all hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] btn-press rounded-xl w-full sm:w-auto">
                     Start your internship <ArrowRight className="ml-2 size-4" />
                   </Button>
                 </Link>
                 <Link to="/domains">
-                  <Button size="lg" variant="outline" className="rounded-xl border-2 border-border px-8 py-6 text-base font-semibold shadow-sm transition hover:border-primary/40 hover:bg-accent/30 hover:shadow-md">
+                  <Button size="lg" variant="outline" className="rounded-xl border-2 border-border px-6 sm:px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-sm transition hover:border-primary/40 hover:bg-accent/30 hover:shadow-md btn-press active:btn-press-active w-full sm:w-auto">
                     Browse domains
                   </Button>
                 </Link>
               </div>
 
-              <div className="mt-12 flex items-center gap-8 md:justify-start">
+              <div className="mt-10 sm:mt-12 flex items-center justify-center md:justify-start gap-6 sm:gap-8">
                 <div>
-                  <div className="text-3xl font-bold">10</div>
-                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
+                  <div className="text-2xl sm:text-3xl font-bold">10</div>
+                  <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
                 </div>
-                <div className="h-10 w-px bg-border" />
+                <div className="h-8 sm:h-10 w-px bg-border" />
                 <div>
-                  <div className="text-3xl font-bold">50+</div>
-                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
+                  <div className="text-2xl sm:text-3xl font-bold">50+</div>
+                  <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
                 </div>
-                <div className="h-10 w-px bg-border" />
+                <div className="h-8 sm:h-10 w-px bg-border" />
                 <div>
-                  <div className="text-3xl font-bold">100%</div>
-                  <div className="mt-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">Online</div>
+                  <div className="text-2xl sm:text-3xl font-bold">100%</div>
+                  <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Online</div>
                 </div>
               </div>
             </div>
@@ -217,58 +218,73 @@ function Landing() {
       </section>
 
       {/* HOW */}
-      <section className="section-bg border-y border-border/40 py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-3 px-3 py-1">How it works</Badge>
-            <h2 className="text-3xl font-bold md:text-4xl">Your journey to certification</h2>
-            <p className="mt-3 text-muted-foreground">A simple 5-step journey from application to certification.</p>
+      <ScrollReveal>
+        <section className="section-bg border-y border-border/40 py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <Badge variant="secondary" className="mb-3 px-3 py-1">How it works</Badge>
+              <h2 className="text-3xl font-bold md:text-4xl">Your journey to certification</h2>
+              <p className="mt-3 text-muted-foreground">A simple 5-step journey from application to certification.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+              {STEPS.map((s, i) => (
+                <div key={i} className="group relative rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur transition-all card-glow hover:border-primary/40 hover:bg-card/80"
+                  style={{
+                    transitionDelay: `${i * 0.1}s`,
+                    transitionProperty: "opacity, transform, border-color, background-color, box-shadow",
+                    transitionDuration: "0.5s, 0.5s, 0.3s, 0.3s, 0.3s",
+                    transitionTimingFunction: "ease-out, ease-out, ease, ease, ease",
+                  }}>
+                  <div className="absolute -top-3 left-5 grid size-7 place-items-center rounded-full brand-gradient text-xs font-bold text-white shadow-md">{i + 1}</div>
+                  <s.icon className="mt-3 size-6 text-primary" />
+                  <h3 className="mt-3 font-semibold">{s.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            {STEPS.map((s, i) => (
-              <div key={i} className="group relative rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur transition-all card-hover hover:border-primary/40 hover:bg-card/80">
-                <div className="absolute -top-3 left-5 grid size-7 place-items-center rounded-full brand-gradient text-xs font-bold text-white shadow-md">{i + 1}</div>
-                <s.icon className="mt-3 size-6 text-primary" />
-                <h3 className="mt-3 font-semibold">{s.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* DOMAINS */}
-      <section className="py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-3 px-3 py-1">Domains</Badge>
-            <h2 className="text-3xl font-bold md:text-4xl">Choose your internship domain</h2>
-            <p className="mt-3 text-muted-foreground">10 industry-aligned tracks. Each ships with a 5-task curriculum.</p>
+      <ScrollReveal>
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <Badge variant="secondary" className="mb-3 px-3 py-1">Domains</Badge>
+              <h2 className="text-3xl font-bold md:text-4xl">Choose your internship domain</h2>
+              <p className="mt-3 text-muted-foreground">10 industry-aligned tracks. Each ships with a 5-task curriculum.</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {DOMAINS.slice(0, 6).map((d, i) => (
+                <button
+                  key={d.slug}
+                  onClick={() => setApplyDomain(d.slug)}
+                  className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 text-left transition-all card-glow hover:border-primary/40 hover:shadow-xl"
+                  style={{
+                    opacity: 0,
+                    transform: "translateY(20px)",
+                    animation: `fade-in-up 0.5s ease-out ${0.3 + i * 0.1}s forwards`,
+                  }}
+                >
+                  <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${d.color} opacity-0 transition group-hover:opacity-10`} />
+                  <div className={`grid size-12 sm:size-13 place-items-center rounded-xl bg-gradient-to-br ${d.color} text-lg font-bold text-white shadow-md`}>{d.icon}</div>
+                  <h3 className="mt-4 font-semibold text-lg">{d.name}</h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{d.description}</p>
+                  <div className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                    Apply now <ArrowRight className="size-3.5 transition group-hover:translate-x-1" />
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Button asChild variant="outline" className="rounded-xl h-11 transition-all hover:shadow-md">
+                <Link to="/domains">View all domains <ChevronRight className="ml-1 size-4" /></Link>
+              </Button>
+            </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {DOMAINS.slice(0, 6).map((d) => (
-              <button
-                key={d.slug}
-                onClick={() => setApplyDomain(d.slug)}
-                className="group relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 text-left transition-all card-hover hover:border-primary/40 hover:shadow-xl"
-              >
-                <div className={`absolute inset-0 -z-10 bg-gradient-to-br ${d.color} opacity-0 transition group-hover:opacity-10`} />
-                <div className={`grid size-13 place-items-center rounded-xl bg-gradient-to-br ${d.color} text-lg font-bold text-white shadow-md`}>{d.icon}</div>
-                <h3 className="mt-4 font-semibold text-lg">{d.name}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{d.description}</p>
-                <div className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                  Apply now <ArrowRight className="size-3.5 transition group-hover:translate-x-1" />
-                </div>
-              </button>
-            ))}
-          </div>
-          <div className="mt-8 text-center">
-            <Button asChild variant="outline">
-              <Link to="/domains">View all domains <ChevronRight className="ml-1 size-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* Apply Dialog */}
       <Dialog open={!!applyDomain} onOpenChange={(o) => { if (!o) { setApplyDomain(null); setPhotoFile(null); } }}>
@@ -320,92 +336,121 @@ function Landing() {
       </Dialog>
 
       {/* COURSES */}
-      <section className="section-bg border-y border-border/40 py-20">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-3 px-3 py-1">Learning Paths</Badge>
-            <h2 className="text-3xl font-bold md:text-4xl">Explore Courses</h2>
-            <p className="mt-3 text-muted-foreground">Topic-based learning paths with hands-on tasks and a final quiz.</p>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {courses?.slice(0, 6).map((c) => {
-              const Icon = COURSE_ICONS[c.icon] ?? BookOpen;
-              return (
-                <Card key={c.id} className="group overflow-hidden transition-all card-hover hover:shadow-xl">
-                  <CardContent className="flex flex-col gap-4 pt-6">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="grid size-13 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-lg shadow-primary/20">
-                        <Icon className="size-6" />
+      <ScrollReveal>
+        <section className="section-bg border-y border-border/40 py-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <Badge variant="secondary" className="mb-3 px-3 py-1">Learning Paths</Badge>
+              <h2 className="text-3xl font-bold md:text-4xl">Explore Courses</h2>
+              <p className="mt-3 text-muted-foreground">Topic-based learning paths with hands-on tasks and a final quiz.</p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {courses?.slice(0, 6).map((c, i) => {
+                const Icon = COURSE_ICONS[c.icon] ?? BookOpen;
+                return (
+                  <Card key={c.id} className="group overflow-hidden transition-all card-glow hover:shadow-xl"
+                    style={{
+                      opacity: 0,
+                      transform: "translateY(20px)",
+                      animation: `fade-in-up 0.5s ease-out ${0.3 + i * 0.1}s forwards`,
+                    }}>
+                    <CardContent className="flex flex-col gap-4 pt-6">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="grid size-12 sm:size-13 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-lg shadow-primary/20">
+                          <Icon className="size-6" />
+                        </div>
+                        <Badge variant="outline" className="shrink-0 text-xs">{c.difficulty}</Badge>
                       </div>
-                      <Badge variant="outline" className="shrink-0 text-xs">{c.difficulty}</Badge>
-                    </div>
-                    <div className="space-y-1.5">
-                      <h3 className="text-xl font-bold leading-tight">{c.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{c.short_description}</p>
-                    </div>
-                    <dl className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-secondary/30 p-3.5 text-xs">
-                      <div className="flex flex-col"><dt className="text-muted-foreground">Topics</dt><dd className="font-bold">{c.total_topics}</dd></div>
-                      <div className="flex flex-col"><dt className="text-muted-foreground">Tasks</dt><dd className="font-bold">{c.total_tasks}</dd></div>
-                      <div className="flex flex-col"><dt className="text-muted-foreground">Quiz</dt><dd className="font-bold">{c.quiz_marks} Marks</dd></div>
-                      <div className="flex flex-col"><dt className="text-muted-foreground">Duration</dt><dd className="font-bold">{c.duration_weeks} Weeks</dd></div>
-                    </dl>
-                    <Button asChild className="brand-gradient text-white border-0">
-                      <Link to="/courses/$slug" params={{ slug: c.slug }}>Learn More <ArrowRight className="ml-1 size-4" /></Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                      <div className="space-y-1.5">
+                        <h3 className="text-xl font-bold leading-tight">{c.name}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{c.short_description}</p>
+                      </div>
+                      <dl className="grid grid-cols-2 gap-2 rounded-xl border border-border bg-secondary/30 p-3.5 text-xs">
+                        <div className="flex flex-col"><dt className="text-muted-foreground">Topics</dt><dd className="font-bold">{c.total_topics}</dd></div>
+                        <div className="flex flex-col"><dt className="text-muted-foreground">Tasks</dt><dd className="font-bold">{c.total_tasks}</dd></div>
+                        <div className="flex flex-col"><dt className="text-muted-foreground">Quiz</dt><dd className="font-bold">{c.quiz_marks} Marks</dd></div>
+                        <div className="flex flex-col"><dt className="text-muted-foreground">Duration</dt><dd className="font-bold">{c.duration_weeks} Weeks</dd></div>
+                      </dl>
+                      <Button asChild className="brand-gradient text-white border-0 btn-press active:btn-press-active">
+                        <Link to="/courses/$slug" params={{ slug: c.slug }}>Learn More <ArrowRight className="ml-1 size-4" /></Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+            <div className="mt-8 text-center">
+              <Button asChild variant="outline" className="rounded-xl h-11 transition-all hover:shadow-md">
+                <Link to="/courses">View all courses <ChevronRight className="ml-1 size-4" /></Link>
+              </Button>
+            </div>
           </div>
-          <div className="mt-8 text-center">
-            <Button asChild variant="outline">
-              <Link to="/courses">View all courses <ChevronRight className="ml-1 size-4" /></Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* FAQ */}
-      <section className="py-20">
-        <div className="mx-auto max-w-3xl px-4">
-          <div className="mx-auto mb-12 max-w-2xl text-center">
-            <Badge variant="secondary" className="mb-3 px-3 py-1">FAQ</Badge>
-            <h2 className="text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
-            <p className="mt-3 text-muted-foreground">Everything you need to know about the Skyrovix internship program.</p>
+      <ScrollReveal>
+        <section className="py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl px-4">
+            <div className="mx-auto mb-12 max-w-2xl text-center">
+              <Badge variant="secondary" className="mb-3 px-3 py-1">FAQ</Badge>
+              <h2 className="text-3xl font-bold md:text-4xl">Frequently Asked Questions</h2>
+              <p className="mt-3 text-muted-foreground">Everything you need to know about the Skyrovix internship program.</p>
+            </div>
+            <Accordion type="single" collapsible className="space-y-3">
+              {FAQ_ITEMS.map((item, i) => (
+                <AccordionItem key={i} value={`faq-${i}`} className="rounded-xl border border-border/60 bg-card/40 px-4 sm:px-6 transition hover:border-border">
+                  <AccordionTrigger className="py-4 text-left text-sm sm:text-base font-medium hover:no-underline">{item.q}</AccordionTrigger>
+                  <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground">{item.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
-          <Accordion type="single" collapsible className="space-y-3">
-            {FAQ_ITEMS.map((item, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="rounded-xl border border-border/60 bg-card/40 px-6 transition hover:border-border">
-                <AccordionTrigger className="py-4 text-left font-medium hover:no-underline">{item.q}</AccordionTrigger>
-                <AccordionContent className="pb-4 text-sm leading-relaxed text-muted-foreground">{item.a}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
 
       {/* CTA */}
-      <section className="px-4 pb-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="relative overflow-hidden rounded-3xl border border-border/40 brand-gradient p-12 text-center text-white shadow-2xl shadow-primary/20 md:p-16">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
-            <div className="absolute -right-16 -top-16 size-64 rounded-full bg-white/5 blur-3xl" />
-            <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-white/5 blur-3xl" />
-            <div className="relative">
-              <h2 className="text-3xl font-bold md:text-4xl">Ready to build something real?</h2>
-              <p className="mt-3 text-white/80 max-w-lg mx-auto">Get your offer letter in seconds. No application fee — pay only ₹100 at certification.</p>
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
-                <Button asChild size="lg" className="bg-white text-[#07284a] hover:bg-white/90 border-0 shadow-lg font-semibold">
-                  <Link to="/auth">Apply now <ArrowRight className="ml-1 size-4" /></Link>
-                </Button>
-                <Button asChild size="lg" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white">
-                  <Link to="/courses">Explore courses</Link>
-                </Button>
+      <ScrollReveal>
+        <section className="px-4 pb-20">
+          <div className="mx-auto max-w-5xl">
+            <div className="relative overflow-hidden rounded-3xl border border-border/40 brand-gradient p-8 sm:p-12 md:p-16 text-center text-white shadow-2xl shadow-primary/20">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.15),transparent_50%)]" />
+              <div className="absolute -right-16 -top-16 size-64 rounded-full bg-white/5 blur-3xl" />
+              <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-white/5 blur-3xl" />
+              <div className="relative">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">Ready to build something real?</h2>
+                <p className="mt-3 text-sm sm:text-base text-white/80 max-w-lg mx-auto">Get your offer letter in seconds. No application fee — pay only ₹100 at certification.</p>
+                <div className="mt-8 flex flex-wrap justify-center gap-3">
+                  <Button asChild size="lg" className="bg-white text-[#07284a] hover:bg-white/90 border-0 shadow-lg font-semibold btn-press active:btn-press-active rounded-xl">
+                    <Link to="/auth">Apply now <ArrowRight className="ml-1 size-4" /></Link>
+                  </Button>
+                  <Button asChild size="lg" variant="outline" className="bg-transparent border-white/40 text-white hover:bg-white/10 hover:text-white btn-press active:btn-press-active rounded-xl">
+                    <Link to="/courses">Explore courses</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </ScrollReveal>
+    </div>
+  );
+}
+
+function ScrollReveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, visible } = useScrollReveal<HTMLDivElement>();
+
+  return (
+    <div
+      ref={ref}
+      className={`${className}`}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(30px)",
+        transition: `opacity 0.7s ease-out ${delay}s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+      }}
+    >
+      {children}
     </div>
   );
 }

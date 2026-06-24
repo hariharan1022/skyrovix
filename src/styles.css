@@ -57,6 +57,11 @@
   --animate-scale-in: scale-in 0.4s ease-out forwards;
   --animate-slide-up: slide-up 0.5s ease-out forwards;
   --animate-shimmer: shimmer 2s infinite linear;
+  --animate-scroll-reveal: scroll-reveal 0.7s ease-out forwards;
+  --animate-scroll-reveal-left: scroll-reveal-left 0.7s ease-out forwards;
+  --animate-scroll-reveal-right: scroll-reveal-right 0.7s ease-out forwards;
+  --animate-scroll-reveal-scale: scroll-reveal-scale 0.6s ease-out forwards;
+  --animate-bounce-gentle: bounce-gentle 2s ease-in-out infinite;
 }
 
 :root {
@@ -198,6 +203,29 @@
 @keyframes spinner {
   to { transform: rotate(360deg); }
 }
+@keyframes scroll-reveal {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scroll-reveal-left {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scroll-reveal-right {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scroll-reveal-scale {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@keyframes ripple {
+  to { transform: scale(4); opacity: 0; }
+}
 
 /* ─── Utilities ─── */
 @utility brand-gradient {
@@ -249,4 +277,80 @@
     linear-gradient(rgba(7, 40, 74, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(7, 40, 74, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
+}
+
+/* ─── Responsive helpers ─── */
+@utility touch-target {
+  @media (max-width: 640px) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/* ─── Scroll-reveal utility ─── */
+@utility reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+@utility reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+@utility reveal-left {
+  opacity: 0;
+  transform: translateX(-30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+@utility reveal-left-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+@utility reveal-right {
+  opacity: 0;
+  transform: translateX(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+@utility reveal-right-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+@utility reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+@utility reveal-scale-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── Smooth scrolling ─── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Button micro-interaction ─── */
+@utility btn-press {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+@utility btn-press-active {
+  transform: scale(0.97);
+}
+
+/* ─── Card subtle border glow ─── */
+@utility card-glow {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@utility card-glow-hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px rgba(7, 40, 74, 0.12), 0 20px 40px -12px rgba(7, 40, 74, 0.15);
+  transform: translateY(-3px);
+}
+
+@media (max-width: 640px) {
+  .hide-mobile { display: none !important; }
 }

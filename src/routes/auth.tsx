@@ -79,7 +79,7 @@ function AuthPage() {
         </div>
         <div className="absolute inset-0 hero-grid opacity-20" />
         <div className="relative flex h-full flex-col justify-between p-12 text-white">
-          <Link to="/"><Logo /></Link>
+          <Link to="/"><Logo variant="white" /></Link>
           <div className="space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium backdrop-blur-sm">
               <Sparkles className="size-3.5" /> Task-based virtual internship

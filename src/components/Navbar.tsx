@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut, LayoutDashboard, Shield, Menu, X, GraduationCap, ChevronDown } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -21,12 +21,20 @@ export function Navbar() {
   const router = useRouterState();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   const pathname = router.location.pathname;
 
@@ -71,52 +79,64 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {user ? (
             <>
               {isAdmin && (
-                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-muted-foreground hover:text-foreground">
+                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex text-muted-foreground hover:text-foreground touch-target">
                   <Link to="/admin"><Shield className="mr-1.5 size-4" />Admin</Link>
                 </Button>
               )}
-              <Button asChild variant="secondary" size="sm" className="hidden sm:inline-flex">
+              <Button asChild variant="secondary" size="sm" className="hidden sm:inline-flex touch-target">
                 <Link to="/dashboard"><LayoutDashboard className="mr-1.5 size-4" />Dashboard</Link>
               </Button>
-              <Button onClick={signOut} variant="ghost" size="icon" aria-label="Sign out" className="text-muted-foreground hover:text-foreground">
+              <Button onClick={signOut} variant="ghost" size="icon" aria-label="Sign out" className="text-muted-foreground hover:text-foreground touch-target">
                 <LogOut className="size-4" />
               </Button>
             </>
           ) : (
-            <Button asChild size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-primary/25 hidden sm:inline-flex">
+            <Button asChild size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-primary/25 hidden sm:inline-flex touch-target">
               <Link to="/auth">Sign in</Link>
             </Button>
           )}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="grid size-9 place-items-center rounded-lg border border-border lg:hidden transition hover:bg-accent"
+            className="grid size-9 sm:size-10 place-items-center rounded-lg border border-border lg:hidden transition hover:bg-accent touch-target"
             aria-label="Toggle menu"
           >
-            {open ? <X className="size-4" /> : <Menu className="size-4" />}
+            <span className={`transition-transform duration-300 ${open ? "rotate-90" : ""}`}>
+              {open ? <X className="size-4" /> : <Menu className="size-4" />}
+            </span>
           </button>
         </div>
       </div>
 
       {open && (
-        <div className="animate-fade-in-down border-t border-border bg-background/95 backdrop-blur-xl lg:hidden">
+        <div
+          ref={menuRef}
+          className="animate-fade-in-down border-t border-border bg-background/95 backdrop-blur-xl lg:hidden"
+          style={{
+            animation: "fade-in-down 0.25s ease-out forwards",
+          }}
+        >
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4 text-sm">
-            {NAV.map((n) => {
+            {NAV.map((n, i) => {
               const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
               return (
                 <Link
                   key={n.to}
                   to={n.to}
                   onClick={() => setOpen(false)}
-                  className={`rounded-lg px-3 py-2.5 transition ${
+                  className={`rounded-lg px-4 py-3 transition-all duration-200 text-base ${
                     active
                       ? "bg-accent/60 text-foreground font-medium"
                       : "text-muted-foreground hover:bg-accent/30 hover:text-foreground"
                   }`}
+                  style={{
+                    opacity: 0,
+                    animation: `fade-in-up 0.3s ease-out ${0.03 * i}s forwards`,
+                  }}
                 >
                   {n.label}
                 </Link>
@@ -125,20 +145,20 @@ export function Navbar() {
             <div className="my-2 border-t border-border" />
             {user ? (
               <>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-muted-foreground hover:bg-accent/30 hover:text-foreground">
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-4 py-3 text-base text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-all">
                   <LayoutDashboard className="size-4" /> Dashboard
                 </Link>
                 {isAdmin && (
-                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-muted-foreground hover:bg-accent/30 hover:text-foreground">
+                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-lg px-4 py-3 text-base text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-all">
                     <Shield className="size-4" /> Admin
                   </Link>
                 )}
-                <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-muted-foreground hover:bg-accent/30 hover:text-foreground">
+                <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-2 rounded-lg px-4 py-3 text-base text-muted-foreground hover:bg-accent/30 hover:text-foreground transition-all w-full text-left">
                   <LogOut className="size-4" /> Sign out
                 </button>
               </>
             ) : (
-              <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-lg brand-gradient px-3 py-3 text-center font-medium text-white">
+              <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-xl brand-gradient px-4 py-3.5 text-center font-medium text-white text-base">
                 Sign in to get started
               </Link>
             )}
