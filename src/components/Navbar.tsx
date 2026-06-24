@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const NAV = [
@@ -141,46 +141,85 @@ export function Navbar() {
           }}
         >
           <div className="flex flex-col gap-1 p-3">
-            {NAV.map((n, i) => {
-              const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
-              return (
-                <Link
-                  key={n.to}
-                  to={n.to}
-                  onClick={() => setOpen(false)}
-                  className={`rounded-xl px-4 py-3 text-sm font-medium transition-all ${
-                    active
-                      ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
-                      : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
-                  }`}
-                  style={{
-                    opacity: 0,
-                    animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards`,
-                  }}
-                >
-                  {n.label}
-                </Link>
-              );
-            })}
-            <div className="my-2 border-t border-border" />
+            {/* ── Unified list: public + dashboard items ── */}
             {user ? (
               <>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
+                {[
+                  { to: "/", label: "Home", icon: Home },
+                  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
+                  { to: "/dashboard", label: "My Courses", icon: BookOpen, search: { tab: "courses" } },
+                  { to: "/dashboard", label: "My Tasks", icon: ListChecks, search: { tab: "tasks" } },
+                  { to: "/dashboard", label: "Certificates", icon: Award, search: { tab: "certificates" } },
+                  { to: "/dashboard", label: "Profile", icon: User, search: { tab: "profile" } },
+                ].map((item, i) => {
+                  const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to) && (!item.search || pathname.includes("dashboard"));
+                  return (
+                    <Link key={item.label} to={item.to} search={item.search} onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
+                          : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
+                      }`}
+                      style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
+                    >
+                      <item.icon className="size-4 shrink-0" /> {item.label}
+                    </Link>
+                  );
+                })}
+                <div className="my-2 border-t border-border" style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.18}s forwards` }} />
+                {NAV.map((n, i) => {
+                  const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+                  return (
+                    <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
+                      className={`rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
+                          : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
+                      }`}
+                      style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * (i + 7)}s forwards` }}
+                    >
+                      {n.label}
+                    </Link>
+                  );
+                })}
+                <div className="my-2 border-t border-border" style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.39}s forwards` }} />
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all"
+                  style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.42s forwards` }}>
                   <LayoutDashboard className="size-4" /> Dashboard
                 </Link>
                 {isAdmin && (
-                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
+                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all"
+                    style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.45s forwards` }}>
                     <Shield className="size-4" /> Admin
                   </Link>
                 )}
-                <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left">
+                <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left"
+                  style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.48s forwards` }}>
                   <LogOut className="size-4" /> Sign out
                 </button>
               </>
             ) : (
-              <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-xl bg-[#07284a] px-4 py-3.5 text-center text-sm font-medium text-white">
-                Sign in to get started
-              </Link>
+              <>
+                {NAV.map((n, i) => {
+                  const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+                  return (
+                    <Link key={n.to} to={n.to} onClick={() => setOpen(false)}
+                      className={`rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
+                          : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
+                      }`}
+                      style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
+                    >
+                      {n.label}
+                    </Link>
+                  );
+                })}
+                <div className="my-2 border-t border-border" />
+                <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-xl bg-[#07284a] px-4 py-3.5 text-center text-sm font-medium text-white">
+                  Sign in to get started
+                </Link>
+              </>
             )}
           </div>
         </div>

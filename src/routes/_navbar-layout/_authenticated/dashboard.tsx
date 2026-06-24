@@ -27,7 +27,7 @@ import {
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
   ListChecks, Flag, AlertTriangle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LayoutDashboard, LogOut, PanelRightClose,
-  PanelRightOpen, Settings, Menu, X, Moon, Wallet, CreditCard, ScrollText, Briefcase,
+  PanelRightOpen, Settings, Moon, Wallet, CreditCard, ScrollText, Briefcase,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -85,6 +85,9 @@ function AnimatedSection({ children, className = "", delay = 0 }: { children: Re
 }
 
 export const Route = createFileRoute("/_navbar-layout/_authenticated/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: typeof search.tab === "string" ? search.tab : undefined,
+  }),
   head: () => ({ meta: [{ title: "Dashboard — Skyrovix" }] }),
   component: Dashboard,
 });
@@ -366,9 +369,9 @@ function Dashboard() {
   ];
   const currentStep = timelineSteps.findIndex((s) => !s.done);
 
-  const [active, setActive] = useState("overview");
+  const searchParams = Route.useSearch();
+  const [active, setActive] = useState(searchParams.tab ?? "overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [detailView, setDetailView] = useState<{ type: "app"; id: string } | { type: "enrollment"; id: string } | null>(null);
   const [utrNumber, setUtrNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
@@ -1140,26 +1143,18 @@ function Dashboard() {
 
         <Confetti active={!!cert} />
 
-        {/* Mobile overlay */}
-        {mobileOpen && (
-          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
-        )}
-
         {/* ─── Sidebar ─── */}
-        <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border/60 bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-2xl transition-all duration-300 dark:border-white/5 ${
-          mobileOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0"
-        } ${sidebarOpen ? "lg:w-64" : "lg:w-16"}`}>
+        <aside className={`hidden lg:flex lg:flex-col fixed inset-y-0 left-0 z-50 border-r border-border/60 bg-white/80 dark:bg-[#0f172a]/90 backdrop-blur-2xl transition-all duration-300 dark:border-white/5 ${
+          sidebarOpen ? "w-64" : "w-16"
+        }`}>
           {/* Logo */}
           <div className="flex h-16 items-center justify-between border-b border-border/60 px-4 dark:border-white/5">
-            <Link to="/" className={`flex items-center gap-2 ${!sidebarOpen && !mobileOpen && "lg:hidden"}`}>
+            <Link to="/" className={`flex items-center gap-2 ${!sidebarOpen && "lg:hidden"}`}>
               <div className="grid size-9 shrink-0 place-items-center rounded-xl brand-gradient text-[10px] font-bold text-white">S</div>
-              {(sidebarOpen || mobileOpen) && <span className="text-sm font-bold">Skyrovix</span>}
+              {sidebarOpen && <span className="text-sm font-bold">Skyrovix</span>}
             </Link>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition">
               {sidebarOpen ? <PanelRightClose className="size-4" /> : <PanelRightOpen className="size-4" />}
-            </button>
-            <button onClick={() => setMobileOpen(false)} className="lg:hidden grid size-8 place-items-center rounded-lg hover:bg-accent/50">
-              <X className="size-4" />
             </button>
           </div>
 
@@ -1172,7 +1167,7 @@ function Dashboard() {
                 return (
                   <li key={item.id}>
                     <button
-                      onClick={() => { setActive(item.id); setMobileOpen(false); }}
+                      onClick={() => setActive(item.id)}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                         isActive
                           ? "bg-[#07284a] dark:bg-[#1d4ed8] text-white shadow-md shadow-[#07284a]/20 dark:shadow-[#1d4ed8]/20"
@@ -1180,7 +1175,7 @@ function Dashboard() {
                       }`}
                     >
                       <Icon className="size-5 shrink-0" />
-                      {(sidebarOpen || mobileOpen) && <span className="truncate">{item.label}</span>}
+                      {sidebarOpen && <span className="truncate">{item.label}</span>}
                     </button>
                   </li>
                 );
@@ -1195,7 +1190,7 @@ function Dashboard() {
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-950/30"
             >
               <LogOut className="size-5 shrink-0" />
-              {(sidebarOpen || mobileOpen) && <span>Logout</span>}
+              {sidebarOpen && <span>Logout</span>}
             </button>
           </div>
         </aside>
@@ -1205,9 +1200,6 @@ function Dashboard() {
           {/* Top header */}
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-border/50 bg-white/80 dark:bg-[#0f172a]/80 px-4 backdrop-blur-xl dark:border-white/5">
             <div className="flex items-center gap-3">
-              <button onClick={() => setMobileOpen(true)} className="lg:hidden grid size-8 place-items-center rounded-lg hover:bg-accent/50">
-                <Menu className="size-5" />
-              </button>
               <h1 className="text-lg font-bold capitalize">{active === "overview" ? "Dashboard" : active}</h1>
             </div>
             <div className="flex items-center gap-2">
