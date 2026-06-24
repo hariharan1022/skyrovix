@@ -129,7 +129,7 @@ function CoursesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#020617]">
+    <div className="min-h-screen">
       <Navbar />
       <AuroraBackground>
         <section className="relative pb-8 sm:pb-12 pt-12 sm:pt-20 md:pt-28">
