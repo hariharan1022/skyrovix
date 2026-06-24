@@ -149,54 +149,56 @@ function Landing() {
           <div className="mx-auto max-w-7xl px-4">
             <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
               <FadeUp className="text-center md:text-left">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 px-4 py-1.5 text-xs font-medium text-[#07284a] dark:text-[#60a5fa] shadow-sm backdrop-blur">
-                  <ShieldCheck className="size-3.5" /> MSME Registered · Skyrovix IT Solutions
+                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-medium text-[#07284a] dark:text-[#60a5fa] shadow-sm backdrop-blur">
+                  <ShieldCheck className="size-3 sm:size-3.5" />
+                  <span className="hidden sm:inline">MSME Registered · Skyrovix IT Solutions</span>
+                  <span className="sm:hidden">MSME Registered</span>
                 </div>
 
-                <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
                   Learn by building.<br />
                   <span className="brand-text">Get certified.</span>
                 </h1>
 
-                <div className="mt-4 h-8">
-                  <p className="text-base sm:text-lg text-muted-foreground">
+                <div className="mt-4">
+                  <p className="text-sm sm:text-lg text-muted-foreground">
                     Build in{" "}
                     <TypingText texts={["Full Stack Development", "Data Science", "Cyber Security", "UI/UX Design"]} />
                   </p>
                 </div>
 
-                <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground mx-auto md:mx-0">
+                <p className="mt-5 max-w-lg text-sm sm:text-base leading-relaxed text-muted-foreground mx-auto md:mx-0">
                   Task-based virtual internships — apply in minutes, get an instant offer letter and
                   ID card, complete real-world projects, and earn a QR-verified certificate.
                 </p>
 
-                <div className="mt-8 flex flex-wrap items-center justify-center md:justify-start gap-3">
-                  <Link to="/auth">
-                    <Button size="lg" className="rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-lg shadow-[#07284a]/25 hover:shadow-xl transition-all btn-premium hover:btn-premium-hover active:btn-premium-active">
+                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-3">
+                  <Link to="/auth" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-lg shadow-[#07284a]/25 hover:shadow-xl transition-all btn-premium hover:btn-premium-hover active:btn-premium-active">
                       Start your internship <ArrowRight className="ml-2 size-4" />
                     </Button>
                   </Link>
-                  <Link to="/domains">
-                    <Button size="lg" variant="outline" className="rounded-xl border-2 border-border px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-sm transition-all hover:border-[#07284a]/30 hover:bg-[#07284a]/5 hover:shadow-md btn-premium active:btn-premium-active">
+                  <Link to="/domains" className="w-full sm:w-auto">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl border-2 border-border px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-sm transition-all hover:border-[#07284a]/30 hover:bg-[#07284a]/5 hover:shadow-md btn-premium active:btn-premium-active">
                       Browse domains
                     </Button>
                   </Link>
                 </div>
 
-                <div className="mt-10 sm:mt-12 flex flex-wrap items-center justify-center md:justify-start gap-6 sm:gap-8">
+                <div className="mt-8 sm:mt-12 flex items-center justify-center md:justify-start gap-4 sm:gap-8">
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold brand-text">10</div>
-                    <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
+                    <div className="text-xl sm:text-3xl font-bold brand-text">10</div>
+                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
                   </div>
-                  <div className="h-8 sm:h-10 w-px bg-border" />
+                  <div className="h-6 sm:h-10 w-px bg-border" />
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold brand-text">50+</div>
-                    <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
+                    <div className="text-xl sm:text-3xl font-bold brand-text">50+</div>
+                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
                   </div>
-                  <div className="h-8 sm:h-10 w-px bg-border" />
+                  <div className="h-6 sm:h-10 w-px bg-border" />
                   <div>
-                    <div className="text-2xl sm:text-3xl font-bold brand-text">100%</div>
-                    <div className="mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Online</div>
+                    <div className="text-xl sm:text-3xl font-bold brand-text">100%</div>
+                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Online</div>
                   </div>
                 </div>
               </FadeUp>
