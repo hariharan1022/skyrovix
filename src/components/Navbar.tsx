@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const NAV = [
@@ -45,6 +45,7 @@ export function Navbar() {
   }, [open]);
 
   const pathname = router.location.pathname;
+  const currentTab = (router.location.search as Record<string, string | undefined>)?.tab;
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -55,6 +56,22 @@ export function Navbar() {
     navigate({ to, search });
     setOpen(false);
   };
+
+  const [dark, setDark] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") === "dark";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (dark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
 
   return (
     <>
@@ -75,7 +92,7 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1 overflow-x-auto">
+          <div className="hidden lg:flex flex-1 items-center justify-center gap-0 min-w-0">
             {NAV.map((n) => {
               const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
               const Icon = n.icon;
@@ -84,29 +101,29 @@ export function Navbar() {
                   key={n.to}
                   to={n.to}
                   activeOptions={{ exact: n.to === "/" }}
-                  className={`relative whitespace-nowrap rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+                  className={`whitespace-nowrap rounded-xl px-2 py-2 text-xs font-medium transition-all duration-200 ${
                     active
                       ? "text-[#07284a] dark:text-white bg-[#07284a]/8 dark:bg-white/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
                   }`}
                 >
-                  <Icon className="inline size-4 mr-1.5 -mt-0.5" />{n.label}
+                  <Icon className="inline size-3.5 mr-1 -mt-0.5" />{n.label}
                 </Link>
               );
             })}
             {user && DASHBOARD_ITEMS.map((item) => {
-              const isActive = item.to === "/dashboard" && !item.search
-                ? pathname === "/dashboard" && !pathname.includes("?tab=")
-                : pathname.startsWith("/dashboard") && pathname.includes(item.search?.tab ?? "");
+              const isActive = pathname === "/dashboard" && (item.search?.tab
+                ? currentTab === item.search.tab
+                : !currentTab);
               return (
                 <button key={item.label} onClick={() => goTo(item.to, item.search)}
-                  className={`relative whitespace-nowrap rounded-xl px-3 py-2 text-xs font-medium transition-all duration-200 ${
+                  className={`whitespace-nowrap rounded-xl px-2 py-2 text-[11px] font-medium transition-all duration-200 ${
                     isActive
                       ? "text-[#07284a] dark:text-white bg-[#07284a]/8 dark:bg-white/10"
                       : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
                   }`}
                 >
-                  <item.icon className="inline size-3.5 mr-1 -mt-0.5" />{item.label}
+                  <item.icon className="inline size-3 mr-0.5 -mt-0.5" />{item.label}
                 </button>
               );
             })}
@@ -116,6 +133,11 @@ export function Navbar() {
           <div className="flex items-center gap-2">
             {user ? (
               <>
+                <button onClick={() => setDark(!dark)}
+                  className="hidden md:inline-flex items-center justify-center rounded-xl size-9 text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
+                  {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                </button>
+                <span className="hidden md:inline text-xs text-muted-foreground truncate max-w-[120px]">{user?.email}</span>
                 {isAdmin && (
                   <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9">
                     <Link to="/admin"><Shield className="mr-1.5 size-4" />Admin</Link>
@@ -165,12 +187,21 @@ export function Navbar() {
           <div className="flex flex-col gap-1 p-3">
             {user ? (
               <>
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 mb-2">
+                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">{user?.email}</span>
+                  <button onClick={() => setDark(!dark)}
+                    className="flex items-center justify-center size-8 rounded-lg hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
+                    {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                  </button>
+                </div>
                 {[
                   ...NAV,
                   ...DASHBOARD_ITEMS,
                 ].map((item, i) => {
                   const Icon = item.icon;
-                  const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                  const active = "search" in item
+                    ? pathname === "/dashboard" && (item.search?.tab ? currentTab === item.search.tab : !currentTab)
+                    : item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
                   return (
                     <button key={item.label} onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
                       className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all w-full text-left ${

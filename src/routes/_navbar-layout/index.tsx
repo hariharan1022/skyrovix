@@ -560,7 +560,7 @@ function Landing() {
 
       {/* ─── APPLY DIALOG ─── */}
       <Dialog open={!!applyDomain} onOpenChange={(o) => { if (!o) { setApplyDomain(null); setApplyDuration(1); setPhotoFile(null); } }}>
-        <DialogContent className="sm:max-w-lg rounded-2xl">
+        <DialogContent className="sm:max-w-lg rounded-2xl max-h-[85dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Apply for {applyDomain && DOMAINS.find((d) => d.slug === applyDomain)?.name}</DialogTitle>
             <DialogDescription>Fill in your details. You'll get your offer letter and ID card instantly.</DialogDescription>
@@ -568,33 +568,33 @@ function Landing() {
           <form onSubmit={submitApplication} className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
               <Label>Full Name</Label>
-              <Input name="full_name" defaultValue={user?.user_metadata?.full_name ?? ""} required className="rounded-xl" />
+              <Input name="full_name" defaultValue={user?.user_metadata?.full_name ?? ""} required className="mt-1 rounded-xl" />
             </div>
             <div>
               <Label>Email</Label>
-              <Input name="email" type="email" defaultValue={user?.email ?? ""} required={!user} disabled={!!user} className="rounded-xl" />
+              <Input name="email" type="email" defaultValue={user?.email ?? ""} required={!user} disabled={!!user} className="mt-1 rounded-xl" />
             </div>
             {!user && (
               <div>
                 <Label>Password</Label>
-                <Input name="password" type="password" minLength={6} required={!user} className="rounded-xl" />
+                <Input name="password" type="password" minLength={6} required={!user} className="mt-1 rounded-xl" />
               </div>
             )}
             <div>
               <Label>Phone</Label>
-              <Input name="phone" type="tel" required className="rounded-xl" />
+              <Input name="phone" type="tel" required className="mt-1 rounded-xl" />
             </div>
             <div>
               <Label>College / University</Label>
-              <Input name="college" required className="rounded-xl" />
+              <Input name="college" required className="mt-1 rounded-xl" />
             </div>
             <div>
               <Label>Course / Branch</Label>
-              <Input name="course" required className="rounded-xl" />
+              <Input name="course" required className="mt-1 rounded-xl" />
             </div>
             <div>
               <Label>Year</Label>
-              <Input name="year" placeholder="e.g. 3rd year" required className="rounded-xl" />
+              <Input name="year" placeholder="e.g. 3rd year" required className="mt-1 rounded-xl" />
             </div>
             <div className="md:col-span-2">
               <Label>Duration</Label>
@@ -604,23 +604,23 @@ function Landing() {
                     key={d.value}
                     type="button"
                     onClick={() => setApplyDuration(d.value)}
-                    className={`rounded-xl border p-3 text-left transition-all ${
+                    className={`rounded-xl border p-2.5 sm:p-3 text-left transition-all ${
                       applyDuration === d.value
                         ? "border-[#07284a] bg-[#07284a]/10 dark:border-[#60a5fa] dark:bg-[#60a5fa]/10 ring-1 ring-[#07284a]/20"
                         : "border-border/60 bg-white/50 dark:bg-[#0f172a]/50 hover:border-border"
                     }`}
                   >
-                    <p className="text-sm font-semibold">{d.label}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{d.desc}</p>
+                    <p className="text-xs sm:text-sm font-semibold">{d.label}</p>
+                    <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5">{d.desc}</p>
                   </button>
                 ))}
               </div>
             </div>
             <div>
               <Label>Profile Photo</Label>
-              <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="rounded-xl" />
+              <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 rounded-xl file:truncate" />
             </div>
-            <Button type="submit" className="md:col-span-2 rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-11" disabled={applying}>
+            <Button type="submit" className="w-full md:col-span-2 rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-11" disabled={applying}>
               {applying ? "Submitting..." : "Submit Application"}
             </Button>
           </form>

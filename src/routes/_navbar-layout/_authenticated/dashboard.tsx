@@ -25,9 +25,9 @@ import {
   BookOpen, GraduationCap, ArrowRight, Sparkles, User, Mail, Building,
   Phone, Calendar, ChevronRight, ExternalLink, Shield, Bell, Trophy,
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
-  ListChecks, Flag, AlertTriangle, Zap, Hash, Circle, Loader2,
+  ListChecks, LayoutDashboard, Flag, AlertTriangle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LogOut,
-  Settings, Moon, Wallet, CreditCard, ScrollText, Briefcase,
+  Settings, Wallet, CreditCard, ScrollText, Briefcase,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -84,6 +84,29 @@ function AnimatedSection({ children, className = "", delay = 0 }: { children: Re
   );
 }
 
+function DashboardHero({ badge, title, description, icon: Icon }: {
+  badge: string; title: string; description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07284a]/8 via-[#07284a]/3 to-blue-400/8 p-8 sm:p-12">
+      <div className="absolute -right-24 -top-24 size-64 rounded-full bg-[#07284a]/15 blur-[120px]" />
+      <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-blue-400/10 blur-[100px]" />
+      <div className="absolute right-1/4 bottom-0 size-32 rounded-full bg-emerald-400/5 blur-[80px]" />
+      <div className="relative flex items-start gap-6">
+        <div className="hidden sm:grid size-16 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-lg shadow-[#07284a]/20">
+          <Icon className="size-8" />
+        </div>
+        <div>
+          <Badge variant="secondary" className="mb-4 px-3 py-1.5 text-xs"><Sparkles className="mr-1.5 size-3" />{badge}</Badge>
+          <h1 className="text-3xl sm:text-4xl font-bold font-display">{title}</h1>
+          <p className="mt-3 max-w-2xl text-sm sm:text-base text-muted-foreground/80 leading-relaxed">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export const Route = createFileRoute("/_navbar-layout/_authenticated/dashboard")({
   validateSearch: (search: Record<string, unknown>) => ({
     tab: typeof search.tab === "string" ? search.tab : undefined,
@@ -104,13 +127,7 @@ type Application = {
 function Dashboard() {
   const { user, loading: authLoading } = useAuth();
   const qc = useQueryClient();
-  const [dark, setDark] = useState(false);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (dark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, [dark]);
 
   const { data: appsList, isLoading } = useQuery({
     queryKey: ["my-applications", user?.id],
@@ -426,6 +443,7 @@ function Dashboard() {
       if (active === "courses") {
         return (
           <div className="space-y-8">
+            <DashboardHero badge="My Courses" title="Topic-Based Courses" description="Learn at your own pace with curated topic-based courses and earn certificates." icon={BookOpen} />
             <LmsCoursesSection
               enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
               completedTopics={completedTopics} topics={topics ?? []}
@@ -440,19 +458,30 @@ function Dashboard() {
       }
       if (active === "profile") {
         return (
-          <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <User className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
-            <p className="font-semibold text-muted-foreground">Apply for an internship to set up your profile.</p>
-            <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+          <div className="space-y-8">
+            <DashboardHero badge="Profile" title="Your Profile" description="Manage your personal details, photo, and internship information." icon={User} />
+            <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <User className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+              <p className="font-semibold text-muted-foreground">Apply for an internship to set up your profile.</p>
+              <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+            </div>
           </div>
         );
       }
       if (active === "tasks" || active === "certificates") {
         return (
-          <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <Briefcase className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
-            <p className="font-semibold text-muted-foreground">Apply for an internship to access this section.</p>
-            <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+          <div className="space-y-8">
+            <DashboardHero
+              badge={active === "tasks" ? "My Tasks" : "Certificates"}
+              title={active === "tasks" ? "Internship Tasks" : "Your Certificates"}
+              description={active === "tasks" ? "Track and complete your internship tasks with mentor feedback." : "View and download your verified internship and course certificates."}
+              icon={active === "tasks" ? ListChecks : Award}
+            />
+            <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <Briefcase className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+              <p className="font-semibold text-muted-foreground">Apply for an internship to access this section.</p>
+              <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+            </div>
           </div>
         );
       }
@@ -482,6 +511,13 @@ function Dashboard() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setDetailView(null)}>
               <ChevronLeft className="size-4" /> Back to Dashboard
             </Button>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07284a]/5 via-transparent to-blue-400/5 p-8 sm:p-10 mb-6">
+              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/10 blur-[80px]" />
+              <div className="absolute -bottom-8 -left-8 size-32 rounded-full bg-blue-400/10 blur-[60px]" />
+              <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> {dd?.name ?? da.domain}</Badge>
+              <h1 className="text-2xl sm:text-3xl font-bold">{dd?.name ?? da.domain}</h1>
+              <p className="mt-2 max-w-2xl text-muted-foreground">{dd?.description ?? ""}</p>
+            </div>
             <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
               <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
               <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
@@ -601,6 +637,13 @@ function Dashboard() {
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setDetailView(null)}>
               <ChevronLeft className="size-4" /> Back to Dashboard
             </Button>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07284a]/5 via-transparent to-blue-400/5 p-8 sm:p-10 mb-6">
+              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/10 blur-[80px]" />
+              <div className="absolute -bottom-8 -left-8 size-32 rounded-full bg-blue-400/10 blur-[60px]" />
+              <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> Course Detail</Badge>
+              <h1 className="text-2xl sm:text-3xl font-bold">{dc?.name ?? "Course"}</h1>
+              <p className="mt-2 max-w-2xl text-muted-foreground">{dc?.domain ? `${dc.domain} · ${dc.total_topics} topics · ${dc.total_tasks} tasks` : ""}</p>
+            </div>
             <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
               <div className="absolute -right-16 -top-16 size-48 rounded-full bg-blue-400/15 blur-[80px]" />
               <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
@@ -654,6 +697,7 @@ function Dashboard() {
 
       return (
         <div className="space-y-6">
+          <DashboardHero badge="Dashboard" title="Your Progress" description="Track your internships, courses, and achievements at a glance." icon={LayoutDashboard} />
           {/* Stats */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
@@ -771,6 +815,7 @@ function Dashboard() {
     if (active === "courses") {
       return (
         <div className="space-y-8">
+          <DashboardHero badge="My Courses" title="Topic-Based Courses" description="Learn at your own pace with curated topic-based courses and earn certificates." icon={BookOpen} />
           <LmsCoursesSection
             enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
             completedTopics={completedTopics} topics={topics ?? []}
@@ -790,6 +835,7 @@ function Dashboard() {
       const totalTasks = internTasks?.length ?? 0;
       return (
         <div className="space-y-6">
+          <DashboardHero badge="My Tasks" title="Internship Tasks" description="Complete your internship tasks and get feedback from your mentor." icon={ListChecks} />
           {/* Internship Header */}
           <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
             <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
@@ -902,6 +948,7 @@ function Dashboard() {
     if (active === "certificates") {
       return (
         <div className="space-y-8">
+          <DashboardHero badge="Certificates" title="Your Certificates" description="View and download your verified internship and course certificates." icon={Award} />
           {/* Internship completion header */}
           <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
             <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
@@ -1112,8 +1159,66 @@ function Dashboard() {
 
     if (active === "profile") {
       return (
-        <div className="space-y-8">
+        <div className="space-y-6">
+          <DashboardHero badge="Profile" title="Your Profile" description="Manage your personal details, photo, and internship information." icon={User} />
+          {/* Profile Header Card */}
           <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-applications", user?.id] })} />
+
+          {/* Detail Grid */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Personal Info */}
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 text-sm font-bold mb-4"><User className="size-4 text-primary" /> Personal Details</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">College</span>
+                  <span className="font-medium text-right">{app.college || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Course</span>
+                  <span className="font-medium text-right">{app.course || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Year</span>
+                  <span className="font-medium text-right">{app.year || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Phone</span>
+                  <span className="font-medium text-right">{app.phone || "—"}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Internship Info */}
+            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
+              <h3 className="flex items-center gap-2 text-sm font-bold mb-4"><Briefcase className="size-4 text-primary" /> Internship Details</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Domain</span>
+                  <span className="font-medium text-right">{domain?.name ?? app.domain}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Intern ID</span>
+                  <span className="font-medium font-mono text-xs text-right">{app.intern_id}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Duration</span>
+                  <span className="font-medium text-right">{app.duration ?? 1} month{app.duration !== 1 ? "s" : ""}</span>
+                </div>
+                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge className={`text-[10px] px-2 py-0.5 rounded-md ${
+                    app.status === "completed" ? "bg-emerald-600 text-white" :
+                    app.status === "ongoing" ? "bg-blue-600 text-white" :
+                    app.status === "approved" ? "bg-amber-500 text-white" :
+                    "bg-gray-500 text-white"
+                  }`}>{app.status}</Badge>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ID Card & Documents */}
           <IDCardSection app={app} />
         </div>
       );
@@ -1123,7 +1228,7 @@ function Dashboard() {
   };
 
   return (
-    <div className={`min-h-screen ${dark ? "dark" : ""}`}>
+    <div className="min-h-screen">
       <div className="flex min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0B1120] dark:to-[#0F172A]">
         {/* Background blobs */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -1137,19 +1242,6 @@ function Dashboard() {
 
         {/* ─── Main Area ─── */}
         <div className="flex-1">
-          {/* Top header */}
-          <header className="sticky top-20 sm:top-24 z-30 flex h-16 items-center justify-between gap-4 border-b border-border/50 bg-white/80 dark:bg-[#0f172a]/80 px-4 backdrop-blur-xl dark:border-white/5">
-            <div className="flex items-center gap-3">
-              <h1 className="text-lg font-bold capitalize">{active === "overview" ? "Dashboard" : active}</h1>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => setDark(!dark)} className="size-8 rounded-lg hover:bg-accent/50 grid place-items-center">
-                {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
-              </button>
-              <span className="text-sm text-muted-foreground">{user?.email}</span>
-            </div>
-          </header>
-
           {/* Content */}
           <main className="mx-auto max-w-6xl px-4 py-8 space-y-8">
             {renderContent()}
@@ -2006,7 +2098,7 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto rounded-2xl border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
+    <Card className="w-full max-w-2xl mx-auto rounded-2xl border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
       <CardHeader><CardTitle>Apply for an Internship</CardTitle><CardDescription>Fill in your details. You'll get your offer letter and digital ID card instantly.</CardDescription></CardHeader>
       <CardContent>
         <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
@@ -2024,8 +2116,8 @@ function ApplyForm({ onCreated }: { onCreated: () => void }) {
           <div><Label>College</Label><Input name="college" required className="mt-1" /></div>
           <div><Label>Course / Branch</Label><Input name="course" required className="mt-1" /></div>
           <div><Label>Year</Label><Input name="year" placeholder="e.g. 3rd year" required className="mt-1" /></div>
-          <div><Label>Profile Photo</Label><Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1" /></div>
-          <Button type="submit" className="md:col-span-2 brand-gradient text-white border-0 h-11 rounded-xl mt-2" disabled={loading}>{loading ? "Submitting…" : "Submit Application"}</Button>
+          <div><Label>Profile Photo</Label><Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 file:truncate" /></div>
+          <Button type="submit" className="w-full md:col-span-2 brand-gradient text-white border-0 h-11 rounded-xl mt-2" disabled={loading}>{loading ? "Submitting…" : "Submit Application"}</Button>
         </form>
       </CardContent>
     </Card>

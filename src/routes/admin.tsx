@@ -24,7 +24,7 @@ import {
   PanelRightOpen, FolderTree, FileQuestion, PieChart,
 } from "lucide-react";
 
-export const Route = createFileRoute("/_navbar-layout/_authenticated/admin")({
+export const Route = createFileRoute("/admin")({
   ssr: false,
   beforeLoad: async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -357,7 +357,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
             >
               <div className="flex items-start justify-between">
                 <div className={`grid size-11 shrink-0 place-items-center rounded-xl ${s.bg}`}>
-                  <Icon className={`size-5 bg-gradient-to-br ${s.color} bg-clip-text text-transparent`} />
+                  <Icon className="size-5 text-[#07284a] dark:text-white" />
                 </div>
                 <span className={`rounded-full bg-gradient-to-br ${s.color} px-2 py-0.5 text-[10px] font-medium text-white`}>{s.change}</span>
               </div>
@@ -1711,90 +1711,172 @@ function StudentsSection() {
 // ══════════════════════════════════════════════
 function AnalyticsSection() {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const chartData = [12, 19, 15, 22, 28, 35, 42, 38, 45, 52, 48, 63];
-  const maxVal = Math.max(...chartData);
+  const cfg = { refetchInterval: 30_000 };
+
+  const { data: regData = [] } = useQuery({
+    queryKey: ["admin-analytics-registrations"],
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("created_at");
+      if (!data || data.length === 0) return [];
+      const map: Record<string, number> = {};
+      data.forEach((p) => {
+        const d = new Date(p.created_at);
+        map[`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`] = (map[`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`] || 0) + 1;
+      });
+      const now = new Date();
+      const result: number[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        result.push(map[`${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`] || 0);
+      }
+      return result;
+    },
+    ...cfg,
+  });
+
+  const { data: domainData = [] } = useQuery({
+    queryKey: ["admin-analytics-domains"],
+    queryFn: async () => {
+      const { data } = await supabase.from("applications").select("domain");
+      if (!data || data.length === 0) return [];
+      const map: Record<string, number> = {};
+      data.forEach((a) => { map[a.domain] = (map[a.domain] || 0) + 1; });
+      const total = Object.values(map).reduce((a, b) => a + b, 0) || 1;
+      return Object.entries(map)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6)
+        .map(([label, count]) => ({ label, pct: Math.round((count / total) * 100) }));
+    },
+    ...cfg,
+  });
+
+  const { data: completion } = useQuery({
+    queryKey: ["admin-analytics-completion"],
+    queryFn: async () => {
+      const { data } = await supabase.from("enrollments").select("status");
+      if (!data || data.length === 0) return { completed: 0, inProgress: 0, pct: 0 };
+      const completed = data.filter((e) => e.status === "completed").length;
+      const total = data.length || 1;
+      return { completed, inProgress: total - completed, pct: Math.round((completed / total) * 100) };
+    },
+    ...cfg,
+  });
+
+  const { data: revenue } = useQuery({
+    queryKey: ["admin-analytics-revenue"],
+    queryFn: async () => {
+      const { data } = await supabase.from("payments").select("amount, created_at").eq("status", "completed");
+      if (!data || data.length === 0) return { data: [], total: 0 };
+      const map: Record<string, number> = {};
+      data.forEach((p) => {
+        const d = new Date(p.created_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        map[key] = (map[key] || 0) + Number(p.amount);
+      });
+      const now = new Date();
+      const result: number[] = [];
+      for (let i = 11; i >= 0; i--) {
+        const m = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        result.push(map[`${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}`] || 0);
+      }
+      return { data: result, total: result.reduce((a, b) => a + b, 0) };
+    },
+    ...cfg,
+  });
+
+  const maxReg = Math.max(...regData, 1);
+  const maxRev = Math.max(...(revenue?.data ?? []), 1);
+
+  const noRegData = regData.length === 0 || regData.every((v) => v === 0);
+  const noDomainData = domainData.length === 0;
+  const noCompletionData = completion && completion.total === 0;
+  const noRevenueData = !revenue || revenue.data.length === 0 || revenue.data.every((v) => v === 0);
 
   return (
     <div className="animate-fade-in-up space-y-6">
       <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Registrations Line Chart */}
+        {/* Registrations */}
         <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
           <h3 className="mb-1 font-semibold">Student Registrations</h3>
-          <p className="mb-4 text-xs text-muted-foreground">Per month (2026)</p>
-          <div className="flex items-end gap-1.5 h-40">
-            {chartData.map((v, i) => (
-              <div key={i} className="group relative flex flex-1 flex-col items-center">
-                <div
-                  className="w-full rounded-t-lg brand-gradient transition-all duration-300 hover:opacity-80"
-                  style={{ height: `${(v / maxVal) * 100}%` }}
-                />
-                <span className="mt-1.5 text-[10px] text-muted-foreground">{months[i]}</span>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-xs text-background opacity-0 transition group-hover:opacity-100">{v}</div>
-              </div>
-            ))}
-          </div>
+          <p className="mb-4 text-xs text-muted-foreground">Per month (last 12 months)</p>
+          {noRegData ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+          ) : (
+            <div className="flex items-end gap-1.5 h-40">
+              {regData.map((v, i) => (
+                <div key={i} className="group relative flex flex-1 flex-col items-center">
+                  <div className="w-full rounded-t-lg brand-gradient transition-all duration-300 hover:opacity-80" style={{ height: `${(v / maxReg) * 100}%` }} />
+                  <span className="mt-1.5 text-[10px] text-muted-foreground">{months[i]}</span>
+                  <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-foreground px-2 py-1 text-xs text-background opacity-0 transition group-hover:opacity-100">{v}</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Domain Popularity Bar Chart */}
+        {/* Domain Popularity */}
         <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
           <h3 className="mb-1 font-semibold">Domain Popularity</h3>
           <p className="mb-4 text-xs text-muted-foreground">Applications per domain</p>
-          <div className="space-y-3">
-            {[
-              { label: "Full Stack", value: 85 },
-              { label: "AI/ML", value: 62 },
-              { label: "UI/UX", value: 48 },
-              { label: "Data Science", value: 41 },
-              { label: "Cyber Security", value: 35 },
-            ].map((d) => (
-              <div key={d.label}>
-                <div className="flex items-center justify-between text-xs mb-1">
-                  <span>{d.label}</span>
-                  <span className="font-semibold">{d.value}%</span>
+          {noDomainData ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+          ) : (
+            <div className="space-y-3">
+              {domainData.map((d) => (
+                <div key={d.label}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span>{d.label}</span>
+                    <span className="font-semibold">{d.pct}%</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
+                    <div className="h-full rounded-full brand-gradient transition-all" style={{ width: `${d.pct}%` }} />
+                  </div>
                 </div>
-                <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
-                  <div className="h-full rounded-full brand-gradient transition-all" style={{ width: `${d.value}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Course Completion Donut */}
+        {/* Course Completion */}
         <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
           <h3 className="mb-1 font-semibold">Course Completion Rate</h3>
           <p className="mb-4 text-xs text-muted-foreground">Enrolled vs completed</p>
-          <div className="flex items-center justify-center gap-8">
-            <div className="relative grid size-36 place-items-center">
-              <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="42" fill="none" stroke="oklch(0.9 0.01 270)" strokeWidth="8" />
-                <circle cx="50" cy="50" r="42" fill="none" stroke="oklch(0.55 0.22 295)" strokeWidth="8" strokeDasharray={`${78 * 2.64} ${100 * 2.64}`} strokeLinecap="round" />
-              </svg>
-              <span className="font-display text-3xl font-bold">78%</span>
+          {noCompletionData ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+          ) : (
+            <div className="flex items-center justify-center gap-8">
+              <div className="relative grid size-36 place-items-center">
+                <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="oklch(0.9 0.01 270)" strokeWidth="8" />
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="oklch(0.55 0.22 295)" strokeWidth="8" strokeDasharray={`${(completion?.pct ?? 0) * 2.64} ${100 * 2.64}`} strokeLinecap="round" />
+                </svg>
+                <span className="font-display text-3xl font-bold">{completion?.pct ?? 0}%</span>
+              </div>
+              <div className="space-y-2 text-xs">
+                <div className="flex items-center gap-2"><span className="size-3 rounded-sm brand-gradient" /><span>Completed: {completion?.completed ?? 0}</span></div>
+                <div className="flex items-center gap-2"><span className="size-3 rounded-sm bg-secondary" /><span>In Progress: {completion?.inProgress ?? 0}</span></div>
+              </div>
             </div>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2"><span className="size-3 rounded-sm brand-gradient" /><span>Completed: 42</span></div>
-              <div className="flex items-center gap-2"><span className="size-3 rounded-sm bg-secondary" /><span>In Progress: 12</span></div>
-            </div>
-          </div>
+          )}
         </div>
 
-        {/* Revenue Area Chart */}
+        {/* Revenue */}
         <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
           <h3 className="mb-1 font-semibold">Revenue Overview</h3>
-          <p className="mb-4 text-xs text-muted-foreground">₹ {chartData.reduce((a, b) => a + b, 0) * 100} total</p>
-          <div className="flex items-end gap-1.5 h-36">
-            {chartData.map((v, i) => (
-              <div key={i} className="flex flex-1 flex-col items-center">
-                <div
-                  className="w-full rounded-t-lg bg-gradient-to-t from-blue-500 to-[#07284a] opacity-80 transition-all hover:opacity-100"
-                  style={{ height: `${(v / maxVal) * 100}%` }}
-                />
-                <span className="mt-1.5 text-[10px] text-muted-foreground">{months[i]}</span>
-              </div>
-            ))}
-          </div>
+          <p className="mb-4 text-xs text-muted-foreground">{noRevenueData ? "No data available" : `₹ ${(revenue?.total ?? 0).toLocaleString("en-IN")} total`}</p>
+          {noRevenueData ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+          ) : (
+            <div className="flex items-end gap-1.5 h-36">
+              {(revenue?.data ?? []).map((v, i) => (
+                <div key={i} className="flex flex-1 flex-col items-center">
+                  <div className="w-full rounded-t-lg bg-gradient-to-t from-blue-500 to-[#07284a] opacity-80 transition-all hover:opacity-100" style={{ height: `${(v / maxRev) * 100}%` }} />
+                  <span className="mt-1.5 text-[10px] text-muted-foreground">{months[i]}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

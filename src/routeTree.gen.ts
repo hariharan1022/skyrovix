@@ -16,6 +16,7 @@ import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as CoursesRouteImport } from './routes/courses'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as NavbarLayoutRouteImport } from './routes/_navbar-layout'
 import { Route as DomainsIndexRouteImport } from './routes/domains.index'
 import { Route as CoursesIndexRouteImport } from './routes/courses.index'
@@ -25,8 +26,8 @@ import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as NavbarLayoutAboutRouteImport } from './routes/_navbar-layout/about'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
 import { Route as CoursesSlugQuizRouteImport } from './routes/courses.$slug_.quiz'
+import { Route as CoursesSlugDetailsRouteImport } from './routes/courses.$slug_.details'
 import { Route as NavbarLayoutAuthenticatedDashboardRouteImport } from './routes/_navbar-layout/_authenticated/dashboard'
-import { Route as NavbarLayoutAuthenticatedAdminRouteImport } from './routes/_navbar-layout/_authenticated/admin'
 
 const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
   id: '/verify-certificate',
@@ -61,6 +62,11 @@ const ContactRoute = ContactRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NavbarLayoutRoute = NavbarLayoutRouteImport.update({
@@ -107,21 +113,21 @@ const CoursesSlugQuizRoute = CoursesSlugQuizRouteImport.update({
   path: '/$slug/quiz',
   getParentRoute: () => CoursesRoute,
 } as any)
+const CoursesSlugDetailsRoute = CoursesSlugDetailsRouteImport.update({
+  id: '/$slug_/details',
+  path: '/$slug/details',
+  getParentRoute: () => CoursesRoute,
+} as any)
 const NavbarLayoutAuthenticatedDashboardRoute =
   NavbarLayoutAuthenticatedDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
     getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
   } as any)
-const NavbarLayoutAuthenticatedAdminRoute =
-  NavbarLayoutAuthenticatedAdminRouteImport.update({
-    id: '/admin',
-    path: '/admin',
-    getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof NavbarLayoutIndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRouteWithChildren
@@ -134,11 +140,12 @@ export interface FileRoutesByFullPath {
   '/domains/$slug': typeof DomainsSlugRoute
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
-  '/admin': typeof NavbarLayoutAuthenticatedAdminRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/courses/$slug/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesByTo {
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
@@ -150,13 +157,14 @@ export interface FileRoutesByTo {
   '/domains/$slug': typeof DomainsSlugRoute
   '/courses': typeof CoursesIndexRoute
   '/domains': typeof DomainsIndexRoute
-  '/admin': typeof NavbarLayoutAuthenticatedAdminRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/courses/$slug/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_navbar-layout': typeof NavbarLayoutRouteWithChildren
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/courses': typeof CoursesRouteWithChildren
@@ -171,14 +179,15 @@ export interface FileRoutesById {
   '/_navbar-layout/': typeof NavbarLayoutIndexRoute
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
-  '/_navbar-layout/_authenticated/admin': typeof NavbarLayoutAuthenticatedAdminRoute
   '/_navbar-layout/_authenticated/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/courses/$slug_/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug_/quiz': typeof CoursesSlugQuizRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
     | '/contact'
     | '/courses'
@@ -191,11 +200,12 @@ export interface FileRouteTypes {
     | '/domains/$slug'
     | '/courses/'
     | '/domains/'
-    | '/admin'
     | '/dashboard'
+    | '/courses/$slug/details'
     | '/courses/$slug/quiz'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/admin'
     | '/auth'
     | '/contact'
     | '/privacy'
@@ -207,12 +217,13 @@ export interface FileRouteTypes {
     | '/domains/$slug'
     | '/courses'
     | '/domains'
-    | '/admin'
     | '/dashboard'
+    | '/courses/$slug/details'
     | '/courses/$slug/quiz'
   id:
     | '__root__'
     | '/_navbar-layout'
+    | '/admin'
     | '/auth'
     | '/contact'
     | '/courses'
@@ -227,13 +238,14 @@ export interface FileRouteTypes {
     | '/_navbar-layout/'
     | '/courses/'
     | '/domains/'
-    | '/_navbar-layout/_authenticated/admin'
     | '/_navbar-layout/_authenticated/dashboard'
+    | '/courses/$slug_/details'
     | '/courses/$slug_/quiz'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   NavbarLayoutRoute: typeof NavbarLayoutRouteWithChildren
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ContactRoute: typeof ContactRoute
   CoursesRoute: typeof CoursesRouteWithChildren
@@ -292,6 +304,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_navbar-layout': {
@@ -357,6 +376,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugQuizRouteImport
       parentRoute: typeof CoursesRoute
     }
+    '/courses/$slug_/details': {
+      id: '/courses/$slug_/details'
+      path: '/$slug/details'
+      fullPath: '/courses/$slug/details'
+      preLoaderRoute: typeof CoursesSlugDetailsRouteImport
+      parentRoute: typeof CoursesRoute
+    }
     '/_navbar-layout/_authenticated/dashboard': {
       id: '/_navbar-layout/_authenticated/dashboard'
       path: '/dashboard'
@@ -364,24 +390,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedDashboardRouteImport
       parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
     }
-    '/_navbar-layout/_authenticated/admin': {
-      id: '/_navbar-layout/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof NavbarLayoutAuthenticatedAdminRouteImport
-      parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
-    }
   }
 }
 
 interface NavbarLayoutAuthenticatedRouteRouteChildren {
-  NavbarLayoutAuthenticatedAdminRoute: typeof NavbarLayoutAuthenticatedAdminRoute
   NavbarLayoutAuthenticatedDashboardRoute: typeof NavbarLayoutAuthenticatedDashboardRoute
 }
 
 const NavbarLayoutAuthenticatedRouteRouteChildren: NavbarLayoutAuthenticatedRouteRouteChildren =
   {
-    NavbarLayoutAuthenticatedAdminRoute: NavbarLayoutAuthenticatedAdminRoute,
     NavbarLayoutAuthenticatedDashboardRoute:
       NavbarLayoutAuthenticatedDashboardRoute,
   }
@@ -411,12 +428,14 @@ const NavbarLayoutRouteWithChildren = NavbarLayoutRoute._addFileChildren(
 interface CoursesRouteChildren {
   CoursesSlugRoute: typeof CoursesSlugRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  CoursesSlugDetailsRoute: typeof CoursesSlugDetailsRoute
   CoursesSlugQuizRoute: typeof CoursesSlugQuizRoute
 }
 
 const CoursesRouteChildren: CoursesRouteChildren = {
   CoursesSlugRoute: CoursesSlugRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  CoursesSlugDetailsRoute: CoursesSlugDetailsRoute,
   CoursesSlugQuizRoute: CoursesSlugQuizRoute,
 }
 
@@ -438,6 +457,7 @@ const DomainsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   NavbarLayoutRoute: NavbarLayoutRouteWithChildren,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ContactRoute: ContactRoute,
   CoursesRoute: CoursesRouteWithChildren,

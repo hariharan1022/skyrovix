@@ -11,7 +11,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import {
   BookOpen, Layers, Monitor, Server, BarChart3, Brain, Palette,
-  Code2, Shield, TrendingUp, Database, GraduationCap, Trophy, Clock, Star, Users, ArrowRight, CheckCircle2, Sparkles, Search,
+  Code2, Shield, TrendingUp, Database, GraduationCap, Trophy, Clock, Star, Users, ArrowRight, CheckCircle2, Sparkles, Search, Eye, RotateCcw,
 } from "lucide-react";
 import { getLocalCourseContent, getLocalCourseSlugs, getLocalTopicCount } from "@/lib/course-content";
 import { AuroraBackground } from "@/components/AuroraBackground";
@@ -32,32 +32,36 @@ export const Route = createFileRoute("/courses/")({
   component: CoursesPage,
 });
 
-type CourseRow = {
+export type CourseRow = {
   id: string; slug: string; name: string; short_description: string;
   icon: string; domain: string; total_topics: number; total_tasks: number;
   quiz_marks: number; duration_weeks: number; difficulty: string;
 };
 
-const DIFFICULTY_COLORS: Record<string, string> = {
+export const DIFFICULTY_COLORS: Record<string, string> = {
   Beginner: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-300",
   Intermediate: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-300",
   Advanced: "bg-red-100 text-red-700 border-red-200 dark:bg-red-950/30 dark:text-red-300",
 };
 
-const COURSE_HERO: Record<string, { gradient: string; icon: string }> = {
-  python: { gradient: "from-blue-600 to-cyan-500", icon: "Py" },
-  java: { gradient: "from-red-600 to-orange-500", icon: "Jv" },
-  html: { gradient: "from-orange-500 to-red-500", icon: "</>" },
-  css: { gradient: "from-blue-500 to-[#07284a]", icon: "#" },
-  javascript: { gradient: "from-yellow-500 to-amber-600", icon: "JS" },
-  php: { gradient: "from-indigo-500 to-[#07284a]", icon: "PHP" },
-  sql: { gradient: "from-cyan-500 to-blue-600", icon: "SQL" },
-  mysql: { gradient: "from-cyan-600 to-blue-700", icon: "SQL" },
-  django: { gradient: "from-green-700 to-green-500", icon: "Dj" },
-  numpy: { gradient: "from-blue-600 to-indigo-500", icon: "Np" },
-  pandas: { gradient: "from-indigo-600 to-purple-600", icon: "Pd" },
-  scipy: { gradient: "from-teal-600 to-cyan-500", icon: "Sc" },
-  matplotlib: { gradient: "from-orange-500 to-rose-500", icon: "Mp" },
+const COURSE_IMAGES: Record<string, string> = {
+  python: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&h=338&fit=crop&auto=format",
+  java: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=338&fit=crop&auto=format",
+  html: "https://images.unsplash.com/photo-1621839673705-6617adf9e890?w=600&h=338&fit=crop&auto=format",
+  css: "https://images.unsplash.com/photo-1523437113738-bbd3cc89fb19?w=600&h=338&fit=crop&auto=format",
+  javascript: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&h=338&fit=crop&auto=format",
+  php: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=338&fit=crop&auto=format",
+  sql: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&h=338&fit=crop&auto=format",
+  mysql: "https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&h=338&fit=crop&auto=format",
+  django: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=338&fit=crop&auto=format",
+  numpy: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
+  pandas: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
+  scipy: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
+  matplotlib: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
+  fullstack: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=338&fit=crop&auto=format",
+  frontend: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=338&fit=crop&auto=format",
+  backend: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=338&fit=crop&auto=format",
+  datascience: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
 };
 
 function CoursesPage() {
@@ -169,53 +173,83 @@ function CoursesPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered?.map((course) => {
               const enrolled = enrollMap.get(course.id);
-              const hero = COURSE_HERO[course.slug] ?? { gradient: "from-[#07284a] to-blue-600", icon: "CD" };
               const Icon = ICONS[course.icon] ?? BookOpen;
               return (
-                <Link
+                <div
                   key={course.id}
-                  to="/courses/$slug" params={{ slug: course.slug }}
-                  className="group block rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 overflow-hidden transition-all card-elevated hover:card-elevated-hover"
+                  className="group block rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5"
                 >
-                  <div className={`h-32 bg-gradient-to-br ${hero.gradient} p-5 flex items-end justify-between`}>
-                    <div>
-                      <div className="text-3xl font-bold text-white/90">{hero.icon}</div>
-                      <h3 className="text-lg font-bold text-white mt-1">{course.name}</h3>
+                  {/* Banner Image */}
+                  <Link to="/courses/$slug/details" params={{ slug: course.slug }} className="block relative h-36 overflow-hidden bg-gradient-to-br from-[#07284a] to-blue-900">
+                    <img
+                      src={COURSE_IMAGES[course.slug]}
+                      alt={course.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                      onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                    <div className="absolute top-3 right-3 flex gap-1.5">
+                      {course.difficulty && (
+                        <Badge className={`text-[10px] px-2.5 py-1 border-0 ${DIFFICULTY_COLORS[course.difficulty] ?? "bg-white/20 text-white"}`}>
+                          {course.difficulty}
+                        </Badge>
+                      )}
+                      <Badge className="bg-white/20 backdrop-blur text-white border-0 text-[10px] px-2.5 py-1">Course</Badge>
                     </div>
-                    <div className="grid size-10 place-items-center rounded-xl bg-white/20 backdrop-blur text-white">
-                      <Icon className="size-5" />
+                  </Link>
+                  {/* Content */}
+                  <div className="p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#07284a]/10 dark:bg-[#1d4ed8]/10 text-[#07284a] dark:text-[#60a5fa]">
+                        <Icon className="size-5" />
+                      </div>
+                      <Link to="/courses/$slug/details" params={{ slug: course.slug }}>
+                        <h3 className="text-lg font-bold transition-colors hover:text-[#07284a] dark:hover:text-[#60a5fa]">{course.name}</h3>
+                      </Link>
                     </div>
-                  </div>
-                  <div className="p-5 space-y-3">
-                    <p className="text-xs text-muted-foreground line-clamp-2">{course.short_description}</p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className={`text-[10px] border rounded-full ${DIFFICULTY_COLORS[course.difficulty] ?? ""}`}>{course.difficulty}</Badge>
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1"><BookOpen className="size-3" />{course.total_topics} topics</span>
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Clock className="size-3" />{course.duration_weeks} weeks</span>
+                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{course.short_description}</p>
+                    <div className="flex items-center gap-3 flex-wrap text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1"><BookOpen className="size-3.5" />{course.total_topics} topics</span>
+                      <span className="flex items-center gap-1"><Clock className="size-3.5" />{course.duration_weeks} weeks</span>
+                      <span className="flex items-center gap-1"><Trophy className="size-3.5" />Certificate</span>
                     </div>
                     {enrolled ? (
-                      <div className="space-y-2">
+                      <div className="space-y-3">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-muted-foreground">{enrolled.status === "completed" ? "Completed" : "In Progress"}</span>
                           <span className="font-semibold">{enrolled.progress_percent}%</span>
                         </div>
                         <Progress value={enrolled.progress_percent} className="h-1.5" />
-                        <div className="w-full rounded-xl h-9 text-xs gap-1 bg-[#07284a] dark:bg-[#1d4ed8] text-white flex items-center justify-center font-medium shadow-sm">
-                          {enrolled.status === "completed" ? <CheckCircle2 className="size-3.5" /> : <ArrowRight className="size-3.5" />}
-                          {enrolled.status === "completed" ? "Completed" : "Continue Learning"}
+                        <div className="flex gap-2">
+                          <Button variant="outline" className="flex-1 h-10 rounded-xl text-sm gap-1.5 border-border/60" asChild>
+                            <Link to="/courses/$slug/details" params={{ slug: course.slug }}>
+                              <Eye className="size-4" /> View Course
+                            </Link>
+                          </Button>
+                          <Button className="flex-1 h-10 rounded-xl text-sm gap-1.5 bg-[#07284a] hover:bg-[#07284a]/90 dark:bg-[#1d4ed8] dark:hover:bg-[#1d4ed8]/90 text-white border-0 shadow-sm" asChild>
+                            <Link to={`/courses/${course.slug}`}>
+                              {enrolled.status === "completed" ? <RotateCcw className="size-4" /> : <ArrowRight className="size-4" />}
+                              {enrolled.status === "completed" ? "Review Course" : "Continue Learning"}
+                            </Link>
+                          </Button>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 pt-1">
-                        <Button size="sm" className="rounded-xl h-10 text-xs gap-1 bg-[#07284a] dark:bg-[#1d4ed8] text-white border-0 shadow-sm shadow-[#07284a]/20"
-                          onClick={(e) => handleEnroll(e, course.id, course.slug)}>
-                          <Sparkles className="size-3.5" /> Enroll Free
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="flex-1 h-10 rounded-xl text-sm gap-1.5 border-border/60" asChild>
+                          <Link to="/courses/$slug/details" params={{ slug: course.slug }}>
+                            <Eye className="size-4" /> View Course
+                          </Link>
                         </Button>
-                        <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Trophy className="size-3" />Certificate</span>
+                        <Button className="flex-1 h-10 rounded-xl text-sm gap-1.5 bg-[#07284a] hover:bg-[#07284a]/90 dark:bg-[#1d4ed8] dark:hover:bg-[#1d4ed8]/90 text-white border-0 shadow-sm transition-all hover:shadow-md hover:shadow-[#07284a]/30"
+                          onClick={(e) => handleEnroll(e, course.id, course.slug)}>
+                          <Sparkles className="size-4" /> Enroll Now
+                        </Button>
                       </div>
                     )}
                   </div>
-                </Link>
+                </div>
               );
             })}
           </div>
