@@ -165,7 +165,7 @@ export const STRUCTURED_DATA_ORG = {
     "@type": "PostalAddress",
     addressCountry: "IN",
   },
-  sameAs: [],
+  sameAs: ["https://www.linkedin.com/company/skyrovix/", "https://www.instagram.com/skyrovix?igsh=ZXY2ZXdxZTM5czNr"],
   founder: [
     {
       "@type": "Person",
@@ -235,5 +235,5 @@ export const STRUCTURED_DATA_ORG_LOCALE = {
     email: COMPANY.email,
     availableLanguage: "English",
   },
-  sameAs: [],
+  sameAs: ["https://www.linkedin.com/company/skyrovix/", "https://www.instagram.com/skyrovix?igsh=ZXY2ZXdxZTM5czNr"],
 };

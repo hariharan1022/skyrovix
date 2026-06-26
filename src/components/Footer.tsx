@@ -17,10 +17,10 @@ export function Footer() {
               A task-based virtual internship platform by Skyrovix — build real skills, earn a recognised certificate.
             </p>
             <nav aria-label="Social media links" className="flex items-center gap-2.5 pt-2">
-              <a href="https://www.linkedin.com/in/hariharan-s-92b566381" target="_blank" rel="noopener noreferrer" aria-label="Skyrovix on LinkedIn" className="grid size-9 place-items-center rounded-xl border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 text-muted-foreground hover:text-[#0A66C2] hover:border-[#0A66C2]/30 hover:bg-[#0A66C2]/5 transition-all">
+              <a href="https://www.linkedin.com/company/skyrovix/" target="_blank" rel="noopener noreferrer" aria-label="Skyrovix on LinkedIn" className="grid size-9 place-items-center rounded-xl border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 text-muted-foreground hover:text-[#0A66C2] hover:border-[#0A66C2]/30 hover:bg-[#0A66C2]/5 transition-all">
                 <Linkedin className="size-4" />
               </a>
-              <a href="https://www.instagram.com/skyrovix_web" target="_blank" rel="noopener noreferrer" aria-label="Skyrovix on Instagram" className="grid size-9 place-items-center rounded-xl border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 text-muted-foreground hover:text-[#E4405F] hover:border-[#E4405F]/30 hover:bg-[#E4405F]/5 transition-all">
+              <a href="https://www.instagram.com/skyrovix?igsh=ZXY2ZXdxZTM5czNr" target="_blank" rel="noopener noreferrer" aria-label="Skyrovix on Instagram" className="grid size-9 place-items-center rounded-xl border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 text-muted-foreground hover:text-[#E4405F] hover:border-[#E4405F]/30 hover:bg-[#E4405F]/5 transition-all">
                 <Instagram className="size-4" />
               </a>
               <a href="https://wa.me/919940773204" target="_blank" rel="noopener noreferrer" aria-label="Skyrovix on WhatsApp" className="grid size-9 place-items-center rounded-xl border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 text-muted-foreground hover:text-[#25D366] hover:border-[#25D366]/30 hover:bg-[#25D366]/5 transition-all">
