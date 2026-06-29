@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { generateCertId, getDomain, COMPANY, DOMAINS } from "@/lib/constants";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
+import { PromotionsSection } from "@/components/admin/PromotionsSection";
 import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
@@ -21,7 +22,7 @@ import {
   ChevronRight, ChevronLeft, Clock, TrendingUp, UserPlus, Wallet,
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
-  PanelRightOpen, FolderTree, FileQuestion, PieChart,
+  PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -47,6 +48,7 @@ const SIDEBAR_ITEMS = [
   { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
   { id: "quiz", label: "Quiz Management", icon: Brain },
   { id: "payments", label: "Payments", icon: Wallet },
+  { id: "promotions", label: "Promotions", icon: Percent },
   { id: "certificates", label: "Certificates", icon: Award },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "email-logs", label: "Email Logs", icon: Mail },
@@ -261,6 +263,7 @@ function AdminPanel() {
             {active === "submissions" && <SubmissionsSection />}
             {active === "quiz" && <QuizSection />}
             {active === "payments" && <PaymentsSection />}
+            {active === "promotions" && <PromotionsSection />}
             {active === "certificates" && <CertificatesSection />}
             {active === "students" && <StudentsSection />}
             {active === "email-logs" && <EmailLogsSection />}

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DOMAINS, COMPANY, DURATIONS, durationConfig, generateInternId } from "@/lib/constants";
+import { validateCoupon } from "@/lib/coupons";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { useRecentReviews, computeStats } from "@/lib/reviews";
@@ -77,6 +78,9 @@ function Landing() {
   const [applyDuration, setApplyDuration] = useState(1);
   const [applying, setApplying] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState<{ code: string; discount: string } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
   const { data: courses } = useQuery({
     queryKey: ["home-courses"],
@@ -90,6 +94,31 @@ function Landing() {
       return data ?? [];
     },
   });
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    try {
+      const result = await validateCoupon(couponCode.trim(), applyDomain ?? undefined);
+      if (result.valid) {
+        setCouponApplied({ code: result.code!, discount: result.discountType === "percentage" ? `${result.discountValue}% OFF` : `₹${result.discountValue} OFF` });
+        toast.success(`Coupon applied! ${result.discountType === "percentage" ? `${result.discountValue}%` : `₹${result.discountValue}`} discount`);
+      } else {
+        setCouponApplied(null);
+        toast.error(result.error || "Invalid coupon");
+      }
+    } catch {
+      toast.error("Failed to validate coupon");
+      setCouponApplied(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("");
+    setCouponApplied(null);
+  };
 
   const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -135,9 +164,10 @@ function Landing() {
         course: String(fd.get("course")),
         year: String(fd.get("year")),
         photo_url,
+        coupon_code: couponApplied?.code ?? null,
         status: "approved" as const,
       };
-      const { error: insertError } = await supabase.from("applications").insert(payload);
+      const { error: insertError } = await (supabase.from("applications" as any) as any).insert(payload);
       if (insertError) throw insertError;
 
       await supabase.from("profiles").upsert({
@@ -561,7 +591,7 @@ function Landing() {
       </section>
 
       {/* ─── APPLY DIALOG ─── */}
-      <Dialog open={!!applyDomain} onOpenChange={(o) => { if (!o) { setApplyDomain(null); setApplyDuration(1); setPhotoFile(null); } }}>
+      <Dialog open={!!applyDomain} onOpenChange={(o) => { if (!o) { setApplyDomain(null); setApplyDuration(1); setPhotoFile(null); setCouponCode(""); setCouponApplied(null); } }}>
         <DialogContent className="sm:max-w-lg rounded-2xl max-h-[85dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Apply for {applyDomain && DOMAINS.find((d) => d.slug === applyDomain)?.name}</DialogTitle>
@@ -621,6 +651,31 @@ function Landing() {
             <div>
               <Label>Profile Photo</Label>
               <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 rounded-xl file:truncate" />
+            </div>
+            <div className="md:col-span-2">
+              {couponApplied ? (
+                <div className="flex items-center justify-between rounded-xl border border-green-200 dark:border-green-800/30 bg-green-50 dark:bg-green-950/20 p-3">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="size-4 text-green-500" />
+                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">Coupon {couponApplied.code} — {couponApplied.discount}</span>
+                  </div>
+                  <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={handleRemoveCoupon}>Remove</Button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Have a coupon code? Enter it here"
+                    className="mt-1 flex-1 rounded-xl"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
+                  />
+                  <Button type="button" size="sm" variant="outline" className="mt-1 h-10 rounded-xl gap-1" onClick={handleApplyCoupon} disabled={!couponCode.trim() || validatingCoupon}>
+                    {validatingCoupon ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
+                    Apply
+                  </Button>
+                </div>
+              )}
             </div>
             <Button type="submit" className="w-full md:col-span-2 rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-11" disabled={applying}>
               {applying ? "Submitting..." : "Submit Application"}

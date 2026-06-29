@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { DOMAINS, PAYMENT, COMPANY, generateInternId, getDomain } from "@/lib/constants";
+import { validateCoupon, calculateDiscountedAmount, formatDiscount } from "@/lib/coupons";
+import type { CouponResult } from "@/lib/coupons";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { IDCard } from "@/components/IDCard";
@@ -394,6 +396,46 @@ function Dashboard() {
   const [utrNumber, setUtrNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [submittingPayment, setSubmittingPayment] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
+  const [autoApplied, setAutoApplied] = useState(false);
+
+  // Auto-apply coupon from application record
+  useEffect(() => {
+    if (app?.coupon_code && !autoApplied && !couponResult) {
+      setAutoApplied(true);
+      setCouponCode(app.coupon_code);
+      validateCoupon(app.coupon_code, app.domain).then((result) => {
+        if (result.valid) setCouponResult(result);
+      });
+    }
+  }, [app?.coupon_code, app?.domain, autoApplied]);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setValidatingCoupon(true);
+    try {
+      const result = await validateCoupon(couponCode.trim(), app?.domain);
+      if (result.valid) {
+        setCouponResult(result);
+        toast.success(`Coupon applied! You save ₹${result.discountAmount}`);
+      } else {
+        setCouponResult(null);
+        toast.error(result.error || "Invalid coupon");
+      }
+    } catch {
+      toast.error("Failed to validate coupon");
+      setCouponResult(null);
+    } finally {
+      setValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode("");
+    setCouponResult(null);
+  };
 
   const handlePaymentSubmit = async () => {
     if (!app || !utrNumber.trim()) return;
@@ -413,17 +455,21 @@ function Dashboard() {
           toast.warning("Screenshot upload failed, but payment will still be submitted.");
         }
       }
-      const { error } = await supabase.from("payments").insert({
+      const { error } = await (supabase.from("payments" as any) as any).insert({
         application_id: app.id,
         utr_number: utrNumber.trim(),
         screenshot_url: screenshotUrl,
-        amount: PAYMENT.amount,
+        amount: couponResult?.finalAmount ?? PAYMENT.amount,
+        coupon_code: couponResult?.code ?? null,
+        discount_amount: couponResult?.discountAmount ?? 0,
         status: "pending",
       });
       if (error) throw error;
       toast.success("Payment submitted successfully! Awaiting verification.");
       setUtrNumber("");
       setPaymentScreenshot(null);
+      setCouponCode("");
+      setCouponResult(null);
       qc.invalidateQueries({ queryKey: ["all-payments"] });
     } catch (err: any) {
       toast.error(err.message || "Failed to submit payment");
@@ -1017,13 +1063,13 @@ function Dashboard() {
                   <Wallet className="size-5 text-amber-600 shrink-0 mt-0.5" />
                   <div className="text-sm">
                     <p className="font-semibold text-amber-800 dark:text-amber-300">Complete Payment to Get Certificate</p>
-                    <p className="text-amber-700 dark:text-amber-400 mt-1">Pay ₹{PAYMENT.amount} via UPI and submit the details below.</p>
+                    <p className="text-amber-700 dark:text-amber-400 mt-1">Pay {couponResult ? <><span className="line-through">₹{PAYMENT.amount}</span> <span className="text-green-600 font-bold">₹{couponResult.finalAmount}</span></> : <>₹{PAYMENT.amount}</>} via UPI and submit the details below.</p>
                   </div>
                 </div>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="rounded-xl border border-border/40 bg-secondary/30 p-4 flex flex-col items-center gap-3">
                     <p className="text-xs font-semibold text-muted-foreground">Scan to Pay</p>
-                    <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${PAYMENT.amount}&cu=${PAYMENT.currency}`} size={140} />
+                    <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${couponResult?.finalAmount ?? PAYMENT.amount}&cu=${PAYMENT.currency}`} size={140} />
                     <div className="text-center">
                       <p className="text-xs font-mono font-bold">{PAYMENT.upiId}</p>
                       <p className="text-[10px] text-muted-foreground">{PAYMENT.payeeName}</p>
@@ -1035,6 +1081,34 @@ function Dashboard() {
                       }}>
                       <Copy className="size-3" /> Copy UPI ID
                     </Button>
+                  </div>
+                  {/* Coupon Code */}
+                  <div className="rounded-xl border border-border/40 bg-secondary/30 p-3 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground">Have a coupon code?</p>
+                    {couponResult ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="size-4 text-green-500" />
+                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">{couponResult.code}</span>
+                          <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300">
+                            {couponResult.discountType === "percentage" ? `${couponResult.discountValue}% OFF` : `₹${couponResult.discountValue} OFF`}
+                          </Badge>
+                        </div>
+                        <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-muted-foreground" onClick={handleRemoveCoupon}>Remove</Button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Enter code" className="h-8 text-xs flex-1"
+                          value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
+                        />
+                        <Button size="sm" variant="outline" className="h-8 text-xs rounded-lg gap-1" onClick={handleApplyCoupon} disabled={!couponCode.trim() || validatingCoupon}>
+                          {validatingCoupon ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
+                          Apply
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-4">
                     <div>
@@ -1051,7 +1125,7 @@ function Dashboard() {
                       disabled={!utrNumber.trim() || submittingPayment}
                       onClick={handlePaymentSubmit}>
                       {submittingPayment ? <Loader2 className="size-3.5 animate-spin" /> : <CreditCard className="size-3.5" />}
-                      {submittingPayment ? "Submitting..." : `Pay ₹${PAYMENT.amount}`}
+                      {submittingPayment ? "Submitting..." : `Pay ₹${couponResult?.finalAmount ?? PAYMENT.amount}`}
                     </Button>
                   </div>
                 </div>
