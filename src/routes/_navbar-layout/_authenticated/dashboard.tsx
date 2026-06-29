@@ -482,8 +482,6 @@ function Dashboard() {
     if (!app || !couponResult) return;
     setSubmittingPayment(true);
     try {
-      const cert_id = generateCertId();
-      const hash = crypto.randomUUID().replace(/-/g, "").slice(0, 32);
       const { error: payErr } = await (supabase.from("payments" as any) as any).insert({
         application_id: app.id,
         utr_number: "FREE_COUPON",
@@ -495,13 +493,9 @@ function Dashboard() {
         verified_at: new Date().toISOString(),
       });
       if (payErr) throw payErr;
-      const { error: certErr } = await supabase.from("certificates").insert({
-        application_id: app.id,
-        certificate_id: cert_id,
-        verification_hash: hash,
-      });
-      if (certErr) throw certErr;
-      toast.success(`Certificate ${cert_id} generated!`);
+      const { data: certId, error: certErr } = await supabase.rpc("generate_certificate", { p_application_id: app.id });
+      if (certErr || !certId) throw certErr || new Error("Failed to generate certificate");
+      toast.success(`Certificate ${certId} generated!`);
       setCouponCode("");
       setCouponResult(null);
       qc.invalidateQueries({ queryKey: ["all-payments"] });
