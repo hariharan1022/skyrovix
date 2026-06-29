@@ -430,11 +430,7 @@ function Dashboard() {
       const result = await validateCoupon(couponCode.trim(), app?.domain);
       if (result.valid) {
         setCouponResult(result);
-        if (result.finalAmount === 0 && app) {
-          await doFreeCertificate(result, app.id);
-        } else {
-          toast.success(`Coupon applied! You save ₹${result.discountAmount}`);
-        }
+        toast.success(`Coupon applied! You save ₹${result.discountAmount}`);
       } else {
         setCouponResult(null);
         toast.error(result.error || "Invalid coupon");
