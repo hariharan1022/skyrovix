@@ -124,6 +124,7 @@ type Application = {
   photo_url: string | null; offer_issued_at: string;
   created_at: string; status: string; completed_at?: string | null;
   duration?: number; total_tasks?: number;
+  coupon_code?: string | null;
 };
 
 function Dashboard() {
@@ -400,6 +401,8 @@ function Dashboard() {
   const [couponResult, setCouponResult] = useState<CouponResult | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [autoApplied, setAutoApplied] = useState(false);
+  const [certStatus, setCertStatus] = useState<"idle" | "generating" | "done" | "error">("idle");
+  const certTriggered = useRef(false);
 
   // Auto-apply coupon from application record
   useEffect(() => {
@@ -411,6 +414,14 @@ function Dashboard() {
       });
     }
   }, [app?.coupon_code, app?.domain, autoApplied]);
+
+  // Auto-generate certificate when all conditions met
+  useEffect(() => {
+    if (couponResult?.finalAmount === 0 && internApproved >= internTotal && app && !certTriggered.current) {
+      certTriggered.current = true;
+      doFreeCertificate(couponResult, app.id);
+    }
+  }, [couponResult, internApproved, internTotal, app]);
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -483,7 +494,7 @@ function Dashboard() {
   };
 
   const doFreeCertificate = async (coupon: CouponResult, applicationId: string) => {
-    setSubmittingPayment(true);
+    setCertStatus("generating");
     try {
       const { error: payErr } = await (supabase.from("payments" as any) as any).insert({
         application_id: applicationId,
@@ -498,15 +509,12 @@ function Dashboard() {
       if (payErr) throw payErr;
       const { data: certId, error: certErr } = await supabase.rpc("generate_certificate", { p_application_id: applicationId });
       if (certErr || !certId) throw certErr || new Error("Failed to generate certificate");
-      toast.success(`Certificate ${certId} generated!`);
-      setCouponCode("");
-      setCouponResult(null);
+      setCertStatus("done");
       qc.invalidateQueries({ queryKey: ["all-payments"] });
       qc.invalidateQueries({ queryKey: ["all-certs"] });
     } catch (err: any) {
+      setCertStatus("error");
       toast.error(err.message || "Failed to generate certificate");
-    } finally {
-      setSubmittingPayment(false);
     }
   };
 
@@ -1092,22 +1100,42 @@ function Dashboard() {
             ) : internTotal > 0 && internApproved >= internTotal ? (
               couponResult?.finalAmount === 0 ? (
                 <div className="space-y-4">
-                  <div className="flex items-start gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/30">
-                    <Award className="size-5 text-green-600 shrink-0 mt-0.5" />
-                    <div className="text-sm">
-                      <p className="font-semibold text-green-800 dark:text-green-300">Free with Coupon!</p>
-                      <p className="text-green-700 dark:text-green-400 mt-1">
-                        Coupon <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300 mx-1">{couponResult.code}</Badge>
-                        applied — <span className="line-through">₹{PAYMENT.amount}</span> <span className="text-green-600 font-bold">₹0</span>. Generate your certificate directly.
-                      </p>
+                  {certStatus === "done" ? (
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/30">
+                      <CheckCircle2 className="size-5 text-green-600 shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-green-800 dark:text-green-300">Certificate Generated!</p>
+                        <p className="text-green-700 dark:text-green-400 mt-1">Your certificate has been issued. You can download it below.</p>
+                      </div>
                     </div>
-                  </div>
-                  <Button className="w-full brand-gradient text-white border-0 rounded-xl h-10 text-sm gap-1.5"
-                    disabled={submittingPayment}
-                    onClick={() => doFreeCertificate(couponResult!, app!.id)}>
-                    {submittingPayment ? <Loader2 className="size-4 animate-spin" /> : <Award className="size-4" />}
-                    {submittingPayment ? "Generating..." : "Generate Certificate"}
-                  </Button>
+                  ) : certStatus === "generating" ? (
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/30">
+                      <Loader2 className="size-5 text-blue-600 shrink-0 mt-0.5 animate-spin" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-blue-800 dark:text-blue-300">Generating Certificate...</p>
+                        <p className="text-blue-700 dark:text-blue-400 mt-1">Please wait while we generate your certificate.</p>
+                      </div>
+                    </div>
+                  ) : certStatus === "error" ? (
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-800/30">
+                      <AlertTriangle className="size-5 text-red-600 shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-red-800 dark:text-red-300">Generation Failed</p>
+                        <p className="text-red-700 dark:text-red-400 mt-1">Could not generate certificate. The SQL migration may not have been run in Supabase.</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/30">
+                      <Award className="size-5 text-green-600 shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-green-800 dark:text-green-300">Free with Coupon!</p>
+                        <p className="text-green-700 dark:text-green-400 mt-1">
+                          Coupon <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300 mx-1">{couponResult.code}</Badge>
+                          applied — <span className="line-through">₹{PAYMENT.amount}</span> <span className="text-green-600 font-bold">₹0</span>. Generating certificate automatically...
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
               <div className="space-y-4">
