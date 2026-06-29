@@ -59,7 +59,7 @@ const DOMAIN_IMAGES: Record<string, string> = {
   dataanalytics: "https://images.unsplash.com/photo-1543286386-713bdd548da4?w=600&h=338&fit=crop&auto=format",
   machinelearning: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=338&fit=crop&auto=format",
   deeplearning: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=338&fit=crop&auto=format",
-  generativeai: "https://images.unsplash.com/photo-1655720828018-edd71de2b476?w=600&h=338&fit=crop&auto=format",
+  generativeai: "https://picsum.photos/seed/genai/600/338",
   promptengineering: "https://images.unsplash.com/photo-1676299081847-824916de030a?w=600&h=338&fit=crop&auto=format",
   cloudcomputing: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=338&fit=crop&auto=format",
   ethicalhacking: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=338&fit=crop&auto=format",
@@ -69,7 +69,7 @@ const DOMAIN_IMAGES: Record<string, string> = {
   graphicdesign: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&h=338&fit=crop&auto=format",
   motiongraphics: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&h=338&fit=crop&auto=format",
   videoediting: "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=600&h=338&fit=crop&auto=format",
-  animation: "https://images.unsplash.com/photo-1536240478700-b869070f9279?w=600&h=338&fit=crop&auto=format",
+  animation: "https://picsum.photos/seed/animation/600/338",
   threeddesign: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=338&fit=crop&auto=format",
 };
 
