@@ -1398,7 +1398,7 @@ function Dashboard() {
         <Confetti active={!!cert} />
 
         {/* ─── Main Area ─── */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           {/* Content */}
           <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 min-w-0">
             {renderContent()}
