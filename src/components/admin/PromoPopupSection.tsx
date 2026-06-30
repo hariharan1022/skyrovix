@@ -34,16 +34,22 @@ export function PromoPopupSection() {
       link_label: fd.get("link_label") || "Learn More",
     };
 
+    const urlInput = (fd.get("image_url") as string)?.trim();
     const file = fd.get("image") as File;
+
     if (file?.size) {
       const ext = file.name.split(".").pop();
       const path = `popups/${crypto.randomUUID()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from("assets").upload(path, file);
+      const { error: uploadError } = await supabase.storage.from("payment-screenshots").upload(path, file);
       if (uploadError) { toast.error("Image upload failed: " + uploadError.message); setSaving(false); return; }
-      const { data: { publicUrl } } = supabase.storage.from("assets").getPublicUrl(path);
+      const { data: { publicUrl } } = supabase.storage.from("payment-screenshots").getPublicUrl(path);
       payload.image_url = publicUrl;
-    } else if (!edit?.image_url) {
-      toast.error("Please upload a popup image"); setSaving(false); return;
+    } else if (urlInput) {
+      payload.image_url = urlInput;
+    } else if (edit?.image_url) {
+      payload.image_url = edit.image_url;
+    } else {
+      toast.error("Please provide a popup image"); setSaving(false); return;
     }
 
     if (edit) {
@@ -91,9 +97,13 @@ export function PromoPopupSection() {
         <CardContent>
           <form onSubmit={save} className="space-y-4">
             <div>
-              <Label>Image *</Label>
+              <Label>Upload Image</Label>
               <Input name="image" type="file" accept="image/*" className="mt-1" />
-              {edit?.image_url && <p className="mt-1 text-xs text-muted-foreground">Leave empty to keep current image</p>}
+            </div>
+            <div>
+              <Label>Or Image URL</Label>
+              <Input name="image_url" defaultValue={edit?.image_url ?? ""} placeholder="https://..." className="mt-1" />
+              {edit?.image_url && <p className="mt-1 text-xs text-muted-foreground">Leave both blank to keep current image</p>}
             </div>
             <div>
               <Label>Title</Label>
