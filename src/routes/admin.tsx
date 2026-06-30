@@ -1272,6 +1272,13 @@ function SubmissionsSection() {
   const qc = useQueryClient();
   const [subTab, setSubTab] = useState<"intern" | "course">("intern");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<{ id: string; status: string; label: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [showHistory, setShowHistory] = useState<string | null>(null);
+  const [historyData, setHistoryData] = useState<any[]>([]);
+
+  const tableName = subTab === "intern" ? "submissions" : "course_task_submissions";
+  const queryKey = subTab === "intern" ? ["admin-subs"] : ["admin-course-subs"];
 
   const { data: internData } = useQuery({
     queryKey: ["admin-subs"],
@@ -1299,14 +1306,35 @@ function SubmissionsSection() {
 
   const data = subTab === "intern" ? internData : courseData;
 
-  const review = async (id: string, status: "approved" | "rejected", feedback: string) => {
+  const loadHistory = async (id: string) => {
+    const { data: history } = await supabase
+      .from("submission_history")
+      .select("*")
+      .eq("submission_id", id)
+      .eq("table_name", tableName)
+      .order("created_at", { ascending: false });
+    setHistoryData(history ?? []);
+    setShowHistory(showHistory === id ? null : id);
+  };
+
+  const changeStatus = async (id: string, newStatus: string) => {
     setLoadingId(id);
-    const table = subTab === "intern" ? "submissions" : "course_task_submissions";
-    const { error } = await supabase.from(table as any).update({ status, feedback, reviewed_at: new Date().toISOString() }).eq("id", id);
+    const reason = newStatus === "rejected" ? rejectReason : "";
+    const { error } = await supabase.from(tableName as any).update({ status: newStatus, feedback: reason || null, reviewed_at: new Date().toISOString() }).eq("id", id);
+    if (error) { setLoadingId(null); return toast.error(error.message); }
+    await supabase.from("submission_history").insert({
+      submission_id: id,
+      table_name: tableName,
+      previous_status: data?.find((s: any) => s.id === id)?.status ?? null,
+      new_status: newStatus,
+      changed_by: (await supabase.auth.getUser()).data.user?.id,
+      reason: reason || null,
+    });
     setLoadingId(null);
-    if (error) return toast.error(error.message);
-    toast.success(`Submission ${status}`);
-    qc.invalidateQueries({ queryKey: subTab === "intern" ? ["admin-subs"] : ["admin-course-subs"] });
+    setConfirmAction(null);
+    setRejectReason("");
+    toast.success(`Submission ${newStatus}`);
+    qc.invalidateQueries({ queryKey });
   };
 
   const pending = data?.filter((s: any) => s.status === "pending") ?? [];
@@ -1326,7 +1354,9 @@ function SubmissionsSection() {
         <div>
           <h3 className="mb-3 text-sm font-semibold text-amber-600 flex items-center gap-2"><Clock className="size-4" /> Pending Review ({pending.length})</h3>
           <div className="space-y-3">
-            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} loadingId={loadingId} tab={subTab} />)}
+            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} tab={subTab} tableName={tableName} queryKey={queryKey}
+              onAction={(status, label) => setConfirmAction({ id: s.id, status, label })}
+              onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
           </div>
         </div>
       )}
@@ -1335,26 +1365,72 @@ function SubmissionsSection() {
         <div className="mt-6">
           <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Reviewed ({reviewed.length})</h3>
           <div className="space-y-3">
-            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} loadingId={loadingId} tab={subTab} />)}
+            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} tab={subTab} tableName={tableName} queryKey={queryKey}
+              onAction={(status, label) => setConfirmAction({ id: s.id, status, label })}
+              onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
           </div>
         </div>
       )}
 
       {!data?.length && <p className="text-center text-muted-foreground py-12">No submissions yet.</p>}
+
+      {/* Confirmation Dialog */}
+      {confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmAction(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">Confirm Action</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Are you sure you want to <span className="font-semibold text-foreground">{confirmAction.label}</span> this submission?</p>
+            {confirmAction.status === "rejected" && (
+              <div className="mt-4">
+                <Label className="text-xs">Reason for rejection</Label>
+                <Textarea
+                  placeholder="Provide a reason for rejection..."
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  rows={3}
+                  className="mt-1 text-xs"
+                />
+              </div>
+            )}
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setConfirmAction(null); setRejectReason(""); }}>Cancel</Button>
+              <Button size="sm" className={`rounded-xl text-white border-0 ${confirmAction.status === "approved" ? "bg-green-600 hover:bg-green-700" : confirmAction.status === "rejected" ? "bg-red-600 hover:bg-red-700" : "bg-amber-600 hover:bg-amber-700"}`}
+                disabled={loadingId === confirmAction.id}
+                onClick={() => changeStatus(confirmAction.id, confirmAction.status)}>
+                {loadingId === confirmAction.id ? "Saving..." : `Yes, ${confirmAction.label}`}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function SubmissionCard({ sub, review, loadingId, tab }: { sub: any; review: (id: string, status: "approved" | "rejected", feedback: string) => void; loadingId: string | null; tab: string }) {
-  const [feedback, setFeedback] = useState(sub.feedback ?? "");
+function SubmissionCard({ sub, loadingId, tab, onAction, onHistory, showHistory, historyData }: any) {
+  const [actionsOpen, setActionsOpen] = useState(false);
   const isLoading = loadingId === sub.id;
   const subType = tab === "intern" ? "intern" : "course";
-  const isPending = sub.status === "pending";
   const taskLabel = subType === "intern"
     ? `Task ${sub.tasks?.task_number}: ${sub.tasks?.title}`
     : `Task ${sub.course_tasks?.task_number}: ${sub.course_tasks?.title}`;
   const userName = subType === "intern" ? sub.applications?.full_name : sub.enrollments?.courses?.name ?? "Course";
   const userMeta = subType === "intern" ? `${sub.applications?.intern_id} · ${getDomain(sub.applications?.domain)?.name}` : `Enrolled`;
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setActionsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const actionItems = [];
+  if (sub.status !== "approved") actionItems.push({ status: "approved", label: "Approve", icon: CheckCircle2, color: "text-green-600" });
+  if (sub.status !== "rejected") actionItems.push({ status: "rejected", label: "Reject", icon: XCircle, color: "text-red-600" });
+  if (sub.status !== "pending") actionItems.push({ status: "pending", label: "Mark as Pending", icon: Clock, color: "text-amber-600" });
+
   return (
     <div className={`rounded-2xl border border-border/50 bg-white/60 p-4 backdrop-blur dark:bg-[#1E293B]/60 ${isLoading ? "opacity-60 pointer-events-none" : ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -1362,24 +1438,73 @@ function SubmissionCard({ sub, review, loadingId, tab }: { sub: any; review: (id
           <p className="font-semibold text-sm">{taskLabel}</p>
           <p className="text-xs text-muted-foreground">{userName} · {userMeta}</p>
         </div>
-        <Badge className={`text-xs ${
-          sub.status === "approved" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
-          sub.status === "rejected" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
-          "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-        }`}>{isLoading ? "Saving..." : sub.status}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge className={`text-xs ${
+            sub.status === "approved" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
+            sub.status === "rejected" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
+            "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+          }`}>{isLoading ? "Saving..." : sub.status}</Badge>
+          <div className="relative" ref={dropdownRef}>
+            <Button size="sm" variant="outline" className="h-8 text-xs rounded-lg border-border/60 gap-1" onClick={() => setActionsOpen(!actionsOpen)}>
+              Actions <ChevronDown className="size-3" />
+            </Button>
+            {actionsOpen && (
+              <div className="absolute right-0 top-10 z-40 w-48 rounded-xl border border-border/60 bg-white/95 p-1.5 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95">
+                {actionItems.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <button key={item.status}
+                      onClick={() => { setActionsOpen(false); onAction(item.status, item.label); }}
+                      className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition hover:bg-accent/50 ${item.color}`}>
+                      <Icon className="size-4" /> {item.label}
+                    </button>
+                  );
+                })}
+                <div className="my-1 border-t border-border/40" />
+                <button onClick={() => { setActionsOpen(false); onHistory(); }}
+                  className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition hover:bg-accent/50">
+                  <Clock className="size-4" /> View History
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
         {(subType === "intern" ? sub.github_url : sub.project_url) && <a href={sub.github_url || sub.project_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "GitHub" : "Project"}</a>}
         {(subType === "intern" ? sub.deployed_url : sub.file_path) && <a href={sub.deployed_url || sub.file_path} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "Demo" : "File"}</a>}
         {sub.notes && <p className="w-full text-muted-foreground mt-1">{sub.notes}</p>}
       </div>
-      {isPending && (
-        <div className="mt-3 space-y-2 rounded-xl border border-border/40 bg-secondary/30 p-3">
-          <Textarea placeholder="Feedback (optional)" value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={2} className="text-xs" />
-          <div className="flex gap-2">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-10 text-xs" disabled={isLoading} onClick={() => { review(sub.id, "approved", feedback); setFeedback(""); }}><CheckCircle2 className="mr-1 size-3" /> Approve</Button>
-            <Button size="sm" variant="destructive" className="h-10 text-xs" disabled={isLoading} onClick={() => { review(sub.id, "rejected", feedback); setFeedback(""); }}><XCircle className="mr-1 size-3" /> Reject</Button>
-          </div>
+      {sub.feedback && (
+        <div className="mt-2 rounded-xl border border-blue-200 bg-blue-50 p-2.5 text-xs text-blue-900 dark:border-blue-900/30 dark:bg-blue-950/30 dark:text-blue-300">
+          <span className="font-semibold">Feedback:</span> {sub.feedback}
+        </div>
+      )}
+
+      {/* History */}
+      {showHistory && (
+        <div className="mt-3 rounded-xl border border-border/40 bg-secondary/30 p-3">
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">Submission History</p>
+          {historyData.length === 0 ? (
+            <p className="text-xs text-muted-foreground">No history recorded yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {historyData.map((h: any, i: number) => (
+                <div key={h.id} className="flex items-start gap-2 text-xs">
+                  <div className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-muted text-[9px] font-bold text-muted-foreground">{i + 1}</div>
+                  <div>
+                    <p>
+                      <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>{h.previous_status ?? "—"}</span>
+                      <span className="mx-1.5 text-muted-foreground">→</span>
+                      <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>{h.new_status}</span>
+                    </p>
+                    <p className="text-muted-foreground">{new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                    {h.reason && <p className="mt-0.5 text-muted-foreground italic">Reason: {h.reason}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

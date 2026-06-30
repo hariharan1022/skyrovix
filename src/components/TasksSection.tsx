@@ -453,9 +453,24 @@ function TaskCard({
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
   const { submission, status, dueDate, remaining, lockedByLinkedin } = task;
   const isOverdue = status === "overdue";
   const isLocked = lockedByLinkedin && task.taskNumber > 0;
+
+  const loadHistory = async () => {
+    if (!submission) return;
+    if (showHistory) { setShowHistory(false); return; }
+    const { data } = await supabase
+      .from("submission_history")
+      .select("*")
+      .eq("submission_id", submission.id)
+      .eq("table_name", "submissions")
+      .order("created_at", { ascending: false });
+    setHistory(data ?? []);
+    setShowHistory(true);
+  };
 
   const borderColor = isOverdue
     ? "#EF4444"
@@ -566,9 +581,20 @@ function TaskCard({
             .update({ ...payload, submitted_at: new Date().toISOString() })
             .eq("id", submission.id)
         : await supabase.from("submissions").insert(payload);
+      if (error) { setLoading(false); return toast.error(error.message); }
+      // Log resubmission history if previously rejected
+      if (submission && submission.status === "rejected") {
+        await supabase.from("submission_history").insert({
+          submission_id: submission.id,
+          table_name: "submissions",
+          previous_status: "rejected",
+          new_status: "pending",
+          changed_by: user.id,
+          reason: null,
+        });
+      }
       setLoading(false);
-      if (error) return toast.error(error.message);
-      toast.success("Task submitted for review!");
+      toast.success(submission?.status === "rejected" ? "Resubmitted for review!" : "Task submitted for review!");
       setOpen(false);
       onSubmitted();
     } catch (err: any) {
@@ -707,10 +733,16 @@ function TaskCard({
           </p>
         ) : (
           <div className="space-y-3">
-            {submission?.status === "rejected" && submission.feedback && (
-              <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-rose-50 p-3">
-                <p className="mb-1 text-xs font-semibold text-red-700">Feedback</p>
-                <p className="text-xs text-red-600">{submission.feedback}</p>
+            {submission?.status === "rejected" && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/30 dark:bg-red-950/20">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="size-4 text-red-500 shrink-0" />
+                  <p className="text-sm font-semibold text-red-700 dark:text-red-400">Needs Revision</p>
+                </div>
+                {submission.feedback && (
+                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-300 pl-6">Reason: {submission.feedback}</p>
+                )}
+                <p className="mt-2 text-xs text-red-500 pl-6">Please review the feedback and resubmit.</p>
               </div>
             )}
             {!tasksReady ? (
@@ -721,9 +753,13 @@ function TaskCard({
               <Button
                 onClick={() => setOpen(!open)}
                 className="w-full text-sm h-10 rounded-xl"
-                variant={status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
+                variant={submission?.status === "rejected" ? "destructive" : status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
               >
-                {status === "ongoing" ? (
+                {submission?.status === "rejected" ? (
+                  <>
+                    <AlertCircle className="mr-1.5 size-4" /> Resubmit
+                  </>
+                ) : status === "ongoing" ? (
                   <>
                     <ArrowRight className="mr-1.5 size-4" /> Continue Working
                   </>
@@ -814,6 +850,34 @@ function TaskCard({
                   {loading ? "Submitting…" : "Submit for Review"}
                 </Button>
               </form>
+            )}
+            {submission && (
+              <button onClick={loadHistory} className="w-full mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-transparent px-3 py-1.5 text-[10px] font-medium text-muted-foreground transition hover:bg-accent/30">
+                <Clock className="size-3" /> {showHistory ? "Hide History" : "View History"}
+              </button>
+            )}
+            {showHistory && (
+              <div className="rounded-xl border border-border/40 bg-secondary/20 p-3">
+                <p className="mb-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Submission History</p>
+                {history.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground">No history recorded yet.</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {history.map((h: any, i: number) => (
+                      <div key={h.id} className="flex items-start gap-2 text-[10px]">
+                        <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-muted text-[7px] font-bold text-muted-foreground">{i + 1}</span>
+                        <div>
+                          <p>
+                            <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>{h.previous_status ?? "—"} → {h.new_status}</span>
+                          </p>
+                          <p className="text-muted-foreground">{new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                          {h.reason && <p className="text-red-500 italic">Reason: {h.reason}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
