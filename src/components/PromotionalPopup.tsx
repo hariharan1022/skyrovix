@@ -27,7 +27,7 @@ export function PromotionalPopup() {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDismissed(true)}>
       <div
-        className="relative w-full max-w-lg animate-in zoom-in-95 fade-in duration-300 rounded-2xl border border-border/50 bg-white shadow-2xl dark:bg-[#1E293B] dark:border-white/10 overflow-hidden"
+        className="relative w-full max-w-md animate-in zoom-in-95 fade-in duration-300 rounded-2xl border border-border/50 bg-white shadow-2xl dark:bg-[#1E293B] dark:border-white/10 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -38,7 +38,7 @@ export function PromotionalPopup() {
         </button>
 
         {popup.image_url && (
-          <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-[#07284a]/10 to-blue-500/10 dark:from-[#07284a]/30 dark:to-blue-500/20">
+          <div className="relative w-full aspect-[4/5] bg-gradient-to-br from-[#07284a]/10 to-blue-500/10 dark:from-[#07284a]/30 dark:to-blue-500/20">
             <img
               src={popup.image_url}
               alt={popup.title || "Promotion"}
