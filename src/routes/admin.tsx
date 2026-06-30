@@ -13,6 +13,7 @@ import { generateCertId, getDomain, COMPANY, DOMAINS } from "@/lib/constants";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { PromotionsSection } from "@/components/admin/PromotionsSection";
+import { PromoPopupSection } from "@/components/admin/PromoPopupSection";
 import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
@@ -49,6 +50,7 @@ const SIDEBAR_ITEMS = [
   { id: "quiz", label: "Quiz Management", icon: Brain },
   { id: "payments", label: "Payments", icon: Wallet },
   { id: "promotions", label: "Promotions", icon: Percent },
+  { id: "popup", label: "Promo Popup", icon: Bell },
   { id: "certificates", label: "Certificates", icon: Award },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "email-logs", label: "Email Logs", icon: Mail },
@@ -264,6 +266,7 @@ function AdminPanel() {
             {active === "quiz" && <QuizSection />}
             {active === "payments" && <PaymentsSection />}
             {active === "promotions" && <PromotionsSection />}
+            {active === "popup" && <PromoPopupSection />}
             {active === "certificates" && <CertificatesSection />}
             {active === "students" && <StudentsSection />}
             {active === "email-logs" && <EmailLogsSection />}
