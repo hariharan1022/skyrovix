@@ -1270,22 +1270,43 @@ function TaskDialog({ open, onClose, onSaved, mode, task }: {
 // ══════════════════════════════════════════════
 function SubmissionsSection() {
   const qc = useQueryClient();
-  const { data } = useQuery({
+  const [subTab, setSubTab] = useState<"intern" | "course">("intern");
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+
+  const { data: internData } = useQuery({
     queryKey: ["admin-subs"],
     queryFn: async () => {
       const { data } = await supabase
         .from("submissions")
-        .select("*, applications(full_name, intern_id, domain), tasks(title, task_number)")
+        .select("*, applications!inner(full_name, intern_id, domain), tasks(title, task_number)")
         .order("submitted_at", { ascending: false });
       return data ?? [];
     },
+    refetchInterval: 10_000,
   });
 
+  const { data: courseData } = useQuery({
+    queryKey: ["admin-course-subs"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("course_task_submissions")
+        .select("*, enrollments(id, course_id, courses(name)), course_tasks(task_number, title)")
+        .order("submitted_at", { ascending: false });
+      return data ?? [];
+    },
+    refetchInterval: 10_000,
+  });
+
+  const data = subTab === "intern" ? internData : courseData;
+
   const review = async (id: string, status: "approved" | "rejected", feedback: string) => {
-    const { error } = await supabase.from("submissions").update({ status, feedback, reviewed_at: new Date().toISOString() }).eq("id", id);
+    setLoadingId(id);
+    const table = subTab === "intern" ? "submissions" : "course_task_submissions";
+    const { error } = await supabase.from(table as any).update({ status, feedback, reviewed_at: new Date().toISOString() }).eq("id", id);
+    setLoadingId(null);
     if (error) return toast.error(error.message);
     toast.success(`Submission ${status}`);
-    qc.invalidateQueries({ queryKey: ["admin-subs"] });
+    qc.invalidateQueries({ queryKey: subTab === "intern" ? ["admin-subs"] : ["admin-course-subs"] });
   };
 
   const pending = data?.filter((s: any) => s.status === "pending") ?? [];
@@ -1295,13 +1316,17 @@ function SubmissionsSection() {
     <div className="animate-fade-in-up space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Task Submissions</h2>
+        <div className="flex gap-1 rounded-xl border border-border/60 bg-white/50 p-1 dark:bg-[#1E293B]/50">
+          <button onClick={() => setSubTab("intern")} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${subTab === "intern" ? "brand-gradient text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Internship</button>
+          <button onClick={() => setSubTab("course")} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${subTab === "course" ? "brand-gradient text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Course</button>
+        </div>
       </div>
 
       {pending.length > 0 && (
         <div>
           <h3 className="mb-3 text-sm font-semibold text-amber-600 flex items-center gap-2"><Clock className="size-4" /> Pending Review ({pending.length})</h3>
           <div className="space-y-3">
-            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} />)}
+            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} loadingId={loadingId} tab={subTab} />)}
           </div>
         </div>
       )}
@@ -1310,7 +1335,7 @@ function SubmissionsSection() {
         <div className="mt-6">
           <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Reviewed ({reviewed.length})</h3>
           <div className="space-y-3">
-            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} />)}
+            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} review={review} loadingId={loadingId} tab={subTab} />)}
           </div>
         </div>
       )}
@@ -1320,32 +1345,40 @@ function SubmissionsSection() {
   );
 }
 
-function SubmissionCard({ sub, review }: { sub: any; review: (id: string, status: "approved" | "rejected", feedback: string) => void }) {
+function SubmissionCard({ sub, review, loadingId, tab }: { sub: any; review: (id: string, status: "approved" | "rejected", feedback: string) => void; loadingId: string | null; tab: string }) {
   const [feedback, setFeedback] = useState(sub.feedback ?? "");
+  const isLoading = loadingId === sub.id;
+  const subType = tab === "intern" ? "intern" : "course";
+  const isPending = sub.status === "pending";
+  const taskLabel = subType === "intern"
+    ? `Task ${sub.tasks?.task_number}: ${sub.tasks?.title}`
+    : `Task ${sub.course_tasks?.task_number}: ${sub.course_tasks?.title}`;
+  const userName = subType === "intern" ? sub.applications?.full_name : sub.enrollments?.courses?.name ?? "Course";
+  const userMeta = subType === "intern" ? `${sub.applications?.intern_id} · ${getDomain(sub.applications?.domain)?.name}` : `Enrolled`;
   return (
-    <div className="rounded-2xl border border-border/50 bg-white/60 p-4 backdrop-blur dark:bg-[#1E293B]/60">
+    <div className={`rounded-2xl border border-border/50 bg-white/60 p-4 backdrop-blur dark:bg-[#1E293B]/60 ${isLoading ? "opacity-60 pointer-events-none" : ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className="font-semibold text-sm">Task {sub.tasks?.task_number}: {sub.tasks?.title}</p>
-          <p className="text-xs text-muted-foreground">{sub.applications?.full_name} · <span className="font-mono">{sub.applications?.intern_id}</span> · {getDomain(sub.applications?.domain)?.name}</p>
+          <p className="font-semibold text-sm">{taskLabel}</p>
+          <p className="text-xs text-muted-foreground">{userName} · {userMeta}</p>
         </div>
         <Badge className={`text-xs ${
           sub.status === "approved" ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" :
           sub.status === "rejected" ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" :
           "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-        }`}>{sub.status}</Badge>
+        }`}>{isLoading ? "Saving..." : sub.status}</Badge>
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        {sub.github_url && <a href={sub.github_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> GitHub</a>}
-        {sub.deployed_url && <a href={sub.deployed_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> Demo</a>}
+        {(subType === "intern" ? sub.github_url : sub.project_url) && <a href={sub.github_url || sub.project_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "GitHub" : "Project"}</a>}
+        {(subType === "intern" ? sub.deployed_url : sub.file_path) && <a href={sub.deployed_url || sub.file_path} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "Demo" : "File"}</a>}
         {sub.notes && <p className="w-full text-muted-foreground mt-1">{sub.notes}</p>}
       </div>
-      {sub.status === "pending" && (
+      {isPending && (
         <div className="mt-3 space-y-2 rounded-xl border border-border/40 bg-secondary/30 p-3">
           <Textarea placeholder="Feedback (optional)" value={feedback} onChange={(e) => setFeedback(e.target.value)} rows={2} className="text-xs" />
           <div className="flex gap-2">
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-10 text-xs" onClick={() => review(sub.id, "approved", feedback)}><CheckCircle2 className="mr-1 size-3" /> Approve</Button>
-            <Button size="sm" variant="destructive" className="h-10 text-xs" onClick={() => review(sub.id, "rejected", feedback)}><XCircle className="mr-1 size-3" /> Reject</Button>
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 h-10 text-xs" disabled={isLoading} onClick={() => { review(sub.id, "approved", feedback); setFeedback(""); }}><CheckCircle2 className="mr-1 size-3" /> Approve</Button>
+            <Button size="sm" variant="destructive" className="h-10 text-xs" disabled={isLoading} onClick={() => { review(sub.id, "rejected", feedback); setFeedback(""); }}><XCircle className="mr-1 size-3" /> Reject</Button>
           </div>
         </div>
       )}
