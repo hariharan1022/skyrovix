@@ -14,6 +14,9 @@ import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { PromotionsSection } from "@/components/admin/PromotionsSection";
 import { PromoPopupSection } from "@/components/admin/PromoPopupSection";
+import { ProjectsSection } from "@/components/admin/ProjectsSection";
+import { ProjectSubmissionsSection } from "@/components/admin/ProjectSubmissionsSection";
+import { ProjectAwardsSection } from "@/components/admin/ProjectAwardsSection";
 import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
@@ -23,7 +26,7 @@ import {
   ChevronRight, ChevronLeft, Clock, TrendingUp, UserPlus, Wallet,
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
-  PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent,
+  PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent, Briefcase,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -51,6 +54,9 @@ const SIDEBAR_ITEMS = [
   { id: "payments", label: "Payments", icon: Wallet },
   { id: "promotions", label: "Promotions", icon: Percent },
   { id: "popup", label: "Promo Popup", icon: Bell },
+  { id: "projects", label: "Projects", icon: Briefcase },
+  { id: "project-submissions", label: "Project Submissions", icon: ClipboardCheck },
+  { id: "project-awards", label: "Project Awards", icon: Award },
   { id: "certificates", label: "Certificates", icon: Award },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "email-logs", label: "Email Logs", icon: Mail },
@@ -267,6 +273,9 @@ function AdminPanel() {
             {active === "payments" && <PaymentsSection />}
             {active === "promotions" && <PromotionsSection />}
             {active === "popup" && <PromoPopupSection />}
+            {active === "projects" && <ProjectsSection />}
+            {active === "project-submissions" && <ProjectSubmissionsSection />}
+            {active === "project-awards" && <ProjectAwardsSection />}
             {active === "certificates" && <CertificatesSection />}
             {active === "students" && <StudentsSection />}
             {active === "email-logs" && <EmailLogsSection />}

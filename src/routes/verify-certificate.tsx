@@ -35,12 +35,14 @@ type FoundData = {
   status: string; cert_id?: string; issued_at?: string;
   // LMS fields
   course_name?: string; score?: number; verification_hash?: string;
+  // Project fields
+  project_title?: string;
 };
 
 type Result =
   | { state: "idle" }
   | { state: "loading" }
-  | { state: "found"; data: FoundData; type: "internship" | "course" }
+  | { state: "found"; data: FoundData; type: "internship" | "course" | "project" }
   | { state: "notfound" };
 
 function VerifyPage() {
@@ -100,7 +102,36 @@ function VerifyPage() {
       }
     }
 
-    // 2. Try old certificates table lookup
+    // 1.5 Try project_certificates lookup
+    if (trimmed.startsWith("SKX-PCERT-")) {
+      const { data: projCert } = await supabase
+        .from("project_certificates" as any)
+        .select("*, project_challenges!inner(title, industry)")
+        .eq("cert_id", trimmed)
+        .maybeSingle();
+
+      if (projCert) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", projCert.user_id)
+          .maybeSingle();
+
+        return setResult({
+          state: "found",
+          type: "project",
+          data: {
+            full_name: profile?.full_name ?? projCert.participant_name,
+            domain: projCert.industry ?? "",
+            cert_id: projCert.cert_id,
+            issued_at: projCert.issued_at,
+            status: "completed",
+            score: projCert.final_score,
+            project_title: projCert.project_challenges?.title ?? projCert.project_title,
+          },
+        });
+      }
+    }
     const { data: cert, error: oldCertErr } = await supabase
       .from("certificates")
       .select("certificate_id, issued_at, application_id")
@@ -164,7 +195,7 @@ function VerifyPage() {
       <main className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
 
         <form onSubmit={verify} className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2">
-          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKY-FULL-2026-123456 or SKX-2026-XXXX" className="w-full" />
+          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKX-PCERT-2026-XXXXX or SKX-2026-XXXX" className="w-full" />
           <Button type="submit" className="w-full sm:w-auto brand-gradient text-white border-0"><Search className="size-4" /> Verify</Button>
         </form>
 
@@ -221,6 +252,35 @@ function VerifyPage() {
                 <Row k="Intern ID" v={d.intern_id} />
                 <Row k="Status" v={<Badge variant={d.status === "approved" ? "default" : d.status === "rejected" ? "destructive" : "secondary"}>{d.status}</Badge>} />
                 {d.cert_id && <Row k="Certificate ID" v={d.cert_id} />}
+                {d.issued_at && <Row k="Issued" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
+              </CardContent>
+            </Card>
+          );
+        })()}
+
+        {result.state === "found" && result.type === "project" && (() => {
+          const d = result.data;
+          return (
+            <Card className="mt-8 border-primary/40">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="size-8 text-green-500" />
+                  <div>
+                    <CardTitle>Verified ✓</CardTitle>
+                    <p className="text-sm text-muted-foreground">This Real-World Project certificate is authentic.</p>
+                  </div>
+                  <div className="ml-auto grid size-12 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-700">
+                    <Award className="size-6" />
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <Row k="Name" v={d.full_name} />
+                <Row k="Project" v={d.project_title ?? "—"} />
+                <Row k="Industry" v={d.domain} />
+                {d.score != null && <Row k="Score" v={`${d.score}/100`} />}
+                <Row k="Status" v={<Badge className="bg-emerald-600 hover:bg-emerald-600">Completed</Badge>} />
+                <Row k="Certificate ID" v={d.cert_id} />
                 {d.issued_at && <Row k="Issued" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
               </CardContent>
             </Card>

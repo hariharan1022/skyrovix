@@ -29,7 +29,7 @@ import {
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
   ListChecks, LayoutDashboard, Flag, AlertTriangle, AlertCircle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LogOut,
-  Settings, Wallet, CreditCard, ScrollText, Briefcase,
+  Settings, Wallet, CreditCard, ScrollText, Briefcase, Code2,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -415,9 +415,9 @@ function Dashboard() {
     }
   }, [app?.coupon_code, app?.domain, autoApplied]);
 
-  // Auto-generate certificate when all conditions met
+  // Auto-generate certificate when all tasks approved
   useEffect(() => {
-    if (couponResult?.finalAmount === 0 && internApproved >= internTotal && app && !certTriggered.current) {
+    if (couponResult?.finalAmount === 0 && internTotal > 0 && internApproved >= internTotal && app && !certTriggered.current) {
       certTriggered.current = true;
       doFreeCertificate(couponResult, app.id);
     }
@@ -511,6 +511,26 @@ function Dashboard() {
       setCertStatus("done");
       qc.invalidateQueries({ queryKey: ["all-payments"] });
       qc.invalidateQueries({ queryKey: ["all-certs"] });
+      (async () => {
+        try {
+          const { sendCertificateEmail } = await import("@/lib/email-helpers");
+          const domainObj = getDomain(app!.domain);
+          const domainName = domainObj?.name ?? app!.domain;
+          const result = await sendCertificateEmail({
+            to: app!.email,
+            studentName: app!.full_name,
+            studentId: app!.user_id,
+            certId: certId as string,
+            domainName,
+            internId: app!.intern_id,
+          });
+          if (result.success) toast.success("Certificate sent to your email!");
+          else toast.error("Certificate email delivery failed. Contact support.");
+        } catch (e) {
+          console.warn("[Email] Failed to send certificate:", e);
+          toast.error("Certificate email could not be sent.");
+        }
+      })();
     } catch (err: any) {
       setCertStatus("error");
       toast.error(err.message || "Failed to generate certificate");
@@ -894,6 +914,11 @@ function Dashboard() {
                 })}
               </div>
             )}
+          </AnimatedSection>
+
+          <AnimatedSection>
+            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2"><Code2 className="size-5 text-primary" /> My Projects</h2>
+            <ProjectCards userId={user?.id} />
           </AnimatedSection>
         </div>
       );
@@ -2127,6 +2152,60 @@ function CertificateSection({ cert, app, course, enrollment, lastAttempt, compac
   );
   if (compact) return <div className="border-b border-border/40 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">{inner}</div>;
   return <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">{inner}</div>;
+}
+
+// ─── PROJECT CARDS ───
+
+function ProjectCards({ userId }: { userId?: string }) {
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    supabase
+      .from("project_submissions" as any)
+      .select("*, project_challenges!inner(title, project_id, industry)")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .then(({ data }) => {
+        if (data) setProjects(data);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  if (loading) return <div className="h-20 rounded-2xl bg-white/50 animate-pulse" />;
+  if (projects.length === 0) return <Link to="/projects" className="block rounded-2xl border border-dashed border-border/50 bg-white/70 p-8 text-center backdrop-blur-xl dark:bg-[#1E293B]/70 hover:border-[#07284a]/30 transition"><Code2 className="size-8 mx-auto mb-2 text-muted-foreground/30" /><p className="text-xs text-muted-foreground">No project submissions yet. Browse projects to start a challenge.</p></Link>;
+
+  return (
+    <div className="grid gap-3">
+      {projects.map((p) => (
+        <Link
+          key={p.id}
+          to="/projects/$id"
+          params={{ id: p.project_challenges?.project_id }}
+          className="block rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl dark:bg-[#1E293B]/70 hover:shadow-md hover:-translate-y-0.5 transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="grid size-12 shrink-0 place-items-center rounded-xl brand-gradient text-white shadow-sm"><Code2 className="size-6" /></div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold text-sm truncate group-hover:text-[#07284a] dark:group-hover:text-blue-400 transition">
+                  {p.project_challenges?.title}
+                </span>
+                <Badge className={`text-[10px] px-2 py-0.5 rounded-md ${
+                  p.status === "approved" ? "bg-emerald-600 text-white" :
+                  p.status === "rejected" ? "bg-rose-600 text-white" :
+                  "bg-amber-500 text-white"
+                }`}>{p.status}</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">{p.project_challenges?.industry ?? ""}{p.final_score != null ? ` · Score: ${p.final_score}/100` : ""}</p>
+            </div>
+            <ChevronRight className="size-4 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition" />
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
 }
 
 // ─── ID CARD ───

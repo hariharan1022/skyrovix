@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyCertificateRouteImport } from './routes/verify-certificate'
+import { Route as VerifyAwardRouteImport } from './routes/verify-award'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DomainsRouteImport } from './routes/domains'
@@ -25,13 +26,21 @@ import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
 import { Route as CoursesSlugRouteImport } from './routes/courses.$slug'
 import { Route as NavbarLayoutAboutRouteImport } from './routes/_navbar-layout/about'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
+import { Route as NavbarLayoutProjectsIndexRouteImport } from './routes/_navbar-layout/projects.index'
 import { Route as CoursesSlugQuizRouteImport } from './routes/courses.$slug_.quiz'
 import { Route as CoursesSlugDetailsRouteImport } from './routes/courses.$slug_.details'
+import { Route as NavbarLayoutProjectsIdRouteImport } from './routes/_navbar-layout/projects.$id'
 import { Route as NavbarLayoutAuthenticatedDashboardRouteImport } from './routes/_navbar-layout/_authenticated/dashboard'
+import { Route as NavbarLayoutAuthenticatedProjectsIdSubmitRouteImport } from './routes/_navbar-layout/_authenticated/projects.$id.submit'
 
 const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
   id: '/verify-certificate',
   path: '/verify-certificate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyAwardRoute = VerifyAwardRouteImport.update({
+  id: '/verify-award',
+  path: '/verify-award',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -108,6 +117,12 @@ const NavbarLayoutAuthenticatedRouteRoute =
     id: '/_authenticated',
     getParentRoute: () => NavbarLayoutRoute,
   } as any)
+const NavbarLayoutProjectsIndexRoute =
+  NavbarLayoutProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => NavbarLayoutRoute,
+  } as any)
 const CoursesSlugQuizRoute = CoursesSlugQuizRouteImport.update({
   id: '/$slug_/quiz',
   path: '/$slug/quiz',
@@ -118,10 +133,21 @@ const CoursesSlugDetailsRoute = CoursesSlugDetailsRouteImport.update({
   path: '/$slug/details',
   getParentRoute: () => CoursesRoute,
 } as any)
+const NavbarLayoutProjectsIdRoute = NavbarLayoutProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => NavbarLayoutRoute,
+} as any)
 const NavbarLayoutAuthenticatedDashboardRoute =
   NavbarLayoutAuthenticatedDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
+  } as any)
+const NavbarLayoutAuthenticatedProjectsIdSubmitRoute =
+  NavbarLayoutAuthenticatedProjectsIdSubmitRouteImport.update({
+    id: '/projects/$id/submit',
+    path: '/projects/$id/submit',
     getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
   } as any)
 
@@ -134,6 +160,7 @@ export interface FileRoutesByFullPath {
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/verify-award': typeof VerifyAwardRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/about': typeof NavbarLayoutAboutRoute
   '/courses/$slug': typeof CoursesSlugRoute
@@ -141,8 +168,11 @@ export interface FileRoutesByFullPath {
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/courses/$slug/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
+  '/projects/': typeof NavbarLayoutProjectsIndexRoute
+  '/projects/$id/submit': typeof NavbarLayoutAuthenticatedProjectsIdSubmitRoute
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
@@ -150,6 +180,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/verify-award': typeof VerifyAwardRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/': typeof NavbarLayoutIndexRoute
   '/about': typeof NavbarLayoutAboutRoute
@@ -158,8 +189,11 @@ export interface FileRoutesByTo {
   '/courses': typeof CoursesIndexRoute
   '/domains': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/courses/$slug/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug/quiz': typeof CoursesSlugQuizRoute
+  '/projects': typeof NavbarLayoutProjectsIndexRoute
+  '/projects/$id/submit': typeof NavbarLayoutAuthenticatedProjectsIdSubmitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -171,6 +205,7 @@ export interface FileRoutesById {
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/verify-award': typeof VerifyAwardRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/_navbar-layout/_authenticated': typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
   '/_navbar-layout/about': typeof NavbarLayoutAboutRoute
@@ -180,8 +215,11 @@ export interface FileRoutesById {
   '/courses/': typeof CoursesIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/_navbar-layout/_authenticated/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/_navbar-layout/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/courses/$slug_/details': typeof CoursesSlugDetailsRoute
   '/courses/$slug_/quiz': typeof CoursesSlugQuizRoute
+  '/_navbar-layout/projects/': typeof NavbarLayoutProjectsIndexRoute
+  '/_navbar-layout/_authenticated/projects/$id/submit': typeof NavbarLayoutAuthenticatedProjectsIdSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -194,6 +232,7 @@ export interface FileRouteTypes {
     | '/domains'
     | '/privacy'
     | '/terms'
+    | '/verify-award'
     | '/verify-certificate'
     | '/about'
     | '/courses/$slug'
@@ -201,8 +240,11 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/domains/'
     | '/dashboard'
+    | '/projects/$id'
     | '/courses/$slug/details'
     | '/courses/$slug/quiz'
+    | '/projects/'
+    | '/projects/$id/submit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
@@ -210,6 +252,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/privacy'
     | '/terms'
+    | '/verify-award'
     | '/verify-certificate'
     | '/'
     | '/about'
@@ -218,8 +261,11 @@ export interface FileRouteTypes {
     | '/courses'
     | '/domains'
     | '/dashboard'
+    | '/projects/$id'
     | '/courses/$slug/details'
     | '/courses/$slug/quiz'
+    | '/projects'
+    | '/projects/$id/submit'
   id:
     | '__root__'
     | '/_navbar-layout'
@@ -230,6 +276,7 @@ export interface FileRouteTypes {
     | '/domains'
     | '/privacy'
     | '/terms'
+    | '/verify-award'
     | '/verify-certificate'
     | '/_navbar-layout/_authenticated'
     | '/_navbar-layout/about'
@@ -239,8 +286,11 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/domains/'
     | '/_navbar-layout/_authenticated/dashboard'
+    | '/_navbar-layout/projects/$id'
     | '/courses/$slug_/details'
     | '/courses/$slug_/quiz'
+    | '/_navbar-layout/projects/'
+    | '/_navbar-layout/_authenticated/projects/$id/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -252,6 +302,7 @@ export interface RootRouteChildren {
   DomainsRoute: typeof DomainsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
+  VerifyAwardRoute: typeof VerifyAwardRoute
   VerifyCertificateRoute: typeof VerifyCertificateRoute
 }
 
@@ -262,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/verify-certificate'
       fullPath: '/verify-certificate'
       preLoaderRoute: typeof VerifyCertificateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-award': {
+      id: '/verify-award'
+      path: '/verify-award'
+      fullPath: '/verify-award'
+      preLoaderRoute: typeof VerifyAwardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -369,6 +427,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedRouteRouteImport
       parentRoute: typeof NavbarLayoutRoute
     }
+    '/_navbar-layout/projects/': {
+      id: '/_navbar-layout/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof NavbarLayoutProjectsIndexRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
     '/courses/$slug_/quiz': {
       id: '/courses/$slug_/quiz'
       path: '/$slug/quiz'
@@ -383,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CoursesSlugDetailsRouteImport
       parentRoute: typeof CoursesRoute
     }
+    '/_navbar-layout/projects/$id': {
+      id: '/_navbar-layout/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof NavbarLayoutProjectsIdRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
     '/_navbar-layout/_authenticated/dashboard': {
       id: '/_navbar-layout/_authenticated/dashboard'
       path: '/dashboard'
@@ -390,17 +462,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedDashboardRouteImport
       parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
     }
+    '/_navbar-layout/_authenticated/projects/$id/submit': {
+      id: '/_navbar-layout/_authenticated/projects/$id/submit'
+      path: '/projects/$id/submit'
+      fullPath: '/projects/$id/submit'
+      preLoaderRoute: typeof NavbarLayoutAuthenticatedProjectsIdSubmitRouteImport
+      parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
+    }
   }
 }
 
 interface NavbarLayoutAuthenticatedRouteRouteChildren {
   NavbarLayoutAuthenticatedDashboardRoute: typeof NavbarLayoutAuthenticatedDashboardRoute
+  NavbarLayoutAuthenticatedProjectsIdSubmitRoute: typeof NavbarLayoutAuthenticatedProjectsIdSubmitRoute
 }
 
 const NavbarLayoutAuthenticatedRouteRouteChildren: NavbarLayoutAuthenticatedRouteRouteChildren =
   {
     NavbarLayoutAuthenticatedDashboardRoute:
       NavbarLayoutAuthenticatedDashboardRoute,
+    NavbarLayoutAuthenticatedProjectsIdSubmitRoute:
+      NavbarLayoutAuthenticatedProjectsIdSubmitRoute,
   }
 
 const NavbarLayoutAuthenticatedRouteRouteWithChildren =
@@ -412,6 +494,8 @@ interface NavbarLayoutRouteChildren {
   NavbarLayoutAuthenticatedRouteRoute: typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
   NavbarLayoutAboutRoute: typeof NavbarLayoutAboutRoute
   NavbarLayoutIndexRoute: typeof NavbarLayoutIndexRoute
+  NavbarLayoutProjectsIdRoute: typeof NavbarLayoutProjectsIdRoute
+  NavbarLayoutProjectsIndexRoute: typeof NavbarLayoutProjectsIndexRoute
 }
 
 const NavbarLayoutRouteChildren: NavbarLayoutRouteChildren = {
@@ -419,6 +503,8 @@ const NavbarLayoutRouteChildren: NavbarLayoutRouteChildren = {
     NavbarLayoutAuthenticatedRouteRouteWithChildren,
   NavbarLayoutAboutRoute: NavbarLayoutAboutRoute,
   NavbarLayoutIndexRoute: NavbarLayoutIndexRoute,
+  NavbarLayoutProjectsIdRoute: NavbarLayoutProjectsIdRoute,
+  NavbarLayoutProjectsIndexRoute: NavbarLayoutProjectsIndexRoute,
 }
 
 const NavbarLayoutRouteWithChildren = NavbarLayoutRoute._addFileChildren(
@@ -464,6 +550,7 @@ const rootRouteChildren: RootRouteChildren = {
   DomainsRoute: DomainsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
+  VerifyAwardRoute: VerifyAwardRoute,
   VerifyCertificateRoute: VerifyCertificateRoute,
 }
 export const routeTree = rootRouteImport

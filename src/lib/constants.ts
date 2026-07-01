@@ -75,3 +75,47 @@ export function generateCertId() {
   const n = Math.floor(10000 + Math.random() * 90000);
   return `SKX-CERT-${year}-${n}`;
 }
+
+export function generateProjectId() {
+  const year = new Date().getFullYear();
+  const n = Math.floor(100 + Math.random() * 900);
+  return `PRJ-${year}-${n}`;
+}
+
+export function generateProjectCertId() {
+  const year = new Date().getFullYear();
+  const n = Math.floor(10000 + Math.random() * 90000);
+  return `SKX-PCERT-${year}-${n}`;
+}
+
+export function generateAwardId() {
+  const year = new Date().getFullYear();
+  const n = Math.floor(100 + Math.random() * 900);
+  return `SKX-AWARD-${year}-${n}`;
+}
+
+export const PROJECT_DIFFICULTIES = ["beginner", "intermediate", "advanced", "expert"] as const;
+
+export const EVALUATION_CRITERIA = [
+  { key: "problem_solving", label: "Problem Solving Approach", max: 10 },
+  { key: "ui_ux_design", label: "UI/UX Design", max: 10 },
+  { key: "functionality", label: "Functionality", max: 10 },
+  { key: "code_quality", label: "Code Quality", max: 10 },
+  { key: "architecture", label: "Application Architecture", max: 10 },
+  { key: "database_design", label: "Database Design", max: 10 },
+  { key: "performance", label: "Performance", max: 10 },
+  { key: "security", label: "Security", max: 10 },
+  { key: "scalability", label: "Scalability", max: 10 },
+  { key: "documentation", label: "Documentation", max: 10 },
+  { key: "innovation", label: "Innovation", max: 10 },
+] as const;
+
+export const AWARD_CATEGORIES = [
+  "Top 1", "Top 3", "Top 5", "Top 10",
+  "Highest Evaluation Score",
+  "Innovation Award",
+  "Best UI/UX",
+  "Best Architecture",
+  "Best Problem Solver",
+  "Outstanding Performance",
+] as const;

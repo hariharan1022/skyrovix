@@ -3,13 +3,14 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/domains", label: "Internship", icon: Briefcase },
   { to: "/courses", label: "Courses", icon: BookOpen },
+  { to: "/projects", label: "Projects", icon: Code2 },
   { to: "/about", label: "About", icon: Info },
   { to: "/contact", label: "Contact", icon: Mail },
   { to: "/verify-certificate", label: "Verify", icon: BadgeCheck },
