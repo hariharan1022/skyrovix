@@ -1485,6 +1485,8 @@ function SubmissionCard({ sub, loadingId, tab, onAction, onHistory, showHistory,
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
         {(subType === "intern" ? sub.github_url : sub.project_url) && <a href={sub.github_url || sub.project_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "GitHub" : "Project"}</a>}
         {(subType === "intern" ? sub.deployed_url : sub.file_path) && <a href={sub.deployed_url || sub.file_path} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "Demo" : "File"}</a>}
+        {sub.pdf_url && <a href={sub.pdf_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><FileText className="size-3" /> Report</a>}
+        {sub.screenshot_url && <a href={sub.screenshot_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> Screenshot</a>}
         {sub.notes && <p className="w-full text-muted-foreground mt-1">{sub.notes}</p>}
       </div>
       {sub.feedback && (
