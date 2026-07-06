@@ -167,49 +167,49 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) { onOpenChange(false); reset(); } }}>
-      <DialogContent className="sm:max-w-lg max-h-[85dvh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
+      <DialogContent className="sm:max-w-lg max-h-[90dvh] sm:max-h-[85dvh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="mb-1 sm:mb-0">
+          <DialogTitle className="text-base sm:text-xl font-bold">
             Apply for {domainName || "Internship"}
           </DialogTitle>
-          <DialogDescription>Fill in your details. You'll get your offer letter and ID card instantly.</DialogDescription>
+          <DialogDescription className="text-xs sm:text-sm">Fill in your details. You'll get your offer letter and ID card instantly.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={submitApplication} className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <Label>Full Name</Label>
-            <Input name="full_name" defaultValue={user?.user_metadata?.full_name ?? ""} required className="mt-1 rounded-xl" />
+        <form onSubmit={submitApplication} className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
+          <div className="col-span-2">
+            <Label className="text-xs sm:text-sm">Full Name</Label>
+            <Input name="full_name" defaultValue={user?.user_metadata?.full_name ?? ""} required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           <div>
-            <Label>Email</Label>
-            <Input name="email" type="email" defaultValue={user?.email ?? ""} required={!user} disabled={!!user} className="mt-1 rounded-xl" />
+            <Label className="text-xs sm:text-sm">Email</Label>
+            <Input name="email" type="email" defaultValue={user?.email ?? ""} required={!user} disabled={!!user} className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           {!user && (
             <div>
-              <Label>Password</Label>
-              <Input name="password" type="password" minLength={6} required={!user} className="mt-1 rounded-xl" />
+              <Label className="text-xs sm:text-sm">Password</Label>
+              <Input name="password" type="password" minLength={6} required={!user} className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
             </div>
           )}
           <div>
-            <Label>Phone</Label>
-            <Input name="phone" type="tel" required className="mt-1 rounded-xl" />
+            <Label className="text-xs sm:text-sm">Phone</Label>
+            <Input name="phone" type="tel" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           <div>
-            <Label>College / University</Label>
-            <Input name="college" required className="mt-1 rounded-xl" />
+            <Label className="text-xs sm:text-sm">College / University</Label>
+            <Input name="college" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           <div>
-            <Label>Course / Branch</Label>
-            <Input name="course" required className="mt-1 rounded-xl" />
+            <Label className="text-xs sm:text-sm">Course / Branch</Label>
+            <Input name="course" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           <div>
-            <Label>Year</Label>
-            <Input name="year" placeholder="e.g. 3rd year" required className="mt-1 rounded-xl" />
+            <Label className="text-xs sm:text-sm">Year</Label>
+            <Input name="year" placeholder="e.g. 3rd year" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           {!defaultDomain && (
             <div>
-              <Label>Domain</Label>
+              <Label className="text-xs sm:text-sm">Domain</Label>
               <Select value={applyDomain} onValueChange={setApplyDomain} required>
-                <SelectTrigger className="mt-1 rounded-xl">
+                <SelectTrigger className="mt-1 rounded-xl h-9 sm:h-10 text-sm">
                   <SelectValue placeholder="Select a domain" />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,15 +220,15 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
               </Select>
             </div>
           )}
-          <div className="md:col-span-2">
-            <Label>Duration</Label>
-            <div className="mt-1 grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <Label className="text-xs sm:text-sm">Duration</Label>
+            <div className="mt-1 grid grid-cols-2 gap-1.5 sm:gap-2">
               {DURATIONS.map((d) => (
                 <button
                   key={d.value}
                   type="button"
                   onClick={() => setApplyDuration(d.value)}
-                  className={`rounded-xl border p-2.5 sm:p-3 text-left transition-all ${
+                  className={`rounded-xl border p-2 sm:p-3 text-left transition-all ${
                     applyDuration === d.value
                       ? "border-[#07284a] bg-[#07284a]/10 dark:border-[#60a5fa] dark:bg-[#60a5fa]/10 ring-1 ring-[#07284a]/20"
                       : "border-border/60 bg-white/50 dark:bg-[#0f172a]/50 hover:border-border"
@@ -241,35 +241,35 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
             </div>
           </div>
           <div>
-            <Label>Profile Photo</Label>
-            <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 rounded-xl file:truncate" />
+            <Label className="text-xs sm:text-sm">Profile Photo</Label>
+            <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 rounded-xl h-9 sm:h-10 text-sm file:truncate" />
           </div>
-          <div className="md:col-span-2">
+          <div className="col-span-2">
             {couponApplied ? (
-              <div className="flex items-center justify-between rounded-xl border border-green-200 dark:border-green-800/30 bg-green-50 dark:bg-green-950/20 p-3">
+              <div className="flex items-center justify-between rounded-xl border border-green-200 dark:border-green-800/30 bg-green-50 dark:bg-green-950/20 p-2.5 sm:p-3">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-green-500" />
-                  <span className="text-xs font-semibold text-green-700 dark:text-green-300">Coupon {couponApplied.code} — {couponApplied.discount}</span>
+                  <CheckCircle2 className="size-3.5 sm:size-4 text-green-500" />
+                  <span className="text-[11px] sm:text-xs font-semibold text-green-700 dark:text-green-300">Coupon {couponApplied.code} — {couponApplied.discount}</span>
                 </div>
                 <Button type="button" size="sm" variant="ghost" className="h-6 px-2 text-[10px]" onClick={handleRemoveCoupon}>Remove</Button>
               </div>
             ) : (
               <div className="flex gap-2">
                 <Input
-                  placeholder="Have a coupon code? Enter it here"
-                  className="mt-1 flex-1 rounded-xl"
+                  placeholder="Have a coupon code?"
+                  className="mt-1 flex-1 rounded-xl h-9 sm:h-10 text-sm"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
                 />
-                <Button type="button" size="sm" variant="outline" className="mt-1 h-10 rounded-xl gap-1 shrink-0" onClick={handleApplyCoupon} disabled={!couponCode.trim() || validatingCoupon}>
+                <Button type="button" size="sm" variant="outline" className="mt-1 h-9 sm:h-10 rounded-xl gap-1 shrink-0 text-xs sm:text-sm" onClick={handleApplyCoupon} disabled={!couponCode.trim() || validatingCoupon}>
                   {validatingCoupon ? <Loader2 className="size-3.5 animate-spin" /> : <Sparkles className="size-3.5" />}
                   Apply
                 </Button>
               </div>
             )}
           </div>
-          <Button type="submit" className="w-full md:col-span-2 rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-11" disabled={applying}>
+          <Button type="submit" className="w-full col-span-2 rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-10 sm:h-11 text-sm" disabled={applying}>
             {applying ? "Submitting..." : "Submit Application"}
           </Button>
         </form>
