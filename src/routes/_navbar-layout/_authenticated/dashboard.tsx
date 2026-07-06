@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { ApplicationFormDialog } from "@/components/ApplicationFormDialog";
 import { DOMAINS, PAYMENT, COMPANY, generateInternId, generateCertId, getDomain } from "@/lib/constants";
 import { validateCoupon, calculateDiscountedAmount, formatDiscount } from "@/lib/coupons";
 import type { CouponResult } from "@/lib/coupons";
@@ -2285,7 +2286,7 @@ function ActivityFeed({ app, enrollment, taskSubmissions, lastAttempt, topics, c
 // ─── APPLY FORM ───
 
 function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any; enrollments: any[]; courses: any[]; onCreated: () => void }) {
-  const [showApply, setShowApply] = useState(false);
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
   const enrolledCourses = enrollments
     .map((e) => ({ ...e, course: courses.find((c) => c.id === e.course_id) }))
@@ -2307,12 +2308,18 @@ function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any
             <Button asChild size="lg" className="brand-gradient text-white border-0">
               <Link to="/courses"><BookOpen className="mr-2 size-4" /> Explore Courses</Link>
             </Button>
-            <Button size="lg" variant="outline" onClick={() => setShowApply((v) => !v)}>
-              <FileText className="mr-2 size-4" /> {showApply ? "Hide application form" : "Apply for Internship"}
+            <Button size="lg" variant="outline" onClick={() => setShowApplyDialog(true)}>
+              <FileText className="mr-2 size-4" /> Apply for Internship
             </Button>
           </div>
         </div>
       </div>
+
+      <ApplicationFormDialog
+        open={showApplyDialog}
+        onOpenChange={setShowApplyDialog}
+        onSuccess={onCreated}
+      />
 
       {/* Quick action tiles */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -2352,93 +2359,6 @@ function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any
         </div>
       )}
 
-      {/* Inline apply form when toggled */}
-      {showApply && (
-        <AnimatedSection>
-          <ApplyForm onCreated={onCreated} />
-        </AnimatedSection>
-      )}
     </div>
-  );
-}
-
-function ApplyForm({ onCreated }: { onCreated: () => void }) {
-  const { user } = useAuth();
-  const qc = useQueryClient();
-  const [loading, setLoading] = useState(false);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [selectedDomain, setSelectedDomain] = useState("");
-
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!user) return;
-    const fd = new FormData(e.currentTarget);
-    setLoading(true);
-    try {
-      let photo_url: string | null = null;
-      if (photoFile) {
-        const ext = photoFile.name.split(".").pop();
-        const path = `${user.id}/${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("profile-photos").upload(path, photoFile, { upsert: true });
-        if (upErr) {
-          console.warn("Profile photo upload failed:", upErr.message);
-        } else {
-          const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
-          photo_url = publicUrl?.publicUrl ?? null;
-        }
-      }
-      const intern_id = generateInternId();
-      const domain = selectedDomain || String(fd.get("domain") || "");
-      if (!domain) throw new Error("Please select a domain");
-      const payload = { user_id: user.id, domain, intern_id, full_name: String(fd.get("full_name")), email: user.email ?? "", phone: String(fd.get("phone")), college: String(fd.get("college")), course: String(fd.get("course")), year: String(fd.get("year")), photo_url, status: "approved" as const };
-      const { data: inserted, error } = await supabase.from("applications").insert(payload).select().maybeSingle();
-      if (error || !inserted) throw error ?? new Error("Failed to create application");
-      await supabase.from("profiles").update({ full_name: payload.full_name, phone: payload.phone, college: payload.college, course: payload.course, year: payload.year, photo_url }).eq("id", user.id);
-      qc.setQueryData(["my-applications", user.id], [inserted]);
-      toast.success("Application approved! Your offer letter is ready.");
-      onCreated();
-      (async () => {
-        try {
-          const { getDomain } = await import("@/lib/constants");
-          const { sendOfferLetterEmail } = await import("@/lib/email-helpers");
-          const domainObj = getDomain(domain);
-          const domainName = domainObj?.name ?? domain;
-          const result = await sendOfferLetterEmail({ to: user.email ?? "", studentName: payload.full_name, studentId: user.id, internId: intern_id, domainName, duration: 1 });
-          if (result.success) toast.success("Offer letter sent to your email!");
-          else toast.error("Offer letter email delivery failed. Contact support.");
-        } catch (e) {
-          toast.error("Offer letter email could not be sent.");
-          console.warn("[Email] Failed to send offer letter:", e);
-        }
-      })();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
-    } finally { setLoading(false); }
-  };
-
-  return (
-    <Card className="w-full max-w-2xl mx-auto rounded-2xl border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <CardHeader><CardTitle>Apply for an Internship</CardTitle><CardDescription>Fill in your details. You'll get your offer letter and digital ID card instantly.</CardDescription></CardHeader>
-      <CardContent>
-        <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2"><Label>Full Name</Label><Input name="full_name" required className="mt-1" /></div>
-          <div><Label>Phone</Label><Input name="phone" type="tel" required className="mt-1" /></div>
-          <div><Label>Domain</Label>
-            <Select value={selectedDomain} onValueChange={setSelectedDomain} required>
-              <SelectTrigger className="mt-1"><SelectValue placeholder="Select a domain" /></SelectTrigger>
-              <SelectContent>
-                {DOMAINS.map((d) => <SelectItem key={d.slug} value={d.slug}>{d.icon} {d.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <input type="hidden" name="domain" value={selectedDomain} />
-          </div>
-          <div><Label>College</Label><Input name="college" required className="mt-1" /></div>
-          <div><Label>Course / Branch</Label><Input name="course" required className="mt-1" /></div>
-          <div><Label>Year</Label><Input name="year" placeholder="e.g. 3rd year" required className="mt-1" /></div>
-          <div><Label>Profile Photo</Label><Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1 file:truncate" /></div>
-          <Button type="submit" className="w-full md:col-span-2 brand-gradient text-white border-0 h-11 rounded-xl mt-2" disabled={loading}>{loading ? "Submitting…" : "Submit Application"}</Button>
-        </form>
-      </CardContent>
-    </Card>
   );
 }
