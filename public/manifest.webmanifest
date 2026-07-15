@@ -1,13 +1,17 @@
 {
   "name": "Skyrovix — Virtual Internship Platform",
   "short_name": "Skyrovix",
+  "id": "https://skyrovix.online/",
   "description": "Task-based virtual internships with certificates, offer letters, and digital ID cards.",
+  "lang": "en-IN",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#07284a",
   "orientation": "portrait-primary",
   "categories": ["education", "productivity"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -26,6 +30,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-default.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Skyrovix Virtual Internship Platform Homepage"
     }
   ]
 }

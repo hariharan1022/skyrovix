@@ -64,9 +64,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // Default title & description — overridden by each per-route head()
       { title: "Skyrovix — Virtual Internship & Training Platform for Students" },
       { name: "description", content: "Join Skyrovix for task-based virtual internships in Full Stack, AI/ML, Data Science, UI/UX, Cyber Security and more. Get offer letters, digital ID cards, and QR-verified certificates. Apply in minutes — 100% online." },
-      { name: "keywords", content: "virtual internship, online internship, internship with certificate, free internship for students, full stack development internship, data science internship, AI ML internship, UI UX design internship, cyber security internship, python internship, java internship, online courses, skill development, Skyrovix" },
+      { name: "keywords", content: "virtual internship, online internship, internship with certificate, free internship for students, full stack development internship, data science internship, AI ML internship, UI UX design internship, cyber security internship, python internship, java internship, skill development, Skyrovix" },
       { name: "author", content: "Skyrovix" },
       { name: "publisher", content: "Skyrovix" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
@@ -77,6 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-title", content: "Skyrovix" },
       { name: "application-name", content: "Skyrovix" },
       { name: "format-detection", content: "telephone=no" },
+      // Geo tags for India-local SEO
+      { name: "geo.region", content: "IN" },
+      { name: "geo.placename", content: "India" },
+      { name: "geo.position", content: "20.5937;78.9629" },
+      { name: "ICBM", content: "20.5937, 78.9629" },
+      // Open Graph defaults
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Skyrovix" },
       { property: "og:title", content: "Skyrovix — Virtual Internship & Training Platform" },
@@ -86,7 +93,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Skyrovix — Virtual Internship & Training Platform" },
+      { property: "og:image:type", content: "image/png" },
       { property: "og:locale", content: "en_IN" },
+      // Twitter Card defaults
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Skyrovix — Virtual Internship & Training Platform" },
       { name: "twitter:description", content: "Task-based virtual internships with offer letters, digital ID cards, and QR-verified certificates." },
@@ -100,6 +109,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      { rel: "preconnect", href: "https://www.googletagmanager.com", crossOrigin: "" },
+      { rel: "dns-prefetch", href: "https://www.clarity.ms" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" },
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
       { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" },
@@ -109,6 +120,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "sitemap", type: "application/xml", href: "/sitemap.xml" },
       { rel: "icon", type: "image/png", href: "/android-chrome-192x192.png", sizes: "192x192" },
       { rel: "icon", type: "image/png", href: "/android-chrome-512x512.png", sizes: "512x512" },
+      // hreflang for India English
+      { rel: "alternate", hreflang: "en-IN", href: SITE_URL },
+      { rel: "alternate", hreflang: "en", href: SITE_URL },
+      { rel: "alternate", hreflang: "x-default", href: SITE_URL },
     ],
   }),
   shellComponent: RootShell,

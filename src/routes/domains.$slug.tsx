@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { CourseJsonLd } from "@/components/JsonLd";
+import { CourseJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,22 +65,31 @@ export const Route = createFileRoute("/domains/$slug")({
     const d = getDomain(params.slug);
     const name = d?.name ?? "Domain";
     const desc = d?.description ?? "Skyrovix internship domain.";
+    const canonicalUrl = `https://skyrovix.online/domains/${params.slug}`;
     return {
       meta: [
-        { title: `${name} Internship — Virtual Internship | Skyrovix` },
-        { name: "description", content: `Join the ${name} virtual internship at Skyrovix. ${desc} Earn a verified certificate with offer letter and digital ID card.` },
-        { name: "keywords", content: `${name.toLowerCase()} internship, ${params.slug} virtual internship, ${name} online training, Skyrovix ${name}` },
-        { name: "robots", content: "index, follow" },
+        { title: `${name} Internship — Virtual Internship Program | Skyrovix` },
+        { name: "description", content: `Join the ${name} virtual internship at Skyrovix. ${desc} Get an instant offer letter, digital ID card, complete 5 real-world projects, and earn a QR-verified certificate. Apply online in minutes.` },
+        { name: "keywords", content: `${name.toLowerCase()} internship, ${params.slug} virtual internship, ${name} online training, Skyrovix ${name}, ${name} internship certificate, ${name} internship for students, ${name} online course, ${name} internship with offer letter` },
+        { name: "robots", content: "index, follow, max-image-preview:large" },
         { property: "og:type", content: "website" },
-        { property: "og:title", content: `${name} Internship — Skyrovix` },
-        { property: "og:description", content: `${desc} Earn a verified certificate.` },
-        { property: "og:url", content: `https://skyrovix.online/domains/${params.slug}` },
+        { property: "og:site_name", content: "Skyrovix" },
+        { property: "og:title", content: `${name} Internship — Virtual Program with Certificate | Skyrovix` },
+        { property: "og:description", content: `${desc} Get an offer letter, digital ID card, and earn a QR-verified certificate after completing 5 real-world tasks.` },
+        { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: `${name} Virtual Internship — Skyrovix` },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:locale", content: "en_IN" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${name} Internship — Skyrovix` },
-        { name: "twitter:description", content: desc },
+        { name: "twitter:site", content: "@skyrovix" },
+        { name: "twitter:title", content: `${name} Internship — Virtual Program with Certificate | Skyrovix` },
+        { name: "twitter:description", content: `${desc} Earn a QR-verified certificate with offer letter and digital ID card.` },
         { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
-        { rel: "canonical", href: `https://skyrovix.online/domains/${params.slug}` },
+        { name: "twitter:image:alt", content: `${name} Virtual Internship — Skyrovix` },
+        { rel: "canonical", href: canonicalUrl },
       ],
     };
   },
@@ -168,10 +177,23 @@ function InternshipDetailsPage() {
         description={detail.longDescription || domain.description || ""}
         url={`https://skyrovix.online/domains/${slug}`}
       />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://skyrovix.online/" },
+          { name: "Internship Domains", url: "https://skyrovix.online/domains" },
+          { name: `${domain.name} Internship`, url: `https://skyrovix.online/domains/${slug}` },
+        ]}
+      />
       <Navbar />
       <section className="relative overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${domain.color}`}>
-          <img src={heroImage} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <img
+            src={heroImage}
+            alt={`${domain.name} internship program — task-based virtual training at Skyrovix`}
+            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-4 pt-20 sm:pt-28 pb-12 sm:pb-16">

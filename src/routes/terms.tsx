@@ -2,15 +2,30 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
+import { WebPageJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — Skyrovix" },
-      { name: "description", content: "Skyrovix terms of service. Read the terms and conditions governing your use of the Skyrovix virtual internship and training platform." },
+      { title: "Terms of Service — Skyrovix Internship Platform" },
+      { name: "description", content: "Skyrovix terms of service. Read the terms and conditions governing your use of the Skyrovix virtual internship and training platform, including certification, payment, and user conduct policies." },
+      { name: "keywords", content: "skyrovix terms of service, internship terms, skyrovix conditions, platform usage terms" },
       { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Skyrovix" },
       { property: "og:title", content: "Terms of Service — Skyrovix" },
-      { property: "og:description", content: "Skyrovix terms and conditions for platform usage." },
+      { property: "og:description", content: "Skyrovix terms of service governing internship participation, certification, and platform usage." },
+      { property: "og:url", content: "https://skyrovix.online/terms" },
+      { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Terms of Service — Skyrovix" },
+      { property: "og:locale", content: "en_IN" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@skyrovix" },
+      { name: "twitter:title", content: "Terms of Service — Skyrovix" },
+      { name: "twitter:description", content: "Skyrovix terms of service governing internship participation, certification, and platform usage." },
+      { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
       { rel: "canonical", href: "https://skyrovix.online/terms" },
     ],
   }),
@@ -20,6 +35,11 @@ export const Route = createFileRoute("/terms")({
 function TermsPage() {
   return (
     <div className="min-h-screen">
+      <WebPageJsonLd
+        title="Terms of Service — Skyrovix Internship Platform"
+        description="Skyrovix terms of service governing internship participation, certification, payment, and user conduct."
+        url="https://skyrovix.online/terms"
+      />
       <Navbar />
       <main className="mx-auto max-w-3xl px-4 py-16">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-3" /> Back</Link>

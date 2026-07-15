@@ -11,19 +11,32 @@ import { CheckCircle2, XCircle, Search, Clock, GraduationCap, Award, ShieldCheck
 import { getDomain } from "@/lib/constants";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/verify-certificate")({
   head: () => ({
     meta: [
-      { title: "Verify Certificate — Skyrovix Online Certificate Verification" },
-      { name: "description", content: "Verify the authenticity of a Skyrovix internship or course certificate online. Enter your certificate ID or intern ID to confirm authenticity instantly." },
-      { name: "keywords", content: "verify certificate, certificate verification, skyrovix certificate check, internship certificate verify, online certificate verification" },
+      { title: "Verify Skyrovix Certificate — Instant Online Certificate Verification" },
+      { name: "description", content: "Verify the authenticity of a Skyrovix internship certificate online. Enter your certificate ID or intern ID to confirm authenticity instantly. QR-verified certificates for all domains." },
+      { name: "keywords", content: "verify certificate, certificate verification, skyrovix certificate check, internship certificate verify, online certificate verification, QR verified certificate, skyrovix intern ID" },
       { name: "robots", content: "index, follow" },
-      { property: "og:title", content: "Verify Certificate — Skyrovix" },
-      { property: "og:description", content: "Verify your Skyrovix internship or course certificate online." },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Skyrovix" },
+      { property: "og:title", content: "Verify Skyrovix Certificate — Instant Online Verification" },
+      { property: "og:description", content: "Verify your Skyrovix internship certificate online. Enter certificate ID or intern ID for instant QR-verified authenticity confirmation." },
       { property: "og:url", content: "https://skyrovix.online/verify-certificate" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "Verify Certificate — Skyrovix" },
+      { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Skyrovix Certificate Verification" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:locale", content: "en_IN" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@skyrovix" },
+      { name: "twitter:title", content: "Verify Skyrovix Certificate — Instant Online Verification" },
+      { name: "twitter:description", content: "Verify your Skyrovix internship certificate online. Enter certificate ID or intern ID for instant authenticity check." },
+      { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
+      { name: "twitter:image:alt", content: "Skyrovix Certificate Verification" },
       { rel: "canonical", href: "https://skyrovix.online/verify-certificate" },
     ],
   }),
@@ -98,6 +111,17 @@ function VerifyPage() {
 
   return (
     <div className="min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://skyrovix.online/" },
+          { name: "Verify Certificate", url: "https://skyrovix.online/verify-certificate" },
+        ]}
+      />
+      <WebPageJsonLd
+        title="Verify Skyrovix Certificate — Instant Online Certificate Verification"
+        description="Verify the authenticity of a Skyrovix internship certificate online. Enter your certificate ID or intern ID to confirm authenticity instantly."
+        url="https://skyrovix.online/verify-certificate"
+      />
       <Navbar />
       <AuroraBackground>
         <section className="relative pb-6 sm:pb-10 pt-8 sm:pt-16 md:pt-24">

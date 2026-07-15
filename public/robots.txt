@@ -1,12 +1,16 @@
 User-agent: *
 Allow: /
 Disallow: /admin
+Disallow: /admin/
 Disallow: /dashboard
+Disallow: /dashboard/
 Disallow: /auth
+Disallow: /auth/
 Disallow: /api/
 
 Sitemap: https://skyrovix.online/sitemap.xml
 
+# Allow AI indexing bots
 User-agent: GPTBot
 Allow: /
 
@@ -20,4 +24,10 @@ User-agent: PerplexityBot
 Allow: /
 
 User-agent: Anthropic-ai
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Bingbot
 Allow: /

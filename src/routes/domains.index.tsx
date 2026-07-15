@@ -16,20 +16,32 @@ import { toast } from "sonner";
 import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loader2, Upload, Lock } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
+import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/domains/")({
   head: () => ({
     meta: [
-      { title: "Apply for Virtual Internship — Skyrovix" },
-      { name: "description", content: "Apply for virtual internships at Skyrovix. Fill out the form to select your domain, duration, and start your task-based training immediately." },
-      { name: "keywords", content: "apply internship, internship registration, online training, skyrovix application form" },
+      { title: "Apply for Virtual Internship — Select Domain & Start Today | Skyrovix" },
+      { name: "description", content: "Apply for a virtual internship at Skyrovix in Full Stack, Data Science, AI/ML, UI/UX, Cyber Security, Python, Java and more. Select your domain and duration, fill the form, and get an instant offer letter. 100% online, ₹100 certification fee." },
+      { name: "keywords", content: "apply internship, internship registration, virtual internship application, online training registration, skyrovix application form, internship form India, apply online internship, internship with offer letter" },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
-      { property: "og:title", content: "Internship Application — Skyrovix" },
-      { property: "og:description", content: "Apply for virtual internships and start your task-based training." },
+      { property: "og:site_name", content: "Skyrovix" },
+      { property: "og:title", content: "Apply for Virtual Internship — Skyrovix" },
+      { property: "og:description", content: "Apply for a virtual internship in 10+ domains. Get an instant offer letter, digital ID card, complete 5 tasks, earn a QR-verified certificate. Only ₹100 certification fee." },
       { property: "og:url", content: "https://skyrovix.online/domains" },
+      { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Apply for Virtual Internship — Skyrovix" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:locale", content: "en_IN" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Apply for Internship — Skyrovix" },
+      { name: "twitter:site", content: "@skyrovix" },
+      { name: "twitter:title", content: "Apply for Virtual Internship — Skyrovix" },
+      { name: "twitter:description", content: "Apply for a virtual internship in Full Stack, AI/ML, Data Science, UI/UX and more. Get instant offer letter. Only ₹100 certification fee." },
+      { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
+      { name: "twitter:image:alt", content: "Apply for Virtual Internship — Skyrovix" },
       { rel: "canonical", href: "https://skyrovix.online/domains" },
     ],
   }),
@@ -234,6 +246,17 @@ function DomainsPage() {
 
   return (
     <div className="min-h-screen">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://skyrovix.online/" },
+          { name: "Apply for Internship", url: "https://skyrovix.online/domains" },
+        ]}
+      />
+      <WebPageJsonLd
+        title="Apply for Virtual Internship — Select Domain & Start Today | Skyrovix"
+        description="Apply for a virtual internship at Skyrovix. Select your domain and duration, fill the form, and get an instant offer letter."
+        url="https://skyrovix.online/domains"
+      />
       <Navbar />
       <AuroraBackground>
         <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-20">

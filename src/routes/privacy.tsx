@@ -2,15 +2,30 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArrowLeft } from "lucide-react";
+import { WebPageJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Skyrovix" },
-      { name: "description", content: "Skyrovix privacy policy. Learn how we collect, use, and protect your personal information including name, email, phone, college details, and payment data." },
+      { title: "Privacy Policy — Skyrovix Data Protection" },
+      { name: "description", content: "Skyrovix privacy policy. Learn how we collect, use, and protect your personal information including name, email, phone, college details, and payment data. Last updated July 2026." },
+      { name: "keywords", content: "skyrovix privacy policy, data protection, internship data collection, personal information policy" },
       { name: "robots", content: "index, follow" },
+      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Skyrovix" },
       { property: "og:title", content: "Privacy Policy — Skyrovix" },
-      { property: "og:description", content: "Skyrovix privacy policy for data collection and protection." },
+      { property: "og:description", content: "Skyrovix privacy policy explaining how we collect, use, and protect your personal data for internship services." },
+      { property: "og:url", content: "https://skyrovix.online/privacy" },
+      { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Privacy Policy — Skyrovix" },
+      { property: "og:locale", content: "en_IN" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@skyrovix" },
+      { name: "twitter:title", content: "Privacy Policy — Skyrovix" },
+      { name: "twitter:description", content: "Skyrovix privacy policy explaining how we collect, use, and protect your personal data." },
+      { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
       { rel: "canonical", href: "https://skyrovix.online/privacy" },
     ],
   }),
@@ -20,6 +35,11 @@ export const Route = createFileRoute("/privacy")({
 function PrivacyPage() {
   return (
     <div className="min-h-screen">
+      <WebPageJsonLd
+        title="Privacy Policy — Skyrovix"
+        description="Skyrovix privacy policy. Learn how we collect, use, and protect your personal information."
+        url="https://skyrovix.online/privacy"
+      />
       <Navbar />
       <main className="mx-auto max-w-3xl px-4 py-16">
         <Link to="/" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="size-3" /> Back</Link>

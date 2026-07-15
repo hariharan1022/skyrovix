@@ -5,22 +5,32 @@ import { COMPANY } from "@/lib/constants";
 import { Mail, MapPin, Globe, Sparkles } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
+import { BreadcrumbJsonLd, WebPageJsonLd, LocalBusinessJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Skyrovix — Get in Touch | Internship Support" },
-      { name: "description", content: "Have questions about Skyrovix internships or courses? Contact our team for support with applications, payments, certificates, and general inquiries." },
-      { name: "keywords", content: "contact skyrovix, internship support, help skyrovix, skyrovix contact, internship queries" },
+      { title: "Contact Skyrovix — Get Internship Support | Help Center" },
+      { name: "description", content: "Have questions about Skyrovix internships? Contact our team for support with applications, payments, certificates, and general inquiries. We respond within 1–2 business days." },
+      { name: "keywords", content: "contact skyrovix, internship support, help skyrovix, skyrovix contact, internship queries, skyrovix email, skyrovix help center, certificate support" },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Skyrovix" },
       { property: "og:title", content: "Contact Skyrovix — Get in Touch" },
-      { property: "og:description", content: "Contact Skyrovix for internship support, applications, and inquiries." },
+      { property: "og:description", content: "Contact Skyrovix for internship support, certificate queries, and general inquiries. Response within 1–2 business days." },
       { property: "og:url", content: "https://skyrovix.online/contact" },
       { property: "og:image", content: "https://skyrovix.online/og-default.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Contact Skyrovix — Virtual Internship Platform" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:locale", content: "en_IN" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Contact Skyrovix" },
+      { name: "twitter:site", content: "@skyrovix" },
+      { name: "twitter:title", content: "Contact Skyrovix — Get in Touch" },
+      { name: "twitter:description", content: "Contact Skyrovix for internship support, applications, certificates, and general inquiries." },
       { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
+      { name: "twitter:image:alt", content: "Contact Skyrovix — Virtual Internship Platform" },
       { rel: "canonical", href: "https://skyrovix.online/contact" },
     ],
   }),
@@ -36,6 +46,18 @@ const ITEMS = [
 function ContactPage() {
   return (
     <div className="min-h-screen">
+      <LocalBusinessJsonLd />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Home", url: "https://skyrovix.online/" },
+          { name: "Contact", url: "https://skyrovix.online/contact" },
+        ]}
+      />
+      <WebPageJsonLd
+        title="Contact Skyrovix — Get Internship Support"
+        description="Have questions about Skyrovix internships? Contact our team for support with applications, payments, certificates, and general inquiries."
+        url="https://skyrovix.online/contact"
+      />
       <Navbar />
       <AuroraBackground>
         <section className="relative pb-6 sm:pb-10 pt-8 sm:pt-16 md:pt-24">
