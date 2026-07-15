@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
-import { GraduationCap, Sparkles, ArrowRight } from "lucide-react";
+import { GraduationCap, Sparkles, ArrowRight, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -70,98 +70,137 @@ function AuthPage() {
   };
 
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
-      {/* Brand panel */}
-      <div className="relative hidden overflow-hidden lg:block">
-        <div className="absolute inset-0 brand-gradient">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.2),transparent_50%)]" />
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/10 to-transparent" />
-        </div>
-        <div className="absolute inset-0 hero-grid opacity-20" />
-        <div className="relative flex h-full flex-col justify-between p-12 text-white">
-          <Link to="/"><Logo variant="white" /></Link>
-          <div className="space-y-6">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium backdrop-blur-sm">
-              <Sparkles className="size-3.5" /> Task-based virtual internship
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0B1120] dark:to-[#0F172A] p-4 sm:p-6 lg:p-8">
+      {/* CSS Keyframes for drift background blobs */}
+      <style>{`
+        @keyframes drift-sphere-1 {
+          0% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(40px, -60px) scale(1.15); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes drift-sphere-2 {
+          0% { transform: translate(0px, 0px) scale(1.1); }
+          50% { transform: translate(-50px, 50px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1.1); }
+        }
+        .animate-drift-1 {
+          animation: drift-sphere-1 20s infinite alternate ease-in-out;
+        }
+        .animate-drift-2 {
+          animation: drift-sphere-2 16s infinite alternate ease-in-out;
+        }
+      `}</style>
+
+      {/* Backdrop glowing spheres */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -left-40 size-[450px] rounded-full bg-[#07284a]/10 blur-[130px] dark:bg-[#07284a]/15 animate-drift-1" />
+        <div className="absolute top-1/2 -right-40 size-[400px] rounded-full bg-blue-500/10 blur-[120px] dark:bg-blue-600/5 animate-drift-2" />
+        <div className="absolute -bottom-48 left-1/4 size-[550px] rounded-full bg-violet-400/8 blur-[140px] dark:bg-violet-600/5 animate-drift-1" />
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-5xl overflow-hidden rounded-3xl border border-border/40 bg-white/40 shadow-2xl backdrop-blur-xl dark:bg-slate-900/40 dark:border-white/5 min-h-[640px] lg:grid lg:grid-cols-12">
+        {/* ─── Column 1: Brand visual panel (Desktop only) ─── */}
+        <div className="relative hidden lg:flex lg:col-span-6 flex-col justify-between p-10 overflow-hidden bg-gradient-to-br from-[#07284a] via-[#093561] to-[#0d4c8a] text-white">
+          {/* Subtle grid layout overlays */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_55%)] pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 size-48 rounded-full bg-blue-400/20 blur-[80px]" />
+          
+          <div className="relative z-10">
+            <Link to="/"><Logo variant="white" /></Link>
+          </div>
+
+          <div className="relative z-10 space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-semibold backdrop-blur-md border border-white/10">
+              <Sparkles className="size-3.5 text-amber-300 animate-pulse" />
+              <span>MSME Registered Internship Platform</span>
             </div>
-            <h2 className="font-display text-4xl font-bold leading-tight">Build the future,<br />one task at a time.</h2>
-            <p className="max-w-md text-white/80 leading-relaxed">
-              Join hundreds of students gaining real, hands-on experience with Skyrovix. 
-              Complete projects, get mentor reviews, and earn verified certificates.
+            
+            <h2 className="font-display text-3xl font-extrabold leading-[1.2] tracking-tight">
+              Build real projects.<br />
+              <span className="text-blue-300">Earn verified credentials.</span>
+            </h2>
+            
+            <p className="text-sm text-white/80 leading-relaxed max-w-sm">
+              Complete task-based virtual internships, receive detailed mentor code feedback, and unlock QR-coded certificates to power your career.
             </p>
-            <div className="flex items-center gap-8 pt-4">
-              <div>
-                <div className="text-2xl font-bold">10+</div>
-                <div className="text-xs text-white/60">Domains</div>
+
+            <div className="grid grid-cols-3 gap-4 pt-4 text-center">
+              <div className="rounded-2xl bg-white/5 border border-white/5 p-3.5 backdrop-blur-sm">
+                <p className="text-2xl font-black text-blue-300">10+</p>
+                <p className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">Domains</p>
               </div>
-              <div className="h-8 w-px bg-white/20" />
-              <div>
-                <div className="text-2xl font-bold">50+</div>
-                <div className="text-xs text-white/60">Projects</div>
+              <div className="rounded-2xl bg-white/5 border border-white/5 p-3.5 backdrop-blur-sm">
+                <p className="text-2xl font-black text-blue-300">50+</p>
+                <p className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">Tasks</p>
               </div>
-              <div className="h-8 w-px bg-white/20" />
-              <div>
-                <div className="text-2xl font-bold">100%</div>
-                <div className="text-xs text-white/60">Online</div>
+              <div className="rounded-2xl bg-white/5 border border-white/5 p-3.5 backdrop-blur-sm">
+                <p className="text-2xl font-black text-blue-300">100%</p>
+                <p className="text-[10px] text-white/60 font-semibold uppercase tracking-wider mt-0.5">Online</p>
               </div>
             </div>
           </div>
-          <div className="text-xs text-white/40">© {new Date().getFullYear()} Skyrovix</div>
-        </div>
-      </div>
 
-      {/* Form panel */}
-      <div className="flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          <div className="mb-6 lg:hidden"><Link to="/"><Logo /></Link></div>
-          <Card className="border-border/60 shadow-xl shadow-primary/5">
-            <CardHeader>
-              <CardTitle className="text-2xl">Welcome</CardTitle>
-              <CardDescription>Sign in or create an account to get started.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="signin">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="signin">Sign In</TabsTrigger>
-                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                <TabsContent value="signin">
-                  <form onSubmit={signIn} method="post" action="?" autoComplete="on" className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                      <Label>Email</Label>
-                      <Input name="email" type="email" required className="h-11" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Password</Label>
-                      <Input name="password" type="password" required className="h-11" />
-                    </div>
-                    <Button type="submit" className="w-full brand-gradient text-white border-0 h-11" disabled={loading}>
-                      {loading ? "Signing in..." : "Sign In"}
-                    </Button>
-                  </form>
-                </TabsContent>
-                <TabsContent value="signup">
-                  <form onSubmit={signUp} method="post" action="?" autoComplete="on" className="mt-4 space-y-4">
-                    <div className="space-y-2">
-                      <Label>Full Name</Label>
-                      <Input name="name" required className="h-11" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Email</Label>
-                      <Input name="email" type="email" required className="h-11" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Password</Label>
-                      <Input name="password" type="password" minLength={6} required className="h-11" />
-                    </div>
-                    <Button type="submit" className="w-full brand-gradient text-white border-0 h-11" disabled={loading}>
-                      {loading ? "Creating..." : "Create Account"}
-                    </Button>
-                  </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+          <div className="relative z-10 flex items-center justify-between text-xs text-white/40">
+            <span>© {new Date().getFullYear()} Skyrovix</span>
+            <span className="font-medium">Registered IT Company</span>
+          </div>
+        </div>
+
+        {/* ─── Column 2: Authentication Form Panel ─── */}
+        <div className="flex lg:col-span-6 flex-col justify-center p-6 sm:p-10 md:p-12 w-full">
+          <div className="mb-6 flex justify-between items-center lg:hidden">
+            <Link to="/"><Logo /></Link>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-2 text-center lg:text-left">
+              <h1 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground tracking-tight">Portal Gateway</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Access your virtual internship task submissions panel.</p>
+            </div>
+
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 rounded-2xl bg-muted/60 p-1">
+                <TabsTrigger value="signin" className="rounded-xl font-bold py-2 text-xs transition-all">Sign In</TabsTrigger>
+                <TabsTrigger value="signup" className="rounded-xl font-bold py-2 text-xs transition-all">Create Account</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin" className="mt-4">
+                <form onSubmit={signIn} method="post" action="?" className="space-y-4">
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground">Registered Email</Label>
+                    <Input name="email" type="email" placeholder="name@college.edu" required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white" />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground">Account Password</Label>
+                    <Input name="password" type="password" placeholder="••••••••" required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white" />
+                  </div>
+                  <Button type="submit" className="w-full brand-gradient text-white border-0 h-11 rounded-2xl font-bold gap-1.5 shadow-lg shadow-[#07284a]/15 mt-2" disabled={loading}>
+                    {loading ? <Loader2 className="size-4 animate-spin" /> : <>Access Dashboard <ArrowRight className="size-4" /></>}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup" className="mt-4">
+                <form onSubmit={signUp} method="post" action="?" className="space-y-4">
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground">Your Full Name</Label>
+                    <Input name="name" type="text" placeholder="As required on certificate" required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white" />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground">Preferred Email</Label>
+                    <Input name="email" type="email" placeholder="name@college.edu" required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white" />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-muted-foreground">Set Secure Password (min 6 chars)</Label>
+                    <Input name="password" type="password" placeholder="Min 6 characters" minLength={6} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white" />
+                  </div>
+                  <Button type="submit" className="w-full brand-gradient text-white border-0 h-11 rounded-2xl font-bold gap-1.5 shadow-lg shadow-[#07284a]/15 mt-2" disabled={loading}>
+                    {loading ? <Loader2 className="size-4 animate-spin" /> : <>Register Account <GraduationCap className="size-4" /></>}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>

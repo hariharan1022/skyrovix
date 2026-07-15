@@ -5,30 +5,31 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DOMAINS } from "@/lib/constants";
-import { ApplicationFormDialog } from "@/components/ApplicationFormDialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DOMAINS, DURATIONS, durationConfig, generateInternId, getDomain } from "@/lib/constants";
+import { validateCoupon } from "@/lib/coupons";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loader2, Upload, Lock } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
 
 export const Route = createFileRoute("/domains/")({
   head: () => ({
     meta: [
-      { title: "Internship Domains — Full Stack, AI/ML, Data Science, UI/UX | Skyrovix" },
-      { name: "description", content: "Explore 10+ internship domains at Skyrovix: Full Stack Development, AI & Machine Learning, Data Science, UI/UX Design, Cyber Security, Python, Java, and more. Find your perfect domain." },
-      { name: "keywords", content: "internship domains, full stack internship, AI ML internship, data science internship, cyber security training, python internship, java internship, frontend development, backend development" },
+      { title: "Apply for Virtual Internship — Skyrovix" },
+      { name: "description", content: "Apply for virtual internships at Skyrovix. Fill out the form to select your domain, duration, and start your task-based training immediately." },
+      { name: "keywords", content: "apply internship, internship registration, online training, skyrovix application form" },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
-      { property: "og:title", content: "Internship Domains — Full Stack, AI/ML, Data Science | Skyrovix" },
-      { property: "og:description", content: "Explore 10+ internship domains at Skyrovix. Find your perfect domain." },
+      { property: "og:title", content: "Internship Application — Skyrovix" },
+      { property: "og:description", content: "Apply for virtual internships and start your task-based training." },
       { property: "og:url", content: "https://skyrovix.online/domains" },
-      { property: "og:image", content: "https://skyrovix.online/og-default.png" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Internship Domains — Skyrovix" },
-      { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
+      { name: "twitter:title", content: "Apply for Internship — Skyrovix" },
       { rel: "canonical", href: "https://skyrovix.online/domains" },
     ],
   }),
@@ -38,45 +39,56 @@ export const Route = createFileRoute("/domains/")({
   component: DomainsPage,
 });
 
-const DOMAIN_IMAGES: Record<string, string> = {
-  fullstack: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=338&fit=crop&auto=format",
-  frontend: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=338&fit=crop&auto=format",
-  backend: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=600&h=338&fit=crop&auto=format",
-  datascience: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=338&fit=crop&auto=format",
-  aiml: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=338&fit=crop&auto=format",
-  uiux: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=600&h=338&fit=crop&auto=format",
-  python: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&h=338&fit=crop&auto=format",
-  java: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=338&fit=crop&auto=format",
-  cybersecurity: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=600&h=338&fit=crop&auto=format",
-  digitalmarketing: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=338&fit=crop&auto=format",
-  cprogramming: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=338&fit=crop&auto=format",
-  cppprogramming: "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=600&h=338&fit=crop&auto=format",
-  mernstack: "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&h=338&fit=crop&auto=format",
-  meanstack: "https://images.unsplash.com/photo-1533750349088-cd871a92f312?w=600&h=338&fit=crop&auto=format",
-  dataanalytics: "https://images.unsplash.com/photo-1543286386-713bdd548da4?w=600&h=338&fit=crop&auto=format",
-  machinelearning: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=338&fit=crop&auto=format",
-  deeplearning: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&h=338&fit=crop&auto=format",
-  generativeai: "https://picsum.photos/seed/genai/600/338",
-  promptengineering: "https://images.unsplash.com/photo-1676299081847-824916de030a?w=600&h=338&fit=crop&auto=format",
-  cloudcomputing: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&h=338&fit=crop&auto=format",
-  ethicalhacking: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&h=338&fit=crop&auto=format",
-  androiddevelopment: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&h=338&fit=crop&auto=format",
-  flutterdevelopment: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=338&fit=crop&auto=format",
-  reactnative: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=338&fit=crop&auto=format",
-  graphicdesign: "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&h=338&fit=crop&auto=format",
-  motiongraphics: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&h=338&fit=crop&auto=format",
-  videoediting: "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=600&h=338&fit=crop&auto=format",
-  animation: "https://picsum.photos/seed/animation/600/338",
-  threeddesign: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&h=338&fit=crop&auto=format",
-};
-
 function DomainsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const [applyDomain, setApplyDomain] = useState<string | null>(search.apply ?? null);
+  const [applyDomain, setApplyDomain] = useState(search.apply ?? "");
+  const [applyDuration, setApplyDuration] = useState(1);
+  const [applying, setApplying] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponApplied, setCouponApplied] = useState<{ code: string; discount: string } | null>(null);
+  const [validatingCoupon, setValidatingCoupon] = useState(false);
 
-  // Auto-open dialog from search param (e.g. navigating from detail page)
+  const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [college, setCollege] = useState("");
+  const [course, setCourse] = useState("");
+  const [year, setYear] = useState("");
+
+  // Fetch profile if user is logged in
+  const { data: profile } = useQuery({
+    queryKey: ["user-profile-domains", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
+      return data ?? null;
+    }
+  });
+
+  // Fetch existing applications
+  const { data: myApps } = useQuery({
+    queryKey: ["user-enrolled-apps", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("applications").select("domain").eq("user_id", user!.id);
+      return data ?? [];
+    }
+  });
+
+  const enrolledSlugs = new Set(myApps?.map(a => a.domain) ?? []);
+
+  useEffect(() => {
+    if (profile) {
+      setFullName(profile.full_name ?? "");
+      setPhone(profile.phone ?? "");
+      setCollege(profile.college ?? "");
+      setCourse(profile.course ?? "");
+      setYear(profile.year ?? "");
+    }
+  }, [profile]);
+
   useEffect(() => {
     if (search.apply && DOMAINS.some((d) => d.slug === search.apply)) {
       setApplyDomain(search.apply);
@@ -87,7 +99,7 @@ function DomainsPage() {
     if (!couponCode.trim()) return;
     setValidatingCoupon(true);
     try {
-      const result = await validateCoupon(couponCode.trim(), applyDomain ?? undefined);
+      const result = await validateCoupon(couponCode.trim(), applyDomain || undefined);
       if (result.valid) {
         setCouponApplied({ code: result.code!, discount: result.discountType === "percentage" ? `${result.discountValue}% OFF` : `₹${result.discountValue} OFF` });
         toast.success(`Coupon applied! ${result.discountType === "percentage" ? `${result.discountValue}%` : `₹${result.discountValue}`} discount`);
@@ -108,104 +120,352 @@ function DomainsPage() {
     setCouponApplied(null);
   };
 
-  const { data: applications } = useQuery({
-    queryKey: ["my-applications", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("applications")
-        .select("domain")
-        .eq("user_id", user!.id);
-      return data ?? [];
-    },
-  });
+  const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!applyDomain) return toast.error("Please select a domain");
+    const fd = new FormData(e.currentTarget);
+    setApplying(true);
+    try {
+      let currentUser = user;
+      if (!currentUser) {
+        const email = String(fd.get("email"));
+        const password = String(fd.get("password"));
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: String(fd.get("full_name")) } },
+        });
+        if (signUpError) {
+          if (signUpError.message.toLowerCase().includes("already registered") || 
+              signUpError.message.toLowerCase().includes("already exists") ||
+              signUpError.message.toLowerCase().includes("user_already_exists")) {
+            // Try to sign in instead
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            if (signInError) {
+              throw new Error("This email is already registered. Please check your password or use a different email.");
+            }
+            currentUser = signInData.user;
+          } else {
+            throw signUpError;
+          }
+        } else {
+          currentUser = signUpData.user;
+        }
+        if (!currentUser) throw new Error("Account creation failed");
+      }
 
-  const appliedDomains = new Set(applications?.map((a) => a.domain) ?? []);
+      let photo_url: string | null = null;
+      if (photoFile && currentUser) {
+        const ext = photoFile.name.split(".").pop();
+        const path = `${currentUser.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("profile-photos").upload(path, photoFile, { upsert: true });
+        if (!upErr) {
+          const { data: signed } = await supabase.storage.from("profile-photos").createSignedUrl(path, 60 * 60 * 24 * 365);
+          photo_url = signed?.signedUrl ?? null;
+        }
+      }
+
+      const intern_id = generateInternId();
+      const dur = durationConfig(applyDuration);
+      const payload: Record<string, any> = {
+        user_id: currentUser.id,
+        domain: applyDomain,
+        duration: applyDuration,
+        total_tasks: dur?.tasks ?? 5,
+        intern_id,
+        full_name: String(fd.get("full_name")),
+        email: currentUser.email ?? "",
+        phone: String(fd.get("phone")),
+        college: String(fd.get("college")),
+        course: String(fd.get("course")),
+        year: String(fd.get("year")),
+        photo_url,
+        coupon_code: couponApplied?.code ?? null,
+        status: "approved",
+      };
+      const { error: insertError } = await supabase.from("applications").insert(payload);
+      if (insertError) throw insertError;
+
+      await supabase.from("profiles").upsert({
+        id: currentUser.id,
+        full_name: payload.full_name,
+        phone: payload.phone,
+        college: payload.college,
+        course: payload.course,
+        year: payload.year,
+        photo_url,
+      });
+
+      toast.success("Application submitted! Your internship has started.");
+      navigate({ to: "/dashboard" });
+
+      (async () => {
+        try {
+          const { sendOfferLetterEmail } = await import("@/lib/email-helpers");
+          const domainObj = getDomain(applyDomain);
+          const domainName = domainObj?.name ?? applyDomain;
+          await sendOfferLetterEmail({
+            to: currentUser!.email ?? "",
+            studentName: payload.full_name,
+            studentId: currentUser!.id,
+            internId: intern_id,
+            domainName,
+            duration: applyDuration,
+          });
+          toast.success("Offer letter sent to your email!");
+        } catch (e) {
+          toast.error("Offer letter email could not be sent.");
+          console.warn("[Email] Failed to send offer letter:", e);
+        }
+      })();
+
+    } catch (err) {
+      const msg = (err as any)?.message || (err as any)?.error_description || "Something went wrong.";
+      toast.error(msg);
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  const selectedDomainObj = DOMAINS.find(d => d.slug === applyDomain);
 
   return (
     <div className="min-h-screen">
       <Navbar />
       <AuroraBackground>
-        <section className="relative pb-6 sm:pb-10 pt-8 sm:pt-16 md:pt-24">
-          <div className="mx-auto max-w-7xl px-4">
-            <FadeUp className="text-center">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-medium text-[#07284a] dark:text-[#60a5fa] shadow-sm backdrop-blur">
-                <ShieldCheck className="size-3 sm:size-3.5" /> Internship Programs
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16 md:py-20">
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            
+            {/* Left Column: Platform info & Live preview */}
+            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+              <div>
+                <Badge variant="outline" className="mb-3 border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 text-[#07284a] dark:text-[#60a5fa] px-3 py-1 font-semibold shadow-sm backdrop-blur">
+                  <ShieldCheck className="mr-1.5 size-3.5" /> MSME Registered Platform
+                </Badge>
+                <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#07284a] dark:text-white leading-[1.15]">
+                  Start Your <span className="brand-text">Virtual Internship</span>
+                </h1>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                  Join task-based remote internships designed to build real portfolio skills. Earn offer letters, digital ID cards, and QR-verified certificates.
+                </p>
               </div>
-              <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.1]">
-                All <span className="brand-text">Domains</span>
-              </h1>
-              <p className="mt-5 mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground">
-                Each domain offers a 5-task curriculum designed to build real, portfolio-ready skills.
-              </p>
-            </FadeUp>
-          </div>
-        </section>
-      </AuroraBackground>
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:py-16">
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {DOMAINS.map((d) => {
-            const isEnrolled = appliedDomains.has(d.slug);
-            return (
-            <div key={d.slug} className="group block rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 backdrop-blur overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-white/5">
-              {/* Banner Image */}
-              <Link to="/domains/$slug" params={{ slug: d.slug }} className={`block relative h-36 overflow-hidden bg-gradient-to-br ${d.color}`}>
-                <img
-                  src={DOMAIN_IMAGES[d.slug]}
-                  alt={d.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0"; }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                <div className="absolute top-3 right-3">
-                  <Badge className="bg-white/20 backdrop-blur text-white border-0 text-[10px] px-2.5 py-1">Internship</Badge>
+
+              {/* Dynamic preview card */}
+              {selectedDomainObj ? (
+                <div className={`rounded-3xl bg-gradient-to-br ${selectedDomainObj.color ?? "from-[#07284a] to-blue-600"} p-6 text-white shadow-xl space-y-4`}>
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-14 place-items-center rounded-2xl bg-white/20 text-white text-3xl shadow-inner font-black">
+                      {selectedDomainObj.icon ?? "🎓"}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-lg leading-snug">{selectedDomainObj.name}</h4>
+                      <p className="text-[10px] text-blue-200 uppercase font-bold tracking-widest">Selected Internship Stream</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-blue-100/90 leading-relaxed">
+                    {selectedDomainObj.description || "Learn industry-grade tools and complete real-world tasks in this internship domain."}
+                  </p>
+                  <div className="pt-3 border-t border-white/10 grid grid-cols-2 gap-3 text-center text-xs">
+                    <div className="bg-white/10 rounded-2xl p-2.5">
+                      <span className="text-[9px] text-blue-200 block uppercase font-bold tracking-widest">Syllabus</span>
+                      <span className="font-extrabold text-sm mt-0.5 block">{DURATIONS.find(d => d.value === applyDuration)?.tasks ?? 5} Projects</span>
+                    </div>
+                    <div className="bg-white/10 rounded-2xl p-2.5">
+                      <span className="text-[9px] text-blue-200 block uppercase font-bold tracking-widest">Credential Status</span>
+                      <span className="font-extrabold text-sm mt-0.5 block">QR Verified</span>
+                    </div>
+                  </div>
                 </div>
-              </Link>
-              {/* Content */}
-              <div className="p-5 space-y-4">
-                <Link to="/domains/$slug" params={{ slug: d.slug }}>
-                  <h3 className="text-lg font-bold transition-colors hover:text-[#07284a] dark:hover:text-[#60a5fa]">{d.name}</h3>
-                </Link>
-                <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">{d.description}</p>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1"><Clock className="size-3.5" /> 1-6 months</span>
-                  <span className="flex items-center gap-1"><Users className="size-3.5" /> Remote</span>
-                  <Badge variant="secondary" className="text-[10px] ml-auto">Free</Badge>
+              ) : (
+                <div className="rounded-3xl border-2 border-dashed border-border/40 p-8 flex flex-col items-center justify-center text-center bg-[#07284a]/5 dark:bg-slate-900/10 min-h-[200px]">
+                  <Sparkles className="size-10 text-amber-500 mb-3 animate-bounce" />
+                  <h4 className="font-bold text-sm text-foreground">Select an Internship Domain</h4>
+                  <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">Choose your preferred stream on the right to preview task scope, curriculum workloads, and verified certificates.</p>
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 h-10 rounded-xl text-sm gap-1.5 border-border/60" asChild>
-                    <Link to="/domains/$slug" params={{ slug: d.slug }}>
-                      <Eye className="size-4" /> View Details
-                    </Link>
-                  </Button>
-                  {isEnrolled ? (
-                    <Button className="flex-1 h-10 rounded-xl text-sm gap-1.5 bg-[#07284a] hover:bg-[#07284a]/90 dark:bg-[#1d4ed8] dark:hover:bg-[#1d4ed8]/90 text-white border-0 shadow-sm" asChild>
-                      <Link to="/dashboard">
-                        <ArrowRight className="size-4" /> Continue Internship
-                      </Link>
-                    </Button>
-                  ) : (
-                    <Button className="flex-1 h-10 rounded-xl text-sm gap-1.5 bg-[#07284a] hover:bg-[#07284a]/90 dark:bg-[#1d4ed8] dark:hover:bg-[#1d4ed8]/90 text-white border-0 shadow-sm transition-all hover:shadow-md hover:shadow-[#07284a]/30"
-                      onClick={() => setApplyDomain(d.slug)}>
-                      <Sparkles className="size-4" /> Apply Now
-                    </Button>
-                  )}
+              )}
+
+              {/* Core Features */}
+              <div className="space-y-3.5 pt-2">
+                <h4 className="font-bold text-xs uppercase text-muted-foreground tracking-widest">Internship Inclusions</h4>
+                <div className="grid gap-3 text-xs">
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground"><strong className="text-foreground">Offer Letter:</strong> Dispatched to email instantly upon registration.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground"><strong className="text-foreground">Student ID Card:</strong> Issued digitally in your dashboard immediately.</span>
+                  </div>
+                  <div className="flex items-start gap-2.5">
+                    <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground"><strong className="text-foreground">Verified Certificates:</strong> QR-linked and searchable credentials portal.</span>
+                  </div>
                 </div>
               </div>
             </div>
-            );
-          })}
-        </div>
-      </div>
-      <Footer />
 
-      <ApplicationFormDialog
-        open={!!applyDomain}
-        onOpenChange={(o) => { if (!o) { setApplyDomain(null); navigate({ to: "/domains", search: {} }); } }}
-        defaultDomain={applyDomain ?? undefined}
-        onSuccess={() => navigate({ to: "/dashboard" })}
-      />
+            {/* Right Column: Premium Form */}
+            <div className="lg:col-span-7">
+              <div className="rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl">
+                <form onSubmit={submitApplication} className="space-y-6">
+                  
+                  {/* Select Domain Dropdown */}
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">Select Internship Domain *</Label>
+                    <Select value={applyDomain} onValueChange={setApplyDomain} required>
+                      <SelectTrigger className="rounded-xl h-11 bg-background/50 border-border/60">
+                        <SelectValue placeholder="Choose a learning stream..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DOMAINS.map((d) => {
+                          const isEnrolled = enrolledSlugs.has(d.slug);
+                          return (
+                            <SelectItem key={d.slug} value={d.slug} disabled={isEnrolled}>
+                              {d.name} {isEnrolled && "(Already Enrolled)"}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Personal details info */}
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Full Name *</Label>
+                      <Input name="full_name" value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Enter your full name" className="h-11 rounded-xl bg-background/50 border-border/60" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Phone Number *</Label>
+                      <Input name="phone" type="tel" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="Enter mobile number" className="h-11 rounded-xl bg-background/50 border-border/60" />
+                    </div>
+                  </div>
+
+                  {/* Auth fields (only if guest) */}
+                  {!user && (
+                    <div className="grid gap-4 sm:grid-cols-2 p-4 rounded-2xl bg-[#07284a]/5 border border-border/40">
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-bold text-foreground">Email Address *</Label>
+                        <Input name="email" type="email" required placeholder="name@domain.com" className="h-11 rounded-xl bg-white border-border/60" />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-bold text-foreground">Account Password *</Label>
+                        <Input name="password" type="password" required placeholder="Choose password (min 6 chars)" className="h-11 rounded-xl bg-white border-border/60" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Academic Info */}
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div className="space-y-2 sm:col-span-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">College / University Name *</Label>
+                      <Input name="college" value={college} onChange={e => setCollege(e.target.value)} required placeholder="Enter institution name" className="h-11 rounded-xl bg-background/50 border-border/60" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Year of Study *</Label>
+                      <Input name="year" value={year} onChange={e => setYear(e.target.value)} required placeholder="e.g. 3rd Year" className="h-11 rounded-xl bg-background/50 border-border/60" />
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Course / Branch *</Label>
+                      <Input name="course" value={course} onChange={e => setCourse(e.target.value)} required placeholder="e.g. B.Tech CSE" className="h-11 rounded-xl bg-background/50 border-border/60" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Profile Photo (Optional)</Label>
+                      <div className="flex gap-2">
+                        <Input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files?.[0] ?? null)} className="h-11 file:text-xs rounded-xl bg-background/50 border-border/60 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-[#07284a] file:text-white hover:file:bg-[#07284a]/90 file:cursor-pointer" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Duration Button Grid */}
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">Internship Duration *</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {DURATIONS.map((d) => (
+                        <button
+                          key={d.value}
+                          type="button"
+                          onClick={() => setApplyDuration(d.value)}
+                          className={`rounded-2xl border p-3.5 text-left transition-all ${
+                            applyDuration === d.value
+                              ? "border-[#07284a] bg-[#07284a]/5 dark:border-blue-500 dark:bg-blue-500/10 ring-1 ring-[#07284a]/10 dark:ring-blue-500/10"
+                              : "border-border/60 bg-background/30 hover:border-border"
+                          }`}
+                        >
+                          <p className="text-xs sm:text-sm font-extrabold text-foreground">{d.label}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{d.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Coupon Code section */}
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">Promo / Coupon Code (Optional)</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter coupon code"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        disabled={!!couponApplied}
+                        className="rounded-xl h-11 bg-background/50 border-border/60"
+                      />
+                      {couponApplied ? (
+                        <Button type="button" variant="outline" className="rounded-xl h-11 px-4 text-red-500" onClick={handleRemoveCoupon}>
+                          Remove
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="rounded-xl h-11 px-5"
+                          onClick={handleApplyCoupon}
+                          disabled={validatingCoupon || !couponCode.trim()}
+                        >
+                          {validatingCoupon ? <Loader2 className="size-4 animate-spin" /> : "Apply"}
+                        </Button>
+                      )}
+                    </div>
+                    {couponApplied && (
+                      <p className="text-xs text-emerald-600 font-bold mt-1">Coupon applied successfully: {couponApplied.discount}</p>
+                    )}
+                  </div>
+
+                  {/* Submit button */}
+                  <Button
+                    type="submit"
+                    className="w-full brand-gradient text-white border-0 rounded-2xl h-12 text-sm font-extrabold shadow-lg shadow-[#07284a]/15 hover:shadow-xl hover:shadow-[#07284a]/25 transition-all mt-4"
+                    disabled={applying}
+                  >
+                    {applying ? (
+                      <span className="flex items-center gap-2 justify-center">
+                        <Loader2 className="size-4 animate-spin" /> Starting Your Internship...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2 justify-center">
+                        Apply & Launch Internship <ArrowRight className="size-4" />
+                      </span>
+                    )}
+                  </Button>
+
+                </form>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </AuroraBackground>
+      <Footer />
     </div>
   );
 }

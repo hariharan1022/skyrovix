@@ -3,25 +3,25 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, ChevronDown } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, Share2, HelpCircle, Package, CreditCard } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/domains", label: "Internship", icon: Briefcase },
-  { to: "/courses", label: "Courses", icon: BookOpen },
-  { to: "/projects", label: "Projects", icon: Code2 },
   { to: "/about", label: "About", icon: Info },
   { to: "/contact", label: "Contact", icon: Mail },
   { to: "/verify-certificate", label: "Verify", icon: BadgeCheck },
 ] as const;
 
 const DASHBOARD_ITEMS = [
-  { to: "/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/dashboard", label: "My Courses", icon: BookOpen, search: { tab: "courses" } },
   { to: "/dashboard", label: "My Tasks", icon: ListChecks, search: { tab: "tasks" } },
+  { to: "/dashboard", label: "My Internships", icon: Briefcase, search: { tab: "internships" } },
+  { to: "/dashboard", label: "Payment", icon: CreditCard, search: { tab: "payment" } },
   { to: "/dashboard", label: "Certificates", icon: Award, search: { tab: "certificates" } },
   { to: "/dashboard", label: "Profile", icon: User, search: { tab: "profile" } },
+  { to: "/dashboard", label: "Help", icon: HelpCircle, search: { tab: "help" } },
 ] as const;
 
 export function Navbar() {
@@ -30,9 +30,7 @@ export function Navbar() {
   const router = useRouterState();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -49,6 +47,8 @@ export function Navbar() {
 
   const pathname = router.location.pathname;
   const currentTab = (router.location.search as Record<string, string | undefined>)?.tab;
+  const isDashboardPage = pathname === "/dashboard";
+  const itemsToRender = isDashboardPage ? DASHBOARD_ITEMS : NAV;
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -96,17 +96,20 @@ export function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden lg:flex flex-1 items-center justify-center gap-0.5 min-w-0">
-            {NAV.map((n) => {
-              const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+            {itemsToRender.map((n) => {
+              const isActive = isDashboardPage
+                ? (n.search?.tab ? currentTab === n.search.tab : !currentTab)
+                : (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to));
               const Icon = n.icon;
               return (
                 <Link
-                  key={n.to}
+                  key={n.label}
                   to={n.to}
+                  search={"search" in n ? n.search : undefined}
                   activeOptions={{ exact: n.to === "/" }}
                   className={`whitespace-nowrap rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
-                    active
-                      ? "text-[#07284a] dark:text-white bg-[#07284a]/8 dark:bg-white/10"
+                    isActive
+                      ? "text-[#07284a] dark:text-white bg-[#07284a]/8 dark:bg-white/10 font-bold"
                       : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
                   }`}
                 >
@@ -129,48 +132,38 @@ export function Navbar() {
                     <Link to="/admin"><Shield className="size-3.5" />Admin</Link>
                   </Button>
                 )}
-                {/* User avatar + dropdown */}
-                <div className="relative" ref={userMenuRef}>
-                  <button onClick={() => setUserMenuOpen(!userMenuOpen)}
-                    className="hidden md:inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
-                    <span className="flex items-center justify-center size-6 rounded-full bg-[#07284a]/10 dark:bg-white/10 text-[11px] font-bold text-[#07284a] dark:text-white shrink-0">
-                      {user.email?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                    <span className="max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
-                    <ChevronDown className={`size-3 transition-transform ${userMenuOpen ? "rotate-180" : ""}`} />
-                  </button>
-                  {userMenuOpen && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} />
-                      <div className="absolute right-0 top-9 z-50 w-52 rounded-xl border border-border/50 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl shadow-xl overflow-hidden">
-                        <div className="p-1.5">
-                          <div className="px-3 py-2 border-b border-border/40 mb-1">
-                            <p className="text-xs font-medium truncate">{user.email}</p>
-                          </div>
-                          {DASHBOARD_ITEMS.map((item) => {
-                            const isActive = pathname === "/dashboard" && (item.search?.tab ? currentTab === item.search.tab : !currentTab);
-                            const Icon = item.icon;
-                            return (
-                              <button key={item.label} onClick={() => { goTo(item.to, item.search); setUserMenuOpen(false); }}
-                                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
-                                  isActive
-                                    ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
-                                }`}>
-                                <Icon className="size-3.5 shrink-0" />{item.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-                        <div className="border-t border-border/40 p-1.5">
-                          <button onClick={() => { signOut(); setUserMenuOpen(false); }}
-                            className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
-                            <LogOut className="size-3.5" /> Sign out
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
+                {/* Share with Friends */}
+                <button
+                  onClick={() => {
+                    const url = window.location.origin;
+                    if (navigator.share) {
+                      navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      toast.success("Link copied to clipboard!");
+                    }
+                  }}
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 gap-1.5 transition-all"
+                >
+                  <Share2 className="size-3.5 text-violet-500" />
+                  <span>Share</span>
+                </button>
+
+                {/* Logout */}
+                <button
+                  onClick={signOut}
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-8 px-2.5 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1.5 transition-all"
+                >
+                  <LogOut className="size-3.5" />
+                  <span>Logout</span>
+                </button>
+
+                {/* User avatar — display only, no dropdown */}
+                <div className="hidden md:inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                  <span className="flex items-center justify-center size-6 rounded-full bg-[#07284a]/10 dark:bg-white/10 text-[11px] font-bold text-[#07284a] dark:text-white shrink-0">
+                    {user.email?.charAt(0).toUpperCase() || "U"}
+                  </span>
+                  <span className="max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
                 </div>
               </>
             ) : (
@@ -223,19 +216,16 @@ export function Navbar() {
                     {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
                   </button>
                 </div>
-                {[
-                  ...NAV,
-                  ...DASHBOARD_ITEMS,
-                ].map((item, i) => {
+                {itemsToRender.map((item, i) => {
                   const Icon = item.icon;
-                  const active = "search" in item
-                    ? pathname === "/dashboard" && (item.search?.tab ? currentTab === item.search.tab : !currentTab)
-                    : item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                  const active = isDashboardPage
+                    ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
+                    : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
                   return (
                     <button key={item.label} onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
                       className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all w-full text-left ${
                         active
-                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
+                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white font-bold"
                           : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
                       }`}
                       style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
@@ -251,6 +241,22 @@ export function Navbar() {
                     <Shield className="size-4" /> Admin
                   </Link>
                 )}
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    const url = window.location.origin;
+                    if (navigator.share) {
+                      navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
+                    } else {
+                      navigator.clipboard.writeText(url);
+                      toast.success("Link copied to clipboard!");
+                    }
+                  }}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left"
+                  style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.36s forwards` }}
+                >
+                  <Share2 className="size-4 shrink-0 text-violet-500" /> Share with Friends
+                </button>
                 <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left"
                   style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.39s forwards` }}>
                   <LogOut className="size-4" /> Sign out

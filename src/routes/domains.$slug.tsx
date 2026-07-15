@@ -3,6 +3,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { CourseJsonLd } from "@/components/JsonLd";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -162,6 +163,11 @@ function InternshipDetailsPage() {
 
   return (
     <div className="min-h-screen">
+      <CourseJsonLd
+        name={`${domain.name} Internship`}
+        description={detail.longDescription || domain.description || ""}
+        url={`https://skyrovix.online/domains/${slug}`}
+      />
       <Navbar />
       <section className="relative overflow-hidden">
         <div className={`absolute inset-0 bg-gradient-to-br ${domain.color}`}>

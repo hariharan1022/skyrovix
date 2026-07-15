@@ -14,10 +14,7 @@ import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { PromotionsSection } from "@/components/admin/PromotionsSection";
 import { PromoPopupSection } from "@/components/admin/PromoPopupSection";
-import { ProjectsSection } from "@/components/admin/ProjectsSection";
-import { ProjectSubmissionsSection } from "@/components/admin/ProjectSubmissionsSection";
-import { ProjectAwardsSection } from "@/components/admin/ProjectAwardsSection";
-import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
+import { OfferLetterDoc, CertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
   ClipboardCheck, ClipboardList, Brain, IndianRupee, Award, Users, BarChart3,
@@ -45,18 +42,10 @@ export const Route = createFileRoute("/admin")({
 const SIDEBAR_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "applications", label: "Internship Applications", icon: Users },
-  { id: "courses", label: "Courses", icon: BookOpen },
-  { id: "enrollments", label: "Course Enrollments", icon: ClipboardList },
-  { id: "topics", label: "Topics", icon: FolderTree },
-  { id: "tasks", label: "Tasks", icon: ListChecks },
   { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
-  { id: "quiz", label: "Quiz Management", icon: Brain },
   { id: "payments", label: "Payments", icon: Wallet },
   { id: "promotions", label: "Promotions", icon: Percent },
   { id: "popup", label: "Promo Popup", icon: Bell },
-  { id: "projects", label: "Projects", icon: Briefcase },
-  { id: "project-submissions", label: "Project Submissions", icon: ClipboardCheck },
-  { id: "project-awards", label: "Project Awards", icon: Award },
   { id: "certificates", label: "Certificates", icon: Award },
   { id: "students", label: "Students", icon: GraduationCap },
   { id: "email-logs", label: "Email Logs", icon: Mail },
@@ -117,18 +106,14 @@ function AdminPanel() {
   const { data: overview } = useQuery({
     queryKey: ["admin-overview"],
     queryFn: async () => {
-      const [a, s, p, c, e, co, qa] = await Promise.all([
+      const [a, s, p, c] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("certificates").select("id", { count: "exact", head: true }),
-        supabase.from("enrollments").select("id", { count: "exact", head: true }),
-        supabase.from("courses").select("id", { count: "exact", head: true }).eq("is_published", true),
-        supabase.from("quiz_attempts").select("id", { count: "exact", head: true }),
       ]);
       return {
         apps: a.count ?? 0, subs: s.count ?? 0, pays: p.count ?? 0, certs: c.count ?? 0,
-        enrolled: e.count ?? 0, courses: co.count ?? 0, quizAttempts: qa.count ?? 0,
       };
     },
   });
@@ -264,18 +249,10 @@ function AdminPanel() {
 
             {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} />}
             {active === "applications" && <ApplicationsSection />}
-            {active === "courses" && <CoursesSection />}
-            {active === "enrollments" && <CourseEnrollmentsSection />}
-            {active === "topics" && <TopicsSection />}
-            {active === "tasks" && <TasksSection />}
             {active === "submissions" && <SubmissionsSection />}
-            {active === "quiz" && <QuizSection />}
             {active === "payments" && <PaymentsSection />}
             {active === "promotions" && <PromotionsSection />}
             {active === "popup" && <PromoPopupSection />}
-            {active === "projects" && <ProjectsSection />}
-            {active === "project-submissions" && <ProjectSubmissionsSection />}
-            {active === "project-awards" && <ProjectAwardsSection />}
             {active === "certificates" && <CertificatesSection />}
             {active === "students" && <StudentsSection />}
             {active === "email-logs" && <EmailLogsSection />}
@@ -317,7 +294,7 @@ function NotificationsDropdown({ onClose, notifs }: { onClose: () => void; notif
 // DASHBOARD
 // ══════════════════════════════════════════════
 function DashboardSection({ greeting, overview, onNavigate }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void }) {
-  const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0, enrolled: 0, courses: 0 });
+  const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0 });
   useEffect(() => {
     if (!overview) return;
     const timer = setInterval(() => {
@@ -326,8 +303,6 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
         subs: Math.min(c.subs + 1, overview.subs),
         pays: Math.min(c.pays + 1, overview.pays),
         certs: Math.min(c.certs + 2, overview.certs),
-        enrolled: Math.min(c.enrolled + 5, overview.enrolled),
-        courses: Math.min(c.courses + 1, overview.courses),
       }));
     }, 30);
     setTimeout(() => clearInterval(timer), 1000);
@@ -339,10 +314,6 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
     { label: "Pending Submissions", value: counts.subs, icon: FileText, change: "Need Review", color: "from-amber-500 to-orange-500", bg: "bg-amber-50 dark:bg-amber-950/30" },
     { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "₹18,000 Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30" },
     { label: "Certificates Issued", value: counts.certs, icon: Award, change: "+15 This Week", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
-    { label: "Students Enrolled", value: counts.enrolled, icon: GraduationCap, change: "LMS Courses", color: "from-cyan-500 to-teal-500", bg: "bg-cyan-50 dark:bg-cyan-950/30" },
-    { label: "Courses Available", value: counts.courses, icon: BookOpen, change: "Published", color: "from-rose-500 to-pink-500", bg: "bg-rose-50 dark:bg-rose-950/30" },
-    { label: "Quiz Attempts", value: overview?.quizAttempts ?? 0, icon: Brain, change: "All Time", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
-    { label: "Completion Rate", value: "78%", icon: TrendingUp, change: "+5% vs Last Month", color: "from-emerald-500 to-green-500", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
   ];
 
   return (
@@ -354,12 +325,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{greeting}, Admin <span className="brand-text">👋</span></h1>
-              <p className="mt-1.5 text-muted-foreground">Manage internships, courses, tasks and certificates effortlessly.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-[#07284a]/25" onClick={() => onNavigate("courses")}><Plus className="mr-1 size-4" /> Add Course</Button>
-              <Button size="sm" variant="outline" className="border-border/60" onClick={() => onNavigate("tasks")}><Plus className="mr-1 size-4" /> Add Task</Button>
-              <Button size="sm" variant="outline" className="border-border/60" onClick={() => onNavigate("quiz")}><Brain className="mr-1 size-4" /> Create Quiz</Button>
+              <p className="mt-1.5 text-muted-foreground">Manage internships, submissions and certificates effortlessly.</p>
             </div>
           </div>
         </div>
@@ -586,737 +552,30 @@ function ApplicationsSection() {
 }
 
 // ══════════════════════════════════════════════
-// COURSES
-// ══════════════════════════════════════════════
-function CoursesSection() {
-  const qc = useQueryClient();
-  const [dialog, setDialog] = useState<null | { mode: "create" } | { mode: "edit"; course: any }>(null);
-
-  const { data } = useQuery({
-    queryKey: ["admin-courses"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("*").order("created_at", { ascending: false });
-      return data ?? [];
-    },
-  });
-
-  const deleteCourse = async (id: string) => {
-    const { error } = await supabase.from("courses").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Course deleted");
-    qc.invalidateQueries({ queryKey: ["admin-courses"] });
-  };
-
-  return (
-    <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Course Management</h2>
-          <p className="text-sm text-muted-foreground">{data?.length ?? 0} courses</p>
-        </div>
-        <Button className="brand-gradient text-white border-0" onClick={() => setDialog({ mode: "create" })}><Plus className="mr-1 size-4" /> Add Course</Button>
-      </div>
-
-      <CourseDialog
-        key={dialog ? JSON.stringify(dialog) : "closed"}
-        open={!!dialog}
-        onClose={() => setDialog(null)}
-        onSaved={() => { qc.invalidateQueries({ queryKey: ["admin-courses"] }); setDialog(null); }}
-        mode={dialog?.mode as any}
-        course={dialog?.mode === "edit" ? (dialog as any).course : undefined}
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data?.map((c) => (
-          <div key={c.id} className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#1E293B]/70">
-            <div className="flex items-center gap-3">
-              <div className="grid size-12 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md">
-                <BookOpen className="size-6" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold truncate">{c.name}</p>
-                <Badge variant="outline" className="mt-0.5 text-[10px]">{c.difficulty}</Badge>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 rounded-xl border border-border/40 bg-secondary/30 p-3 text-xs">
-              <div><span className="text-muted-foreground">Topics</span><p className="font-bold">{c.total_topics}</p></div>
-              <div><span className="text-muted-foreground">Tasks</span><p className="font-bold">{c.total_tasks}</p></div>
-              <div><span className="text-muted-foreground">Quiz</span><p className="font-bold">{c.quiz_marks}m</p></div>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1 h-10 rounded-xl border-border/60" onClick={() => setDialog({ mode: "edit", course: c })}><Edit className="mr-1 size-3" /> Edit</Button>
-              <Button size="sm" variant="outline" className="size-8 rounded-xl border-border/60 text-red-500 hover:text-red-600" onClick={() => deleteCourse(c.id)}><Trash2 className="size-3" /></Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function CourseDialog({ open, onClose, onSaved, mode, course }: {
-  open: boolean; onClose: () => void; onSaved: () => void;
-  mode: "create" | "edit"; course?: any;
-}) {
-  const [slug, setSlug] = useState(course?.slug ?? "");
-  const [name, setName] = useState(course?.name ?? "");
-  const [desc, setDesc] = useState(course?.short_description ?? "");
-  const [domain, setDomain] = useState(course?.domain ?? "fullstack");
-  const [difficulty, setDifficulty] = useState(course?.difficulty ?? "Intermediate");
-  const [duration, setDuration] = useState(course?.duration_weeks ?? 8);
-  const [quizMarks, setQuizMarks] = useState(course?.quiz_marks ?? 100);
-  const [passMarks, setPassMarks] = useState(course?.pass_marks ?? 60);
-  const [quizDuration, setQuizDuration] = useState(course?.quiz_duration_min ?? 60);
-  const [totalTasks, setTotalTasks] = useState(course?.total_tasks ?? 5);
-  const [published, setPublished] = useState(course?.is_published ?? true);
-  const [saving, setSaving] = useState(false);
-
-  if (!open) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!slug.trim() || !name.trim() || !desc.trim()) return toast.error("Name, slug, and description are required");
-    setSaving(true);
-    const payload = {
-      slug: slug.trim().toLowerCase().replace(/\s+/g, "-"), name: name.trim(),
-      short_description: desc.trim(), domain, difficulty, duration_weeks: duration,
-      quiz_marks: quizMarks, pass_marks: passMarks, quiz_duration_min: quizDuration,
-      total_tasks: totalTasks, is_published: published,
-    };
-    if (mode === "create") {
-      const { error } = await supabase.from("courses").insert(payload);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const { error } = await supabase.from("courses").update(payload).eq("id", course.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    }
-    toast.success(mode === "create" ? "Course created" : "Course updated");
-    setSaving(false);
-    onSaved();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{mode === "create" ? "Create Course" : "Edit Course"}</h3>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Course Name *</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Full Stack Development" className="mt-1" />
-            </div>
-            <div>
-              <Label>Slug *</Label>
-              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. fullstack" className="mt-1" />
-            </div>
-          </div>
-          <div>
-            <Label>Short Description *</Label>
-            <Textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} placeholder="Brief course description" className="mt-1" />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Domain</Label>
-              <select value={domain} onChange={(e) => setDomain(e.target.value)} className="mt-1 flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm">
-                {DOMAINS.map((d) => <option key={d.slug} value={d.slug}>{d.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <Label>Difficulty</Label>
-              <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="mt-1 flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm">
-                {["Beginner", "Intermediate", "Advanced"].map((d) => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Duration (weeks)</Label>
-              <Input type="number" min={1} value={duration} onChange={(e) => setDuration(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div>
-              <Label>Total Tasks</Label>
-              <Input type="number" min={1} value={totalTasks} onChange={(e) => setTotalTasks(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div>
-              <Label>Published</Label>
-              <select value={published ? "true" : "false"} onChange={(e) => setPublished(e.target.value === "true")} className="mt-1 flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm">
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Quiz Marks</Label>
-              <Input type="number" min={1} value={quizMarks} onChange={(e) => setQuizMarks(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div>
-              <Label>Pass Marks</Label>
-              <Input type="number" min={1} value={passMarks} onChange={(e) => setPassMarks(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div>
-              <Label>Quiz Duration (min)</Label>
-              <Input type="number" min={1} value={quizDuration} onChange={(e) => setQuizDuration(Number(e.target.value))} className="mt-1" />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0">
-              {saving ? "Saving…" : mode === "create" ? "Create Course" : "Save Changes"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════
-// COURSE ENROLLMENTS
-// ══════════════════════════════════════════════
-function CourseEnrollmentsSection() {
-  const qc = useQueryClient();
-  const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
-  const [deleting, setDeleting] = useState(false);
-
-  const { data: enrollments, isLoading } = useQuery({
-    queryKey: ["admin-enrollments"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("enrollments")
-        .select("id, user_id, course_id, status, progress_percent, started_at, completed_at, created_at, courses:course_id(slug, name)")
-        .order("created_at", { ascending: false });
-      return (data ?? []).map((e: any) => ({ ...e, course: e.courses }));
-    },
-  });
-
-  const { data: profiles } = useQuery({
-    queryKey: ["admin-enrollments-profiles"],
-    queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("id, full_name, email");
-      return new Map((data ?? []).map((p: any) => [p.id, p]));
-    },
-  });
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    try {
-      const { deleteCourseEnrollment: del } = await import("@/lib/admin-service");
-      const result = await del({ data: { enrollmentId: deleteTarget.id } });
-      if (result.success) {
-        toast.success("Course enrollment deleted successfully.");
-        qc.invalidateQueries({ queryKey: ["admin-enrollments"] });
-        qc.invalidateQueries({ queryKey: ["admin-overview"] });
-      } else {
-        toast.error(result.error ?? "Failed to delete enrollment");
-      }
-    } catch (e: any) {
-      toast.error(e.message ?? "Failed to delete enrollment");
-    } finally {
-      setDeleting(false);
-      setDeleteTarget(null);
-    }
-  };
-
-  return (
-    <div className="animate-fade-in-up space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-2xl font-bold">Course Enrollments</h2>
-        <p className="text-sm text-muted-foreground">{enrollments?.length ?? 0} total enrollments</p>
-      </div>
-
-      {/* Delete Confirmation */}
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => !deleting && setDeleteTarget(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="grid size-10 place-items-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/30"><AlertTriangle className="size-5" /></div>
-              <div>
-                <h3 className="font-bold text-lg">Delete Course Enrollment?</h3>
-                <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
-              </div>
-            </div>
-            <div className="rounded-xl bg-accent/30 p-4 text-sm space-y-1 mb-4">
-              <p><span className="font-medium">Student:</span> {deleteTarget.profileName ?? "Unknown"}</p>
-              <p><span className="font-medium">Course:</span> {deleteTarget.course?.name ?? "Unknown"}</p>
-              <p><span className="font-medium">Status:</span> {deleteTarget.status}</p>
-            </div>
-            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-3 text-xs text-amber-700 dark:text-amber-400 mb-4">
-              <p className="font-medium mb-1">This will remove:</p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                <li>Course enrollment</li>
-                <li>Course progress</li>
-                <li>Quiz attempts</li>
-                <li>Course certificate</li>
-              </ul>
-              <p className="mt-2 font-medium text-green-600 dark:text-green-400">Student account will NOT be deleted.</p>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" className="border-border/60" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700 text-white border-0" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete Enrollment"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/50 text-xs uppercase text-muted-foreground">
-              <th className="px-4 py-3 text-left">Student</th>
-              <th className="px-4 py-3 text-left">Course</th>
-              <th className="px-4 py-3 text-left">Progress</th>
-              <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-left">Enrolled</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {isLoading && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">Loading...</td></tr>
-            )}
-            {!isLoading && enrollments?.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No course enrollments yet.</td></tr>
-            )}
-            {enrollments?.map((e: any) => {
-              const profile = profiles?.get(e.user_id);
-              return (
-                <tr key={e.id} className="border-b border-border/30 transition hover:bg-accent/20">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="grid size-8 shrink-0 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{(profile?.full_name ?? "?").charAt(0).toUpperCase()}</div>
-                      <div className="min-w-0"><p className="font-medium text-sm truncate">{profile?.full_name ?? "Unknown"}</p><p className="text-xs text-muted-foreground">{profile?.email ?? ""}</p></div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-xs font-medium">{e.course?.name ?? "Unknown"}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-20 rounded-full bg-accent overflow-hidden">
-                        <div className="h-full brand-gradient rounded-full" style={{ width: `${e.progress_percent ?? 0}%` }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">{e.progress_percent ?? 0}%</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge className={`text-xs ${
-                      e.status === "completed" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" :
-                      e.status === "enrolled" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400" :
-                      "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-                    }`}>{e.status}</Badge>
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(e.created_at).toLocaleDateString("en-IN")}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-1">
-                      <button
-                        onClick={() => {
-                          setDeleteTarget({ ...e, profileName: profile?.full_name });
-                        }}
-                        className="grid size-8 place-items-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
-                        title="Delete Enrollment"
-                      >
-                        <Trash2 className="size-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════
-// TOPICS
-// ══════════════════════════════════════════════
-function TopicsSection() {
-  const qc = useQueryClient();
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [dialog, setDialog] = useState<null | { mode: "create"; courseId: string } | { mode: "edit"; topic: any }>(null);
-
-  const { data: courses } = useQuery({
-    queryKey: ["admin-courses-list"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, slug, name").order("name");
-      return data ?? [];
-    },
-  });
-
-  const { data: topics } = useQuery({
-    queryKey: ["admin-topics", expanded],
-    enabled: !!expanded,
-    queryFn: async () => {
-      const { data } = await supabase.from("course_topics").select("*").eq("course_id", expanded!).order("order_index");
-      return data ?? [];
-    },
-  });
-
-  const deleteTopic = async (topic: any) => {
-    const { error } = await supabase.from("course_topics").delete().eq("id", topic.id);
-    if (error) return toast.error(error.message);
-    const { data: c } = await supabase.from("courses").select("total_topics").eq("id", topic.course_id).single();
-    if (c) {
-      await supabase.from("courses").update({ total_topics: Math.max(0, (c.total_topics ?? 1) - 1) }).eq("id", topic.course_id);
-    }
-    toast.success("Topic deleted");
-    qc.invalidateQueries({ queryKey: ["admin-topics", expanded] });
-    qc.invalidateQueries({ queryKey: ["admin-courses"] });
-  };
-
-  return (
-    <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Topic Management</h2>
-          <p className="text-sm text-muted-foreground">Organize course content</p>
-        </div>
-      </div>
-
-      <TopicDialog
-        key={dialog ? JSON.stringify(dialog) : "closed"}
-        open={!!dialog}
-        onClose={() => setDialog(null)}
-        onSaved={() => { qc.invalidateQueries({ queryKey: ["admin-topics", expanded] }); setDialog(null); }}
-        mode={dialog?.mode as any}
-        courseId={dialog?.mode === "create" ? (dialog as any).courseId : undefined}
-        topic={dialog?.mode === "edit" ? (dialog as any).topic : undefined}
-      />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        {courses?.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
-            <button
-              onClick={() => setExpanded(expanded === c.id ? null : c.id)}
-              className="flex w-full items-center justify-between p-4 transition hover:bg-accent/20"
-            >
-              <div className="flex items-center gap-3">
-                <div className="grid size-9 place-items-center rounded-xl brand-gradient text-white"><FolderTree className="size-4" /></div>
-                <span className="font-semibold">{c.name}</span>
-              </div>
-              <ChevronDown className={`size-4 text-muted-foreground transition ${expanded === c.id ? "rotate-180" : ""}`} />
-            </button>
-            {expanded === c.id && (
-              <div className="border-t border-border/40 px-4 pb-4 pt-2">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{topics?.length ?? 0} topics</span>
-                  <Button size="sm" className="h-10 brand-gradient text-white border-0" onClick={() => setDialog({ mode: "create", courseId: c.id })}>
-                    <Plus className="mr-1 size-3" /> Add Topic
-                  </Button>
-                </div>
-                {!topics?.length && <p className="py-3 text-sm text-muted-foreground">No topics yet.</p>}
-                <ul className="space-y-1">
-                  {topics?.map((t, i) => (
-                    <li key={t.id} className="flex items-center justify-between rounded-xl px-3 py-2 text-sm transition hover:bg-accent/30">
-                      <div className="flex items-center gap-2">
-                        <span className="grid size-6 place-items-center rounded-md bg-secondary text-[10px] font-bold text-muted-foreground">{i + 1}</span>
-                        <span>{t.title}</span>
-                      </div>
-                      <div className="flex gap-1">
-                        <button onClick={() => setDialog({ mode: "edit", topic: t })} className="grid size-7 place-items-center rounded-lg hover:bg-accent/50"><Edit className="size-3" /></button>
-                        <button onClick={() => deleteTopic(t)} className="grid size-7 place-items-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 className="size-3" /></button>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TopicDialog({ open, onClose, onSaved, mode, courseId, topic }: {
-  open: boolean; onClose: () => void; onSaved: () => void;
-  mode: "create" | "edit"; courseId?: string; topic?: any;
-}) {
-  const [courseSel, setCourseSel] = useState(topic?.course_id ?? courseId ?? "");
-  const [title, setTitle] = useState(topic?.title ?? "");
-  const [contentMd, setContentMd] = useState(topic?.content_md ?? "");
-  const [codeExample, setCodeExample] = useState(topic?.code_example ?? "");
-  const [keyPoints, setKeyPoints] = useState((topic?.key_points as string[])?.join("\n") ?? "");
-  const [saving, setSaving] = useState(false);
-
-  const { data: courses } = useQuery({
-    queryKey: ["admin-courses-topic"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, name").order("name");
-      return data ?? [];
-    },
-  });
-
-  if (!open) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!courseSel || !title.trim()) return toast.error("Course and title required");
-    setSaving(true);
-    const kp = keyPoints.split("\n").map((s) => s.trim()).filter(Boolean);
-    if (mode === "create") {
-      const { data: existing } = await supabase.from("course_topics").select("order_index").eq("course_id", courseSel).order("order_index", { ascending: false }).limit(1);
-      const nextIndex = (existing?.[0]?.order_index ?? 0) + 1;
-      const { error } = await supabase.from("course_topics").insert({ course_id: courseSel, order_index: nextIndex, title: title.trim(), content_md: contentMd, code_example: codeExample || null, key_points: kp });
-      if (error) { toast.error(error.message); setSaving(false); return; }
-      const { count } = await supabase.from("course_topics").select("id", { count: "exact", head: true }).eq("course_id", courseSel);
-      await supabase.from("courses").update({ total_topics: count ?? 0 }).eq("id", courseSel);
-    } else {
-      const { error } = await supabase.from("course_topics").update({ title: title.trim(), content_md: contentMd, code_example: codeExample || null, key_points: kp }).eq("id", topic.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    }
-    toast.success(mode === "create" ? "Topic created" : "Topic updated");
-    setSaving(false);
-    onSaved();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{mode === "create" ? "Add Topic" : "Edit Topic"}</h3>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Course</Label>
-            <select value={courseSel} onChange={(e) => setCourseSel(e.target.value)} className="mt-1 flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm" disabled={mode === "edit"}>
-              <option value="">Select course…</option>
-              {courses?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div>
-            <Label>Title *</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Topic title" className="mt-1" />
-          </div>
-          <div>
-            <Label>Content (Markdown)</Label>
-            <Textarea value={contentMd} onChange={(e) => setContentMd(e.target.value)} rows={4} placeholder="Write the lesson content here…" className="mt-1" />
-          </div>
-          <div>
-            <Label>Code Example</Label>
-            <Textarea value={codeExample} onChange={(e) => setCodeExample(e.target.value)} rows={3} placeholder="Optional code snippet" className="mt-1 font-mono text-xs" />
-          </div>
-          <div>
-            <Label>Key Points (one per line)</Label>
-            <Textarea value={keyPoints} onChange={(e) => setKeyPoints(e.target.value)} rows={3} placeholder="Point 1&#10;Point 2&#10;Point 3" className="mt-1" />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0">
-              {saving ? "Saving…" : mode === "create" ? "Add Topic" : "Save Changes"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════
-// TASKS
-// ══════════════════════════════════════════════
-function TasksSection() {
-  const qc = useQueryClient();
-  const [dialog, setDialog] = useState<null | { mode: "create" } | { mode: "edit"; task: any }>(null);
-
-  const { data } = useQuery({
-    queryKey: ["admin-tasks"],
-    queryFn: async () => {
-      const { data } = await supabase.from("course_tasks").select("*, courses(name)").order("task_number");
-      return data ?? [];
-    },
-  });
-
-  const deleteTask = async (id: string) => {
-    const { error } = await supabase.from("course_tasks").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Task deleted");
-    qc.invalidateQueries({ queryKey: ["admin-tasks"] });
-  };
-
-  return (
-    <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Task Management</h2>
-          <p className="text-sm text-muted-foreground">{data?.length ?? 0} tasks</p>
-        </div>
-        <Button className="brand-gradient text-white border-0" onClick={() => setDialog({ mode: "create" })}><Plus className="mr-1 size-4" /> Add Task</Button>
-      </div>
-
-      <TaskDialog
-        key={dialog ? JSON.stringify(dialog) : "closed"}
-        open={!!dialog}
-        onClose={() => setDialog(null)}
-        onSaved={() => { qc.invalidateQueries({ queryKey: ["admin-tasks"] }); setDialog(null); }}
-        mode={dialog?.mode as any}
-        task={dialog?.mode === "edit" ? (dialog as any).task : undefined}
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data?.map((t: any) => (
-          <div key={t.id} className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#1E293B]/70">
-            <div className="flex items-center justify-between">
-              <Badge variant="secondary" className="text-xs">Task #{t.task_number}</Badge>
-              <Badge className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
-            </div>
-            <p className="mt-3 font-semibold">{t.title}</p>
-            <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{t.description}</p>
-            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <BookOpen className="size-3" /> {t.courses?.name ?? "—"}
-              <span className="ml-auto flex items-center gap-1"><Clock className="size-3" /> {t.due_days}d</span>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="outline" className="flex-1 h-10 rounded-xl border-border/60" onClick={() => setDialog({ mode: "edit", task: t })}><Edit className="mr-1 size-3" /> Edit</Button>
-              <Button size="sm" variant="outline" className="size-8 rounded-xl border-border/60 text-red-500 hover:text-red-600" onClick={() => deleteTask(t.id)}><Trash2 className="size-3" /></Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TaskDialog({ open, onClose, onSaved, mode, task }: {
-  open: boolean; onClose: () => void; onSaved: () => void;
-  mode: "create" | "edit"; task?: any;
-}) {
-  const [courseSel, setCourseSel] = useState(task?.course_id ?? "");
-  const [taskNum, setTaskNum] = useState(task?.task_number ?? 1);
-  const [title, setTitle] = useState(task?.title ?? "");
-  const [description, setDescription] = useState(task?.description ?? "");
-  const [requirements, setRequirements] = useState(task?.requirements ?? "");
-  const [dueDays, setDueDays] = useState(task?.due_days ?? 6);
-  const [saving, setSaving] = useState(false);
-
-  const { data: courses } = useQuery({
-    queryKey: ["admin-courses-task"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, name").order("name");
-      return data ?? [];
-    },
-  });
-
-  if (!open) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!courseSel || !title.trim() || !description.trim()) return toast.error("Course, title, and description required");
-    setSaving(true);
-    const payload = { course_id: courseSel, task_number: taskNum, title: title.trim(), description: description.trim(), requirements, due_days: dueDays };
-    if (mode === "create") {
-      const { error } = await supabase.from("course_tasks").insert(payload);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const { error } = await supabase.from("course_tasks").update(payload).eq("id", task.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    }
-    toast.success(mode === "create" ? "Task created" : "Task updated");
-    setSaving(false);
-    onSaved();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{mode === "create" ? "Add Task" : "Edit Task"}</h3>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Course</Label>
-            <select value={courseSel} onChange={(e) => setCourseSel(e.target.value)} className="mt-1 flex h-11 w-full rounded-xl border border-border/60 bg-background px-3 py-2 text-sm" disabled={mode === "edit"}>
-              <option value="">Select course…</option>
-              {courses?.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <Label>Task Number</Label>
-              <Input type="number" min={1} value={taskNum} onChange={(e) => setTaskNum(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div className="col-span-2">
-              <Label>Due (days)</Label>
-              <Input type="number" min={1} value={dueDays} onChange={(e) => setDueDays(Number(e.target.value))} className="mt-1" />
-            </div>
-          </div>
-          <div>
-            <Label>Title *</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" className="mt-1" />
-          </div>
-          <div>
-            <Label>Description *</Label>
-            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Detailed task description" className="mt-1" />
-          </div>
-          <div>
-            <Label>Requirements</Label>
-            <Textarea value={requirements} onChange={(e) => setRequirements(e.target.value)} rows={2} placeholder="Requirements checklist" className="mt-1" />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0">
-              {saving ? "Saving…" : mode === "create" ? "Add Task" : "Save Changes"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════
 // SUBMISSIONS
 // ══════════════════════════════════════════════
 function SubmissionsSection() {
   const qc = useQueryClient();
-  const [subTab, setSubTab] = useState<"intern" | "course">("intern");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [confirmAction, setConfirmAction] = useState<{ id: string; status: string; label: string } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showHistory, setShowHistory] = useState<string | null>(null);
   const [historyData, setHistoryData] = useState<any[]>([]);
 
-  const tableName = subTab === "intern" ? "submissions" : "course_task_submissions";
-  const queryKey = subTab === "intern" ? ["admin-subs"] : ["admin-course-subs"];
+  const tableName = "submissions";
+  const queryKey = ["admin-subs"];
 
-  const { data: internData } = useQuery({
+  const { data } = useQuery({
     queryKey: ["admin-subs"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: list } = await supabase
         .from("submissions")
         .select("*, applications!inner(full_name, intern_id, domain), tasks(title, task_number)")
         .order("submitted_at", { ascending: false });
-      return data ?? [];
+      return list ?? [];
     },
     refetchInterval: 10_000,
   });
-
-  const { data: courseData } = useQuery({
-    queryKey: ["admin-course-subs"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("course_task_submissions")
-        .select("*, enrollments(id, course_id, courses(name)), course_tasks(task_number, title)")
-        .order("submitted_at", { ascending: false });
-      return data ?? [];
-    },
-    refetchInterval: 10_000,
-  });
-
-  const data = subTab === "intern" ? internData : courseData;
 
   const loadHistory = async (id: string) => {
     const { data: history } = await supabase
@@ -1356,19 +615,13 @@ function SubmissionsSection() {
     <div className="animate-fade-in-up space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Task Submissions</h2>
-        <div className="flex gap-1 rounded-xl border border-border/60 bg-white/50 p-1 dark:bg-[#1E293B]/50">
-          <button onClick={() => setSubTab("intern")} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${subTab === "intern" ? "brand-gradient text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Internship</button>
-          <button onClick={() => setSubTab("course")} className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${subTab === "course" ? "brand-gradient text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Course</button>
-        </div>
       </div>
 
       {pending.length > 0 && (
         <div>
           <h3 className="mb-3 text-sm font-semibold text-amber-600 flex items-center gap-2"><Clock className="size-4" /> Pending Review ({pending.length})</h3>
           <div className="space-y-3">
-            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} tab={subTab} tableName={tableName} queryKey={queryKey}
-              onAction={(status, label) => setConfirmAction({ id: s.id, status, label })}
-              onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
+            {pending.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} onAction={(status, label) => setConfirmAction({ id: s.id, status, label })} onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
           </div>
         </div>
       )}
@@ -1377,9 +630,7 @@ function SubmissionsSection() {
         <div className="mt-6">
           <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Reviewed ({reviewed.length})</h3>
           <div className="space-y-3">
-            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} tab={subTab} tableName={tableName} queryKey={queryKey}
-              onAction={(status, label) => setConfirmAction({ id: s.id, status, label })}
-              onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
+            {reviewed.map((s: any) => <SubmissionCard key={s.id} sub={s} loadingId={loadingId} onAction={(status, label) => setConfirmAction({ id: s.id, status, label })} onHistory={() => loadHistory(s.id)} showHistory={showHistory === s.id} historyData={historyData} />)}
           </div>
         </div>
       )}
@@ -1419,15 +670,12 @@ function SubmissionsSection() {
   );
 }
 
-function SubmissionCard({ sub, loadingId, tab, onAction, onHistory, showHistory, historyData }: any) {
+function SubmissionCard({ sub, loadingId, onAction, onHistory, showHistory, historyData }: any) {
   const [actionsOpen, setActionsOpen] = useState(false);
   const isLoading = loadingId === sub.id;
-  const subType = tab === "intern" ? "intern" : "course";
-  const taskLabel = subType === "intern"
-    ? `Task ${sub.tasks?.task_number}: ${sub.tasks?.title}`
-    : `Task ${sub.course_tasks?.task_number}: ${sub.course_tasks?.title}`;
-  const userName = subType === "intern" ? sub.applications?.full_name : sub.enrollments?.courses?.name ?? "Course";
-  const userMeta = subType === "intern" ? `${sub.applications?.intern_id} · ${getDomain(sub.applications?.domain)?.name}` : `Enrolled`;
+  const taskLabel = `Task ${sub.tasks?.task_number}: ${sub.tasks?.title}`;
+  const userName = sub.applications?.full_name;
+  const userMeta = `${sub.applications?.intern_id} · ${getDomain(sub.applications?.domain)?.name}`;
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -1483,8 +731,8 @@ function SubmissionCard({ sub, loadingId, tab, onAction, onHistory, showHistory,
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-2 text-xs">
-        {(subType === "intern" ? sub.github_url : sub.project_url) && <a href={sub.github_url || sub.project_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "GitHub" : "Project"}</a>}
-        {(subType === "intern" ? sub.deployed_url : sub.file_path) && <a href={sub.deployed_url || sub.file_path} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> {subType === "intern" ? "Demo" : "File"}</a>}
+        {sub.github_url && <a href={sub.github_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> GitHub</a>}
+        {sub.deployed_url && <a href={sub.deployed_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> Demo</a>}
         {sub.pdf_url && <a href={sub.pdf_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><FileText className="size-3" /> Report</a>}
         {sub.screenshot_url && <a href={sub.screenshot_url} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-primary"><ExternalLink className="size-3" /> Screenshot</a>}
         {sub.notes && <p className="w-full text-muted-foreground mt-1">{sub.notes}</p>}
@@ -1521,256 +769,6 @@ function SubmissionCard({ sub, loadingId, tab, onAction, onHistory, showHistory,
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-// ══════════════════════════════════════════════
-// QUIZ
-// ══════════════════════════════════════════════
-function QuizSection() {
-  const qc = useQueryClient();
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [dialog, setDialog] = useState<null | { mode: "create"; courseId: string } | { mode: "edit"; question: any }>(null);
-
-  const { data: courses } = useQuery({
-    queryKey: ["admin-courses-quiz"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, slug, name, quiz_marks, pass_marks, quiz_duration_min").order("name");
-      return data ?? [];
-    },
-  });
-
-  const { data: questions } = useQuery({
-    queryKey: ["admin-quiz-questions", expanded],
-    enabled: !!expanded,
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("course_quiz_questions")
-        .select("*")
-        .eq("course_id", expanded!)
-        .order("order_index");
-      return data ?? [];
-    },
-  });
-
-  const deleteQuestion = async (id: string) => {
-    const { error } = await supabase.from("course_quiz_questions").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Question deleted");
-    qc.invalidateQueries({ queryKey: ["admin-quiz-questions", expanded] });
-  };
-
-  return (
-    <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Quiz Management</h2>
-          <p className="text-sm text-muted-foreground">Manage questions per course</p>
-        </div>
-      </div>
-
-      <QuestionDialog
-        key={dialog ? JSON.stringify(dialog) : "closed"}
-        open={!!dialog}
-        onClose={() => setDialog(null)}
-        onSaved={() => {
-          qc.invalidateQueries({ queryKey: ["admin-quiz-questions", expanded] });
-          setDialog(null);
-        }}
-        mode={dialog?.mode as any}
-        courseId={dialog?.mode === "create" ? (dialog as any).courseId : undefined}
-        question={dialog?.mode === "edit" ? (dialog as any).question : undefined}
-      />
-
-      <div className="grid gap-3">
-        {courses?.map((c) => {
-          const isExpanded = expanded === c.id;
-          return (
-            <div key={c.id} className="rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
-              <button
-                onClick={() => setExpanded(isExpanded ? null : c.id)}
-                className="flex w-full items-center justify-between p-4 transition hover:bg-accent/20"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="grid size-9 place-items-center rounded-xl brand-gradient text-white"><Brain className="size-4" /></div>
-                  <div className="text-left">
-                    <span className="font-semibold">{c.name}</span>
-                    <p className="text-xs text-muted-foreground">{c.quiz_marks} marks · pass at {c.pass_marks} · {c.quiz_duration_min} min</p>
-                  </div>
-                </div>
-                <ChevronDown className={`size-4 text-muted-foreground transition ${isExpanded ? "rotate-180" : ""}`} />
-              </button>
-              {isExpanded && (
-                <div className="border-t border-border/40 px-4 pb-4 pt-2">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">{questions?.length ?? 0} questions</span>
-                    <Button size="sm" className="h-10 brand-gradient text-white border-0" onClick={() => setDialog({ mode: "create", courseId: c.id })}>
-                      <Plus className="mr-1 size-3" /> Add Question
-                    </Button>
-                  </div>
-                  {!questions?.length && <p className="py-3 text-sm text-muted-foreground">No questions yet.</p>}
-                  <ul className="space-y-1">
-                    {questions?.map((q, i) => (
-                      <li key={q.id} className="rounded-xl border border-border/40 bg-background/40 px-3 py-2.5 text-sm transition hover:bg-accent/20">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="grid size-6 shrink-0 place-items-center rounded-md bg-secondary text-[10px] font-bold text-muted-foreground">{i + 1}</span>
-                              <span className="font-medium">{q.question}</span>
-                              <Badge variant="outline" className="text-[10px]">{q.marks}m</Badge>
-                            </div>
-                            <div className="mt-1 flex flex-wrap gap-1.5 pl-8">
-                              {(q.options as string[]).map((opt: string, oi: number) => (
-                                <span key={oi} className={`rounded-md px-2 py-0.5 text-xs ${
-                                  oi === q.correct_index
-                                    ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                                    : "bg-secondary text-muted-foreground"
-                                }`}>
-                                  {String.fromCharCode(65 + oi)}. {opt}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 gap-1">
-                            <button onClick={() => setDialog({ mode: "edit", question: q })} className="grid size-7 place-items-center rounded-lg hover:bg-accent/50"><Edit className="size-3" /></button>
-                            <button onClick={() => deleteQuestion(q.id)} className="grid size-7 place-items-center rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"><Trash2 className="size-3" /></button>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function QuestionDialog({ open, onClose, onSaved, mode, courseId, question }: {
-  open: boolean; onClose: () => void; onSaved: () => void;
-  mode: "create" | "edit"; courseId?: string; question?: any;
-}) {
-  const [qText, setQText] = useState(question?.question ?? "");
-  const [opts, setOpts] = useState<string[]>((question?.options as string[]) ?? ["", "", "", ""]);
-  const [correct, setCorrect] = useState(question?.correct_index ?? 0);
-  const [marks, setMarks] = useState(question?.marks ?? 2);
-  const [explanation, setExplanation] = useState(question?.explanation ?? "");
-  const [saving, setSaving] = useState(false);
-
-  if (!open) return null;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!qText.trim() || opts.some((o) => !o.trim())) {
-      return toast.error("All fields required");
-    }
-    setSaving(true);
-    const payload = {
-      question: qText.trim(),
-      options: opts.map((o) => o.trim()),
-      correct_index: correct,
-      marks,
-      explanation: explanation.trim() || null,
-    };
-    if (mode === "create" && courseId) {
-      const { data: existing } = await supabase
-        .from("course_quiz_questions")
-        .select("order_index")
-        .eq("course_id", courseId)
-        .order("order_index", { ascending: false })
-        .limit(1);
-      const nextIndex = (existing?.[0]?.order_index ?? 0) + 1;
-      const { error } = await supabase.from("course_quiz_questions").insert({
-        ...payload, course_id: courseId, order_index: nextIndex,
-      });
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else if (mode === "edit") {
-      const { error } = await supabase.from("course_quiz_questions").update(payload).eq("id", question.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    }
-    toast.success(mode === "create" ? "Question created" : "Question updated");
-    setSaving(false);
-    onSaved();
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-xl rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95">
-        <div className="mb-5 flex items-center justify-between">
-          <h3 className="text-lg font-bold">{mode === "create" ? "Add Question" : "Edit Question"}</h3>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label>Question</Label>
-            <Textarea value={qText} onChange={(e) => setQText(e.target.value)} rows={2} placeholder="Enter your question" className="mt-1" />
-          </div>
-          <div className="space-y-3">
-            <Label>Options</Label>
-            {opts.map((o, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <span className="grid size-7 shrink-0 place-items-center rounded-md bg-secondary text-xs font-bold">{String.fromCharCode(65 + i)}</span>
-                <Input
-                  value={o}
-                  onChange={(e) => {
-                    const next = [...opts];
-                    next[i] = e.target.value;
-                    setOpts(next);
-                  }}
-                  placeholder={`Option ${String.fromCharCode(65 + i)}`}
-                  className="flex-1"
-                />
-                <button
-                  type="button"
-                  onClick={() => setCorrect(i)}
-                  className={`grid size-7 shrink-0 place-items-center rounded-md text-xs font-bold transition ${
-                    correct === i
-                      ? "bg-emerald-600 text-white ring-2 ring-emerald-300"
-                      : "bg-secondary text-muted-foreground hover:bg-accent"
-                  }`}
-                  title="Mark as correct answer"
-                >
-                  ✓
-                </button>
-                {opts.length > 2 && (
-                  <button type="button" onClick={() => setOpts(opts.filter((_, j) => j !== i))} className="text-muted-foreground hover:text-red-500">
-                    <X className="size-4" />
-                  </button>
-                )}
-              </div>
-            ))}
-            {opts.length < 6 && (
-              <button type="button" onClick={() => setOpts([...opts, ""])} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                <Plus className="size-3" /> Add option
-              </button>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Marks</Label>
-              <Input type="number" min={1} value={marks} onChange={(e) => setMarks(Number(e.target.value))} className="mt-1" />
-            </div>
-            <div className="flex items-end">
-              <p className="text-xs text-muted-foreground">Correct option: <span className="font-semibold text-emerald-600">{String.fromCharCode(65 + correct)}</span></p>
-            </div>
-          </div>
-          <div>
-            <Label>Explanation (optional)</Label>
-            <Textarea value={explanation} onChange={(e) => setExplanation(e.target.value)} rows={2} placeholder="Explain why this answer is correct" className="mt-1" />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0">
-              {saving ? "Saving…" : mode === "create" ? "Add Question" : "Save Changes"}
-            </Button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }
@@ -1884,13 +882,8 @@ function CertificatesSection() {
   const { data } = useQuery({
     queryKey: ["admin-certs"],
     queryFn: async () => {
-      const [internCerts, lmsCerts, profiles] = await Promise.all([
-        supabase.from("certificates").select("*, applications(full_name, intern_id, domain)").order("issued_at", { ascending: false }),
-        supabase.from("course_certificates").select("*, enrollments!inner(user_id, course_id), courses(name)").order("issued_at", { ascending: false }),
-        supabase.from("profiles").select("id, full_name"),
-      ]);
-      const profileMap = new Map((profiles.data ?? []).map((p) => [p.id, p.full_name]));
-      return { intern: internCerts.data ?? [], lms: lmsCerts.data ?? [], profileMap };
+      const { data: list } = await supabase.from("certificates").select("*, applications(full_name, intern_id, domain)").order("issued_at", { ascending: false });
+      return list ?? [];
     },
   });
 
@@ -1900,7 +893,7 @@ function CertificatesSection() {
     try {
       const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
-      for (const c of data.intern) {
+      for (const c of data) {
         const doc = CertificateDoc({
           fullName: c.applications?.full_name ?? "Student",
           internId: c.applications?.intern_id ?? "",
@@ -1912,26 +905,12 @@ function CertificatesSection() {
         const blob = await downloadPdfBlob(doc);
         zip.file(`certificate-${c.certificate_id}.pdf`, blob);
       }
-      for (const c of data.lms) {
-        const userName = data.profileMap.get((c.enrollments as any)?.user_id) ?? "Student";
-        const doc = CourseCertificateDoc({
-          fullName: userName,
-          courseName: (c as any).courses?.name ?? "Course",
-          score: c.score,
-          total: (c as any).quiz_total ?? 100,
-          certId: c.certificate_id,
-          issuedAt: c.issued_at,
-          verifyUrl: `${window.location.origin}/verify-certificate`,
-        });
-        const blob = await downloadPdfBlob(doc);
-        zip.file(`course-certificate-${c.certificate_id}.pdf`, blob);
-      }
       const zipBlob = await zip.generateAsync({ type: "blob" });
       const url = URL.createObjectURL(zipBlob);
       const a = document.createElement("a");
       a.href = url; a.download = `certificates-${new Date().toISOString().slice(0, 10)}.zip`; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      toast.success(`Downloaded ${data.intern.length + data.lms.length} certificates`);
+      toast.success(`Downloaded ${data.length} certificates`);
     } catch (err) {
       toast.error("Failed to generate certificates");
       console.error(err);
@@ -1944,7 +923,7 @@ function CertificatesSection() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Certificate Management</h2>
-          <p className="text-sm text-muted-foreground">{data ? data.intern.length + data.lms.length : 0} certificates</p>
+          <p className="text-sm text-muted-foreground">{data?.length ?? 0} certificates</p>
         </div>
         <Button onClick={downloadAll} disabled={downloading} className="brand-gradient text-white border-0">
           <Download className="mr-1.5 size-4" />{downloading ? "Generating…" : "Download All as ZIP"}
@@ -1956,22 +935,20 @@ function CertificatesSection() {
             <tr className="border-b border-border/50 text-xs uppercase text-muted-foreground">
               <th className="px-4 py-3 text-left">Certificate ID</th>
               <th className="px-4 py-3 text-left">Student</th>
-              <th className="px-4 py-3 text-left">Course / Domain</th>
-              <th className="px-4 py-3 text-left">Score</th>
+              <th className="px-4 py-3 text-left">Domain</th>
               <th className="px-4 py-3 text-left">Issued</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {data?.intern.length === 0 && data?.lms.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No certificates issued yet.</td></tr>
+            {!data?.length && (
+              <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No certificates issued yet.</td></tr>
             )}
-            {data?.intern.map((c: any) => (
+            {data?.map((c: any) => (
               <tr key={c.id} className="border-b border-border/30 transition hover:bg-accent/20">
                 <td className="px-4 py-3 font-mono text-xs">{c.certificate_id}</td>
                 <td className="px-4 py-3 font-medium">{c.applications?.full_name}</td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{getDomain(c.applications?.domain)?.name}</td>
-                <td className="px-4 py-3">—</td>
                 <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(c.issued_at).toLocaleDateString("en-IN")}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-1">
@@ -1990,34 +967,6 @@ function CertificatesSection() {
                 </td>
               </tr>
             ))}
-            {data?.lms.map((c: any) => {
-              const userName = data.profileMap.get(c.enrollments?.user_id) ?? "Student";
-              return (
-                <tr key={c.id} className="border-b border-border/30 transition hover:bg-accent/20">
-                  <td className="px-4 py-3 font-mono text-xs">{c.certificate_id}</td>
-                  <td className="px-4 py-3 font-medium">{userName}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{c.courses?.name}</td>
-                  <td className="px-4 py-3">{c.score}/{c.courses?.quiz_marks ?? 100}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(c.issued_at).toLocaleDateString("en-IN")}</td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-1">
-                      <button className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" onClick={() => {
-                        downloadPdf(CourseCertificateDoc({
-                          fullName: userName,
-                          courseName: c.courses?.name ?? "Course",
-                          score: c.score,
-                          total: c.courses?.quiz_marks ?? 100,
-                          certId: c.certificate_id,
-                          issuedAt: c.issued_at,
-                          verifyUrl: `${window.location.origin}/verify-certificate`,
-                        }), `course-certificate-${c.certificate_id}.pdf`);
-                      }}><Download className="size-4" /></button>
-                      <Link to="/verify-certificate" className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><ExternalLink className="size-4" /></Link>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
           </tbody>
         </table>
       </div>

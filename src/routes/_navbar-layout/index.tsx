@@ -73,18 +73,7 @@ function Landing() {
   const navigate = useNavigate();
   const [applyDomain, setApplyDomain] = useState<string | null>(null);
 
-  const { data: courses } = useQuery({
-    queryKey: ["home-courses"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("courses")
-        .select("id, slug, name, short_description, icon, domain, total_topics, total_tasks, quiz_marks, duration_weeks, difficulty")
-        .eq("is_published", true)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
+
 
   return (
     <div className="min-h-screen">
@@ -304,109 +293,14 @@ function Landing() {
         </div>
       </section>
 
-      {/* ─── COURSES ─── */}
-      <section className="py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4">
-          <Reveal>
-            <div className="mx-auto mb-14 max-w-2xl text-center">
-              <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-xs font-medium rounded-full border border-border/60">Learning Paths</Badge>
-              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Explore Courses</h2>
-              <p className="mt-3 text-muted-foreground">Topic-based learning paths with hands-on tasks and a final quiz.</p>
-            </div>
-          </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {courses?.slice(0, 6).map((c, i) => {
-              const Icon = COURSE_ICONS[c.icon] ?? BookOpen;
-              const diffColor = c.difficulty === "Beginner" ? "text-green-600 bg-green-50 dark:text-green-300 dark:bg-green-950/30 border-green-200/50" :
-                c.difficulty === "Intermediate" ? "text-amber-600 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/30 border-amber-200/50" :
-                "text-red-600 bg-red-50 dark:text-red-300 dark:bg-red-950/30 border-red-200/50";
-              const progress = Math.min(100, Math.round((c.total_tasks / (c.total_tasks + c.total_topics + c.quiz_marks / 10)) * 100));
-              return (
-                <FadeUp key={c.id} delay={0.1 + i * 0.08}>
-                  <Card className="group overflow-hidden border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 transition-all card-elevated hover:card-elevated-hover rounded-2xl">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-b from-[#07284a]/5 to-transparent dark:from-[#07284a]/10" />
-                      <CardContent className="relative flex flex-col gap-4 p-6">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#07284a] dark:bg-[#1d4ed8] text-white shadow-md transition-all group-hover:scale-110 group-hover:shadow-lg">
-                            <Icon className="size-5" />
-                          </div>
-                          <Badge className={`shrink-0 text-[10px] font-semibold rounded-full border ${diffColor}`} variant="outline">
-                            {c.difficulty}
-                          </Badge>
-                        </div>
-
-                        {/* Content */}
-                        <div className="space-y-1.5">
-                          <h3 className="text-lg font-bold leading-tight">{c.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{c.short_description}</p>
-                        </div>
-
-                        {/* Progress bar */}
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                            <span>Course completion</span>
-                            <span className="font-medium text-[#07284a] dark:text-[#60a5fa]">{progress}%</span>
-                          </div>
-                          <div className="h-1.5 overflow-hidden rounded-full bg-[#07284a]/10 dark:bg-[#07284a]/20">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[#07284a] to-[#1d4ed8] transition-all duration-700" style={{ width: `${progress}%` }} />
-                          </div>
-                        </div>
-
-                        {/* Stats grid */}
-                        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2 rounded-xl border border-border/50 bg-[#f8fafc]/50 dark:bg-[#020617]/30 p-3 text-[10px]">
-                          <div className="text-center">
-                            <dt className="text-muted-foreground">Topics</dt>
-                            <dd className="mt-0.5 font-bold text-foreground">{c.total_topics}</dd>
-                          </div>
-                          <div className="text-center">
-                            <dt className="text-muted-foreground">Tasks</dt>
-                            <dd className="mt-0.5 font-bold text-foreground">{c.total_tasks}</dd>
-                          </div>
-                          <div className="text-center">
-                            <dt className="text-muted-foreground">Quiz</dt>
-                            <dd className="mt-0.5 font-bold text-foreground">{c.quiz_marks}m</dd>
-                          </div>
-                          <div className="text-center">
-                            <dt className="text-muted-foreground">Weeks</dt>
-                            <dd className="mt-0.5 font-bold text-foreground">{c.duration_weeks}</dd>
-                          </div>
-                        </dl>
-
-                        {/* CTA */}
-                        <Button asChild className="rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 h-11 shadow-sm shadow-[#07284a]/20 transition-all group-hover:shadow-md group-hover:shadow-[#07284a]/30">
-                          <Link to="/courses/$slug" params={{ slug: c.slug }}>
-                            <span className="flex items-center gap-1.5">
-                              Start Learning <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-                            </span>
-                          </Link>
-                        </Button>
-                      </CardContent>
-                    </div>
-                  </Card>
-                </FadeUp>
-              );
-            })}
-          </div>
-          <Reveal>
-            <div className="mt-10 text-center">
-              <Button asChild variant="outline" className="rounded-xl h-11 transition-all hover:shadow-md border-border/60">
-                <Link to="/courses">View all courses <ChevronRight className="ml-1 size-4" /></Link>
-              </Button>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       {/* ─── STATS BANNER ─── */}
       <section className="border-y border-border/40 bg-[#f8fafc]/50 dark:bg-[#020617]/50 py-20 sm:py-24">
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid gap-6 sm:grid-cols-3">
             {[
               { icon: Briefcase, value: "10+", label: "Internship Domains", desc: "Industry-aligned tracks" },
-              { icon: BookOpen, value: "435+", label: "Learning Topics", desc: "Comprehensive curriculum" },
-              { icon: Trophy, value: "1200+", label: "Quiz Questions", desc: "Test your knowledge" },
+              { icon: Code2, value: "50+", label: "Practical Tasks", desc: "Portfolio-grade development" },
+              { icon: Award, value: "1500+", label: "Verified Certificates", desc: "QR-code shareable credentials" },
             ].map((stat, i) => (
               <FadeUp key={i} delay={i * 0.1}>
                 <div className="group relative rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-8 text-center card-elevated hover:card-elevated-hover">

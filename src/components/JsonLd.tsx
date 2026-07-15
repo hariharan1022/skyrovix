@@ -46,7 +46,7 @@ export function WebsiteJsonLd() {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
-            urlTemplate: "https://skyrovix.online/courses?q={search_term_string}",
+            urlTemplate: "https://skyrovix.online/domains?q={search_term_string}",
           },
           "query-input": "required name=search_term_string",
         },
@@ -104,47 +104,7 @@ export function FAQJsonLd({
   );
 }
 
-export function CourseJsonLd({
-  name,
-  description,
-  domain,
-  duration,
-}: {
-  name: string;
-  description: string;
-  domain: string;
-  duration: string;
-}) {
-  return (
-    <JsonLd
-      data={{
-        "@context": "https://schema.org",
-        "@type": "Course",
-        name,
-        description,
-        provider: {
-          "@type": "EducationalOrganization",
-          name: "Skyrovix",
-          url: "https://skyrovix.online",
-        },
-        occupationalCredentialAwarded: {
-          "@type": "EducationalOccupationalCredential",
-          credentialCategory: "certificate",
-        },
-        educationalLevel: "Beginner",
-        timeRequired: duration,
-        about: domain,
-        inLanguage: "en",
-        isAccessibleForFree: false,
-        hasCourseInstance: {
-          "@type": "CourseInstance",
-          courseMode: "online",
-          courseWorkload: duration,
-        },
-      }}
-    />
-  );
-}
+
 
 export function WebPageJsonLd({
   title,
@@ -168,6 +128,42 @@ export function WebPageJsonLd({
           name: "Skyrovix",
           logo: "https://skyrovix.online/logo.png",
         },
+      }}
+    />
+  );
+}
+
+export function CourseJsonLd({
+  name,
+  description,
+  url,
+  durationWeeks = 4,
+}: {
+  name: string;
+  description: string;
+  url: string;
+  durationWeeks?: number;
+}) {
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@type": "Course",
+        "name": name,
+        "description": description,
+        "provider": {
+          "@type": "Organization",
+          "name": "Skyrovix",
+          "sameAs": "https://skyrovix.online"
+        },
+        "hasCourseInstance": {
+          "@type": "CourseInstance",
+          "courseMode": "Online",
+          "duration": `P${durationWeeks}W`,
+          "courseWorkload": "Task-Based Project Submissions",
+          "name": `${name} Virtual Internship Program`,
+          "description": `Task-based remote virtual internship in ${name}. Complete 5+ practical developer syllabus tasks and earn a digital verified certificate.`
+        }
       }}
     />
   );

@@ -64,16 +64,10 @@ export const ROUTE_SEO: Record<
       "Explore 10+ internship domains at Skyrovix: Full Stack Development, AI & Machine Learning, Data Science, UI/UX Design, Cyber Security, Python, Java, and more.",
     keywords: ["internship domains", "full stack internship", "AI ML internship", "data science internship", "cyber security training"],
   },
-  "/courses": {
-    title: "Online Courses — Learn Programming, Data Science, AI | Skyrovix",
-    description:
-      "Browse industry-aligned online courses at Skyrovix. Learn Full Stack Development, Python, Java, UI/UX Design, Data Science, and more with hands-on projects and certificates.",
-    keywords: ["online courses", "learn programming", "data science course", "full stack course", "python course online"],
-  },
   "/contact": {
     title: "Contact Skyrovix — Get in Touch",
     description:
-      "Have questions about Skyrovix internships or courses? Contact our team for support with applications, payments, certificates, and general inquiries.",
+      "Have questions about Skyrovix internships? Contact our team for support with applications, payments, certificates, and general inquiries.",
     keywords: ["contact skyrovix", "internship support", "help skyrovix"],
   },
   "/privacy": {
@@ -89,13 +83,13 @@ export const ROUTE_SEO: Record<
   "/verify-certificate": {
     title: "Verify Certificate — Skyrovix",
     description:
-      "Verify your Skyrovix internship or course certificate online. Enter your certificate ID or intern ID to confirm authenticity.",
+      "Verify your Skyrovix internship certificate online. Enter your certificate ID or intern ID to confirm authenticity.",
     keywords: ["verify certificate", "certificate verification", "skyrovix certificate check"],
   },
   "/auth": {
     title: "Sign In / Sign Up — Skyrovix",
     description:
-      "Create your Skyrovix account or sign in to access your internship dashboard, courses, certificates, and more.",
+      "Create your Skyrovix account or sign in to access your internship dashboard, certificates, and more.",
     noindex: true,
   },
   "/admin": {
@@ -105,7 +99,7 @@ export const ROUTE_SEO: Record<
   },
   "/dashboard": {
     title: "My Dashboard — Skyrovix",
-    description: "Your Skyrovix dashboard. Track internship progress, courses, certificates, and profile.",
+    description: "Your Skyrovix dashboard. Track internship progress, certificates, and profile.",
     noindex: true,
   },
 };
@@ -127,14 +121,9 @@ export const FAQ_DATA = [
       "Yes. Skyrovix certificates are QR-verified and can be authenticated at skyrovix.online/verify-certificate. Each certificate has a unique certificate ID and intern ID for verification.",
   },
   {
-    question: "What courses does Skyrovix offer?",
-    answer:
-      "Skyrovix offers online courses in Full Stack Development, Frontend Development, Backend Development, Python, Java, Data Science, AI & Machine Learning, UI/UX Design, Cyber Security, and Digital Marketing with hands-on projects and assessments.",
-  },
-  {
     question: "How much does the Skyrovix internship cost?",
     answer:
-      "Skyrovix charges a one-time processing fee of ₹100 for internship registration. All courses and learning materials are included.",
+      "Skyrovix charges a one-time processing fee of ₹100 for internship registration. All learning materials are included.",
   },
   {
     question: "Who can join Skyrovix internships?",
@@ -205,7 +194,7 @@ export const STRUCTURED_DATA_WEBSITE = {
     "@type": "SearchAction",
     target: {
       "@type": "EntryPoint",
-      urlTemplate: `${SITE_URL}/courses?q={search_term_string}`,
+      urlTemplate: `${SITE_URL}/domains?q={search_term_string}`,
     },
     "query-input": "required name=search_term_string",
   },

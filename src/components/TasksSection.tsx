@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
@@ -24,6 +27,13 @@ import {
   Loader2,
   ChevronRight,
   Code,
+  Linkedin,
+  X,
+  Upload,
+  FileText,
+  Image,
+  Link2,
+  Send,
 } from "lucide-react";
 
 const TECH_KEYWORDS = ["react", "node", "mongodb", "database", "auth", "responsive", "deploy", "api", "jwt", "tailwind", "crud", "linkedin", "network", "post", "share", "python", "javascript", "typescript", "css", "html", "github", "docker", "aws", "firebase", "sql", "graphql", "next", "express", "redux", "figma"];
@@ -392,7 +402,7 @@ export function TasksSection({
           <p className="mt-3 text-sm text-muted-foreground">No tasks match your filters.</p>
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((task) => (
               <TaskCard
               key={task.id}
@@ -424,71 +434,31 @@ function StatItem({ label, value, color }: { label: string; value: number; color
   );
 }
 
-/* ─────────── TASK CARD ─────────── */
-function TaskCard({
+/* ─────────── TASK SUBMIT DIALOG ─────────── */
+function TaskSubmitDialog({
+  open,
+  onOpenChange,
   task,
   domain,
   appId,
-  tasksReady,
   onSubmitted,
 }: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
   task: {
     id: string;
     taskNumber: number;
     title: string;
     description: string;
-    features: string[];
-    outcome: string;
     submission: Submission | undefined;
-    dueDate: Date;
-    status: TaskStatus;
-    remaining: number;
-    lockedByLinkedin?: boolean;
   };
   domain: { slug: string; name: string; icon: string; color: string } | undefined;
   appId: string;
-  tasksReady: boolean;
   onSubmitted: () => void;
 }) {
   const { user } = useAuth();
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<any[]>([]);
-  const [showHistory, setShowHistory] = useState(false);
-  const { submission, status, dueDate, remaining, lockedByLinkedin } = task;
-  const isOverdue = status === "overdue";
-  const isLocked = lockedByLinkedin && task.taskNumber > 0;
-
-  const loadHistory = async () => {
-    if (!submission) return;
-    if (showHistory) { setShowHistory(false); return; }
-    const { data } = await supabase
-      .from("submission_history")
-      .select("*")
-      .eq("submission_id", submission.id)
-      .eq("table_name", "submissions")
-      .order("created_at", { ascending: false });
-    setHistory(data ?? []);
-    setShowHistory(true);
-  };
-
-  const borderColor = isOverdue
-    ? "#EF4444"
-    : status === "completed"
-      ? "#16A34A"
-      : status === "ongoing"
-        ? "#2563EB"
-        : "#D97706";
-
-  const glowColor = isOverdue
-    ? "#EF4444"
-    : status === "completed"
-      ? "#22C55E"
-      : status === "ongoing"
-        ? "#3B82F6"
-        : "#F59E0B";
-
-  const progressPct = status === "completed" ? 100 : status === "ongoing" ? 60 : isOverdue ? 0 : 0;
+  const { submission } = task;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -498,31 +468,18 @@ function TaskCard({
       let taskId = task.id;
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(taskId)) {
-        // Try a regular lookup first
         const { data: resolved } = await supabase
-          .from("tasks")
-          .select("id")
-          .eq("domain", domain?.slug ?? "")
-          .eq("task_number", task.taskNumber)
-          .maybeSingle();
-
+          .from("tasks").select("id").eq("domain", domain?.slug ?? "").eq("task_number", task.taskNumber).maybeSingle();
         if (resolved) {
           taskId = resolved.id;
         } else {
           const rpcName = task.taskNumber === 0 ? "ensure_linkedin_task" : "ensure_task";
-          const rpcParams: Record<string, any> =
-            task.taskNumber === 0
-              ? { p_domain: domain?.slug ?? "" }
-              : {
-                  p_domain: domain?.slug ?? "",
-                  p_task_number: task.taskNumber,
-                  p_title: task.title ?? `Task ${task.taskNumber}`,
-                  p_description: task.description ?? "",
-                };
+          const rpcParams: Record<string, any> = task.taskNumber === 0
+            ? { p_domain: domain?.slug ?? "" }
+            : { p_domain: domain?.slug ?? "", p_task_number: task.taskNumber, p_title: task.title ?? `Task ${task.taskNumber}`, p_description: task.description ?? "" };
           const { data: rpcId, error: rpcErr } = await supabase.rpc(rpcName, rpcParams);
           if (rpcErr || !rpcId) {
-            console.error(`${rpcName} failed:`, rpcErr?.message ?? "no id returned");
-            return toast.error(rpcErr?.message?.includes("function") ? "Task system not ready — admin must run the SQL migration in Supabase." : `Could not initialise task: ${rpcErr?.message ?? "unknown error"}`);
+            return toast.error(rpcErr?.message?.includes("function") ? "Task system not ready — admin must run the SQL migration." : `Could not initialise task: ${rpcErr?.message ?? "unknown error"}`);
           }
           taskId = rpcId as string;
         }
@@ -534,8 +491,10 @@ function TaskCard({
       const screenshotFile = fd.get("screenshot") as File | null;
       const notes = String(fd.get("notes") || "");
 
-      if (task.taskNumber !== 0 && !githubUrl && !pdfFile?.size && !screenshotFile?.size)
-        return toast.error("Provide at least a GitHub link, a project PDF, or a screenshot"), setLoading(false);
+      if (task.taskNumber !== 0 && !githubUrl && !pdfFile?.size && !screenshotFile?.size) {
+        setLoading(false);
+        return toast.error("Provide at least a GitHub link, a project PDF, or a screenshot");
+      }
 
       if (task.taskNumber === 0) {
         const raw = String(fd.get("deployed_url") || "").trim();
@@ -575,14 +534,12 @@ function TaskCard({
       if (deployedUrl) payload.deployed_url = deployedUrl;
       if (pdfUrl) payload.pdf_url = pdfUrl;
       if (screenshotUrl) payload.screenshot_url = screenshotUrl;
+
       const { error } = submission
-        ? await supabase
-            .from("submissions")
-            .update({ ...payload, submitted_at: new Date().toISOString() })
-            .eq("id", submission.id)
+        ? await supabase.from("submissions").update({ ...payload, submitted_at: new Date().toISOString() }).eq("id", submission.id)
         : await supabase.from("submissions").insert(payload);
       if (error) { setLoading(false); return toast.error(error.message); }
-      // Log resubmission history if previously rejected
+
       if (submission && submission.status === "rejected") {
         await supabase.from("submission_history").insert({
           submission_id: submission.id,
@@ -594,8 +551,8 @@ function TaskCard({
         });
       }
       setLoading(false);
-      toast.success(submission?.status === "rejected" ? "Resubmitted for review!" : "Task submitted for review!");
-      setOpen(false);
+      toast.success(submission?.status === "rejected" ? "Resubmitted for review!" : "Task submitted for review! 🎉");
+      onOpenChange(false);
       onSubmitted();
     } catch (err: any) {
       setLoading(false);
@@ -605,286 +562,367 @@ function TaskCard({
   };
 
   return (
-    <div
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.05),0_12px_32px_rgba(0,0,0,0.08)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] hover:-translate-y-2 hover:scale-[1.02] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08),0_20px_48px_rgba(0,0,0,0.12)] ${
-        isLocked ? "opacity-60 pointer-events-none" : ""
-      }`}
-      style={{ borderLeft: `4px solid ${borderColor}` }}
-    >
-      {/* Hover glow */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-        style={{ boxShadow: `0 0 60px ${glowColor}25, inset 0 0 60px ${glowColor}08` }}
-      />
-
-      {/* Progress bar at top */}
-      <div className="h-1.5 w-full overflow-hidden bg-muted/30">
-        <div
-          className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{
-            width: `${progressPct}%`,
-            background: `linear-gradient(90deg, ${glowColor}99, ${glowColor})`,
-          }}
-        />
-      </div>
-
-      {/* Header */}
-      <div className="flex items-start justify-between px-5 pt-5">
-        <div className="flex items-center gap-2.5">
-          <div
-            className={`flex size-11 items-center justify-center rounded-xl bg-gradient-to-br ${domain?.color ?? "from-[#07284a] to-blue-600"} font-bold text-white shadow-sm text-sm`}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[520px] p-0 overflow-hidden rounded-2xl border border-border/60 shadow-2xl">
+        {/* Dialog Header */}
+        <div className="relative bg-gradient-to-br from-[#07284a] via-[#093a6c] to-[#0a4c8f] px-6 pt-6 pb-5 text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
+          <button
+            onClick={() => onOpenChange(false)}
+            className="absolute right-4 top-4 rounded-lg p-1.5 text-white/60 transition hover:bg-white/10 hover:text-white"
           >
-            {task.taskNumber}
-          </div>
-          <span className={`rounded-lg px-2 py-1 text-[10px] font-bold text-white bg-gradient-to-br ${domain?.color ?? "from-[#07284a] to-blue-600"}`}>
-            {domain?.icon ?? "?"}
-          </span>
-        </div>
-        <StatusPill status={status} isOverdue={isOverdue} />
-      </div>
-
-      {/* Due Date */}
-      <div className="mt-3 flex items-center gap-1.5 px-5 text-xs text-muted-foreground">
-        <CalendarDays className="size-3.5" />
-        <span>Due: {formatDate(dueDate)}</span>
-        {status !== "completed" && remaining <= 3 && remaining >= 0 && (
-          <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-semibold text-red-600">
-            {remaining === 0 ? "Today" : `${remaining} day${remaining > 1 ? "s" : ""} left`}
-          </span>
-        )}
-        {status === "completed" && submission?.submitted_at && (
-          <span className="ml-auto flex items-center gap-1 text-[10px] text-green-600">
-            <CheckCircle2 className="size-3" /> Submitted on time
-          </span>
-        )}
-      </div>
-
-      {/* Title */}
-      <h3 className="mt-3 line-clamp-2 px-5 text-lg font-bold leading-snug transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-[#07284a] group-hover:bg-clip-text group-hover:text-transparent">
-        {task.title}
-      </h3>
-
-      {/* Description */}
-      <p className="mt-2 line-clamp-3 px-5 text-sm leading-relaxed text-muted-foreground">
-        {task.description}
-      </p>
-
-      {/* Key Features */}
-      <div className="mt-5 px-5">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-blue-600 uppercase tracking-wider">
-          <BookOpen className="size-3.5" /> Key Features
-        </h4>
-        <ul className="mt-2.5 space-y-1.5">
-          {task.features.slice(0, 5).map((f, i) => (
-            <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <ChevronRight className="size-3.5 shrink-0 text-emerald-500" />
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Technologies */}
-      {extractTechnologies(task.features).length > 0 && (
-        <div className="mt-4 px-5">
-          <h4 className="flex items-center gap-1.5 text-xs font-semibold text-purple-600 uppercase tracking-wider">
-            <Code className="size-3.5" /> Technologies
-          </h4>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {extractTechnologies(task.features).map((tech) => (
-              <span key={tech} className="rounded-md border border-border/50 bg-muted/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                {tech}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Expected Outcome */}
-      <div className="mt-5 px-5">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold text-green-600 uppercase tracking-wider">
-          <Target className="size-3.5" /> Expected Outcome
-        </h4>
-        <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{task.outcome}</p>
-      </div>
-
-      {/* Spacer */}
-      <div className="flex-1" />
-
-      {/* Footer */}
-      <div className="mt-6 border-t border-border/40 px-5 py-4">
-        {status === "completed" ? (
-          <div className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 px-4 py-3 ring-1 ring-green-200/60">
-            <div className="flex size-8 items-center justify-center rounded-full bg-green-500 text-white shadow-sm">
-              <CheckCircle2 className="size-5" />
-            </div>
+            <X className="size-4" />
+          </button>
+          <div className="flex items-center gap-3 relative z-10">
+            {task.taskNumber === 0 ? (
+              <div className="flex size-10 items-center justify-center rounded-xl bg-[#0077b5] shadow-lg shrink-0">
+                <Linkedin className="size-5" />
+              </div>
+            ) : (
+              <div className="flex size-10 items-center justify-center rounded-xl bg-white/15 border border-white/20 font-bold text-white text-base shadow-lg shrink-0">
+                {task.taskNumber}
+              </div>
+            )}
             <div>
-              <p className="text-sm font-semibold text-green-700">Completed Successfully</p>
-              {submission?.submitted_at && (
-                <p className="text-xs text-green-600">
-                  Submitted on {formatDate(new Date(submission.submitted_at))}
-                </p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-200 mb-0.5">
+                {task.taskNumber === 0 ? "LinkedIn Task" : `Task ${task.taskNumber}`}
+                {submission?.status === "rejected" && " — Revision"}
+              </p>
+              <h2 className="text-base font-extrabold leading-snug">{task.title}</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* Rejected banner */}
+        {submission?.status === "rejected" && (
+          <div className="mx-6 mt-4 rounded-xl border border-red-200 bg-red-50 p-3 flex items-start gap-2">
+            <AlertCircle className="size-4 text-red-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-xs font-semibold text-red-700">Needs Revision</p>
+              {submission.feedback && (
+                <p className="mt-0.5 text-xs text-red-600">Reason: {submission.feedback}</p>
               )}
             </div>
           </div>
-        ) : isLocked ? (
-          <p className="text-center text-xs text-muted-foreground py-2">
-            Complete the LinkedIn post task first to unlock.
-          </p>
-        ) : (
-          <div className="space-y-3">
-            {submission?.status === "rejected" && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/30 dark:bg-red-950/20">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="size-4 text-red-500 shrink-0" />
-                  <p className="text-sm font-semibold text-red-700 dark:text-red-400">Needs Revision</p>
-                </div>
-                {submission.feedback && (
-                  <p className="mt-1.5 text-xs text-red-600 dark:text-red-300 pl-6">Reason: {submission.feedback}</p>
-                )}
-                <p className="mt-2 text-xs text-red-500 pl-6">Please review the feedback and resubmit.</p>
+        )}
+
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+          {task.taskNumber === 0 ? (
+            /* LinkedIn Task */
+            <div className="space-y-1.5">
+              <Label className="text-sm font-semibold flex items-center gap-1.5">
+                <Link2 className="size-3.5 text-primary" /> LinkedIn Post URL
+              </Label>
+              <Input
+                name="deployed_url"
+                type="text"
+                placeholder="https://linkedin.com/posts/..."
+                className="h-10 rounded-xl text-sm"
+                defaultValue={submission?.deployed_url ?? ""}
+                required
+              />
+              <p className="text-[11px] text-muted-foreground">Paste the public URL of your LinkedIn internship post.</p>
+            </div>
+          ) : (
+            <>
+              {/* GitHub */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-semibold flex items-center gap-1.5">
+                  <Code className="size-3.5 text-primary" /> GitHub Repository
+                  <span className="text-xs font-normal text-muted-foreground ml-1">(optional)</span>
+                </Label>
+                <Input
+                  name="github_url"
+                  type="url"
+                  placeholder="https://github.com/your-username/project"
+                  className="h-10 rounded-xl text-sm"
+                  defaultValue={submission?.github_url ?? ""}
+                />
               </div>
-            )}
-            {!tasksReady ? (
-              <Button disabled className="w-full text-sm h-10 rounded-xl opacity-60">
-                <Loader2 className="mr-1.5 size-4 animate-spin" /> Syncing tasks…
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setOpen(!open)}
-                className="w-full text-sm h-10 rounded-xl"
-                variant={submission?.status === "rejected" ? "destructive" : status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
-              >
-                {submission?.status === "rejected" ? (
-                  <>
-                    <AlertCircle className="mr-1.5 size-4" /> Resubmit
-                  </>
-                ) : status === "ongoing" ? (
-                  <>
-                    <ArrowRight className="mr-1.5 size-4" /> Continue Working
-                  </>
-                ) : isOverdue ? (
-                  <>
-                    <Clock className="mr-1.5 size-4" /> Submit Late
-                  </>
-                ) : (
-                  <>
-                    <ExternalLink className="mr-1.5 size-4" /> Submit Task
-                  </>
-                )}
-              </Button>
-            )}
-            {open && (
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-3 rounded-xl border border-border/50 bg-muted/20 p-4"
-              >
-                  {task.taskNumber === 0 ? (
-                  <div>
-                    <Label className="text-[11px] font-medium text-muted-foreground">
-                      LinkedIn Post URL
-                    </Label>
-                    <Input
-                      name="deployed_url"
-                      type="text"
-                      placeholder="https://linkedin.com/posts/..."
-                      className="mt-1 h-9 text-sm"
-                      defaultValue={submission?.deployed_url ?? ""}
-                      required
-                    />
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <Label className="text-[11px] font-medium text-muted-foreground">
-                        GitHub Repo Link <span className="text-muted-foreground/60">(optional)</span>
-                      </Label>
-                      <Input
-                        name="github_url"
-                        type="url"
-                        className="mt-1 h-9 text-sm"
-                        defaultValue={submission?.github_url ?? ""}
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[11px] font-medium text-muted-foreground">
-                        Project PDF <span className="text-muted-foreground/60">(optional)</span>
-                      </Label>
-                      <Input
-                        name="pdf"
-                        type="file"
-                        accept=".pdf"
-                        className="mt-1 h-9 text-sm file:h-full file:border-0 file:bg-primary/10 file:px-3 file:text-xs file:font-medium file:text-primary"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-[11px] font-medium text-muted-foreground">
-                        Screenshot <span className="text-muted-foreground/60">(optional)</span>
-                      </Label>
-                      <Input
-                        name="screenshot"
-                        type="file"
-                        accept="image/*"
-                        className="mt-1 h-9 text-sm file:h-full file:border-0 file:bg-primary/10 file:px-3 file:text-xs file:font-medium file:text-primary"
-                      />
-                    </div>
-                  </>
-                )}
-                <div>
-                  <Label className="text-[11px] font-medium text-muted-foreground">Notes</Label>
-                  <Textarea
-                    name="notes"
-                    rows={3}
-                    className="mt-1 text-sm"
-                    defaultValue={submission?.notes ?? ""}
+
+              {/* PDF */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-semibold flex items-center gap-1.5">
+                  <FileText className="size-3.5 text-primary" /> Project PDF
+                  <span className="text-xs font-normal text-muted-foreground ml-1">(optional)</span>
+                </Label>
+                <div className="relative">
+                  <Input
+                    name="pdf"
+                    type="file"
+                    accept=".pdf"
+                    className="h-10 rounded-xl text-sm cursor-pointer file:mr-3 file:h-full file:border-0 file:bg-primary/10 file:px-3 file:text-xs file:font-semibold file:text-primary file:rounded-lg"
                   />
                 </div>
-                <p className="text-[10px] text-muted-foreground/70 text-center">
-                  Provide at least one: GitHub link, project PDF, or screenshot
-                </p>
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-xl brand-gradient text-white border-0"
-                >
-                  {loading ? "Submitting…" : "Submit for Review"}
-                </Button>
-              </form>
-            )}
-            {submission && (
-              <button onClick={loadHistory} className="w-full mt-2 flex items-center justify-center gap-1.5 rounded-lg bg-transparent px-3 py-1.5 text-[10px] font-medium text-muted-foreground transition hover:bg-accent/30">
-                <Clock className="size-3" /> {showHistory ? "Hide History" : "View History"}
-              </button>
-            )}
-            {showHistory && (
-              <div className="rounded-xl border border-border/40 bg-secondary/20 p-3">
-                <p className="mb-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Submission History</p>
-                {history.length === 0 ? (
-                  <p className="text-[10px] text-muted-foreground">No history recorded yet.</p>
-                ) : (
-                  <div className="space-y-1.5">
-                    {history.map((h: any, i: number) => (
-                      <div key={h.id} className="flex items-start gap-2 text-[10px]">
-                        <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-muted text-[7px] font-bold text-muted-foreground">{i + 1}</span>
-                        <div>
-                          <p>
-                            <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>{h.previous_status ?? "—"} → {h.new_status}</span>
-                          </p>
-                          <p className="text-muted-foreground">{new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-                          {h.reason && <p className="text-red-500 italic">Reason: {h.reason}</p>}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
-            )}
+
+              {/* Screenshot */}
+              <div className="space-y-1.5">
+                <Label className="text-sm font-semibold flex items-center gap-1.5">
+                  <Image className="size-3.5 text-primary" /> Screenshot
+                  <span className="text-xs font-normal text-muted-foreground ml-1">(optional)</span>
+                </Label>
+                <Input
+                  name="screenshot"
+                  type="file"
+                  accept="image/*"
+                  className="h-10 rounded-xl text-sm cursor-pointer file:mr-3 file:h-full file:border-0 file:bg-primary/10 file:px-3 file:text-xs file:font-semibold file:text-primary file:rounded-lg"
+                />
+              </div>
+
+              <p className="text-[11px] text-muted-foreground rounded-lg bg-muted/40 px-3 py-2">
+                ✦ Provide at least one: GitHub link, project PDF, or screenshot.
+              </p>
+            </>
+          )}
+
+          {/* Notes */}
+          <div className="space-y-1.5">
+            <Label className="text-sm font-semibold flex items-center gap-1.5">
+              <BookOpen className="size-3.5 text-primary" /> Notes
+              <span className="text-xs font-normal text-muted-foreground ml-1">(optional)</span>
+            </Label>
+            <Textarea
+              name="notes"
+              rows={3}
+              placeholder="Describe your approach, tools used, or anything you want the mentor to know..."
+              className="rounded-xl text-sm resize-none"
+              defaultValue={submission?.notes ?? ""}
+            />
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 rounded-xl font-bold text-sm bg-gradient-to-r from-[#07284a] to-[#0a4c8f] hover:from-[#093a6c] hover:to-[#0b5ba8] text-white border-0 shadow-lg shadow-[#07284a]/20 transition-all"
+          >
+            {loading ? (
+              <><Loader2 className="mr-2 size-4 animate-spin" /> Submitting…</>
+            ) : (
+              <><Send className="mr-2 size-4" /> {submission?.status === "rejected" ? "Resubmit for Review" : "Submit for Review"}</>
+            )}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
+
+/* ─────────── TASK CARD ─────────── */
+function TaskCard({
+  task,
+  domain,
+  appId,
+  tasksReady,
+  onSubmitted,
+}: {
+  task: {
+    id: string;
+    taskNumber: number;
+    title: string;
+    description: string;
+    features: string[];
+    outcome: string;
+    submission: Submission | undefined;
+    dueDate: Date;
+    status: TaskStatus;
+    remaining: number;
+    lockedByLinkedin?: boolean;
+  };
+  domain: { slug: string; name: string; icon: string; color: string } | undefined;
+  appId: string;
+  tasksReady: boolean;
+  onSubmitted: () => void;
+}) {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [history, setHistory] = useState<any[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const { submission, status, dueDate, remaining, lockedByLinkedin } = task;
+  const isOverdue = status === "overdue";
+  const isLocked = lockedByLinkedin && task.taskNumber > 0;
+
+  const loadHistory = async () => {
+    if (!submission) return;
+    if (showHistory) { setShowHistory(false); return; }
+    const { data } = await supabase
+      .from("submission_history").select("*").eq("submission_id", submission.id)
+      .eq("table_name", "submissions").order("created_at", { ascending: false });
+    setHistory(data ?? []);
+    setShowHistory(true);
+  };
+
+  const borderColor = isOverdue ? "#EF4444" : status === "completed" ? "#16A34A" : status === "ongoing" ? "#2563EB" : "#D97706";
+
+  return (
+    <>
+      <TaskSubmitDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        task={task}
+        domain={domain}
+        appId={appId}
+        onSubmitted={onSubmitted}
+      />
+      <div
+        className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-white shadow-[0_2px_8px_rgba(0,0,0,0.03),0_6px_20px_rgba(0,0,0,0.05)] transition-all duration-300 ease-[cubic-bezier(.4,0,.2,1)] hover:-translate-y-1.5 hover:shadow-[0_6px_16px_rgba(0,0,0,0.06),0_16px_36px_rgba(0,0,0,0.08)] ${
+          isLocked ? "opacity-65 pointer-events-none" : ""
+        }`}
+        style={{ borderLeft: `5px solid ${borderColor}` }}
+      >
+        {/* Header Info: Task Badge & Status Pill */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          {task.taskNumber === 0 ? (
+            <div className="flex size-9 items-center justify-center rounded-xl bg-[#0077b5] text-white shadow-sm shrink-0">
+              <Linkedin className="size-4" />
+            </div>
+          ) : (
+            <div className="flex size-9 items-center justify-center rounded-xl border border-blue-200 bg-blue-50/50 font-bold text-blue-700 text-sm shadow-sm shrink-0">
+              {task.taskNumber}
+            </div>
+          )}
+          <StatusPill status={status} isOverdue={isOverdue} />
+        </div>
+
+        {/* Due Date & Submission Status */}
+        <div className="px-5 space-y-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 font-medium">
+            <CalendarDays className="size-3.5 shrink-0 text-muted-foreground/60" />
+            <span>Due Date: <span className="font-bold text-foreground">{formatDate(dueDate)}</span></span>
+          </div>
+          <div className="flex items-center gap-1.5 font-medium">
+            {status === "completed" ? (
+              <><CheckCircle2 className="size-3.5 text-emerald-600 shrink-0" /><span className="text-emerald-700 font-semibold">Submitted on track</span></>
+            ) : status === "ongoing" ? (
+              <><CheckCircle2 className="size-3.5 text-blue-500 shrink-0" /><span className="text-blue-600 font-semibold">Submitted for review</span></>
+            ) : isOverdue ? (
+              <><AlertCircle className="size-3.5 text-red-500 shrink-0" /><span className="text-red-600 font-semibold">Overdue Submission</span></>
+            ) : (
+              <><AlertCircle className="size-3.5 text-amber-500 shrink-0" /><span className="text-amber-600 font-semibold">Pending Submission</span></>
+            )}
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="px-5 pt-4 text-base font-extrabold text-foreground tracking-tight leading-snug">
+          {task.title}
+        </h3>
+
+        {/* Description */}
+        <p className="px-5 pt-1.5 text-xs text-muted-foreground leading-relaxed">
+          {task.description}
+        </p>
+
+        {/* Key Features */}
+        {task.features.length > 0 && (
+          <div className="px-5 pt-4">
+            <h4 className="text-xs font-bold text-blue-700 tracking-wide uppercase">Key Features:</h4>
+            <ul className="mt-2 space-y-1">
+              {task.features.map((f, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground leading-relaxed">
+                  <span className="text-blue-500 font-bold select-none">•</span>
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Expected Outcome */}
+        {task.outcome && (
+          <div className="px-5 pt-4">
+            <h4 className="text-xs font-bold text-emerald-700 tracking-wide uppercase">Expected Outcome:</h4>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{task.outcome}</p>
+          </div>
+        )}
+
+        {/* Spacer */}
+        <div className="flex-1 min-h-[20px]" />
+
+        {/* Action Area / Footer */}
+        <div className="border-t border-border/40 p-5 mt-4">
+          {status === "completed" ? (
+            <div className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 py-2.5 text-xs font-bold text-emerald-700">
+              <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+              <span>Completed Successfully!</span>
+            </div>
+          ) : isLocked ? (
+            <p className="text-center text-xs text-muted-foreground py-2 font-medium">
+              Complete the LinkedIn post task first to unlock.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {submission?.status === "rejected" && (
+                <div className="rounded-xl border border-red-200 bg-red-50 p-3">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="size-4 text-red-500 shrink-0" />
+                    <p className="text-xs font-semibold text-red-700">Needs Revision</p>
+                  </div>
+                  {submission.feedback && (
+                    <p className="mt-1 text-xs text-red-600 pl-6">Reason: {submission.feedback}</p>
+                  )}
+                </div>
+              )}
+              {!tasksReady ? (
+                <Button disabled className="w-full text-xs h-10 rounded-xl opacity-60">
+                  <Loader2 className="mr-1.5 size-4 animate-spin" /> Syncing tasks…
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setDialogOpen(true)}
+                  className="w-full text-xs font-bold h-10 rounded-xl transition-all"
+                  variant={submission?.status === "rejected" ? "destructive" : status === "ongoing" ? "outline" : isOverdue ? "destructive" : "default"}
+                >
+                  {submission?.status === "rejected" ? (
+                    <><AlertCircle className="mr-1.5 size-4" /> Resubmit Revision</>
+                  ) : status === "ongoing" ? (
+                    <><ArrowRight className="mr-1.5 size-4" /> Update Submission</>
+                  ) : isOverdue ? (
+                    <><Clock className="mr-1.5 size-4" /> Submit Late</>
+                  ) : (
+                    <><ExternalLink className="mr-1.5 size-4" /> Submit Task</>
+                  )}
+                </Button>
+              )}
+              {submission && (
+                <button onClick={loadHistory} className="w-full mt-1 flex items-center justify-center gap-1.5 rounded-lg bg-transparent px-3 py-1.5 text-[10px] font-medium text-muted-foreground transition hover:bg-accent/30">
+                  <Clock className="size-3" /> {showHistory ? "Hide History" : "View History"}
+                </button>
+              )}
+              {showHistory && (
+                <div className="rounded-xl border border-border/40 bg-secondary/20 p-3">
+                  <p className="mb-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Submission History</p>
+                  {history.length === 0 ? (
+                    <p className="text-[10px] text-muted-foreground">No history recorded yet.</p>
+                  ) : (
+                    <div className="space-y-1.5">
+                      {history.map((h: any, i: number) => (
+                        <div key={h.id} className="flex items-start gap-2 text-[10px]">
+                          <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-muted text-[7px] font-bold text-muted-foreground">{i + 1}</span>
+                          <div>
+                            <p>
+                              <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>
+                                {h.previous_status ?? "—"} → {h.new_status}
+                              </span>
+                            </p>
+                            <p className="text-muted-foreground">{new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                            {h.reason && <p className="text-red-500 italic">Reason: {h.reason}</p>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
+
 
 /* ─────────── STATUS PILL ─────────── */
 function StatusPill({ status, isOverdue }: { status: TaskStatus; isOverdue: boolean }) {

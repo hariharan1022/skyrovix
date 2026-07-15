@@ -14,14 +14,14 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { ApplicationFormDialog } from "@/components/ApplicationFormDialog";
-import { DOMAINS, PAYMENT, COMPANY, generateInternId, generateCertId, getDomain } from "@/lib/constants";
+import { DOMAINS, DURATIONS, PAYMENT, COMPANY, generateInternId, generateCertId, getDomain } from "@/lib/constants";
 import { validateCoupon, calculateDiscountedAmount, formatDiscount } from "@/lib/coupons";
 import type { CouponResult } from "@/lib/coupons";
 import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { IDCard } from "@/components/IDCard";
 import { TasksSection } from "@/components/TasksSection";
-import { OfferLetterDoc, CertificateDoc, CourseCertificateDoc, downloadPdf } from "@/components/pdf-docs";
+import { OfferLetterDoc, CertificateDoc, downloadPdf } from "@/components/pdf-docs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Copy, Download, FileText, CheckCircle2, Clock, XCircle, Upload, Award,
@@ -31,6 +31,7 @@ import {
   ListChecks, LayoutDashboard, Flag, AlertTriangle, AlertCircle, Zap, Hash, Circle, Loader2,
   TrendingUp, Star, Lock, Eye, LogOut,
   Settings, Wallet, CreditCard, ScrollText, Briefcase, Code2,
+  Share2, HelpCircle, Package, Users,
 } from "lucide-react";
 
 function useInView(threshold = 0.15) {
@@ -133,6 +134,15 @@ function Dashboard() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
+  const { data: profile } = useQuery({
+    queryKey: ["my-profile-details", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("profiles").select("*").eq("id", user!.id).maybeSingle();
+      return data ?? null;
+    }
+  });
+
   const { data: appsList, isLoading } = useQuery({
     queryKey: ["my-applications", user?.id],
     queryFn: async (): Promise<Application[]> => {
@@ -146,101 +156,37 @@ function Dashboard() {
     },
     enabled: !!user,
     refetchInterval: 10_000,
+    staleTime: 5_000,
+    placeholderData: (prev) => prev,
   });
+
+  const appsWithProfile = useMemo(() => {
+    if (!appsList) return [];
+    if (!profile) return appsList;
+    return appsList.map(a => ({
+      ...a,
+      full_name: profile.full_name || a.full_name,
+      phone: profile.phone || a.phone,
+      college: profile.college || a.college,
+      course: profile.course || a.course,
+      year: profile.year || a.year,
+      photo_url: profile.photo_url || a.photo_url,
+    }));
+  }, [appsList, profile]);
 
   const app = useMemo(() => {
-    if (!appsList?.length) return null;
-    const active = appsList.find((a) => a.status === "ongoing" || a.status === "approved");
-    return active ?? appsList[0];
-  }, [appsList]);
+    if (!appsWithProfile?.length) return null;
+    const active = appsWithProfile.find((a) => a.status === "ongoing" || a.status === "approved");
+    return active ?? appsWithProfile[0];
+  }, [appsWithProfile]);
 
   const completedApps = useMemo(() => {
-    return appsList?.filter((a) => a.status === "completed") ?? [];
-  }, [appsList]);
+    return appsWithProfile?.filter((a) => a.status === "completed") ?? [];
+  }, [appsWithProfile]);
 
-  const { data: enrollments } = useQuery({
-    queryKey: ["my-lms-enrollments", user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const { data } = await supabase
-        .from("enrollments")
-        .select("id, course_id, status, progress_percent, completed_at, current_topic_id")
-        .eq("user_id", user.id)
-        .order("started_at", { ascending: false });
-      return data ?? [];
-    },
-    enabled: !!user,
-    refetchInterval: 10_000,
-  });
 
-  const { data: courses } = useQuery({
-    queryKey: ["all-lms-courses"],
-    queryFn: async () => {
-      const { data } = await supabase.from("courses").select("id, slug, name, domain, icon, total_topics, total_tasks, quiz_marks, pass_marks, quiz_duration_min").eq("is_published", true);
-      return data ?? [];
-    },
-  });
 
-  const { data: lmsCerts } = useQuery({
-    queryKey: ["my-lms-certificates", user?.id],
-    queryFn: async () => {
-      if (!user) return [];
-      const enrollIds = (enrollments ?? []).map((e) => e.id);
-      if (!enrollIds.length) return [];
-      const { data } = await supabase.from("course_certificates").select("certificate_id, score, issued_at, enrollment_id").in("enrollment_id", enrollIds);
-      return data ?? [];
-    },
-    enabled: !!user && (enrollments ?? []).length > 0,
-    refetchInterval: 10_000,
-  });
 
-  const { data: topics } = useQuery({
-    queryKey: ["my-topics", enrollments?.[0]?.course_id],
-    enabled: !!enrollments?.length && !!enrollments[0].course_id,
-    queryFn: async () => {
-      const { data } = await supabase.from("course_topics").select("id, title, order_index").eq("course_id", enrollments![0].course_id).order("order_index");
-      return data ?? [];
-    },
-  });
-
-  const { data: completedTopics } = useQuery({
-    queryKey: ["my-lesson-progress", enrollments?.[0]?.id],
-    enabled: !!enrollments?.length,
-    queryFn: async () => {
-      const { data } = await supabase.from("lesson_progress").select("topic_id, completed_at").eq("enrollment_id", enrollments![0].id);
-      return new Map((data ?? []).map((r) => [r.topic_id, r.completed_at]));
-    },
-    refetchInterval: 10_000,
-  });
-
-  const { data: taskSubmissions } = useQuery({
-    queryKey: ["my-course-subs", enrollments?.[0]?.id],
-    enabled: !!enrollments?.length,
-    queryFn: async () => {
-      const { data } = await supabase.from("course_task_submissions").select("*, course_tasks(task_number, title)").eq("enrollment_id", enrollments![0].id);
-      return data ?? [];
-    },
-    refetchInterval: 10_000,
-  });
-
-  const { data: quizAttempts } = useQuery({
-    queryKey: ["my-quiz-attempts", enrollments?.[0]?.id],
-    enabled: !!enrollments?.length,
-    queryFn: async () => {
-      const { data } = await supabase.from("quiz_attempts").select("*").eq("enrollment_id", enrollments![0].id).order("started_at", { ascending: false });
-      return data ?? [];
-    },
-    refetchInterval: 10_000,
-  });
-
-  const { data: tasks } = useQuery({
-    queryKey: ["course-tasks-list", enrollments?.[0]?.course_id],
-    enabled: !!enrollments?.length,
-    queryFn: async () => {
-      const { data } = await supabase.from("course_tasks").select("*").eq("course_id", enrollments![0].course_id).order("task_number");
-      return data ?? [];
-    },
-  });
 
   const { data: allAppSubmissions } = useQuery({
     queryKey: ["all-submissions", appsList?.map((a) => a.id)],
@@ -252,6 +198,7 @@ function Dashboard() {
     },
     enabled: !!appsList?.length,
     refetchInterval: 10_000,
+    placeholderData: (prev) => prev,
   });
 
   const { data: allAppCerts } = useQuery({
@@ -264,6 +211,7 @@ function Dashboard() {
     },
     enabled: !!appsList?.length,
     refetchInterval: 10_000,
+    placeholderData: (prev) => prev,
   });
 
   const { data: allTasksByDomain } = useQuery({
@@ -280,6 +228,7 @@ function Dashboard() {
       return byDomain;
     },
     enabled: !!appsList?.length,
+    placeholderData: (prev) => prev,
   });
 
   const internSubmissions = useMemo(() => {
@@ -297,6 +246,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!app,
+    placeholderData: (prev) => prev,
   });
 
   const certificate = useMemo(() => {
@@ -313,6 +263,7 @@ function Dashboard() {
       return data ?? [];
     },
     enabled: !!appsList?.length,
+    placeholderData: (prev) => prev,
   });
 
   const payment = useMemo(() => {
@@ -320,23 +271,7 @@ function Dashboard() {
     return allPayments.find((p: any) => p.application_id === app.id) ?? null;
   }, [allPayments, app]);
 
-  const course = useMemo(() => {
-    if (!enrollments?.length || !courses?.length) return null;
-    return courses.find((c: any) => c.id === enrollments[0].course_id) ?? null;
-  }, [enrollments, courses]);
-
-  const enrollment = enrollments?.[0] ?? null;
-  const lmsCert = useMemo(() => {
-    if (!enrollment || !lmsCerts?.length) return null;
-    return lmsCerts.find((c: any) => c.enrollment_id === enrollment.id) ?? null;
-  }, [enrollment, lmsCerts]);
-
-  const completedTopicCount = completedTopics?.size ?? 0;
-  const totalTopics = topics?.length ?? 0;
-  const completedTaskCount = taskSubmissions?.filter((s: any) => s.status === "approved").length ?? 0;
-  const totalTasks = tasks?.length ?? 0;
-  const lastAttempt = quizAttempts?.[0] ?? null;
-  const cert = certificate ?? lmsCert;
+  const cert = certificate;
   const domain = app ? getDomain(app.domain) : null;
   const internTotal = internTasks?.length ?? 0;
   const internApproved = internSubmissions?.filter((s: any) => s.status === "approved").length ?? 0;
@@ -366,35 +301,17 @@ function Dashboard() {
     })();
   }, [appsList, allAppSubmissions, allAppCerts, allTasksByDomain, qc]);
 
-  // Auto-complete enrollments when progress = 100 and quiz passed
-  useEffect(() => {
-    if (!enrollments || !quizAttempts || !taskSubmissions || !tasks) return;
-    for (const e of enrollments) {
-      if (e.status === "completed") continue;
-      const approvedTasks = taskSubmissions.filter((s: any) => s.status === "approved").length;
-      const allTasks = tasks.length;
-      const passed = quizAttempts.some((q: any) => q.passed);
-      if (e.progress_percent >= 100 && allTasks > 0 && approvedTasks >= allTasks && passed) {
-        supabase.from("enrollments").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", e.id).then(() => {
-          qc.invalidateQueries({ queryKey: ["my-lms-enrollments"] });
-        });
-      }
-    }
-  }, [enrollments, quizAttempts, taskSubmissions, tasks, qc]);
-
   const timelineSteps = [
     { label: "Application Submitted", done: !!app },
-    { label: "Offer Letter Received", done: !!app },
-    { label: "LMS Course Started", done: !!enrollment },
-    { label: "Tasks Completed", done: totalTasks > 0 && completedTaskCount >= totalTasks },
-    { label: "Quiz Passed", done: !!lastAttempt?.passed },
-    { label: "Certificate Generated", done: !!cert },
+    { label: "Verification & Ongoing", done: app?.status === "ongoing" || app?.status === "completed" },
+    { label: "Tasks Completed", done: internTotal > 0 && internApproved >= (taskLimits[app?.duration ?? 1] ?? 5) },
+    { label: "Certificate Generated", done: !!certificate },
   ];
   const currentStep = timelineSteps.findIndex((s) => !s.done);
 
   const searchParams = Route.useSearch();
-  const active = searchParams.tab ?? "overview";
-  const [detailView, setDetailView] = useState<{ type: "app"; id: string } | { type: "enrollment"; id: string } | null>(null);
+  const active = searchParams.tab ?? "tasks";
+  const [detailView, setDetailView] = useState<{ type: "app"; id: string } | null>(null);
   const [utrNumber, setUtrNumber] = useState("");
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [submittingPayment, setSubmittingPayment] = useState(false);
@@ -404,6 +321,109 @@ function Dashboard() {
   const [autoApplied, setAutoApplied] = useState(false);
   const [certStatus, setCertStatus] = useState<"idle" | "generating" | "done" | "error">("idle");
   const certTriggered = useRef(false);
+
+  // New Domain Application Form states
+  const [newDomain, setNewDomain] = useState("");
+  const [newDuration, setNewDuration] = useState(1);
+  const [newCouponCode, setNewCouponCode] = useState("");
+  const [newCouponApplied, setNewCouponApplied] = useState<{ code: string; discount: string } | null>(null);
+  const [validatingNewCoupon, setValidatingNewCoupon] = useState(false);
+  const [submittingNewApp, setSubmittingNewApp] = useState(false);
+
+  const handleApplyNewCoupon = async () => {
+    if (!newCouponCode.trim()) return;
+    setValidatingNewCoupon(true);
+    try {
+      const result = await validateCoupon(newCouponCode.trim(), newDomain || undefined);
+      if (result.valid) {
+        setNewCouponApplied({ code: result.code!, discount: result.discountType === "percentage" ? `${result.discountValue}% OFF` : `₹${result.discountValue} OFF` });
+        toast.success(`Coupon applied! ${result.discountType === "percentage" ? `${result.discountValue}%` : `₹${result.discountValue}`} discount`);
+      } else {
+        setNewCouponApplied(null);
+        toast.error(result.error || "Invalid coupon");
+      }
+    } catch {
+      toast.error("Failed to validate coupon");
+      setNewCouponApplied(null);
+    } finally {
+      setValidatingNewCoupon(false);
+    }
+  };
+
+  const handleRemoveNewCoupon = () => {
+    setNewCouponCode("");
+    setNewCouponApplied(null);
+  };
+
+  const handleApplyNewDomain = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newDomain) return toast.error("Please select a domain");
+    
+    // Check if already enrolled in this domain and active/pending
+    const alreadyEnrolled = appsList?.some(a => a.domain === newDomain && (a.status === "ongoing" || a.status === "approved" || a.status === "pending"));
+    if (alreadyEnrolled) {
+      return toast.error("You are already enrolled or have a pending application in this domain!");
+    }
+
+    setSubmittingNewApp(true);
+    try {
+      const intern_id = generateInternId();
+      const limit = taskLimits[newDuration] ?? 5;
+      
+      const payload = {
+        user_id: user?.id,
+        domain: newDomain,
+        duration: newDuration,
+        total_tasks: limit,
+        intern_id,
+        full_name: app?.full_name ?? user?.user_metadata?.full_name ?? "Student",
+        email: user?.email ?? "",
+        phone: app?.phone ?? "",
+        college: app?.college ?? "",
+        course: app?.course ?? "",
+        year: app?.year ?? "",
+        photo_url: app?.photo_url ?? null,
+        coupon_code: newCouponApplied?.code ?? null,
+        status: "approved",
+      };
+
+      const { error: insertError } = await supabase.from("applications").insert(payload);
+      if (insertError) throw insertError;
+
+      toast.success("Application submitted successfully! Your new internship has started.");
+      
+      // Invalidate queries to refresh list
+      qc.invalidateQueries({ queryKey: ["my-applications", user?.id] });
+      
+      // Send offer letter email in the background
+      (async () => {
+        try {
+          const { sendOfferLetterEmail } = await import("@/lib/email-helpers");
+          const domainObj = getDomain(newDomain);
+          await sendOfferLetterEmail({
+            to: user?.email ?? "",
+            studentName: payload.full_name,
+            studentId: user!.id,
+            internId: intern_id,
+            domainName: domainObj?.name ?? newDomain,
+            duration: newDuration,
+          });
+        } catch (e) {
+          console.warn("Failed to send offer letter email for new domain:", e);
+        }
+      })();
+
+      // Reset form
+      setNewDomain("");
+      setNewDuration(1);
+      setNewCouponCode("");
+      setNewCouponApplied(null);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to submit application");
+    } finally {
+      setSubmittingNewApp(false);
+    }
+  };
 
   // Auto-apply coupon from application record
   useEffect(() => {
@@ -541,53 +561,37 @@ function Dashboard() {
   const signOut = async () => {
     await supabase.auth.signOut();
     window.location.href = "/auth";
-  };
-
-  if (authLoading || isLoading) return <LoadingSkeleton />;
+  };  if (authLoading || isLoading) return <LoadingSkeleton />;
 
   const renderContent = () => {
     if (!appsList?.length || !app) {
-      if (active === "courses") {
-        return (
-          <div className="space-y-8">
-            <DashboardHero badge="My Courses" title="Topic-Based Courses" description="Learn at your own pace with curated topic-based courses and earn certificates." icon={BookOpen} />
-            <LmsCoursesSection
-              enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
-              completedTopics={completedTopics} topics={topics ?? []}
-              taskSubmissions={taskSubmissions ?? []} tasks={tasks ?? []}
-              quizAttempts={quizAttempts ?? []} course={course} enrollment={enrollment}
-            />
-            {enrollment && course && <CurrentTopicWidget topics={topics ?? []} completedTopics={completedTopics} enrollment={enrollment} course={course} />}
-            {enrollment && <TasksSectionWidget tasks={tasks ?? []} submissions={taskSubmissions ?? []} enrollmentId={enrollment.id} courseSlug={course?.slug ?? ""} onChange={() => qc.invalidateQueries({ queryKey: ["my-course-subs"] })} />}
-            {enrollment && <QuizSectionWidget course={course} lastAttempt={lastAttempt} enrollment={enrollment} completedTaskCount={completedTaskCount} totalTasks={totalTasks} />}
-          </div>
-        );
-      }
       if (active === "profile") {
         return (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <DashboardHero badge="Profile" title="Your Profile" description="Manage your personal details, photo, and internship information." icon={User} />
-            <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-6 sm:p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <User className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
-              <p className="font-semibold text-muted-foreground">Apply for an internship to set up your profile.</p>
-              <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+            <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-12 text-center backdrop-blur-xl dark:bg-slate-900/40">
+              <User className="size-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-base font-bold text-foreground">Profile Uninitialized</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">Please apply for a virtual internship first to initialize your profile details.</p>
+              <Button size="sm" className="mt-5 brand-gradient text-white border-0 rounded-2xl px-5 h-10 font-medium" onClick={() => navigate({ search: { tab: "overview" } })}>Go to Overview</Button>
             </div>
           </div>
         );
       }
       if (active === "tasks" || active === "certificates") {
         return (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <DashboardHero
               badge={active === "tasks" ? "My Tasks" : "Certificates"}
               title={active === "tasks" ? "Internship Tasks" : "Your Certificates"}
-              description={active === "tasks" ? "Track and complete your internship tasks with mentor feedback." : "View and download your verified internship and course certificates."}
+              description={active === "tasks" ? "Track and complete your internship tasks with mentor feedback." : "View and download your verified internship certificates."}
               icon={active === "tasks" ? ListChecks : Award}
             />
-            <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-6 sm:p-12 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <Briefcase className="size-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
-              <p className="font-semibold text-muted-foreground">Apply for an internship to access this section.</p>
-              <Button size="sm" className="mt-4 brand-gradient text-white border-0 rounded-xl" onClick={() => navigate({ to: "/dashboard" })}>Go to Overview</Button>
+            <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-12 text-center backdrop-blur-xl dark:bg-slate-900/40">
+              <Briefcase className="size-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-base font-bold text-foreground">No Internships Active</h3>
+              <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">You do not have any active internships. Apply for an internship domain to unlock tasks.</p>
+              <Button size="sm" className="mt-5 brand-gradient text-white border-0 rounded-2xl px-5 h-10 font-medium" onClick={() => navigate({ search: { tab: "overview" } })}>Go to Overview</Button>
             </div>
           </div>
         );
@@ -596,206 +600,135 @@ function Dashboard() {
         <AnimatedSection>
           <WelcomeDashboard
             user={user}
-            enrollments={enrollments ?? []}
-            courses={courses ?? []}
             onCreated={() => qc.invalidateQueries()}
           />
         </AnimatedSection>
       );
     }
 
-    if (active === "overview") {
+    if (active === "overview" || active === "tasks") {
       if (detailView?.type === "app") {
         const da = appsList!.find((a) => a.id === detailView.id)!;
         const dd = getDomain(da.domain);
         const daSubs = allAppSubmissions?.filter((s: any) => s.application_id === da.id) ?? [];
         const daApproved = daSubs.filter((s: any) => s.status === "approved").length;
-        const daTotal = internTasks?.length ?? 0;
+        const daTotal = allTasksByDomain?.[da.domain]?.length ?? 5;
         const daCert = allAppCerts?.find((c: any) => c.application_id === da.id) ?? null;
         const daPayment = allPayments?.find((p: any) => p.application_id === da.id) ?? null;
+        
+        const daSteps = [
+          { label: "Application Submitted", done: true },
+          { label: "Ongoing Internship", done: da.status === "ongoing" || da.status === "completed" },
+          { label: "Tasks Approved", done: daApproved >= daTotal },
+          { label: "Certificate Issued", done: !!daCert },
+        ];
+        const daCurrentStep = daSteps.findIndex((s) => !s.done);
+
         return (
           <div className="space-y-6">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setDetailView(null)}>
-              <ChevronLeft className="size-4" /> Back to Dashboard
-            </Button>
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07284a]/5 via-transparent to-blue-400/5 p-8 sm:p-10 mb-6">
+            <div className="flex items-center">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground rounded-xl" onClick={() => setDetailView(null)}>
+                <ChevronLeft className="size-4" /> Back to Overview
+              </Button>
+            </div>
+
+            {/* Internship Title */}
+            <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
               <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/10 blur-[80px]" />
-              <div className="absolute -bottom-8 -left-8 size-32 rounded-full bg-blue-400/10 blur-[60px]" />
-              <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> {dd?.name ?? da.domain}</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold">{dd?.name ?? da.domain}</h1>
-              <p className="mt-2 max-w-2xl text-muted-foreground">{dd?.description ?? ""}</p>
-            </div>
-            <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
-              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
-              <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
-                  <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-display text-2xl font-bold">{dd?.name ?? da.domain}</h2>
-                    <Badge className={`text-xs px-3 py-1 rounded-lg ${
-                      da.status === "completed" ? "bg-emerald-600 text-white" :
-                      da.status === "ongoing" ? "bg-blue-600 text-white" :
-                      da.status === "approved" ? "bg-amber-500 text-white" :
-                      "bg-gray-500 text-white"
-                    }`}>
-                      {da.status === "completed" ? "Completed" :
-                       da.status === "ongoing" ? "Ongoing" :
-                       da.status === "approved" ? "Approved" :
-                       da.status === "pending" ? "Pending" : da.status}
-                    </Badge>
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
+                    <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{da.intern_id} · {da.full_name} · {dd?.description ?? ""}</p>
+                  <div>
+                    <h2 className="font-display text-2xl font-bold">{dd?.name ?? da.domain}</h2>
+                    <p className="text-xs text-muted-foreground mt-1">{da.intern_id} · {da.duration} Month{(da.duration ?? 1) > 1 ? "s" : ""}</p>
+                  </div>
                 </div>
+                <Badge className={`text-xs px-3 py-1.5 rounded-xl border-0 ${
+                  da.status === "completed" ? "bg-emerald-500 text-white" :
+                  da.status === "ongoing" ? "bg-blue-600 text-white" :
+                  da.status === "approved" ? "bg-amber-500 text-white" :
+                  "bg-gray-500 text-white"
+                }`}>
+                  {da.status === "completed" ? "Completed" :
+                   da.status === "ongoing" ? "Ongoing" :
+                   da.status === "approved" ? "Approved" :
+                   da.status === "pending" ? "Pending Approval" : da.status}
+                </Badge>
               </div>
             </div>
 
-            {/* Info grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Started</p><p className="font-semibold mt-0.5">{new Date(da.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Completed</p><p className="font-semibold mt-0.5">{da.completed_at ? new Date(da.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Tasks</p><p className="font-semibold mt-0.5">{daApproved}/{daTotal}</p></div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Certificate</p><p className="font-semibold mt-0.5">{daCert ? "Generated" : "—"}</p></div>
-            </div>
+            {/* Progress Timeline */}
+            <TimelineSection steps={daSteps} currentStep={daCurrentStep} />
 
-            {/* Payment */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><CreditCard className="size-4 text-primary" /> Payment Details</h3>
-              {daPayment ? (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                  <div><p className="text-muted-foreground text-xs">Status</p><Badge className={`mt-1 text-[10px] ${daPayment.status === "verified" ? "bg-emerald-600" : "bg-amber-500"} text-white`}>{daPayment.status === "verified" ? "Verified" : daPayment.status === "pending" ? "Pending" : daPayment.status}</Badge></div>
-                  <div><p className="text-muted-foreground text-xs">UTR</p><p className="font-semibold mt-0.5 font-mono text-xs">{daPayment.utr_number ?? "—"}</p></div>
-                  <div><p className="text-muted-foreground text-xs">Amount</p><p className="font-semibold mt-0.5">{daPayment.amount ? `₹${daPayment.amount}` : "—"}</p></div>
-                  <div><p className="text-muted-foreground text-xs">Verified</p><p className="font-semibold mt-0.5">{daPayment.verified_at ? new Date(daPayment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+            {/* Grid details */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-6">
+                {/* Documents & Details */}
+                <IDCardSection app={da} />
+
+                {/* Summary Panel */}
+                <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+                  <h3 className="flex items-center gap-2 font-bold text-sm"><ScrollText className="size-4 text-primary" /> Application Details</h3>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">Start Date</p><p className="font-semibold mt-0.5">{new Date(da.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">End Date</p><p className="font-semibold mt-0.5">{da.completed_at ? new Date(da.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">Approved Tasks</p><p className="font-semibold mt-0.5">{daApproved} of {daTotal}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3">
+                      <p className="text-muted-foreground">Payment Details</p>
+                      {daPayment ? (
+                        <span className={`font-semibold mt-0.5 inline-flex items-center gap-1 ${daPayment.status === "verified" ? "text-emerald-600" : "text-amber-500"}`}>
+                          {daPayment.status === "verified" ? "Verified" : "Pending"}
+                        </span>
+                      ) : <p className="font-semibold mt-0.5 text-muted-foreground">—</p>}
+                    </div>
+                  </div>
                 </div>
-              ) : <p className="text-sm text-muted-foreground">No payment record.</p>}
-            </div>
-
-            {/* Offer Letter */}
-            <div className="group cursor-pointer rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl transition-all hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50 dark:bg-[#1E293B]/70 dark:hover:border-blue-700 dark:hover:shadow-blue-900/20" onClick={() => downloadPdf(<OfferLetterDoc fullName={da.full_name} internId={da.intern_id} domain={dd?.name ?? da.domain} issuedAt={da.offer_issued_at} duration={da.duration ?? 1} />, `OfferLetter_${da.intern_id}.pdf`)}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-md transition-transform group-hover:scale-105"><FileText className="size-6" /></div>
-                  <div><p className="font-semibold text-sm">Offer Letter</p><p className="text-xs text-muted-foreground">Issued {new Date(da.offer_issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
-                </div>
-                <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition-all group-hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300 dark:group-hover:bg-blue-900/50"><Download className="size-3.5" /> Download</div>
               </div>
-            </div>
 
-            {/* ID Card */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Shield className="size-4 text-primary" /> Digital ID Card</h3>
-              <IDCard internId={da.intern_id} fullName={da.full_name} domain={dd?.name ?? da.domain} photoUrl={da.photo_url} issuedAt={da.offer_issued_at} duration={da.duration ?? 1} />
-              <div className="mt-3 flex gap-2">
-                <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs border-border/60" onClick={() => downloadPdf(<OfferLetterDoc fullName={da.full_name} internId={da.intern_id} domain={dd?.name ?? da.domain} issuedAt={da.offer_issued_at} duration={da.duration ?? 1} />, `OfferLetter_${da.intern_id}.pdf`)}><FileText className="mr-1 size-3" /> Offer Letter</Button>
-                <Button size="sm" className="brand-gradient text-white border-0 rounded-lg h-8 text-xs" onClick={() => downloadPdf(<OfferLetterDoc fullName={da.full_name} internId={da.intern_id} domain={dd?.name ?? da.domain} issuedAt={da.offer_issued_at} duration={da.duration ?? 1} />, `IDCard_${da.intern_id}.pdf`)}><Download className="mr-1 size-3" /> Download ID</Button>
-              </div>
-            </div>
-
-            {/* Tasks */}
-            {daTotal > 0 && (
-              <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <TasksSection
-                  domainSlug={da.domain}
-                  submissions={daSubs}
-                  appId={da.id}
-                  duration={da.duration}
-                  onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
+              {/* UTR Invoice scan section if tasks done but verification pending */}
+              <div className="space-y-6">
+                <UnlockedCertificateCard app={da} cert={daCert} domain={dd} />
+                <LockedCertificateCard
+                  app={da}
+                  internApproved={daApproved}
+                  internTotal={daTotal}
+                  payment={daPayment}
+                  couponResult={couponResult}
+                  validatingCoupon={validatingCoupon}
+                  couponCode={couponCode}
+                  setCouponCode={setCouponCode}
+                  handleApplyCoupon={handleApplyCoupon}
+                  handleRemoveCoupon={handleRemoveCoupon}
+                  utrNumber={utrNumber}
+                  setUtrNumber={setUtrNumber}
+                  paymentScreenshot={paymentScreenshot}
+                  setPaymentScreenshot={setPaymentScreenshot}
+                  submittingPayment={submittingPayment}
+                  handlePaymentSubmit={handlePaymentSubmit}
+                  certStatus={certStatus}
+                  doFreeCertificate={doFreeCertificate}
                 />
               </div>
-            )}
-
-            {/* Certificate */}
-            {daCert && (
-              <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-                <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
-                  <p className="font-bold text-sm">{dd?.name ?? da.domain}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono mt-1">{daCert.certificate_id}</p>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<CertificateDoc fullName={da.full_name} internId={da.intern_id} domain={dd?.name ?? da.domain} certId={daCert.certificate_id} issuedAt={daCert.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />, `Certificate_${daCert.certificate_id}.pdf`)}><Download className="mr-1.5 size-4" /> Download PDF</Button>
-                  <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9"><Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link></Button>
-                </div>
-              </div>
-            )}
-
-            {/* Summary */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><ScrollText className="size-4 text-primary" /> Summary</h3>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><p className="text-muted-foreground text-xs">Name</p><p className="font-semibold mt-0.5">{da.full_name}</p></div>
-                <div><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-semibold mt-0.5 font-mono text-xs">{da.intern_id}</p></div>
-                <div><p className="text-muted-foreground text-xs">Domain</p><p className="font-semibold mt-0.5">{dd?.name ?? da.domain}</p></div>
-                <div><p className="text-muted-foreground text-xs">Duration</p><p className="font-semibold mt-0.5">{da.duration ? `${da.duration} Month${da.duration > 1 ? "s" : ""}` : "—"}</p></div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (detailView?.type === "enrollment") {
-        const de = enrollments?.find((e: any) => e.id === detailView.id)!;
-        const dc = courses?.find((c: any) => c.id === de?.course_id)!;
-        const dcCert = lmsCerts?.find((c: any) => c.enrollment_id === de?.id) ?? null;
-        return (
-          <div className="space-y-6">
-            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setDetailView(null)}>
-              <ChevronLeft className="size-4" /> Back to Dashboard
-            </Button>
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#07284a]/5 via-transparent to-blue-400/5 p-8 sm:p-10 mb-6">
-              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/10 blur-[80px]" />
-              <div className="absolute -bottom-8 -left-8 size-32 rounded-full bg-blue-400/10 blur-[60px]" />
-              <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> Course Detail</Badge>
-              <h1 className="text-2xl sm:text-3xl font-bold">{dc?.name ?? "Course"}</h1>
-              <p className="mt-2 max-w-2xl text-muted-foreground">{dc?.domain ? `${dc.domain} · ${dc.total_topics} topics · ${dc.total_tasks} tasks` : ""}</p>
-            </div>
-            <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
-              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-blue-400/15 blur-[80px]" />
-              <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="grid size-16 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md"><GraduationCap className="size-8" /></div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-display text-2xl font-bold">{dc?.name ?? "Course"}</h2>
-                    {dcCert ? (
-                      <Badge className="bg-emerald-600 text-white text-xs rounded-lg px-3 py-1"><Award className="mr-1 size-3" /> Certified</Badge>
-                    ) : de?.status === "completed" ? (
-                      <Badge className="bg-emerald-600 text-white text-xs rounded-lg px-3 py-1"><CheckCircle2 className="mr-1 size-3" /> Completed</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="text-xs rounded-lg px-3 py-1">In Progress</Badge>
-                    )}
-                  </div>
-                  {dc && <p className="text-sm text-muted-foreground mt-1">{dc.domain} · {dc.total_topics} topics · {dc.total_tasks} tasks</p>}
-                </div>
-                {dc && (
-                  <Button asChild size="sm" className="brand-gradient text-white border-0 rounded-xl h-9">
-                    <Link to="/courses/$slug" params={{ slug: dc.slug }}><Play className="mr-1.5 size-3.5" /> Continue</Link>
-                  </Button>
-                )}
-              </div>
             </div>
 
-            {/* Progress */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Target className="size-4 text-primary" /> Progress</h3>
-              <div className="flex items-center gap-3 mb-2"><Progress value={de?.progress_percent ?? 0} className="h-2.5 flex-1" /><span className="text-xs font-semibold">{de?.progress_percent ?? 0}%</span></div>
-              {de && <Badge variant="outline" className="text-[10px]">{de?.status === "completed" ? "Completed" : "In Progress"}</Badge>}
-            </div>
-
-            {dcCert && (
-              <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-                <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
-                  <p className="font-bold text-sm">{dc?.name ?? "Course"}</p>
-                  <p className="text-[10px] text-muted-foreground font-mono mt-1">{dcCert.certificate_id}</p>
-                  {dcCert.score != null && <Badge variant="secondary" className="mt-2 text-xs">{dcCert.score}/100</Badge>}
-                </div>
-                <div className="mt-4 space-y-2">
-                  <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<CourseCertificateDoc fullName={app!.full_name} courseName={dc?.name ?? "Course"} score={dcCert.score ?? 0} total={100} certId={dcCert.certificate_id} issuedAt={dcCert.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />, `Certificate_${dcCert.certificate_id}.pdf`)}><Download className="mr-1.5 size-4" /> Download PDF</Button>
-                  <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9"><Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link></Button>
+            {/* Task Submission history for debug/mentors */}
+            {daSubs.length > 0 && (
+              <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+                <h3 className="font-bold text-sm">Task Submissions Logs</h3>
+                <div className="divide-y divide-border/40 text-xs">
+                  {daSubs.map((sub: any) => (
+                    <div key={sub.id} className="py-2.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-foreground truncate">Task Reference {sub.task_id ? sub.task_id.slice(-6) : sub.id?.slice(-6) ?? "—"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Submitted {new Date(sub.submitted_at ?? sub.created_at).toLocaleDateString("en-IN")}</p>
+                      </div>
+                      <Badge className={`text-[9px] font-bold ${sub.status === "approved" ? "bg-emerald-500/10 text-emerald-600/90 border-0" : "bg-amber-500/10 text-amber-500 border-0"}`}>
+                        {sub.status}
+                      </Badge>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -805,37 +738,44 @@ function Dashboard() {
 
       return (
         <div className="space-y-6">
-          <DashboardHero badge="Dashboard" title="Your Progress" description="Track your internships, courses, and achievements at a glance." icon={LayoutDashboard} />
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {[
-              { label: "Total Internships", value: appsList?.length ?? 0, icon: Briefcase, color: "from-[#07284a] to-blue-600" },
-              { label: "Completed", value: completedApps.length + (enrollments?.filter((e: any) => e.status === "completed").length ?? 0), icon: CheckCircle2, color: "from-emerald-500 to-teal-600" },
-              { label: "Active Courses", value: enrollments?.filter((e: any) => e.status !== "completed").length ?? 0, icon: BookOpen, color: "from-amber-500 to-orange-600" },
-              { label: "Certificates", value: (allAppCerts?.length ?? 0) + (lmsCerts?.length ?? 0), icon: Award, color: "from-[#07284a] to-[#07284a]" },
-            ].map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <div key={stat.label} className="rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl dark:bg-[#1E293B]/70">
-                  <div className="flex items-center gap-3">
-                    <div className={`grid size-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${stat.color} text-white shadow-sm`}><Icon className="size-4" /></div>
-                    <div><p className="text-2xl font-bold">{stat.value}</p><p className="text-[10px] text-muted-foreground leading-tight">{stat.label}</p></div>
-                  </div>
-                </div>
-              );
-            })}
+          {/* Welcome Banner */}
+          <HeroSection app={app} internApproved={internApproved} durationLimit={internTotal} cert={cert} />
+          
+          {/* Stats details card row */}
+          <StatsCards internApproved={internApproved} internPending={internPending} durationLimit={internTotal} cert={cert} />
+          
+          {/* Stepper progress timeline */}
+          <TimelineSection steps={timelineSteps} currentStep={currentStep} />
+
+          {/* Quest Log: Active Tasks grid list */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold font-display flex items-center gap-2 text-foreground">
+                <ListChecks className="size-5 text-primary" /> Quest Log
+              </h2>
+            </div>
+            <TasksSection
+              domainSlug={app.domain}
+              submissions={internSubmissions ?? []}
+              appId={app.id}
+              duration={app.duration}
+              onChange={() => {
+                qc.invalidateQueries({ queryKey: ["all-submissions"] });
+                qc.invalidateQueries({ queryKey: ["my-applications"] });
+              }}
+            />
           </div>
 
-          {/* Internships List */}
-          <AnimatedSection>
-            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2"><Briefcase className="size-5 text-primary" /> Internships</h2>
-            {(!appsList || appsList.length === 0) ? (
-              <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-8 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <p className="text-muted-foreground text-sm">No internships yet. Apply for one to get started.</p>
+          {/* Render past/multiple domains ONLY if they have more than 1 application */}
+          {appsList && appsList.length > 1 && (
+            <AnimatedSection>
+              <div className="flex items-center justify-between mb-4 mt-8">
+                <h2 className="text-base font-display font-bold flex items-center gap-2 text-foreground">
+                  <Briefcase className="size-4 text-primary" /> Other Enrolled Domains
+                </h2>
               </div>
-            ) : (
               <div className="grid gap-3">
-                {appsList.map((a) => {
+                {appsList.filter(a => a.id !== app.id).map((a) => {
                   const d = getDomain(a.domain);
                   const aSubs = allAppSubmissions?.filter((s: any) => s.application_id === a.id) ?? [];
                   const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
@@ -843,19 +783,19 @@ function Dashboard() {
                   const appTaskCount = taskLimits[a.duration ?? 1] ?? 5;
                   return (
                     <button key={a.id} onClick={() => setDetailView({ type: "app", id: a.id })}
-                      className="w-full text-left rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl transition-all hover:shadow-md hover:-translate-y-0.5 dark:bg-[#1E293B]/70 group">
+                      className="w-full text-left rounded-2xl border border-border/40 bg-white/60 p-4 backdrop-blur-xl transition-all hover:shadow-md hover:bg-white/80 dark:bg-slate-900/60 dark:hover:bg-slate-900/80 group">
                       <div className="flex items-center gap-4">
                         <div className={`grid size-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br ${d?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-sm`}>
                           <span className="text-lg font-bold">{d?.icon ?? "?"}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold">{d?.name ?? a.domain}</p>
-                            <Badge className={`text-[10px] px-2 py-0.5 rounded-md ${
+                            <p className="font-bold text-sm text-foreground">{d?.name ?? a.domain}</p>
+                            <Badge className={`text-[10px] px-2 py-0.5 rounded-md border-0 ${
                               a.status === "completed" ? "bg-emerald-600 text-white" :
                               a.status === "ongoing" ? "bg-blue-600 text-white" :
                               a.status === "approved" ? "bg-amber-500 text-white" :
-                              "bg-gray-500 text-white"
+                              "bg-gray-550 text-white"
                             }`}>
                               {a.status === "completed" ? "Completed" :
                                a.status === "ongoing" ? "Ongoing" :
@@ -863,479 +803,68 @@ function Dashboard() {
                                a.status === "pending" ? "Pending" : a.status}
                             </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{a.intern_id} · {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">{a.intern_id} · Applied {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })}</p>
                         </div>
-                        <div className="hidden sm:flex items-center gap-4 text-xs text-center">
-                          <div><p className="text-muted-foreground">Tasks</p><p className="font-semibold">{aApproved}/{appTaskCount}</p></div>
-                          <div><p className="text-muted-foreground">Cert</p><p className={`font-semibold ${aCert ? "text-emerald-600" : "text-muted-foreground"}`}>{aCert ? "✓" : "—"}</p></div>
+                        <div className="hidden sm:flex items-center gap-5 text-xs text-right shrink-0">
+                          <div><p className="text-muted-foreground text-[10px]">Tasks</p><p className="font-semibold text-foreground mt-0.5">{aApproved}/{appTaskCount}</p></div>
+                          <div><p className="text-muted-foreground text-[10px]">Award</p><p className={`font-semibold mt-0.5 ${aCert ? "text-emerald-500 font-bold" : "text-muted-foreground"}`}>{aCert ? "Issued" : "—"}</p></div>
                         </div>
-                        <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-0.5 transition" />
+                        <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-1 transition shrink-0" />
                       </div>
                     </button>
                   );
                 })}
               </div>
-            )}
-          </AnimatedSection>
-
-          {/* Courses List */}
-          <AnimatedSection delay={100}>
-            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2"><BookOpen className="size-5 text-primary" /> Courses</h2>
-            {(!enrollments || enrollments.length === 0) ? (
-              <div className="rounded-2xl border border-dashed border-border/50 bg-white/70 p-8 text-center backdrop-blur-xl dark:bg-[#1E293B]/70">
-                <p className="text-muted-foreground text-sm">No course enrollments yet. Browse courses to start learning.</p>
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {enrollments.map((e: any) => {
-                  const c = courses?.find((co: any) => co.id === e.course_id);
-                  const cCert = lmsCerts?.find((lc: any) => lc.enrollment_id === e.id) ?? null;
-                  return (
-                    <button key={e.id} onClick={() => setDetailView({ type: "enrollment", id: e.id })}
-                      className="w-full text-left rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl transition-all hover:shadow-md hover:-translate-y-0.5 dark:bg-[#1E293B]/70 group">
-                      <div className="flex items-center gap-4">
-                        <div className="grid size-12 shrink-0 place-items-center rounded-xl brand-gradient text-white shadow-sm"><GraduationCap className="size-6" /></div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="font-semibold">{c?.name ?? "Course"}</p>
-                            {cCert ? (
-                              <Badge className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-md"><Award className="mr-0.5 size-2.5" /> Certified</Badge>
-                            ) : e.status === "completed" ? (
-                              <Badge variant="secondary" className="text-[10px] px-2 py-0.5 rounded-md">Completed</Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-[10px] px-2 py-0.5 rounded-md">{e.progress_percent ?? 0}%</Badge>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5">{c?.domain ?? ""} · {c?.total_topics ?? 0} topics</p>
-                        </div>
-                        <ChevronRight className="size-4 text-muted-foreground group-hover:translate-x-0.5 transition" />
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </AnimatedSection>
-
-          <AnimatedSection>
-            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2"><Code2 className="size-5 text-primary" /> My Projects</h2>
-            <ProjectCards userId={user?.id} />
-          </AnimatedSection>
-        </div>
-      );
-    }
-
-    if (active === "courses") {
-      return (
-        <div className="space-y-8">
-          <DashboardHero badge="My Courses" title="Topic-Based Courses" description="Learn at your own pace with curated topic-based courses and earn certificates." icon={BookOpen} />
-          <LmsCoursesSection
-            enrollments={enrollments ?? []} courses={courses ?? []} lmsCerts={lmsCerts ?? []}
-            completedTopics={completedTopics} topics={topics ?? []}
-            taskSubmissions={taskSubmissions ?? []} tasks={tasks ?? []}
-            quizAttempts={quizAttempts ?? []} course={course} enrollment={enrollment}
-          />
-          {enrollment && course && <CurrentTopicWidget topics={topics ?? []} completedTopics={completedTopics} enrollment={enrollment} course={course} />}
-          {enrollment && <TasksSectionWidget tasks={tasks ?? []} submissions={taskSubmissions ?? []} enrollmentId={enrollment.id} courseSlug={course?.slug ?? ""} onChange={() => qc.invalidateQueries({ queryKey: ["my-course-subs"] })} />}
-          {enrollment && <QuizSectionWidget course={course} lastAttempt={lastAttempt} enrollment={enrollment} completedTaskCount={completedTaskCount} totalTasks={totalTasks} />}
-        </div>
-      );
-    }
-
-    if (active === "tasks") {
-      const dd = getDomain(app.domain);
-      const approvedCount = internSubmissions?.filter((s: any) => s.status === "approved").length ?? 0;
-      const totalTasks = internTasks?.length ?? 0;
-      return (
-        <div className="space-y-6">
-          <DashboardHero badge="My Tasks" title="Internship Tasks" description="Complete your internship tasks and get feedback from your mentor." icon={ListChecks} />
-          {/* Internship Header */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
-            <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
-            <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
-              <div className={`grid size-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
-                <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="font-display text-2xl font-bold">{dd?.name ?? app.domain}</h2>
-                  <Badge className={`text-xs px-3 py-1 rounded-lg ${
-                    app.status === "completed" ? "bg-emerald-600 text-white" :
-                    app.status === "ongoing" ? "bg-blue-600 text-white" :
-                    app.status === "approved" ? "bg-amber-500 text-white" :
-                    "bg-gray-500 text-white"
-                  }`}>
-                    {app.status === "completed" ? "Completed" :
-                     app.status === "ongoing" ? "Ongoing" :
-                     app.status === "approved" ? "Approved" :
-                     app.status === "pending" ? "Pending" : app.status}
-                  </Badge>
-                </div>
-                <p className="text-sm text-muted-foreground mt-1">{app.intern_id} · {app.full_name} · {dd?.description ?? ""}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Info Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Started</p><p className="font-semibold mt-0.5">{new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
-            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Completed</p><p className="font-semibold mt-0.5">{app.completed_at ? new Date(app.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
-            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Tasks</p><p className="font-semibold mt-0.5">{approvedCount}/{totalTasks}</p></div>
-            <div className="rounded-xl border border-border/40 bg-secondary/30 p-3"><p className="text-muted-foreground">Certificate</p><p className="font-semibold mt-0.5">{certificate ? "Generated" : "—"}</p></div>
-          </div>
-
-          {/* Payment */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><CreditCard className="size-4 text-primary" /> Payment Details</h3>
-            {payment ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                <div><p className="text-muted-foreground text-xs">Status</p><Badge className={`mt-1 text-[10px] ${payment.status === "verified" ? "bg-emerald-600" : "bg-amber-500"} text-white`}>{payment.status === "verified" ? "Verified" : payment.status === "pending" ? "Pending" : payment.status}</Badge></div>
-                <div><p className="text-muted-foreground text-xs">UTR</p><p className="font-semibold mt-0.5 font-mono text-xs">{payment.utr_number ?? "—"}</p></div>
-                <div><p className="text-muted-foreground text-xs">Amount</p><p className="font-semibold mt-0.5">{payment.amount ? `₹${payment.amount}` : "—"}</p></div>
-                <div><p className="text-muted-foreground text-xs">Verified</p><p className="font-semibold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
-              </div>
-            ) : <p className="text-sm text-muted-foreground">No payment record.</p>}
-          </div>
-
-          {/* Offer Letter */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="grid size-10 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><FileText className="size-5" /></div>
-                <div><p className="font-semibold text-sm">Offer Letter</p><p className="text-xs text-muted-foreground">Issued {new Date(app.offer_issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
-              </div>
-              <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />, `OfferLetter_${app.intern_id}.pdf`)}><Download className="mr-1.5 size-3.5" /> Download</Button>
-            </div>
-          </div>
-
-          {/* ID Card */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Shield className="size-4 text-primary" /> Digital ID Card</h3>
-            <IDCard internId={app.intern_id} fullName={app.full_name} domain={dd?.name ?? app.domain} photoUrl={app.photo_url} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />
-            <div className="mt-3 flex gap-2">
-              <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs border-border/60" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />, `OfferLetter_${app.intern_id}.pdf`)}><FileText className="mr-1 size-3" /> Offer Letter</Button>
-              <Button size="sm" className="brand-gradient text-white border-0 rounded-lg h-8 text-xs" onClick={() => downloadPdf(<OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />, `IDCard_${app.intern_id}.pdf`)}><Download className="mr-1 size-3" /> Download ID</Button>
-            </div>
-          </div>
-
-          {/* Tasks */}
-          {totalTasks > 0 && (
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><ListChecks className="size-4 text-primary" /> Internship Tasks</h3>
-              <div className="flex items-center gap-3 mb-3">
-                <Progress value={totalTasks > 0 ? Math.round((approvedCount / totalTasks) * 100) : 0} className="h-2 flex-1" />
-                <span className="text-xs font-semibold whitespace-nowrap">{approvedCount}/{totalTasks} completed</span>
-              </div>
-            </div>
-          )}
-
-          {/* Task Cards */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <TasksSection
-              domainSlug={app.domain}
-              submissions={internSubmissions ?? []}
-              appId={app.id}
-              duration={app.duration}
-              onChange={() => { qc.invalidateQueries({ queryKey: ["all-submissions"] }); qc.invalidateQueries({ queryKey: ["my-applications"] }); }}
-            />
-          </div>
-
-          {/* Certificate */}
-          {certificate && (
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4 text-sm"><Award className="size-4 text-primary" /> Certificate</h3>
-              <div className="rounded-xl bg-gradient-to-br from-[#07284a]/10 to-blue-50 p-4 text-center dark:from-[#07284a]/40 dark:to-blue-950/30 border border-[#07284a]/20 dark:border-[#07284a]/50">
-                <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3"><Award className="size-7" /></div>
-                <p className="font-bold text-sm">{dd?.name ?? app.domain}</p>
-                <p className="text-[10px] text-muted-foreground font-mono mt-1">{certificate.certificate_id}</p>
-              </div>
-              <div className="mt-4 space-y-2">
-                <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9" onClick={() => downloadPdf(<CertificateDoc fullName={app.full_name} internId={app.intern_id} domain={dd?.name ?? app.domain} certId={certificate.certificate_id} issuedAt={certificate.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />, `Certificate_${certificate.certificate_id}.pdf`)}><Download className="mr-1.5 size-4" /> Download PDF</Button>
-                <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9"><Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link></Button>
-              </div>
-            </div>
+            </AnimatedSection>
           )}
         </div>
       );
     }
 
     if (active === "certificates") {
+      const isTasksDone = internTotal > 0 && internApproved >= internTotal;
+      if (!cert) {
+        return (
+          <div className="space-y-6">
+            <DashboardHero badge="Certificates" title="Your Certificates" description="Generate and view your verified internship certificates." icon={Award} />
+            <LockedCertificateCard 
+              app={app} 
+              internApproved={internApproved} 
+              internTotal={internTotal} 
+              payment={payment} 
+              couponResult={couponResult} 
+              validatingCoupon={validatingCoupon} 
+              couponCode={couponCode} 
+              setCouponCode={setCouponCode} 
+              handleApplyCoupon={handleApplyCoupon} 
+              handleRemoveCoupon={handleRemoveCoupon} 
+              utrNumber={utrNumber} 
+              setUtrNumber={setUtrNumber} 
+              paymentScreenshot={paymentScreenshot} 
+              setPaymentScreenshot={setPaymentScreenshot} 
+              submittingPayment={submittingPayment} 
+              handlePaymentSubmit={handlePaymentSubmit}
+              certStatus={certStatus}
+              doFreeCertificate={doFreeCertificate}
+            />
+          </div>
+        );
+      }
       return (
-        <div className="space-y-8">
-          <DashboardHero badge="Certificates" title="Your Certificates" description="View and download your verified internship and course certificates." icon={Award} />
-          {/* Internship completion header */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70">
-            <div className="absolute -right-16 -top-16 size-48 rounded-full bg-emerald-400/15 blur-[80px]" />
-            <div className="relative flex items-center gap-4">
-              <div className="grid size-14 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md">
-                <Award className="size-7" />
-              </div>
-              <div>
-                <h2 className="font-display text-xl font-bold">Internship Documents</h2>
-                <p className="text-sm text-muted-foreground">{domain?.name ?? app.domain} · {app.intern_id}</p>
-              </div>
-              <Badge className="ml-auto bg-emerald-600 text-white text-xs rounded-lg px-3 py-1.5">
-                <CheckCircle2 className="mr-1 size-3.5" /> Completed
-              </Badge>
-            </div>
-            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center text-xs">
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-                <p className="text-muted-foreground">Started</p>
-                <p className="font-semibold mt-0.5">{new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-                <p className="text-muted-foreground">Certificate</p>
-                <p className="font-semibold mt-0.5">{cert?.issued_at ? new Date(cert.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-                <p className="text-muted-foreground">Payment</p>
-                <p className="font-semibold mt-0.5 capitalize">{payment?.status ?? "—"}</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3">
-                <p className="text-muted-foreground">Domain</p>
-                <p className="font-semibold mt-0.5 capitalize">{domain?.name ?? app.domain}</p>
-              </div>
+        <div className="space-y-6">
+          <DashboardHero badge="Certificates" title="Your Certificates" description="View and download your verified internship certificates." icon={Award} />
+          <UnlockedCertificateCard app={app} cert={cert} domain={domain} />
+          
+          {/* Details Overview */}
+          <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+            <h3 className="flex items-center gap-2 font-bold text-sm"><ScrollText className="size-4 text-primary" /> Certificate Summary</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+              <div><p className="text-muted-foreground">Verification ID</p><p className="font-semibold mt-0.5 font-mono text-xs text-foreground">{cert.certificate_id}</p></div>
+              <div><p className="text-muted-foreground">Recipient Name</p><p className="font-semibold mt-0.5 text-foreground">{app.full_name}</p></div>
+              <div><p className="text-muted-foreground">Syllabus Domain</p><p className="font-semibold mt-0.5 text-foreground">{domain?.name ?? app.domain}</p></div>
+              <div><p className="text-muted-foreground">Verified Date</p><p className="font-semibold mt-0.5 text-foreground">{cert.issued_at ? new Date(cert.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
             </div>
           </div>
-
-          {/* Payment Details */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <h3 className="flex items-center gap-2 font-bold mb-4"><CreditCard className="size-4 text-primary" /> Payment Details</h3>
-            {payment ? (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground text-xs">Status</p>
-                  <Badge className={`mt-1 text-[10px] ${payment.status === "verified" ? "bg-emerald-600" : "bg-amber-500"} text-white`}>
-                    {payment.status === "verified" ? "Verified" : payment.status === "pending" ? "Pending" : payment.status}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">UTR Number</p>
-                  <p className="font-semibold mt-0.5 font-mono text-xs">{payment.utr_number ?? "—"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Amount</p>
-                  <p className="font-semibold mt-0.5">{payment.amount ? `₹${payment.amount}` : "—"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Verified On</p>
-                  <p className="font-semibold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p>
-                </div>
-              </div>
-            ) : internTotal > 0 && internApproved >= internTotal ? (
-              couponResult?.finalAmount === 0 ? (
-                <div className="space-y-4">
-                  {certStatus === "done" ? (
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/30">
-                      <CheckCircle2 className="size-5 text-green-600 shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-green-800 dark:text-green-300">Certificate Generated!</p>
-                        <p className="text-green-700 dark:text-green-400 mt-1">Your certificate has been issued. You can download it below.</p>
-                      </div>
-                    </div>
-                  ) : certStatus === "generating" ? (
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/30">
-                      <Loader2 className="size-5 text-blue-600 shrink-0 mt-0.5 animate-spin" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-blue-800 dark:text-blue-300">Generating Certificate...</p>
-                        <p className="text-blue-700 dark:text-blue-400 mt-1">Please wait while we generate your certificate.</p>
-                      </div>
-                    </div>
-                  ) : certStatus === "error" ? (
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200/50 dark:border-red-800/30">
-                      <AlertTriangle className="size-5 text-red-600 shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-red-800 dark:text-red-300">Generation Failed</p>
-                        <p className="text-red-700 dark:text-red-400 mt-1">Could not generate certificate. The SQL migration may not have been run in Supabase.</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-4 p-4 rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200/50 dark:border-green-800/30">
-                      <Award className="size-5 text-green-600 shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-green-800 dark:text-green-300">Free with Coupon!</p>
-                        <p className="text-green-700 dark:text-green-400 mt-1">
-                          Coupon <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300 mx-1">{couponResult.code}</Badge>
-                          applied — <span className="line-through">₹{PAYMENT.amount}</span> <span className="text-green-600 font-bold">₹0</span>. Generating certificate automatically...
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-              <div className="space-y-4">
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30">
-                  <Wallet className="size-5 text-amber-600 shrink-0 mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-semibold text-amber-800 dark:text-amber-300">Complete Payment to Get Certificate</p>
-                    <p className="text-amber-700 dark:text-amber-400 mt-1">Pay {couponResult ? <><span className="line-through">₹{PAYMENT.amount}</span> <span className="text-green-600 font-bold">₹{couponResult.finalAmount}</span></> : <>₹{PAYMENT.amount}</>} via UPI and submit the details below.</p>
-                  </div>
-                </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-border/40 bg-secondary/30 p-4 flex flex-col items-center gap-3">
-                    <p className="text-xs font-semibold text-muted-foreground">Scan to Pay</p>
-                    <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${couponResult?.finalAmount ?? PAYMENT.amount}&cu=${PAYMENT.currency}`} size={140} />
-                    <div className="text-center">
-                      <p className="text-xs font-mono font-bold">{PAYMENT.upiId}</p>
-                      <p className="text-[10px] text-muted-foreground">{PAYMENT.payeeName}</p>
-                    </div>
-                    <Button size="sm" variant="outline" className="rounded-lg h-7 text-[10px] gap-1"
-                      onClick={() => {
-                        navigator.clipboard.writeText(PAYMENT.upiId);
-                        toast.success("UPI ID copied");
-                      }}>
-                      <Copy className="size-3" /> Copy UPI ID
-                    </Button>
-                  </div>
-                  {/* Coupon Code */}
-                  <div className="rounded-xl border border-border/40 bg-secondary/30 p-3 space-y-2">
-                    <p className="text-xs font-semibold text-muted-foreground">Have a coupon code?</p>
-                    {couponResult ? (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle2 className="size-4 text-green-500" />
-                          <span className="text-xs font-semibold text-green-600 dark:text-green-400">{couponResult.code}</span>
-                          <Badge className="text-[10px] bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300">
-                            {couponResult.discountType === "percentage" ? `${couponResult.discountValue}% OFF` : `₹${couponResult.discountValue} OFF`}
-                          </Badge>
-                        </div>
-                        <Button size="sm" variant="ghost" className="h-6 px-2 text-[10px] text-muted-foreground" onClick={handleRemoveCoupon}>Remove</Button>
-                      </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Input
-                          placeholder="Enter code" className="h-8 text-xs flex-1"
-                          value={couponCode} onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                          onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); handleApplyCoupon(); } }}
-                        />
-                        <Button size="sm" variant="outline" className="h-8 text-xs rounded-lg gap-1" onClick={handleApplyCoupon} disabled={!couponCode.trim() || validatingCoupon}>
-                          {validatingCoupon ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-                          Apply
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-xs">UTR Number</Label>
-                      <Input placeholder="e.g. HDFC123456789" className="mt-1 h-9 text-xs"
-                        value={utrNumber} onChange={e => setUtrNumber(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Payment Screenshot (optional)</Label>
-                      <Input type="file" accept="image/*" className="mt-1 h-9 text-xs file:text-xs"
-                        onChange={e => setPaymentScreenshot(e.target.files?.[0] ?? null)} />
-                    </div>
-                    <Button className="w-full brand-gradient text-white border-0 rounded-xl h-9 text-xs gap-1.5"
-                      disabled={!utrNumber.trim() || submittingPayment}
-                      onClick={handlePaymentSubmit}>
-                      {submittingPayment ? <Loader2 className="size-3.5 animate-spin" /> : <CreditCard className="size-3.5" />}
-                      {submittingPayment ? "Submitting..." : `Pay ₹${couponResult?.finalAmount ?? PAYMENT.amount}`}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              )
-            ) : (
-              <p className="text-sm text-muted-foreground">Complete all tasks to proceed with payment.</p>
-            )}
-          </div>
-
-          {/* Offer Letter */}
-          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="grid size-10 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                  <FileText className="size-5" />
-                </div>
-                <div>
-                  <p className="font-semibold text-sm">Offer Letter</p>
-                  <p className="text-xs text-muted-foreground">Issued {new Date(app.offer_issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                </div>
-              </div>
-              <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-9"
-                onClick={() => downloadPdf(
-                  <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
-                  `OfferLetter_${app.intern_id}.pdf`
-                )}>
-                <Download className="mr-1.5 size-3.5" /> Download
-              </Button>
-            </div>
-          </div>
-
-          {/* ID Card */}
-          <IDCardSection app={app} />
-
-          {/* Certificates */}
-          {(cert || (lmsCerts && lmsCerts.length > 0)) && (
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4"><Award className="size-4 text-primary" /> Certificates</h3>
-
-              {/* Internship Certificate */}
-              {cert && <CertificateSection compact cert={cert} app={app} course={course} enrollment={enrollment} lastAttempt={lastAttempt} />}
-
-              {/* Course Certificates */}
-              {lmsCerts && lmsCerts.length > 0 && enrollments && (
-                <>
-                  {cert && <div className="border-t border-border/40 my-4" />}
-                  <h4 className="text-sm font-semibold mb-3">Course Certificates</h4>
-                  <div className="grid gap-3">
-                    {lmsCerts.map((lc: any) => {
-                      const ec = enrollments.find((e: any) => e.id === lc.enrollment_id);
-                      const c = courses?.find((co: any) => co.id === ec?.course_id);
-                      return (
-                        <div key={lc.enrollment_id} className="flex items-center justify-between rounded-xl border border-border/40 bg-secondary/30 p-3">
-                          <div className="flex items-center gap-3">
-                            <div className="grid size-8 place-items-center rounded-lg bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80">
-                              <BookOpen className="size-4" />
-                            </div>
-                            <div>
-                              <p className="text-xs font-semibold">{c?.name ?? "Course"}</p>
-                              <p className="text-[10px] text-muted-foreground font-mono">{lc.certificate_id} · {new Date(lc.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="outline" className="rounded-lg h-7 text-[10px] border-border/60"
-                            onClick={() => downloadPdf(
-                              <CourseCertificateDoc fullName={app.full_name} courseName={c?.name ?? "Course"}
-                                score={lc.score ?? 0} total={100}
-                                certId={lc.certificate_id} issuedAt={lc.issued_at}
-                                verifyUrl={`${window.location.origin}/verify-certificate`} />,
-                              `Certificate_${lc.certificate_id}.pdf`
-                            )}>
-                            <Download className="mr-1 size-3" /> PDF
-                          </Button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-
-          {(certificate || payment) && (
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-              <h3 className="flex items-center gap-2 font-bold mb-4"><ScrollText className="size-4 text-primary" /> Completion Summary</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground text-xs">Intern ID</p>
-                  <p className="font-semibold mt-0.5 font-mono text-xs">{app.intern_id}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Full Name</p>
-                  <p className="font-semibold mt-0.5">{app.full_name}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Domain</p>
-                  <p className="font-semibold mt-0.5">{domain?.name ?? app.domain}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs">Duration</p>
-                  <p className="font-semibold mt-0.5">{app.duration ? `${app.duration} Month${app.duration > 1 ? "s" : ""}` : "—"}</p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       );
     }
@@ -1344,65 +873,169 @@ function Dashboard() {
       return (
         <div className="space-y-6">
           <DashboardHero badge="Profile" title="Your Profile" description="Manage your personal details, photo, and internship information." icon={User} />
-          {/* Profile Header Card */}
+          
           <ProfilePanel app={app} onChange={() => qc.invalidateQueries({ queryKey: ["my-applications", user?.id] })} />
 
-          {/* Detail Grid */}
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Personal Info */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70 overflow-hidden">
-              <h3 className="flex items-center gap-2 text-sm font-bold mb-4"><User className="size-4 text-primary" /> Personal Details</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-              <span className="text-muted-foreground shrink-0">College</span>
-              <span className="font-medium text-right min-w-0 truncate">{app.college || "—"}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Course</span>
-                  <span className="font-medium text-right min-w-0 truncate">{app.course || "—"}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Year</span>
-                  <span className="font-medium text-right min-w-0 truncate">{app.year || "—"}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Phone</span>
-                  <span className="font-medium text-right min-w-0 truncate">{app.phone || "—"}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Internship Info */}
-            <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70 overflow-hidden">
-              <h3 className="flex items-center gap-2 text-sm font-bold mb-4"><Briefcase className="size-4 text-primary" /> Internship Details</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Domain</span>
-                  <span className="font-medium text-right min-w-0 truncate">{domain?.name ?? app.domain}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Intern ID</span>
-                  <span className="font-medium font-mono text-xs text-right min-w-0 truncate">{app.intern_id}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0 gap-2">
-                  <span className="text-muted-foreground shrink-0">Duration</span>
-                  <span className="font-medium text-right min-w-0 truncate">{app.duration ?? 1} month{app.duration !== 1 ? "s" : ""}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
-                  <span className="text-muted-foreground">Status</span>
-                  <Badge className={`text-[10px] px-2 py-0.5 rounded-md ${
-                    app.status === "completed" ? "bg-emerald-600 text-white" :
-                    app.status === "ongoing" ? "bg-blue-600 text-white" :
-                    app.status === "approved" ? "bg-amber-500 text-white" :
-                    "bg-gray-500 text-white"
-                  }`}>{app.status}</Badge>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ID Card & Documents */}
           <IDCardSection app={app} />
+        </div>
+      );
+    }
+
+    if (active === "internships") {
+      return (
+        <div className="space-y-6">
+          <DashboardHero badge="My Internships" title="My Internships" description="View all your enrolled internship domains and their progress." icon={Briefcase} />
+          <div className="space-y-4">
+            {appsList?.length ? (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center px-1">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Enrolled Streams</h4>
+                  <Button size="sm" variant="outline" className="rounded-xl border-border/50 text-[11px] font-semibold gap-1.5 h-8 bg-white shadow-sm hover:-translate-y-0.5 transition-transform"
+                    onClick={() => navigate({ to: "/domains" })}>
+                    <Sparkles className="size-3 text-amber-500" /> Apply for Another Domain
+                  </Button>
+                </div>
+                {appsList.map((a) => {
+                  const d = getDomain(a.domain);
+                  const aSubs = allAppSubmissions?.filter((s: any) => s.application_id === a.id) ?? [];
+                  const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
+                  const aTotal = taskLimits[a.duration ?? 1] ?? 5;
+                  const pct = aTotal > 0 ? Math.round((aApproved / aTotal) * 100) : 0;
+                  const aCert = allAppCerts?.find((c: any) => c.application_id === a.id);
+                  return (
+                    <div key={a.id} className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+                      <div className="flex items-start gap-4">
+                        <div className={`grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${d?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md text-2xl`}>
+                          {d?.icon ?? "🎓"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="font-bold text-base text-foreground">{d?.name ?? a.domain}</h3>
+                            <Badge className={`text-[10px] px-2 py-0.5 rounded-lg border-0 ${a.status === "completed" ? "bg-emerald-500 text-white" : a.status === "ongoing" ? "bg-blue-600 text-white" : "bg-amber-500 text-white"}`}>{a.status}</Badge>
+                            {aCert && <Badge className="text-[10px] px-2 py-0.5 rounded-lg border-0 bg-emerald-600 text-white">Certified</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">ID: <span className="font-mono font-bold">{a.intern_id}</span> · {a.duration ?? 1} month{(a.duration ?? 1) > 1 ? "s" : ""} · Applied {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
+                              <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-700" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-xs font-bold text-foreground shrink-0">{aApproved}/{aTotal} tasks</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-12 text-center backdrop-blur-xl dark:bg-slate-900/40">
+                <Briefcase className="size-12 mx-auto mb-4 text-muted-foreground/50" />
+                <h3 className="text-base font-bold">No Internships Yet</h3>
+                <p className="text-sm text-muted-foreground mt-1">Apply for an internship to get started.</p>
+                <Button size="sm" className="mt-5 brand-gradient text-white border-0 rounded-2xl px-5 h-10 font-medium" onClick={() => navigate({ to: "/domains" })}>Apply Now</Button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (active === "payment") {
+      return (
+        <div className="space-y-6">
+          <DashboardHero badge="Payment" title="Payment" description="View your payment status and submit payment proof for your certificate." icon={CreditCard} />
+          {payment ? (
+            <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="grid size-12 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+                  <CheckCircle2 className="size-6" />
+                </div>
+                <div>
+                  <p className="font-bold text-base">Payment Verified</p>
+                  <p className="text-xs text-muted-foreground">Your payment has been received and verified.</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs pt-2 border-t border-border/40">
+                <div><p className="text-muted-foreground">Status</p><p className="font-bold text-emerald-600 mt-0.5 capitalize">{payment.status}</p></div>
+                <div><p className="text-muted-foreground">UTR / Reference</p><p className="font-bold font-mono mt-0.5">{payment.utr_number || "—"}</p></div>
+                <div><p className="text-muted-foreground">Paid On</p><p className="font-bold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {internTotal > 0 && internApproved >= internTotal ? (
+                <LockedCertificateCard
+                  app={app}
+                  internApproved={internApproved}
+                  internTotal={internTotal}
+                  payment={payment}
+                  utrNumber={utrNumber}
+                  setUtrNumber={setUtrNumber}
+                  paymentScreenshot={paymentScreenshot}
+                  setPaymentScreenshot={setPaymentScreenshot}
+                  submittingPayment={submittingPayment}
+                  handlePaymentSubmit={handlePaymentSubmit}
+                />
+              ) : (
+                <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-12 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
+                      <CreditCard className="size-6" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-base">Payment Pending</p>
+                      <p className="text-xs text-muted-foreground">Practical tasks are ongoing. You can submit your payment once all tasks are completed.</p>
+                    </div>
+                  </div>
+                  <div className="rounded-2xl bg-gradient-to-br from-[#051c36] to-[#072d54] p-5 text-white space-y-2 shadow-lg">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-blue-200">Pay via GPay / PhonePe / UPI</p>
+                    <p className="text-2xl font-mono font-extrabold tracking-tight">{PAYMENT.upiId}</p>
+                    <p className="text-sm text-blue-100">Payee: <span className="font-bold text-white">{PAYMENT.payeeName}</span></p>
+                    <p className="text-sm text-blue-100">Certification Fee: <span className="font-bold text-white">₹{PAYMENT.amount}</span></p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+
+
+    if (active === "help") {
+      const faqs = [
+        { q: "How do I submit a task?", a: "Click 'Submit Task' on any task card in the My Tasks section. Fill in the form with your GitHub link, PDF, or screenshot and click Submit for Review." },
+        { q: "How long does task review take?", a: "Task reviews are typically completed within 2–5 business days. You'll receive feedback in your task card." },
+        { q: "How do I get my certificate?", a: "Complete all assigned tasks and get them approved. Then go to the Certificates section to generate and download your certificate." },
+        { q: "Can I apply for multiple domains?", a: "Yes! You can apply for multiple internship domains. Each domain is tracked separately with its own tasks and certificate." },
+        { q: "How do I request a physical certificate?", a: "Go to Physical Certificate in the sidebar, fill in your delivery address, and submit. A nominal shipping fee applies." },
+        { q: "Who do I contact for support?", a: "Reach out to us at support@skyrovix.com or use the chat button below for instant help." },
+      ];
+      return (
+        <div className="space-y-6">
+          <DashboardHero badge="Help Center" title="Help & Support" description="Find answers to common questions or reach out to our support team." icon={HelpCircle} />
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <details key={i} className="group rounded-2xl border border-border/40 bg-white/60 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 overflow-hidden">
+                <summary className="flex cursor-pointer items-center justify-between gap-4 px-5 py-4 font-semibold text-sm text-foreground list-none">
+                  {faq.q}
+                  <ChevronRight className="size-4 text-muted-foreground shrink-0 transition-transform duration-200 group-open:rotate-90" />
+                </summary>
+                <div className="border-t border-border/40 px-5 py-4 text-sm text-muted-foreground leading-relaxed">{faq.a}</div>
+              </details>
+            ))}
+          </div>
+          <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 text-center space-y-3">
+            <div className="grid size-14 place-items-center rounded-2xl bg-gradient-to-br from-[#07284a] to-blue-600 text-white mx-auto shadow-lg">
+              <Mail className="size-6" />
+            </div>
+            <h3 className="font-bold text-base">Still need help?</h3>
+            <p className="text-sm text-muted-foreground">Our support team is available Mon–Sat, 9am–6pm IST.</p>
+            <Button asChild className="brand-gradient text-white border-0 rounded-2xl px-6 h-10 font-semibold shadow-md">
+              <a href="mailto:support@skyrovix.com">Email Support</a>
+            </Button>
+          </div>
         </div>
       );
     }
@@ -1410,44 +1043,181 @@ function Dashboard() {
     return null;
   };
 
+  const navItems = [
+    { id: "overview",   label: "Overview",              icon: LayoutDashboard },
+    { id: "tasks",      label: "My Tasks",               icon: ListChecks },
+    { id: "internships",label: "My Internships",         icon: Briefcase },
+    { id: "payment",    label: "Payment",                icon: CreditCard },
+    { id: "certificates",label: "Certificates",          icon: Award },
+    { id: "profile",    label: "Profile",                icon: User },
+  ];
+
+  const sidebarNav = (
+    <div className="w-full lg:w-64 shrink-0 space-y-6">
+      {/* Mini Profile Info panel */}
+      <div className="rounded-3xl border border-border/40 bg-white/60 p-5 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 relative overflow-hidden">
+        <div className="absolute -right-8 -top-8 size-24 rounded-full bg-[#07284a]/10 blur-xl pointer-events-none" />
+        <div className="flex items-center gap-3">
+          {app?.photo_url ? (
+            <img src={app.photo_url} alt="" className="size-12 rounded-2xl object-cover border-2 border-[#07284a]/15 shadow-sm" />
+          ) : (
+            <div className="grid size-12 place-items-center rounded-2xl brand-gradient text-lg font-bold text-white shadow-md shadow-[#07284a]/10 shrink-0">
+              {app?.full_name?.charAt(0).toUpperCase() ?? "S"}
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="font-bold text-sm text-foreground truncate">{app?.full_name ?? "Student"}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{domain?.name ?? app?.domain ?? "Intern"}</p>
+          </div>
+        </div>
+        {app?.intern_id && (
+          <div className="mt-4 rounded-2xl bg-secondary/50 dark:bg-slate-800/40 p-2.5 text-center">
+            <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider block">Student ID</span>
+            <span className="font-mono text-xs font-bold text-foreground mt-0.5 block">{app.intern_id}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs Menu */}
+      <div className="rounded-3xl border border-border/40 bg-white/60 p-2.5 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-1">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = active === item.id;
+          return (
+            <button
+              key={item.id}
+              onClick={() => navigate({ search: { tab: item.id } })}
+              className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+                isActive
+                  ? "brand-gradient text-white shadow-md shadow-[#07284a]/15"
+                  : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground dark:hover:bg-slate-800/30"
+              }`}
+            >
+              <Icon className="size-4 shrink-0" />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Bottom Actions */}
+      <div className="rounded-3xl border border-border/40 bg-white/60 p-2.5 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-1">
+        {/* Share with Friends */}
+        <button
+          onClick={() => {
+            const url = window.location.origin;
+            if (navigator.share) {
+              navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
+            } else {
+              navigator.clipboard.writeText(url);
+              toast.success("Link copied to clipboard!");
+            }
+          }}
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-muted-foreground hover:bg-secondary/40 hover:text-foreground dark:hover:bg-slate-800/30 transition-all duration-200"
+        >
+          <Share2 className="size-4 shrink-0 text-violet-500" />
+          <span>Share with Friends</span>
+        </button>
+
+        {/* Help */}
+        <button
+          onClick={() => navigate({ search: { tab: "help" } })}
+          className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
+            active === "help"
+              ? "brand-gradient text-white shadow-md shadow-[#07284a]/15"
+              : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground dark:hover:bg-slate-800/30"
+          }`}
+        >
+          <HelpCircle className="size-4 shrink-0 text-blue-500" />
+          <span>Help</span>
+        </button>
+
+        {/* Logout */}
+        <button
+          onClick={signOut}
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-200"
+        >
+          <LogOut className="size-4 shrink-0" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const mobileNav = (
+    <div className="flex gap-1.5 overflow-x-auto pb-1.5 -mx-4 px-4 lg:hidden scrollbar-none">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = active === item.id;
+        return (
+          <button
+            key={item.id}
+            onClick={() => navigate({ search: { tab: item.id } })}
+            className={`flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold whitespace-nowrap transition-all ${
+              isActive
+                ? "brand-gradient text-white shadow-md"
+                : "border border-border/40 bg-white/60 dark:bg-slate-900/60 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Icon className="size-3.5 shrink-0" />
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="min-h-screen overflow-x-hidden">
+      <style>{`
+        @keyframes drift-sphere-1 {
+          0% { transform: translate(0px, 0px) scale(1); }
+          50% { transform: translate(40px, -60px) scale(1.15); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        @keyframes drift-sphere-2 {
+          0% { transform: translate(0px, 0px) scale(1.1); }
+          50% { transform: translate(-50px, 50px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1.1); }
+        }
+        @keyframes premium-glow {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+        .animate-drift-1 {
+          animation: drift-sphere-1 20s infinite alternate ease-in-out;
+        }
+        .animate-drift-2 {
+          animation: drift-sphere-2 16s infinite alternate ease-in-out;
+        }
+        .animate-premium-glow {
+          background-size: 200% 200%;
+          animation: premium-glow 8s ease infinite;
+        }
+      `}</style>
       <div className="flex min-h-screen overflow-x-hidden bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0B1120] dark:to-[#0F172A]">
         {/* Background blobs */}
         <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-[#07284a]/15 blur-[120px] dark:bg-[#07284a]/20" />
-          <div className="absolute top-1/3 -right-32 size-80 rounded-full bg-blue-400/15 blur-[100px] dark:bg-blue-600/10" />
-          <div className="absolute -bottom-48 left-1/3 size-[500px] rounded-full bg-violet-400/10 blur-[140px] dark:bg-violet-600/5" />
-          <div className="absolute top-2/3 left-1/4 size-64 rounded-full bg-emerald-400/5 blur-[80px] dark:bg-emerald-600/5" />
+          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-[#07284a]/15 blur-[120px] dark:bg-[#07284a]/20 animate-drift-1" />
+          <div className="absolute top-1/3 -right-32 size-80 rounded-full bg-blue-400/15 blur-[100px] dark:bg-blue-600/10 animate-drift-2" />
+          <div className="absolute -bottom-48 left-1/3 size-[500px] rounded-full bg-violet-400/10 blur-[140px] dark:bg-violet-600/5 animate-drift-1" />
+          <div className="absolute top-2/3 left-1/4 size-64 rounded-full bg-emerald-400/5 blur-[80px] dark:bg-emerald-600/5 animate-drift-2" />
         </div>
 
         <Confetti active={!!cert} />
 
         {/* ─── Main Area ─── */}
         <div className="flex-1 min-w-0">
-          {/* Content */}
-          <main className="mx-auto max-w-6xl px-4 py-8 space-y-8 min-w-0">
-            {renderContent()}
+          <main className="mx-auto max-w-7xl px-4 py-8 min-w-0">
+            {(!appsList?.length || !app) ? (
+              renderContent()
+            ) : (
+              <div className="w-full space-y-6">
+                {renderContent()}
+              </div>
+            )}
           </main>
         </div>
-
-        {/* Quick Actions FAB */}
-        {app && (
-          <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-40 flex flex-col items-end gap-3">
-            {enrollment && course && (
-              <>
-                <Button size="sm" className="brand-gradient text-white border-0 shadow-lg shadow-[#07284a]/25 rounded-full px-5 h-11" asChild>
-                  <Link to="/courses/$slug" params={{ slug: course.slug }}><Play className="mr-1.5 size-4" /> Continue Course</Link>
-                </Button>
-                {cert && (
-                  <Button size="sm" variant="outline" className="rounded-full px-5 h-11 border-border/60 bg-white/80 backdrop-blur dark:bg-[#1E293B]/80">
-                    <Download className="mr-1.5 size-4" /> Download Certificate
-                  </Button>
-                )}
-              </>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -1455,14 +1225,14 @@ function Dashboard() {
 
 function LoadingSkeleton() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF]">
+    <div className="min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0B1120] dark:to-[#0F172A]">
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="space-y-6">
-          <div className="h-40 animate-pulse rounded-3xl bg-white/60 dark:bg-[#1E293B]/60" />
+          <div className="h-40 animate-pulse rounded-3xl bg-white/60 dark:bg-slate-900/60" />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white/60 dark:bg-[#1E293B]/60" />)}
+            {[1, 2, 3, 4].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white/60 dark:bg-slate-900/60" />)}
           </div>
-          <div className="h-64 animate-pulse rounded-2xl bg-white/60 dark:bg-[#1E293B]/60" />
+          <div className="h-64 animate-pulse rounded-2xl bg-white/60 dark:bg-slate-900/60" />
         </div>
       </main>
     </div>
@@ -1489,62 +1259,113 @@ function AnimatedCounter({ value, suffix = "" }: { value: number; suffix?: strin
 
 // ─── HERO ───
 
-function HeroSection({ app, enrollment, course, completedTopicCount, totalTopics, completedTaskCount, totalTasks, lastAttempt, cert }: any) {
+function HeroSection({ app, internApproved, durationLimit, cert }: { app: any; internApproved: number; durationLimit: number; cert?: any }) {
   const domain = getDomain(app.domain);
-  const pct = enrollment?.progress_percent ?? 0;
-  const circ = 2 * Math.PI * 54;
-  const offset = circ - (circ * pct) / 100;
+  const pct = durationLimit > 0 ? Math.min(100, Math.round((internApproved / durationLimit) * 100)) : 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-8 dark:bg-[#1E293B]/70 dark:border-white/5">
-      <div className="absolute -right-20 -top-20 size-64 rounded-full bg-[#07284a]/10 blur-[100px]" />
-      <div className="relative flex flex-wrap items-start justify-between gap-8">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="grid size-10 place-items-center rounded-full brand-gradient text-sm font-bold text-white shadow-md">
-              {app.full_name?.charAt(0).toUpperCase() ?? "S"}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold sm:text-3xl">
-                Welcome Back, <span className="brand-text">{app.full_name?.split(" ")[0] ?? "Student"}</span>
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Continue your <span className="font-semibold text-foreground">{course?.name ?? domain?.name}</span> and complete your tasks to unlock certificates.
-              </p>
-            </div>
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#051c36] via-[#072d54] to-[#093e73] text-white p-6 sm:p-8 md:p-10 shadow-2xl shadow-[#051c36]/30 border border-white/10 animate-premium-glow hover:shadow-blue-500/10 transition-all duration-500 hover:scale-[1.005]">
+      {/* Decorative premium elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.06),transparent_65%)] pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 size-72 rounded-full bg-blue-500/15 blur-[90px] pointer-events-none" />
+      <div className="absolute -top-24 right-1/4 size-64 rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
+      
+      {/* Grid Pattern overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)] pointer-events-none" />
+
+      <div className="relative flex flex-col md:flex-row items-center justify-between gap-8 z-10">
+        <div className="space-y-4 text-center md:text-left min-w-0 flex-1">
+          {/* Welcome Pill */}
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-1.5 text-[10px] font-extrabold uppercase tracking-widest text-blue-200 border border-white/10 backdrop-blur-md shadow-sm">
+            <Sparkles className="size-3 text-amber-300 animate-pulse" /> Welcome Intern
           </div>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            <Badge variant="secondary" className="gap-1.5 px-3 py-1.5 text-xs">
-              <Target className="size-3.5" /> {domain?.name ?? app.domain}
+
+          {/* Name */}
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black font-display leading-tight tracking-tight drop-shadow-sm bg-gradient-to-b from-white to-slate-200 bg-clip-text text-transparent">
+            {app.full_name}
+          </h1>
+
+          {/* Details Row */}
+          <div className="flex flex-wrap justify-center md:justify-start items-center gap-2.5">
+            <Badge className="bg-white/10 hover:bg-white/15 text-white border border-white/10 text-xs font-semibold rounded-xl px-3 py-1 backdrop-blur-sm shadow-sm transition-all duration-300">
+              {domain?.name ?? app.domain}
             </Badge>
-            <Badge variant="outline" className="gap-1.5 px-3 py-1.5 text-xs">
-              <Hash className="size-3.5" /> {app.intern_id}
+            <Badge className="bg-white/5 hover:bg-white/10 text-blue-100 border border-white/5 text-xs font-mono rounded-xl px-3 py-1 backdrop-blur-sm shadow-sm transition-all duration-300">
+              ID: {app.intern_id}
             </Badge>
-            {enrollment && (
-              <Badge className="gap-1.5 px-3 py-1.5 text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">
-                <CheckCircle2 className="size-3.5" /> Course Active
-              </Badge>
+          </div>
+
+          {/* New Premium Meta Details Block */}
+          <div className="flex flex-wrap justify-center md:justify-start items-center gap-x-4 gap-y-2 text-xs text-blue-200/90 font-medium pt-1">
+            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 backdrop-blur-md shadow-sm">
+              <Calendar className="size-3.5 text-blue-300" />
+              <span>Enrolled: {new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span>
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 backdrop-blur-md shadow-sm">
+              <Clock className="size-3.5 text-blue-300" />
+              <span>Duration: {app.duration ?? 1} Month{(app.duration ?? 1) > 1 ? "s" : ""}</span>
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 backdrop-blur-md shadow-sm">
+              <ListChecks className="size-3.5 text-blue-300" />
+              <span>Tasks: {internApproved} / {durationLimit} Approved</span>
+            </span>
+          </div>
+
+          {/* Quick Actions (Offer Letter, ID, WhatsApp, Certificate) */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-2.5 pt-4">
+            <Button size="sm" variant="ghost" className="rounded-2xl h-10 text-xs font-bold bg-white/10 hover:!bg-white/20 border border-white/10 hover:border-white/20 text-white hover:!text-white gap-2 transition-all hover:scale-105 active:scale-95 shadow-black/10 hover:shadow-lg hover:-translate-y-0.5"
+              onClick={() => downloadPdf(
+                <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
+                `OfferLetter_${app.intern_id}.pdf`
+              )}>
+              <FileText className="size-4 text-blue-300" /> Download Offer Letter
+            </Button>
+
+            <Button size="sm" variant="ghost" className="rounded-2xl h-10 text-xs font-bold bg-white/10 hover:!bg-white/20 border border-white/10 hover:border-white/20 text-white hover:!text-white gap-2 transition-all hover:scale-105 active:scale-95 shadow-black/10 hover:shadow-lg hover:-translate-y-0.5"
+              onClick={() => downloadPdf(
+                <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
+                `IDCard_${app.intern_id}.pdf`
+              )}>
+                <Download className="size-4 text-emerald-300" /> Download ID Card
+            </Button>
+
+            <Button size="sm" className="rounded-2xl h-10 text-xs font-bold bg-[#25D366] hover:!bg-[#20ba59] text-white hover:!text-white border-0 gap-2 shadow-lg shadow-[#25D366]/20 transition-all hover:scale-105 active:scale-95 hover:shadow-[#25D366]/35 hover:-translate-y-0.5"
+              onClick={() => window.open("https://whatsapp.com/channel/0029VbD67bgEFeXexEbYGI1f", "_blank")}>
+              <svg className="size-4 fill-current" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.46h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              <span>Join WhatsApp Group</span>
+            </Button>
+
+            {cert && (
+              <Button size="sm" className="rounded-2xl h-10 text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white hover:!text-white border-0 gap-2 shadow-lg shadow-emerald-950/20 transition-all hover:scale-105 active:scale-95 hover:shadow-emerald-500/30 hover:-translate-y-0.5"
+                onClick={() => downloadPdf(
+                  <CertificateDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} certId={cert.certificate_id} issuedAt={cert.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />,
+                  `Certificate_${cert.certificate_id}.pdf`
+                )}>
+                <Award className="size-4" /> Download Certificate
+              </Button>
             )}
           </div>
         </div>
 
-        {/* Circular Progress */}
+        {/* Circular Progress Ring */}
         <div className="flex shrink-0 flex-col items-center">
-          <div className="relative grid size-32 place-items-center">
-            <svg className="absolute inset-0 size-full -rotate-90" viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="54" fill="none" stroke="oklch(0.9 0.01 270)" strokeWidth="6" className="dark:stroke-white/10" />
-              <circle cx="60" cy="60" r="54" fill="none" stroke="url(#heroGrad)" strokeWidth="6" strokeLinecap="round"
-                strokeDasharray={`${circ} ${circ}`} strokeDashoffset={offset} style={{ transition: "stroke-dashoffset 1s ease" }} />
+          <div className="relative size-28 shrink-0 flex items-center justify-center bg-white/5 rounded-full p-2 border border-white/5 backdrop-blur-md shadow-inner">
+            <svg className="size-full -rotate-90" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="5" />
+              <circle cx="50" cy="50" r="42" fill="none" stroke="url(#progress-gradient)" strokeWidth="6" strokeLinecap="round"
+                strokeDasharray="263.89" strokeDashoffset={263.89 - (263.89 * pct) / 100} style={{ transition: "stroke-dashoffset 1s ease" }} />
               <defs>
-                <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#7c3aed" />
-                  <stop offset="100%" stopColor="#3b82f6" />
+                <linearGradient id="progress-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#38bdf8" />
+                  <stop offset="100%" stopColor="#34d399" />
                 </linearGradient>
               </defs>
             </svg>
-            <div className="text-center">
-              <span className="font-display text-2xl font-bold">{pct}%</span>
-              <p className="text-[10px] text-muted-foreground">Completed</p>
+            <div className="absolute flex flex-col items-center">
+              <span className="text-2xl font-black text-white tracking-tight">{pct}%</span>
+              <span className="text-[7.5px] text-white/55 font-bold uppercase tracking-wider mt-0.5">Progress</span>
             </div>
           </div>
         </div>
@@ -1555,45 +1376,39 @@ function HeroSection({ app, enrollment, course, completedTopicCount, totalTopics
 
 // ─── STATS CARDS ───
 
-function StatsCards({ totalTopics, completedTopicCount, totalTasks, completedTaskCount, lastAttempt, cert }: any) {
+function StatsCards({ internApproved, internPending, durationLimit, cert }: any) {
   const stats = [
     {
-      icon: BookOpen, label: "LMS Courses", value: `${completedTopicCount} / ${totalTopics}`,
-      sub: "Topics Completed", color: "from-[#07284a] to-[#07284a]", bg: "bg-violet-50 dark:bg-violet-950/30",
+      icon: CheckCircle2, label: "Approved Tasks", value: `${internApproved} / ${durationLimit}`,
+      sub: "Completed Tasks", color: "from-emerald-500 to-green-600", bg: "bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400",
     },
     {
-      icon: CheckCircle2, label: "Tasks", value: `${completedTaskCount} / ${totalTasks}`,
-      sub: "Completed", color: "from-emerald-500 to-green-600", bg: "bg-emerald-50 dark:bg-emerald-950/30",
+      icon: Clock, label: "Pending Review", value: `${internPending}`,
+      sub: "Submitted Tasks", color: "from-amber-500 to-orange-500", bg: "bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400",
     },
     {
-      icon: Brain, label: "Quiz Score", sub: lastAttempt?.passed ? "PASSED" : "Not Taken",
-      value: lastAttempt ? `${lastAttempt.score} / ${lastAttempt.total}` : "—",
-      color: lastAttempt?.passed ? "from-blue-500 to-cyan-600" : "from-amber-500 to-orange-500",
-      bg: lastAttempt?.passed ? "bg-blue-50 dark:bg-blue-950/30" : "bg-amber-50 dark:bg-amber-950/30",
-    },
-    {
-      icon: Award, label: "Certificates", value: cert ? "1 Earned" : "None",
-      sub: cert ? "Download Available" : "Complete course to earn",
-      color: "from-rose-500 to-pink-600", bg: "bg-rose-50 dark:bg-rose-950/30",
+      icon: Award, label: "Verified Certificate", value: cert ? "Issued" : "None",
+      sub: cert ? "Download PDF" : "Locked",
+      color: "from-rose-500 to-pink-600", bg: "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400",
     },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-3">
       {stats.map((s, i) => {
         const Icon = s.icon;
         return (
           <div key={i}
-            className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/5 dark:bg-[#1E293B]/70 dark:hover:shadow-white/5"
+            className="group rounded-3xl border border-border/40 bg-white/60 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-slate-900/60 dark:border-white/5"
           >
             <div className="flex items-start justify-between">
-              <div className={`grid size-11 shrink-0 place-items-center rounded-xl ${s.bg}`}>
-                <Icon className={`size-5 bg-gradient-to-br ${s.color} bg-clip-text text-transparent`} />
+              <div className={`grid size-11 shrink-0 place-items-center rounded-2xl ${s.bg}`}>
+                <Icon className="size-5" />
               </div>
-              <span className={`rounded-full bg-gradient-to-br ${s.color} px-2.5 py-0.5 text-[10px] font-medium text-white`}>{s.sub}</span>
+              <span className={`rounded-lg bg-gradient-to-br ${s.color} px-2.5 py-0.5 text-[9px] font-bold text-white uppercase tracking-wider`}>{s.sub}</span>
             </div>
-            <p className="mt-3 font-display text-2xl font-bold">{s.value}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{s.label}</p>
+            <p className="mt-4 font-display text-2xl font-bold text-foreground">{s.value}</p>
+            <p className="mt-1 text-xs text-muted-foreground font-medium">{s.label}</p>
           </div>
         );
       })}
@@ -1607,8 +1422,19 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const { user } = useAuth();
-  const domain = getDomain(app.domain);
+  const qc = useQueryClient();
+
+  useEffect(() => {
+    if (photoFile) {
+      const url = URL.createObjectURL(photoFile);
+      setPhotoPreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setPhotoPreview(null);
+    }
+  }, [photoFile]);
 
   const save = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -1625,8 +1451,8 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
           console.warn("Profile photo upload failed:", upErr.message);
           toast.warning("Photo upload failed, profile saved without photo.");
         } else {
-          const { data: publicUrl } = supabase.storage.from("profile-photos").getPublicUrl(path);
-          photo_url = publicUrl?.publicUrl ?? photo_url;
+          const { data: signed } = await supabase.storage.from("profile-photos").createSignedUrl(path, 60 * 60 * 24 * 365);
+          photo_url = signed?.signedUrl ?? photo_url;
         }
       }
       const updates = {
@@ -1637,32 +1463,84 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
         year: String(fd.get("year")),
         photo_url,
       };
-      const { error } = await supabase.from("applications").update(updates).eq("id", app.id);
-      if (error) throw error;
-      await supabase.from("profiles").update(updates).eq("id", user.id);
-      toast.success("Profile updated");
+      
+      try {
+        await supabase.from("applications").update(updates).eq("id", app.id);
+      } catch (err) {
+        console.warn("RLS restriction on applications update ignored:", err);
+      }
+
+      const { error: profileErr } = await supabase.from("profiles").upsert({
+        id: user.id,
+        ...updates,
+      });
+      if (profileErr) throw profileErr;
+
+      toast.success("Profile updated successfully! 🎉");
+      await qc.refetchQueries({ queryKey: ["my-profile-details", user.id] });
+      await qc.refetchQueries({ queryKey: ["my-applications", user.id] });
       setEditing(false);
       setPhotoFile(null);
-      onChange();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Update failed");
-    } finally { setSaving(false); }
+    } catch (err: any) {
+      toast.error(err.message || "Update failed");
+    } finally {
+      setSaving(false);
+    }
   };
 
+  const domain = getDomain(app.domain);
+
   if (editing) return (
-    <Card className="rounded-2xl border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <CardHeader><CardTitle>Edit Profile</CardTitle><CardDescription>Update your details.</CardDescription></CardHeader>
-      <CardContent>
-        <form onSubmit={save} className="grid gap-4 md:grid-cols-2">
-          <div className="md:col-span-2"><Label>Full Name</Label><Input name="full_name" defaultValue={app.full_name} required className="mt-1" /></div>
-          <div><Label>Phone</Label><Input name="phone" type="tel" defaultValue={app.phone ?? ""} required className="mt-1" /></div>
-          <div><Label>Year</Label><Input name="year" defaultValue={app.year ?? ""} required className="mt-1" /></div>
-          <div><Label>College</Label><Input name="college" defaultValue={app.college ?? ""} required className="mt-1" /></div>
-          <div><Label>Course / Branch</Label><Input name="course" defaultValue={app.course ?? ""} required className="mt-1" /></div>
-          <div className="md:col-span-2"><Label>Photo {app.photo_url && <span className="text-xs text-muted-foreground">(leave empty to keep current)</span>}</Label><Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="mt-1" /></div>
-          <div className="md:col-span-2 flex gap-2">
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0">{saving ? "Saving…" : "Save Changes"}</Button>
-            <Button type="button" variant="outline" onClick={() => { setEditing(false); setPhotoFile(null); }}>Cancel</Button>
+    <Card className="overflow-hidden rounded-3xl border-border/40 bg-white/60 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-2xl transition-all duration-300">
+      <div className="relative bg-gradient-to-br from-[#07284a] via-[#093a6c] to-[#0a4c8f] px-6 py-8 text-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
+        <h3 className="text-xl font-extrabold font-display">Edit Profile Information</h3>
+        <p className="text-xs text-blue-200 mt-1">Make sure all details are accurate to ensure clean certificate generation.</p>
+      </div>
+      <CardContent className="p-6">
+        <form onSubmit={save} className="grid gap-6 md:grid-cols-2">
+          {/* Avatar Upload Preview */}
+          <div className="md:col-span-2 flex flex-col items-center justify-center border border-dashed border-border/65 rounded-2xl p-6 bg-slate-50/50 dark:bg-slate-950/20">
+            <div className="relative mb-3 group">
+              {(photoPreview || app.photo_url) ? (
+                <img src={photoPreview || app.photo_url || ""} alt="" className="size-24 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-md transition-all group-hover:scale-105" />
+              ) : (
+                <div className="grid size-24 place-items-center rounded-3xl border-4 border-white dark:border-slate-800 brand-gradient text-3xl font-extrabold text-white shadow-md">
+                  {app.full_name.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <Label className="text-xs font-semibold text-foreground mb-2">Change Profile Photo</Label>
+            <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="h-10 file:text-xs rounded-xl border-border/60 bg-white max-w-xs text-center cursor-pointer" />
+          </div>
+
+          <div className="md:col-span-2">
+            <Label className="text-xs font-semibold text-foreground">Full Name *</Label>
+            <Input name="full_name" defaultValue={app.full_name} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-foreground">Phone Number *</Label>
+            <Input name="phone" type="tel" defaultValue={app.phone ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-foreground">Year of Study *</Label>
+            <Input name="year" defaultValue={app.year ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-foreground">College / Institution *</Label>
+            <Input name="college" defaultValue={app.college ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold text-foreground">Course / Branch *</Label>
+            <Input name="course" defaultValue={app.course ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
+          </div>
+          <div className="md:col-span-2 flex gap-3 mt-2">
+            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 rounded-xl px-6 h-11 font-bold shadow-lg shadow-[#07284a]/15">
+              {saving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving Details…</> : "Save Changes"}
+            </Button>
+            <Button type="button" variant="outline" className="rounded-xl px-6 h-11 font-bold border-border/60" onClick={() => { setEditing(false); setPhotoFile(null); }}>
+              Cancel
+            </Button>
           </div>
         </form>
       </CardContent>
@@ -1670,34 +1548,94 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
   );
 
   return (
-    <Card className="overflow-hidden rounded-2xl border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <div className="h-1.5 brand-gradient" />
-      <CardContent className="pt-6">
-        <div className="flex flex-wrap items-start justify-between gap-4 sm:gap-6">
-          <div className="flex items-center gap-3 sm:gap-5 min-w-0">
-            {app.photo_url ? (
-              <img src={app.photo_url} alt="" className="size-16 rounded-2xl border-2 border-[#07284a]/20 object-cover dark:border-[#07284a]/40" />
-            ) : (
-              <div className="grid size-16 place-items-center rounded-2xl brand-gradient text-xl font-bold text-white shadow-md shadow-[#07284a]/20">
-                {app.full_name.charAt(0).toUpperCase()}
+    <div className="space-y-6">
+      {/* Profile Info & Stats */}
+      <Card className="overflow-hidden rounded-3xl border-border/40 bg-white/60 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl transition-all duration-300">
+        {/* Modern Radial Gradient Banner */}
+        <div className="h-32 bg-gradient-to-r from-[#07284a] via-[#093a6c] to-[#0a4c8f] relative">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
+          <div className="absolute top-4 right-4 flex gap-1.5">
+            <Badge className="bg-white/15 text-white border-0 backdrop-blur-md rounded-lg font-mono text-[10px] tracking-wide uppercase px-2 py-0.5">
+              {app.status}
+            </Badge>
+          </div>
+        </div>
+        
+        <CardContent className="pt-0 px-6 pb-6 relative">
+          {/* Main User Block */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-12 mb-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
+              {app.photo_url ? (
+                <img src={app.photo_url} alt="" className="size-24 rounded-3xl border-4 border-white dark:border-slate-900 object-cover shadow-lg relative z-10" />
+              ) : (
+                <div className="grid size-24 place-items-center rounded-3xl border-4 border-white dark:border-slate-900 brand-gradient text-3xl font-extrabold text-white shadow-lg relative z-10">
+                  {app.full_name.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="pb-1">
+                <h3 className="text-2xl font-extrabold font-display text-foreground leading-snug tracking-tight">{app.full_name}</h3>
+                <p className="text-xs text-muted-foreground flex items-center justify-center sm:justify-start gap-1.5 mt-0.5">
+                  <Mail className="size-3.5 text-primary shrink-0" />
+                  <span className="font-semibold">{app.email}</span>
+                </p>
               </div>
-            )}
-            <div>
-              <h3 className="text-lg font-bold truncate">{app.full_name}</h3>
-              <p className="text-sm text-muted-foreground flex items-center gap-1.5 min-w-0"><Mail className="size-3.5 shrink-0" /><span className="truncate">{app.email}</span></p>
-              <div className="mt-2 flex flex-wrap gap-2 sm:gap-3 text-xs text-muted-foreground min-w-0">
-                {app.college && <span className="flex items-center gap-1 min-w-0"><Building className="size-3 shrink-0" /><span className="truncate">{app.college}</span></span>}
-                {app.course && <span>{app.course}</span>}
-                {app.year && <span className="flex items-center gap-1"><Calendar className="size-3" />{app.year}</span>}
+            </div>
+            <Button variant="outline" size="sm" className="rounded-xl border-border/60 h-9 font-semibold gap-1.5 bg-white/40 shadow-sm shrink-0 mb-1 hover:-translate-y-0.5 transition-transform" onClick={() => setEditing(true)}>
+              <User className="size-4 text-primary" /> Edit Profile
+            </Button>
+          </div>
+
+          {/* Grid Layout Cards */}
+          <div className="grid gap-6 md:grid-cols-2 mt-4">
+            {/* Personal Details Panel */}
+            <div className="rounded-2xl border border-border/30 bg-white/40 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 tracking-wider uppercase border-b border-border/20 pb-2">
+                <User className="size-3.5" /> Personal Details
+              </h4>
+              <div className="space-y-3 text-xs">
+                <div className="flex items-center justify-between py-1 border-b border-border/10">
+                  <span className="text-muted-foreground">Phone Number</span>
+                  <span className="font-bold text-foreground">{app.phone || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-border/10">
+                  <span className="text-muted-foreground">Year of Study</span>
+                  <span className="font-bold text-foreground">{app.year || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-muted-foreground">Registered Email</span>
+                  <span className="font-bold text-foreground">{app.email}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Academic Credentials Panel */}
+            <div className="rounded-2xl border border-border/30 bg-white/40 p-5 space-y-4 shadow-sm hover:shadow-md transition-shadow">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 tracking-wider uppercase border-b border-border/20 pb-2">
+                <Building className="size-3.5" /> Academic Information
+              </h4>
+              <div className="space-y-3 text-xs">
+                <div className="flex items-center justify-between py-1 border-b border-border/10">
+                  <span className="text-muted-foreground">Institution</span>
+                  <span className="font-bold text-foreground text-right truncate max-w-[180px]">{app.college || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1 border-b border-border/10">
+                  <span className="text-muted-foreground">Course / Branch</span>
+                  <span className="font-bold text-foreground text-right truncate max-w-[180px]">{app.course || "—"}</span>
+                </div>
+                <div className="flex items-center justify-between py-1">
+                  <span className="text-muted-foreground">Internship Status</span>
+                  <Badge className={`text-[10px] px-2 py-0.5 rounded-lg border-0 font-bold ${
+                    app.status === "completed" ? "bg-emerald-500 text-white" :
+                    app.status === "ongoing" ? "bg-blue-600 text-white" :
+                    "bg-amber-500 text-white"
+                  }`}>{app.status}</Badge>
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="rounded-xl border-border/60" onClick={() => setEditing(true)}><User className="mr-1 size-3.5" /> Edit Profile</Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -1705,400 +1643,90 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
 
 function TimelineSection({ steps, currentStep }: { steps: { label: string; done: boolean }[]; currentStep: number }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-6 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <h3 className="mb-5 flex items-center gap-2 font-bold"><Flag className="size-4 text-primary" /> Internship Progress</h3>
-      <div className="relative">
-        <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#07284a] via-blue-500 to-emerald-500 dark:from-[#07284a]/80 dark:via-blue-400 dark:to-emerald-400" />
-        <ul className="space-y-0">
-          {steps.map((s, i) => {
-            const isActive = i === currentStep;
-            const isDone = s.done;
-            return (
-              <li key={i} className="relative flex items-center gap-4 pb-6 last:pb-0">
-                <div className={`relative z-10 grid size-6 shrink-0 place-items-center rounded-full transition-all duration-500 ${
-                  isDone ? "bg-emerald-500 text-white scale-100" :
-                  isActive ? "bg-[#07284a] text-white ring-4 ring-[#07284a]/30 dark:ring-[#07284a]/50 animate-pulse-soft" :
-                  "bg-gray-200 dark:bg-gray-700 text-gray-400"
+    <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 relative overflow-hidden">
+      <style>{`
+        @keyframes stepper-pulse {
+          0% { transform: scale(0.9); opacity: 0.9; }
+          100% { transform: scale(1.6); opacity: 0; }
+        }
+        .animate-stepper-pulse {
+          animation: stepper-pulse 2s infinite ease-out;
+        }
+      `}</style>
+      <h3 className="mb-6 flex items-center gap-2 font-bold text-sm text-foreground"><Flag className="size-4 text-primary" /> Internship Progress</h3>
+      
+      {/* Desktop Horizontal Stepper */}
+      <div className="hidden md:flex items-center justify-between relative px-4">
+        {/* Connection Line */}
+        <div className="absolute left-8 right-8 top-5 h-0.5 bg-muted dark:bg-slate-800 -z-10">
+          <div 
+            className="h-full bg-gradient-to-r from-[#07284a] via-blue-500 to-emerald-500 transition-all duration-700 ease-out" 
+            style={{ width: `${currentStep < 0 ? 100 : (currentStep / (steps.length - 1)) * 100}%` }}
+          />
+        </div>
+        
+        {steps.map((s, i) => {
+          const isActive = i === currentStep;
+          const isDone = s.done;
+          return (
+            <div key={i} className="flex flex-col items-center text-center relative z-10 w-32">
+              <div className="relative">
+                {isActive && (
+                  <div className="absolute -inset-2 rounded-full border-2 border-[#07284a] dark:border-blue-500 animate-stepper-pulse pointer-events-none" />
+                )}
+                <div className={`grid size-10 place-items-center rounded-full transition-all duration-500 border-2 ${
+                  isDone 
+                    ? "bg-emerald-500 border-emerald-400 text-white scale-100 shadow-md shadow-emerald-500/20" 
+                    : isActive 
+                      ? "bg-[#07284a] border-blue-500 text-white ring-4 ring-[#07284a]/20 dark:ring-[#07284a]/50" 
+                      : "bg-white dark:bg-slate-800 border-muted dark:border-slate-700 text-muted-foreground"
+                }`}>
+                  {isDone ? <CheckCircle2 className="size-5" /> : <span className="text-xs font-bold">{i + 1}</span>}
+                </div>
+              </div>
+              <p className={`mt-3 text-xs font-medium max-w-full leading-snug ${isActive ? "text-[#07284a] dark:text-[#07284a]/85 font-bold" : isDone ? "text-muted-foreground" : "text-muted-foreground/60"}`}>
+                {s.label}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mobile Vertical Stepper */}
+      <div className="md:hidden relative pl-6 space-y-6">
+        {/* Connecting line */}
+        <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-muted dark:bg-slate-800 -z-10">
+          <div 
+            className="w-full bg-gradient-to-b from-[#07284a] via-blue-500 to-emerald-500 transition-all duration-700 ease-out" 
+            style={{ height: `${currentStep < 0 ? 100 : (currentStep / (steps.length - 1)) * 100}%` }}
+          />
+        </div>
+        
+        {steps.map((s, i) => {
+          const isActive = i === currentStep;
+          const isDone = s.done;
+          return (
+            <div key={i} className="flex items-center gap-4 relative">
+              <div className="relative shrink-0">
+                {isActive && (
+                  <div className="absolute -inset-1 rounded-full border border-[#07284a] dark:border-blue-500 animate-stepper-pulse pointer-events-none" />
+                )}
+                <div className={`grid size-6 place-items-center rounded-full transition-all duration-500 border ${
+                  isDone 
+                    ? "bg-emerald-500 border-emerald-400 text-white shadow-sm" 
+                    : isActive 
+                      ? "bg-[#07284a] border-blue-500 text-white ring-2 ring-[#07284a]/20" 
+                      : "bg-white dark:bg-slate-800 border-muted dark:border-slate-700 text-muted-foreground"
                 }`}>
                   {isDone ? <CheckCircle2 className="size-3.5" /> : <span className="text-[10px] font-bold">{i + 1}</span>}
                 </div>
-                <div className={`min-w-0 ${isActive ? "font-semibold text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
-                  <p className={`text-sm ${isActive ? "text-[#07284a] dark:text-[#07284a]/80" : ""}`}>{s.label}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </div>
-  );
-}
-
-// ─── LMS COURSES ───
-
-function LmsCoursesSection({ enrollments, courses, lmsCerts, completedTopics, topics, taskSubmissions, tasks, quizAttempts, course, enrollment }: any) {
-  const certMap = new Map((lmsCerts ?? []).map((c: any) => [c.enrollment_id, c]));
-
-  if (!enrollments.length) {
-    return (
-      <Card className="rounded-2xl border-dashed border-border/50 bg-white/70 backdrop-blur-xl dark:bg-[#1E293B]/70">
-        <CardContent className="flex flex-col items-center gap-4 py-14 text-center">
-          <div className="grid size-16 place-items-center rounded-2xl bg-[#07284a]/10 dark:bg-[#07284a]/30">
-            <GraduationCap className="size-8 text-[#07284a]" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold">No Enrollments Yet</h3>
-            <p className="text-sm text-muted-foreground">Browse our catalog and enroll in a learning path.</p>
-          </div>
-          <Button asChild className="brand-gradient text-white border-0 rounded-xl">
-            <Link to="/courses"><BookOpen className="mr-1.5 size-4" /> Browse Courses</Link>
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      <h3 className="flex items-center gap-2 text-lg font-bold"><BookOpen className="size-5 text-primary" /> My Courses</h3>
-      {enrollments.map((enr: any) => {
-        const c = courses?.find((co: any) => co.id === enr.course_id);
-        if (!c) return null;
-        const cert = certMap.get(enr.id);
-        const completedTopicCount = completedTopics?.size ?? 0;
-        const totalTopics = topics?.length ?? 0;
-        const approvedTasks = taskSubmissions?.filter((s: any) => s.status === "approved").length ?? 0;
-        const allTasks = tasks?.length ?? 0;
-        const lastAttempt = quizAttempts?.[0] ?? null;
-        const quizLocked = allTasks > 0 && approvedTasks < allTasks;
-
-        return (
-          <div key={enr.id} className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:bg-[#1E293B]/70">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="grid size-14 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md shadow-[#07284a]/20">
-                  <GraduationCap className="size-7" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-bold text-lg">{c.name}</p>
-                  <p className="text-xs text-muted-foreground">{c.domain} · {c.total_topics} topics · {c.total_tasks} tasks</p>
-                </div>
               </div>
-              {cert ? (
-                <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white rounded-lg px-3 py-1.5"><Award className="mr-1 size-3.5" /> Certified</Badge>
-              ) : enr.status === "completed" ? (
-                <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white rounded-lg px-3 py-1.5"><CheckCircle2 className="mr-1 size-3.5" /> Completed</Badge>
-              ) : (
-                <Badge variant="secondary" className="rounded-lg px-3 py-1.5">In Progress</Badge>
-              )}
-            </div>
-            <div className="mt-4 max-w-md">
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-1.5">
-                <span>Progress</span><span className="font-semibold text-foreground">{enr.progress_percent}%</span>
-              </div>
-              <Progress value={enr.progress_percent} className="h-2.5" />
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3 text-center text-xs">
-                <span className="text-muted-foreground">Topics</span>
-                <p className="font-bold text-sm mt-0.5">{completedTopicCount}/{totalTopics || c.total_topics}</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3 text-center text-xs">
-                <span className="text-muted-foreground">Tasks</span>
-                <p className="font-bold text-sm mt-0.5">{approvedTasks}/{allTasks || c.total_tasks}</p>
-              </div>
-              <div className="rounded-xl border border-border/40 bg-secondary/30 p-3 text-center text-xs">
-                <span className="text-muted-foreground">Quiz</span>
-                <p className="font-bold text-sm mt-0.5">{quizLocked ? "🔒" : lastAttempt?.passed ? `${lastAttempt.score}/${lastAttempt.total}` : "Ready"}</p>
+              <div className={`min-w-0 ${isActive ? "font-semibold text-foreground" : isDone ? "text-muted-foreground" : "text-muted-foreground/50"}`}>
+                <p className={`text-xs ${isActive ? "text-[#07284a] dark:text-[#07284a]/80" : ""}`}>{s.label}</p>
               </div>
             </div>
-            <div className="mt-4 flex gap-2">
-              <Button size="sm" variant="outline" className="rounded-xl h-9"
-                onClick={() => window.location.href = `/courses/${c.slug}/quiz`}>
-                <Trophy className="mr-1.5 size-3.5" /> Quiz
-              </Button>
-              <Button asChild size="sm" className="brand-gradient text-white border-0 rounded-xl h-9 flex-1">
-                <Link to="/courses/$slug" params={{ slug: c.slug }}><Play className="mr-1.5 size-3.5" /> Continue Learning</Link>
-              </Button>
-              <Button asChild size="sm" variant="outline" className="rounded-xl border-border/60 h-9">
-                <Link to="/courses/$slug" params={{ slug: c.slug }}><ArrowRight className="size-3.5" /></Link>
-              </Button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── CURRENT TOPIC ───
-
-function CurrentTopicWidget({ topics, completedTopics, enrollment, course }: any) {
-  if (!topics?.length) return null;
-  const currentTopic = topics[completedTopics?.size ?? 0] ?? topics[0];
-  const idx = topics.findIndex((t: any) => t.id === currentTopic.id);
-  const done = completedTopics?.has(currentTopic.id);
-
-  return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#07284a] to-blue-500 text-white shadow-md">
-            <Play className="size-6" />
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Continue Learning</p>
-            <p className="font-bold text-lg">{done ? "Next: " : "Current: "}{currentTopic.title}</p>
-            <p className="text-xs text-muted-foreground">Lesson {idx + 1} of {topics.length}</p>
-          </div>
-        </div>
-        {enrollment && course ? (
-          <Button asChild size="sm" className="brand-gradient text-white border-0 rounded-xl h-9">
-            <Link to="/courses/$slug" params={{ slug: course.slug }}><Play className="mr-1.5 size-3.5" /> Resume Course</Link>
-          </Button>
-        ) : (
-          <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-9" disabled>Resume Course</Button>
-        )}
-      </div>
-      <Progress value={((completedTopics?.size ?? 0) / topics.length) * 100} className="mt-4 h-2" />
-    </div>
-  );
-}
-
-// ─── TASKS SECTION ───
-
-function TasksSectionWidget({ tasks, submissions, enrollmentId, onChange, courseSlug }: any) {
-  const [expanded, setExpanded] = useState<string | null>(null);
-  if (!tasks?.length) return null;
-
-  return (
-    <div className="space-y-3">
-      <h3 className="flex items-center gap-2 text-lg font-bold"><ListChecks className="size-5 text-primary" /> Course Tasks</h3>
-      {tasks.map((t: any) => {
-        const sub = submissions?.find((s: any) => s.task_id === t.id);
-        const st = sub?.status ?? "pending";
-        const statusConfig = ({
-          approved: { label: "Completed", color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", icon: CheckCircle2 },
-          pending: { label: "In Review", color: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300", icon: Clock },
-          rejected: { label: "Needs Revision", color: "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300", icon: XCircle },
-        } as Record<string, { label: string; color: string; icon: any }>)[st] ?? { label: "Not Started", color: "bg-secondary text-muted-foreground", icon: Circle };
-
-        const Tag = statusConfig.icon;
-        const open = expanded === t.id;
-
-        return (
-          <div key={t.id} className={`rounded-2xl border border-border/50 bg-white/70 backdrop-blur-xl transition-all dark:bg-[#1E293B]/70 ${open ? "ring-2 ring-[#07284a]/30 dark:ring-[#07284a]/50" : ""}`}>
-            <button onClick={() => setExpanded(open ? null : t.id)} className="flex w-full items-center justify-between p-4 text-left">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className={`grid size-10 shrink-0 place-items-center rounded-xl ${
-                  st === "approved" ? "bg-emerald-100 dark:bg-emerald-900/40" :
-                  st === "rejected" ? "bg-red-100 dark:bg-red-900/40" :
-                  "bg-[#07284a]/10 dark:bg-[#07284a]/30"
-                }`}>
-                  <Tag className={`size-5 ${
-                    st === "approved" ? "text-emerald-600 dark:text-emerald-400" :
-                    st === "rejected" ? "text-red-600 dark:text-red-400" :
-                    "text-[#07284a] dark:text-[#07284a]/80"
-                  }`} />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm">Task {t.task_number}: {t.title}</p>
-                  <p className="text-xs text-muted-foreground">Due: {t.due_days} days from start</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className={`rounded-lg px-2.5 py-1 text-xs font-medium ${statusConfig.color}`}>{statusConfig.label}</span>
-                <ChevronRight className={`size-4 text-muted-foreground transition ${open ? "rotate-90" : ""}`} />
-              </div>
-            </button>
-            {open && (
-              <div className="border-t border-border/40 px-4 pb-4">
-                <p className="mt-3 text-sm text-foreground/80">{t.description}</p>
-                {t.requirements && (
-                  <div className="mt-2 rounded-xl border border-border/40 bg-secondary/30 p-3 text-xs">
-                    <span className="font-semibold">Requirements:</span> {t.requirements}
-                  </div>
-                )}
-                {sub?.status === "rejected" && (
-                  <div className="mt-2 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900/30 dark:bg-red-950/20">
-                    <div className="flex items-center gap-1.5">
-                      <AlertCircle className="size-3.5 text-red-500 shrink-0" />
-                      <span className="text-xs font-semibold text-red-700 dark:text-red-400">Needs Revision</span>
-                    </div>
-                    {sub.feedback && <p className="mt-1 text-xs text-red-600 dark:text-red-300 pl-5">Reason: {sub.feedback}</p>}
-                    <p className="mt-0.5 text-[10px] text-red-500 pl-5">Review the feedback above and resubmit.</p>
-                  </div>
-                )}
-                {sub?.status !== "rejected" && sub?.feedback && (
-                  <div className="mt-2 rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs text-blue-900 dark:border-blue-900/30 dark:bg-blue-950/30 dark:text-blue-300">
-                    <span className="font-semibold">Feedback:</span> {sub.feedback}
-                  </div>
-                )}
-                <div className="mt-3 flex gap-2">
-                  <TaskSubmitButton task={t} sub={sub} enrollmentId={enrollmentId} onChange={onChange} />
-                  <Button asChild size="sm" variant="ghost" className="rounded-lg">
-                    <Link to="/courses/$slug" params={{ slug: courseSlug }}><ExternalLink className="mr-1 size-3.5" /> View Details</Link>
-                  </Button>
-                </div>
-                <CourseTaskHistory sub={sub} />
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function CourseTaskHistory({ sub }: { sub: any }) {
-  const [history, setHistory] = useState<any[]>([]);
-  const [show, setShow] = useState(false);
-  if (!sub) return null;
-  const load = async () => {
-    if (show) { setShow(false); return; }
-    const { data } = await supabase
-      .from("submission_history")
-      .select("*")
-      .eq("submission_id", sub.id)
-      .eq("table_name", "course_task_submissions")
-      .order("created_at", { ascending: false });
-    setHistory(data ?? []);
-    setShow(true);
-  };
-  return (
-    <>
-      <button onClick={load} className="mt-2 flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground transition">
-        <Clock className="size-3" /> {show ? "Hide History" : "View History"}
-      </button>
-      {show && (
-        <div className="mt-2 rounded-xl border border-border/40 bg-secondary/20 p-3">
-          <p className="mb-2 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Submission History</p>
-          {history.length === 0 ? (
-            <p className="text-[10px] text-muted-foreground">No history recorded yet.</p>
-          ) : (
-            <div className="space-y-1.5">
-              {history.map((h: any, i: number) => (
-                <div key={h.id} className="flex items-start gap-2 text-[10px]">
-                  <span className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full bg-muted text-[7px] font-bold text-muted-foreground">{i + 1}</span>
-                  <div>
-                    <p>
-                      <span className={`font-semibold ${h.new_status === "approved" ? "text-green-600" : h.new_status === "rejected" ? "text-red-600" : "text-amber-600"}`}>{h.previous_status ?? "—"} → {h.new_status}</span>
-                    </p>
-                    <p className="text-muted-foreground">{new Date(h.created_at).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-                    {h.reason && <p className="text-red-500 italic">Reason: {h.reason}</p>}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </>
-  );
-}
-
-function TaskSubmitButton({ task, sub, enrollmentId, onChange }: any) {
-  const [open, setOpen] = useState(false);
-  const [projectUrl, setProjectUrl] = useState(sub?.project_url ?? "");
-  const [notes, setNotes] = useState(sub?.notes ?? "");
-  const [saving, setSaving] = useState(false);
-
-  const submit = async () => {
-    if (!projectUrl.trim()) return toast.error("Project URL is required");
-    setSaving(true);
-    const payload = { enrollment_id: enrollmentId, task_id: task.id, project_url: projectUrl, notes, status: "pending" as const };
-    const { error } = sub
-      ? await supabase.from("course_task_submissions").update(payload).eq("id", sub.id)
-      : await supabase.from("course_task_submissions").insert(payload);
-    if (error) { setSaving(false); return toast.error(error.message); }
-    if (sub && sub.status === "rejected") {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      await supabase.from("submission_history").insert({
-        submission_id: sub.id,
-        table_name: "course_task_submissions",
-        previous_status: "rejected",
-        new_status: "pending",
-        changed_by: u?.id,
-        reason: null,
-      });
-    }
-    setSaving(false);
-    toast.success(sub?.status === "rejected" ? "Resubmitted for review!" : (sub ? "Submission updated" : "Submitted for review"));
-    onChange();
-    setOpen(false);
-  };
-
-  if (sub?.status === "approved") {
-    return (
-      <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
-        <CheckCircle2 className="size-4" /> Completed Successfully
-        {sub.submitted_at && <span>· {new Date(sub.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</span>}
-      </div>
-    );
-  }
-
-  if (!open) return <Button size="sm" className="brand-gradient text-white border-0 rounded-lg h-8" onClick={() => setOpen(true)}>{sub ? "Update" : "Submit"}</Button>;
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <Input placeholder="Project URL" value={projectUrl} onChange={(e) => setProjectUrl(e.target.value)} className="h-8 w-48 text-xs" />
-      <Button size="sm" onClick={submit} disabled={saving} className="brand-gradient text-white border-0 h-8 text-xs">{saving ? "Saving…" : "Submit"}</Button>
-      <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
-    </div>
-  );
-}
-
-// ─── QUIZ ───
-
-function QuizSectionWidget({ course, lastAttempt, enrollment, completedTaskCount, totalTasks }: any) {
-  if (!course) return null;
-  const quizLocked = totalTasks > 0 && completedTaskCount < totalTasks;
-
-  return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="grid size-12 place-items-center rounded-2xl bg-gradient-to-br from-[#07284a] to-blue-500 text-white shadow-md">
-          <Brain className="size-6" />
-        </div>
-        <div>
-          <h3 className="font-bold text-lg">{lastAttempt?.passed ? "Quiz Passed 🎉" : "Final Quiz"}</h3>
-          <p className="text-xs text-muted-foreground">{lastAttempt?.passed ? "Great job! Check your certificate." : "Test your knowledge"}</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-4 gap-2 rounded-xl border border-border/40 bg-secondary/30 p-3 text-xs mb-4">
-        <div className="text-center"><span className="text-muted-foreground">Questions</span><p className="font-bold text-sm mt-0.5">{course.quiz_marks / 2}</p></div>
-        <div className="text-center"><span className="text-muted-foreground">Marks</span><p className="font-bold text-sm mt-0.5">{course.quiz_marks}</p></div>
-        <div className="text-center"><span className="text-muted-foreground">Pass</span><p className="font-bold text-sm mt-0.5">{course.pass_marks}</p></div>
-        <div className="text-center"><span className="text-muted-foreground">Time</span><p className="font-bold text-sm mt-0.5">{course.quiz_duration_min}m</p></div>
-      </div>
-
-      {lastAttempt && (
-        <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900/30 dark:bg-emerald-950/30">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Previous Score</span>
-            <span className="font-bold">{lastAttempt.score}/{lastAttempt.total} · {lastAttempt.passed ? "PASSED" : "FAILED"}</span>
-          </div>
-        </div>
-      )}
-
-      <div className="flex gap-2">
-        {quizLocked ? (
-          <div className="flex items-center gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            <Lock className="size-4" /> Complete all {totalTasks} tasks to unlock
-          </div>
-        ) : enrollment && course ? (
-          <>
-            <Button asChild size="sm" className="brand-gradient text-white border-0 rounded-xl h-9 flex-1">
-              <Link to="/courses/$slug/quiz" params={{ slug: course.slug }}><Brain className="mr-1.5 size-4" /> {lastAttempt ? "Retake Quiz" : "Start Quiz"}</Link>
-            </Button>
-            {lastAttempt && (
-              <Button asChild size="sm" variant="outline" className="rounded-xl border-border/60 h-9">
-                <Link to="/courses/$slug" params={{ slug: course.slug }}><Eye className="mr-1.5 size-3.5" /> View Result</Link>
-              </Button>
-            )}
-          </>
-        ) : null}
+          );
+        })}
       </div>
     </div>
   );
@@ -2106,9 +1734,199 @@ function QuizSectionWidget({ course, lastAttempt, enrollment, completedTaskCount
 
 // ─── CERTIFICATES ───
 
-function CertificateSection({ cert, app, course, enrollment, lastAttempt, compact }: any) {
+function UnlockedCertificateCard({ app, cert, domain }: any) {
+  return (
+    <div className="space-y-6">
+      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+        {/* Glow behind certificate icon */}
+        <div className="absolute -right-20 -top-20 size-64 rounded-full bg-emerald-500/10 blur-[80px] pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="grid size-16 place-items-center rounded-2xl brand-gradient text-white shadow-xl shadow-[#07284a]/10 shrink-0">
+            <Award className="size-9" />
+          </div>
+          <div className="flex-1 text-center md:text-left">
+            <Badge className="bg-emerald-600 text-white text-[10px] rounded-lg px-2.5 py-1 mb-2 border-0"><CheckCircle2 className="mr-1 size-3" /> VERIFIED CERTIFICATE</Badge>
+            <h2 className="text-lg font-bold font-display text-foreground">{domain?.name ?? app.domain} Internship Certificate</h2>
+            <p className="text-xs text-muted-foreground mt-1">Issued to <span className="font-semibold text-foreground">{app.full_name}</span> on {new Date(cert.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
+            <p className="text-[9px] font-mono text-muted-foreground mt-1.5">Certificate ID: {cert.certificate_id}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row md:flex-col gap-2 shrink-0 w-full md:w-auto">
+            <Button size="sm" className="brand-gradient text-white border-0 rounded-2xl h-10 px-6 font-semibold shadow-md gap-1.5"
+              onClick={() => downloadPdf(<CertificateDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} certId={cert.certificate_id} issuedAt={cert.issued_at} verifyUrl={`${window.location.origin}/verify-certificate`} />, `Certificate_${cert.certificate_id}.pdf`)}>
+              <Download className="size-4" /> Download PDF
+            </Button>
+            <Button asChild size="sm" variant="outline" className="rounded-2xl border-border/60 h-10 px-6 font-semibold gap-1.5 bg-white/40">
+              <Link to="/verify-certificate"><ExternalLink className="size-4" /> Verify Certificate</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LockedCertificateCard({ app, internApproved, internTotal, payment, utrNumber, setUtrNumber, paymentScreenshot, setPaymentScreenshot, submittingPayment, handlePaymentSubmit, ...rest }: any) {
+  const domain = getDomain(app?.domain);
+  const isTasksDone = internTotal > 0 && internApproved >= internTotal;
+  const isPaymentDone = payment?.status === "verified";
+  
+  return (
+    <div className="space-y-6">
+      <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 relative overflow-hidden">
+        {/* Glow effect */}
+        <div className="absolute -right-24 -top-24 size-72 rounded-full bg-amber-500/10 blur-[80px] pointer-events-none" />
+        
+        <div className="grid md:grid-cols-12 gap-8 items-center">
+          {/* Visual Locked Certificate Graphic */}
+          <div className="md:col-span-4 flex flex-col items-center">
+            <div className="relative w-full max-w-[240px] aspect-[1.414] rounded-2xl border-2 border-dashed border-muted-foreground/30 dark:border-white/10 bg-slate-100/50 dark:bg-slate-800/20 grid place-items-center overflow-hidden shadow-inner group">
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-[#07284a]/2 to-[#07284a]/5 pointer-events-none" />
+              <div className="flex flex-col items-center text-center p-4">
+                <div className="grid size-14 place-items-center rounded-2xl bg-amber-500/10 text-amber-500 shadow-inner mb-3 animate-pulse">
+                  <Lock className="size-6" />
+                </div>
+                <span className="text-xs font-bold tracking-wide uppercase text-muted-foreground">Internship Certificate</span>
+                <span className="text-[10px] text-muted-foreground/60 mt-1">{domain?.name ?? app?.domain}</span>
+              </div>
+              {/* Progress bar overlay */}
+              <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted dark:bg-slate-800">
+                <div className="h-full bg-amber-500" style={{ width: `${Math.round((internApproved / Math.max(1, internTotal)) * 100)}%` }} />
+              </div>
+            </div>
+          </div>
+          
+          {/* Steps & Checkout Info */}
+          <div className="md:col-span-8 space-y-5">
+            <div>
+              <Badge variant="secondary" className="mb-2 bg-amber-500/10 text-amber-600 border-0"><Lock className="mr-1 size-3" /> Lock Status: Pending</Badge>
+              <h2 className="text-xl font-bold font-display text-foreground">Unlock Your Professional Certificate</h2>
+              <p className="text-xs text-muted-foreground mt-1">Complete your internship syllabus and verification details to generate your certificate.</p>
+            </div>
+            
+            {/* Checklist of Steps */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className={`rounded-2xl border p-4 transition ${isTasksDone ? "bg-emerald-50/50 border-emerald-200/50 dark:bg-emerald-950/10 dark:border-emerald-855/30" : "bg-secondary/40 border-border/40"}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`grid size-7 shrink-0 place-items-center rounded-lg ${isTasksDone ? "bg-emerald-500 text-white" : "bg-amber-500/10 text-amber-500"}`}>
+                    {isTasksDone ? <CheckCircle2 className="size-4" /> : <ListChecks className="size-4" />}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-foreground">1. Practical Tasks</h4>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Approved: {internApproved} of {internTotal} tasks.</p>
+                    <div className="mt-2 h-1.5 w-24 rounded-full bg-muted dark:bg-slate-800 overflow-hidden">
+                      <div className={`h-full ${isTasksDone ? "bg-emerald-500" : "bg-amber-500"}`} style={{ width: `${Math.round((internApproved / Math.max(1, internTotal)) * 100)}%` }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`rounded-2xl border p-4 transition ${isPaymentDone ? "bg-emerald-50/50 border-emerald-200/50 dark:bg-emerald-950/10 dark:border-emerald-855/30" : "bg-secondary/40 border-border/40"}`}>
+                <div className="flex items-start gap-3">
+                  <div className={`grid size-7 shrink-0 place-items-center rounded-lg ${isPaymentDone ? "bg-emerald-500 text-white" : "bg-amber-500/10 text-amber-500"}`}>
+                    {isPaymentDone ? <CheckCircle2 className="size-4" /> : <Wallet className="size-4" />}
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-foreground">2. Payment Verification</h4>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      {payment ? `Payment Status: ${payment.status}` : "Payment verification required."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Invoice Checkout QR Scan Section */}
+      {isTasksDone && !isPaymentDone && (
+        <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-6">
+          <div>
+            <h3 className="flex items-center gap-2 font-bold text-sm text-foreground"><CreditCard className="size-4 text-primary" /> Certificate Fee Payment Checkout</h3>
+            <p className="text-xs text-muted-foreground mt-1">Submit your verification fee payment to unlock your certificate ID immediately.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-12 gap-6 items-start">
+            {/* Column 1: QR & Instructions */}
+            <div className="md:col-span-5 rounded-2xl border border-border/30 bg-secondary/20 p-5 flex flex-col items-center text-center gap-4 relative overflow-hidden">
+              <style>{`
+                @keyframes scanner-laser {
+                  0%, 100% { top: 0%; opacity: 0.3; }
+                  50% { top: 100%; opacity: 1; }
+                }
+              `}</style>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Scan QR Code via GPay or any UPI App</span>
+              
+              <div className="relative p-4 bg-white dark:bg-white rounded-2xl shadow-lg border border-border/10 overflow-hidden group">
+                {/* Running Scanner Laser Line */}
+                <div className="absolute left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.8)] z-10 pointer-events-none animate-[scanner-laser_2.5s_infinite_ease-in-out]" />
+                <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${PAYMENT.amount}&cu=${PAYMENT.currency}`} size={160} />
+              </div>
+
+              {/* GPay/UPI Badges */}
+              <div className="flex flex-col items-center gap-1.5 w-full pt-1 border-t border-border/10">
+                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Supported Payment Apps</span>
+                <div className="flex gap-1.5 text-[10px] font-bold">
+                  <span className="bg-blue-600/10 text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-md border border-blue-600/10">GPay</span>
+                  <span className="bg-purple-600/10 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-md border border-purple-600/10">PhonePe</span>
+                  <span className="bg-sky-600/10 text-sky-600 dark:text-sky-400 px-2 py-0.5 rounded-md border border-sky-600/10">Paytm</span>
+                  <span className="bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md border border-emerald-600/10">UPI</span>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <p className="font-mono font-bold text-sm text-foreground">{PAYMENT.upiId}</p>
+                <p className="text-[10px] text-muted-foreground">{PAYMENT.payeeName}</p>
+              </div>
+              <Button size="sm" variant="outline" className="rounded-xl h-8 text-[11px] border-border/50 gap-1.5 shadow-sm bg-white"
+                onClick={() => {
+                  navigator.clipboard.writeText(PAYMENT.upiId);
+                  toast.success("UPI ID copied to clipboard!");
+                }}>
+                <Copy className="size-3.5" /> Copy UPI ID
+              </Button>
+            </div>
+            
+            {/* Column 2: Form Details */}
+            <div className="md:col-span-7 space-y-4">
+              <div className="rounded-2xl border border-border/40 bg-secondary/30 p-4 flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Certification Fee</p>
+                  <p className="font-extrabold text-2xl mt-0.5 text-emerald-600 dark:text-emerald-400">₹{PAYMENT.amount}</p>
+                </div>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 font-bold px-2.5 py-1 rounded-lg">Payable Amount</span>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-xs font-semibold text-muted-foreground">UPI Ref Number / UTR Transaction ID *</Label>
+                  <Input placeholder="Enter 12-digit UPI reference ID" className="mt-1.5 h-10 text-xs rounded-xl border-border/60 bg-white"
+                    value={utrNumber} onChange={e => setUtrNumber(e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs font-semibold text-muted-foreground">Attach Screenshot (optional)</Label>
+                  <Input type="file" accept="image/*" className="mt-1.5 h-10 text-xs file:text-xs rounded-xl border-border/60 bg-white file:mr-4 file:py-1 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[#07284a] file:text-white hover:file:bg-[#07284a]/90 file:cursor-pointer"
+                    onChange={e => setPaymentScreenshot(e.target.files?.[0] ?? null)} />
+                </div>
+                
+                <Button className="w-full brand-gradient text-white border-0 rounded-2xl h-11 text-sm font-semibold gap-2 shadow-lg shadow-[#07284a]/20 mt-2"
+                  disabled={!utrNumber.trim() || submittingPayment}
+                  onClick={handlePaymentSubmit}>
+                  {submittingPayment ? <Loader2 className="size-4 animate-spin" /> : <CreditCard className="size-4" />}
+                  {submittingPayment ? "Submitting payment details..." : `Pay Fee ₹${PAYMENT.amount} & Verify`}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CertificateSection({ cert, app, compact }: any) {
   if (!cert) return null;
-  const isInternCert = cert.certificate_id?.startsWith("SKX-");
   const domain = getDomain(app?.domain);
   const inner = (
     <>
@@ -2116,14 +1934,11 @@ function CertificateSection({ cert, app, course, enrollment, lastAttempt, compac
         <div className="mx-auto grid size-14 place-items-center rounded-2xl brand-gradient text-white shadow-md mb-3">
           <Award className="size-7" />
         </div>
-        <p className="font-bold text-sm">{isInternCert ? domain?.name : course?.name}</p>
+        <p className="font-bold text-sm text-foreground">{domain?.name}</p>
         <p className="text-[10px] text-muted-foreground font-mono mt-1">{cert.certificate_id}</p>
-        {cert.score != null && (
-          <Badge variant="secondary" className="mt-2 text-xs">{cert.score}/{lastAttempt?.total ?? 100}</Badge>
-        )}
       </div>
       <div className="mt-4 space-y-2">
-        {isInternCert && app ? (
+        {app && (
           <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9"
             onClick={() => downloadPdf(
               <CertificateDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain}
@@ -2133,80 +1948,15 @@ function CertificateSection({ cert, app, course, enrollment, lastAttempt, compac
             )}>
             <Download className="mr-1.5 size-4" /> Download PDF
           </Button>
-        ) : (
-          <Button size="sm" className="w-full brand-gradient text-white border-0 rounded-xl h-9"
-            onClick={() => downloadPdf(
-              <CourseCertificateDoc fullName={app?.full_name ?? "Student"} courseName={course?.name ?? "Course"}
-                score={cert.score ?? 0} total={lastAttempt?.total ?? 100}
-                certId={cert.certificate_id} issuedAt={cert.issued_at}
-                verifyUrl={`${window.location.origin}/verify-certificate`} />,
-              `Certificate_${cert.certificate_id}.pdf`
-            )}>
-            <Download className="mr-1.5 size-4" /> Download PDF
-          </Button>
         )}
-        <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9">
+        <Button asChild size="sm" variant="outline" className="w-full rounded-xl border-border/60 h-9 bg-white">
           <Link to="/verify-certificate"><ExternalLink className="mr-1.5 size-4" /> Verify Certificate</Link>
         </Button>
       </div>
     </>
   );
   if (compact) return <div className="border-b border-border/40 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">{inner}</div>;
-  return <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">{inner}</div>;
-}
-
-// ─── PROJECT CARDS ───
-
-function ProjectCards({ userId }: { userId?: string }) {
-  const [projects, setProjects] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!userId) { setLoading(false); return; }
-    supabase
-      .from("project_submissions" as any)
-      .select("*, project_challenges!inner(title, project_id, industry)")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        if (data) setProjects(data);
-        setLoading(false);
-      });
-  }, [userId]);
-
-  if (loading) return <div className="h-20 rounded-2xl bg-white/50 animate-pulse" />;
-  if (projects.length === 0) return <Link to="/projects" className="block rounded-2xl border border-dashed border-border/50 bg-white/70 p-8 text-center backdrop-blur-xl dark:bg-[#1E293B]/70 hover:border-[#07284a]/30 transition"><Code2 className="size-8 mx-auto mb-2 text-muted-foreground/30" /><p className="text-xs text-muted-foreground">No project submissions yet. Browse projects to start a challenge.</p></Link>;
-
-  return (
-    <div className="grid gap-3">
-      {projects.map((p) => (
-        <Link
-          key={p.id}
-          to="/projects/$id"
-          params={{ id: p.project_challenges?.project_id }}
-          className="block rounded-2xl border border-border/50 bg-white/70 p-4 backdrop-blur-xl dark:bg-[#1E293B]/70 hover:shadow-md hover:-translate-y-0.5 transition-all group"
-        >
-          <div className="flex items-center gap-4">
-            <div className="grid size-12 shrink-0 place-items-center rounded-xl brand-gradient text-white shadow-sm"><Code2 className="size-6" /></div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-semibold text-sm truncate group-hover:text-[#07284a] dark:group-hover:text-blue-400 transition">
-                  {p.project_challenges?.title}
-                </span>
-                <Badge className={`text-[10px] px-2 py-0.5 rounded-md ${
-                  p.status === "approved" ? "bg-emerald-600 text-white" :
-                  p.status === "rejected" ? "bg-rose-600 text-white" :
-                  "bg-amber-500 text-white"
-                }`}>{p.status}</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">{p.project_challenges?.industry ?? ""}{p.final_score != null ? ` · Score: ${p.final_score}/100` : ""}</p>
-            </div>
-            <ChevronRight className="size-4 text-muted-foreground shrink-0 group-hover:translate-x-0.5 transition" />
-          </div>
-        </Link>
-      ))}
-    </div>
-  );
+  return <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-slate-900/70">{inner}</div>;
 }
 
 // ─── ID CARD ───
@@ -2215,20 +1965,20 @@ function IDCardSection({ app }: { app: Application | null }) {
   if (!app) return null;
   const domain = getDomain(app.domain);
   return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <h3 className="flex items-center gap-2 font-bold mb-4"><Shield className="size-4 text-primary" /> Digital ID Card</h3>
+    <div className="rounded-3xl border border-border/40 bg-white/60 p-5 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+      <h3 className="flex items-center gap-2 font-bold mb-4 text-sm text-foreground"><Shield className="size-4 text-primary" /> Digital ID Card</h3>
       <IDCard internId={app.intern_id} fullName={app.full_name} domain={domain?.name ?? app.domain} photoUrl={app.photo_url} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Badge className="bg-emerald-600 text-white text-[10px]"><CheckCircle2 className="mr-1 size-3" /> ACTIVE</Badge>
+        <Badge className="bg-emerald-600 text-white text-[10px] border-0"><CheckCircle2 className="mr-1 size-3" /> ACTIVE</Badge>
         <div className="flex flex-wrap gap-2 ml-auto">
-          <Button size="sm" variant="outline" className="rounded-lg h-8 text-xs border-border/60"
+          <Button size="sm" variant="outline" className="rounded-xl h-8 text-xs border-border/60 bg-white"
             onClick={() => downloadPdf(
               <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
               `OfferLetter_${app.intern_id}.pdf`
             )}>
             <FileText className="mr-1 size-3" /> Offer Letter
           </Button>
-          <Button size="sm" className="brand-gradient text-white border-0 rounded-lg h-8 text-xs"
+          <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-8 text-xs font-semibold"
             onClick={() => downloadPdf(
               <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
               `IDCard_${app.intern_id}.pdf`
@@ -2241,75 +1991,30 @@ function IDCardSection({ app }: { app: Application | null }) {
   );
 }
 
-// ─── ACTIVITY FEED ───
-
-function ActivityFeed({ app, enrollment, taskSubmissions, lastAttempt, topics, completedTopics, cert, lmsCert }: any) {
-  const activities: { icon: any; text: string; time: string; color: string }[] = [];
-
-  if (app) activities.push({ icon: CheckCircle2, text: "Application submitted and approved", time: new Date(app.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400" });
-  if (enrollment) activities.push({ icon: BookOpen, text: "LMS course started", time: new Date(enrollment.started_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), color: "text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-400" });
-  if (taskSubmissions?.length) {
-    const approved = taskSubmissions.filter((s: any) => s.status === "approved");
-    approved.forEach((s: any) => {
-      activities.push({ icon: CheckCircle2, text: `Completed Task ${s.task_number ?? ""}`, time: s.submitted_at ? new Date(s.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400" });
-    });
-  }
-  if (lastAttempt) activities.push({ icon: Brain, text: `Passed quiz with ${lastAttempt.score}/${lastAttempt.total} marks`, time: lastAttempt.submitted_at ? new Date(lastAttempt.submitted_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-[#07284a] bg-[#07284a]/10 dark:bg-[#07284a]/30 dark:text-[#07284a]/80" });
-  if (cert || lmsCert) activities.push({ icon: Award, text: "Certificate generated", time: (cert?.issued_at ?? lmsCert?.issued_at) ? new Date(cert?.issued_at ?? lmsCert?.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short" }) : "", color: "text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400" });
-  if (completedTopics?.size) activities.push({ icon: BookOpen, text: `Completed ${completedTopics.size} course topics`, time: "", color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30 dark:text-cyan-400" });
-
-  if (!activities.length) return null;
-
-  return (
-    <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur-xl dark:bg-[#1E293B]/70">
-      <h3 className="flex items-center gap-2 font-bold mb-4"><TrendingUp className="size-4 text-primary" /> Activity</h3>
-      <div className="space-y-3">
-        {activities.slice(0, 8).map((a, i) => {
-          const Icon = a.icon;
-          return (
-            <div key={i} className="flex items-start gap-3">
-              <div className={`grid size-8 shrink-0 place-items-center rounded-lg ${a.color}`}>
-                <Icon className="size-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm">{a.text}</p>
-                {a.time && <p className="text-xs text-muted-foreground">{a.time}</p>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 // ─── APPLY FORM ───
 
-function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any; enrollments: any[]; courses: any[]; onCreated: () => void }) {
+function WelcomeDashboard({ user, onCreated }: { user: any; onCreated: () => void }) {
   const [showApplyDialog, setShowApplyDialog] = useState(false);
   const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "there";
-  const enrolledCourses = enrollments
-    .map((e) => ({ ...e, course: courses.find((c) => c.id === e.course_id) }))
-    .filter((e) => e.course);
 
   return (
     <div className="space-y-8">
       {/* Hero welcome */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-10 dark:bg-[#1E293B]/70 dark:border-white/5">
+      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/70 backdrop-blur-xl p-6 sm:p-10 dark:bg-slate-900/60 dark:border-white/5">
         <div className="absolute -right-20 -top-20 size-64 rounded-full bg-[#07284a]/15 blur-[100px]" />
         <div className="absolute -bottom-20 -left-20 size-64 rounded-full bg-blue-400/15 blur-[100px]" />
         <div className="relative">
-          <Badge variant="secondary" className="mb-3"><Sparkles className="mr-1 size-3" /> Welcome</Badge>
-          <h1 className="font-display text-3xl font-bold sm:text-4xl">Hi {displayName} 👋</h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            Your Skyrovix learning hub. Browse courses, track your progress, and apply for an internship anytime.
+          <Badge variant="secondary" className="mb-3 bg-primary/10 text-primary border-0"><Sparkles className="mr-1 size-3" /> Welcome</Badge>
+          <h1 className="font-display text-3xl font-bold sm:text-4xl text-foreground">Hi {displayName} 👋</h1>
+          <p className="mt-2 max-w-2xl text-sm sm:text-base text-muted-foreground leading-relaxed">
+            Your Skyrovix learning hub. Select your internship domain, complete practical tasks, and apply for an internship anytime.
           </p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Button asChild size="lg" className="brand-gradient text-white border-0">
-              <Link to="/courses"><BookOpen className="mr-2 size-4" /> Explore Courses</Link>
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => setShowApplyDialog(true)}>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button size="lg" className="brand-gradient text-white border-0 rounded-2xl h-11" onClick={() => setShowApplyDialog(true)}>
               <FileText className="mr-2 size-4" /> Apply for Internship
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-2xl h-11 bg-white">
+              <Link to="/domains"><Layers className="mr-2 size-4" /> Explore Domains</Link>
             </Button>
           </div>
         </div>
@@ -2322,43 +2027,18 @@ function WelcomeDashboard({ user, enrollments, courses, onCreated }: { user: any
       />
 
       {/* Quick action tiles */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Link to="/courses" className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition hover:shadow-lg hover:-translate-y-0.5 dark:bg-[#1E293B]/70">
-          <div className="grid size-11 place-items-center rounded-xl bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/30 dark:text-[#07284a]/80"><GraduationCap className="size-5" /></div>
-          <p className="mt-3 font-semibold">Browse Courses</p>
-          <p className="text-sm text-muted-foreground">Topic-wise lessons + verified certificates.</p>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link to="/domains" className="group rounded-3xl border border-border/45 bg-white/60 p-5 backdrop-blur transition-all duration-300 hover:shadow-lg hover:-translate-y-1 dark:bg-slate-900/60">
+          <div className="grid size-11 place-items-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><Layers className="size-5" /></div>
+          <p className="mt-4 font-bold text-foreground">Internship Domains</p>
+          <p className="text-xs text-muted-foreground mt-1">Pick a domain to specialise in.</p>
         </Link>
-        <Link to="/domains" className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition hover:shadow-lg hover:-translate-y-0.5 dark:bg-[#1E293B]/70">
-          <div className="grid size-11 place-items-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"><Layers className="size-5" /></div>
-          <p className="mt-3 font-semibold">Internship Domains</p>
-          <p className="text-sm text-muted-foreground">Pick a domain to specialise in.</p>
-        </Link>
-        <Link to="/verify-certificate" className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition hover:shadow-lg hover:-translate-y-0.5 dark:bg-[#1E293B]/70">
-          <div className="grid size-11 place-items-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"><Shield className="size-5" /></div>
-          <p className="mt-3 font-semibold">Verify Certificate</p>
-          <p className="text-sm text-muted-foreground">Check any Skyrovix certificate ID.</p>
+        <Link to="/verify-certificate" className="group rounded-3xl border border-border/45 bg-white/60 p-5 backdrop-blur transition-all duration-300 hover:shadow-lg hover:-translate-y-1 dark:bg-slate-900/60">
+          <div className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"><Shield className="size-5" /></div>
+          <p className="mt-4 font-bold text-foreground">Verify Certificate</p>
+          <p className="text-xs text-muted-foreground mt-1">Check any Skyrovix certificate ID.</p>
         </Link>
       </div>
-
-      {/* My courses if any */}
-      {enrolledCourses.length > 0 && (
-        <div>
-          <h2 className="mb-3 font-display text-xl font-bold">My Courses</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {enrolledCourses.map((e) => (
-              <Link key={e.id} to="/courses/$slug" params={{ slug: e.course.slug }} className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition hover:shadow-lg dark:bg-[#1E293B]/70">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="font-semibold">{e.course.name}</p>
-                  <Badge variant="secondary" className="text-xs">{e.status === "completed" ? "Completed" : "In Progress"}</Badge>
-                </div>
-                <Progress value={e.progress_percent ?? 0} className="mt-3 h-2" />
-                <p className="mt-2 text-xs text-muted-foreground">{e.progress_percent ?? 0}% complete · Continue →</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

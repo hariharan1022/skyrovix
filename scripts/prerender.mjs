@@ -6,7 +6,7 @@ const CLIENT = join(DIST, "client");
 const OUT = join(DIST, "gh-pages");
 
 const ROUTES = [
-  "/", "/about", "/auth", "/contact", "/courses", "/domains",
+  "/", "/about", "/auth", "/contact", "/domains",
   "/privacy", "/terms", "/verify-certificate",
 ];
 

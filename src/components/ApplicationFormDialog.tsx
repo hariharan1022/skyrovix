@@ -72,13 +72,32 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
     try {
       let currentUser = user;
       if (!currentUser) {
+        const email = String(fd.get("email"));
+        const password = String(fd.get("password"));
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-          email: String(fd.get("email")),
-          password: String(fd.get("password")),
+          email,
+          password,
           options: { data: { full_name: String(fd.get("full_name")) } },
         });
-        if (signUpError) throw signUpError;
-        currentUser = signUpData.user;
+        if (signUpError) {
+          if (signUpError.message.toLowerCase().includes("already registered") || 
+              signUpError.message.toLowerCase().includes("already exists") ||
+              signUpError.message.toLowerCase().includes("user_already_exists")) {
+            // Try to sign in instead
+            const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+              email,
+              password,
+            });
+            if (signInError) {
+              throw new Error("This email is already registered. Please check your password or use a different email.");
+            }
+            currentUser = signInData.user;
+          } else {
+            throw signUpError;
+          }
+        } else {
+          currentUser = signUpData.user;
+        }
         if (!currentUser) throw new Error("Account creation failed");
       }
 
