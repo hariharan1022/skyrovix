@@ -21,9 +21,9 @@ import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
 export const Route = createFileRoute("/domains/")({
   head: () => ({
     meta: [
-      { title: "Apply for Virtual Internship — Select Domain & Start Today | Skyrovix" },
-      { name: "description", content: "Apply for a virtual internship at Skyrovix in Full Stack, Data Science, AI/ML, UI/UX, Cyber Security, Python, Java and more. Select your domain and duration, fill the form, and get an instant offer letter. 100% online, ₹100 certification fee." },
-      { name: "keywords", content: "apply internship, internship registration, virtual internship application, online training registration, skyrovix application form, internship form India, apply online internship, internship with offer letter" },
+      { title: "Apply for Virtual Internship | Full Stack, AI, Python, Data Science & More | Skyrovix" },
+      { name: "description", content: "Apply for a virtual internship at Skyrovix and gain hands-on experience through real-world projects. Choose from Full Stack, Data Science, AI/ML, UI/UX, Cyber Security, Python, Java, Cloud Computing and more. Get an instant offer letter, digital ID card, and QR-verified certificate. 100% online, work from home, summer internship 2026." },
+      { name: "keywords", content: "apply internship online, internship application form, virtual internship India, full stack internship apply, AI ML internship apply, Python internship apply, data science internship apply, internship with offer letter, internship with certificate, project based internship online, work from home internship, summer internship 2026, internship for CSE students, internship for IT students, internship for engineering students, internship for final year students, MERN stack internship apply, Skyrovix internship registration" },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Skyrovix" },

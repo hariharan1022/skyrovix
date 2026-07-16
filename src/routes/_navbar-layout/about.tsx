@@ -10,9 +10,9 @@ import cofounderPhoto from "@/assets/co founder.jpeg";
 export const Route = createFileRoute("/_navbar-layout/about")({
   head: () => ({
     meta: [
-      { title: "About Skyrovix — MSME-Registered Virtual Internship Platform" },
-      { name: "description", content: "Learn about Skyrovix, an MSME-registered virtual internship and training platform helping college students, fresh graduates, and job seekers gain real-world skills through task-based projects. Founded by students, built for students." },
-      { name: "keywords", content: "about skyrovix, skyrovix internship platform, virtual internship company India, MSME registered training, skill development platform, skyrovix founders, internship platform India, task-based learning" },
+      { title: "About Skyrovix | MSME-Registered Virtual Internship Platform for Students India" },
+      { name: "description", content: "Learn about Skyrovix — an MSME-registered virtual internship and training platform helping college students, engineering students, CSE and IT students, and fresh graduates gain industry-ready skills through project-based internships. Get offer letters, digital ID cards, and QR-verified certificates." },
+      { name: "keywords", content: "about skyrovix, skyrovix internship platform, virtual internship company India, MSME registered training, project based internship platform, internship for college students, internship for CSE students, internship for IT students, internship for engineering students, skill development platform India, skyrovix founders, internship with real projects, work from home internship India, summer internship 2026" },
       { name: "robots", content: "index, follow" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Skyrovix" },

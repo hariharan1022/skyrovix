@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CourseJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
+import { DOMAIN_KEYWORDS } from "@/lib/seo";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,29 +67,47 @@ export const Route = createFileRoute("/domains/$slug")({
     const name = d?.name ?? "Domain";
     const desc = d?.description ?? "Skyrovix internship domain.";
     const canonicalUrl = `https://skyrovix.online/domains/${params.slug}`;
+    // Domain-specific keywords from map, fallback to generic pattern
+    const domainKws = DOMAIN_KEYWORDS[params.slug] ?? [];
+    const genericKws = [
+      `${name} internship`,
+      `${name.toLowerCase()} virtual internship`,
+      `${name} internship with certificate`,
+      `${name} internship for students`,
+      `${name} internship with offer letter`,
+      `${name} internship India`,
+      `${name} online training`,
+      `Skyrovix ${name} internship`,
+      "virtual internship with certificate",
+      "internship with real projects",
+      "project based internship online",
+      "work from home internship",
+      "summer internship 2026",
+    ];
+    const allKws = [...new Set([...domainKws, ...genericKws])].join(", ");
     return {
       meta: [
-        { title: `${name} Internship — Virtual Internship Program | Skyrovix` },
-        { name: "description", content: `Join the ${name} virtual internship at Skyrovix. ${desc} Get an instant offer letter, digital ID card, complete 5 real-world projects, and earn a QR-verified certificate. Apply online in minutes.` },
-        { name: "keywords", content: `${name.toLowerCase()} internship, ${params.slug} virtual internship, ${name} online training, Skyrovix ${name}, ${name} internship certificate, ${name} internship for students, ${name} online course, ${name} internship with offer letter` },
-        { name: "robots", content: "index, follow, max-image-preview:large" },
+        { title: `${name} Internship | Virtual Internship with Certificate & Real Projects | Skyrovix` },
+        { name: "description", content: `Join the ${name} virtual internship at Skyrovix and gain hands-on experience through real-world projects. ${desc} Get an instant offer letter, digital ID card, complete real-world tasks, and earn a QR-verified certificate. Apply online in minutes — 100% remote, work from home.` },
+        { name: "keywords", content: allKws },
+        { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1" },
         { property: "og:type", content: "website" },
         { property: "og:site_name", content: "Skyrovix" },
-        { property: "og:title", content: `${name} Internship — Virtual Program with Certificate | Skyrovix` },
-        { property: "og:description", content: `${desc} Get an offer letter, digital ID card, and earn a QR-verified certificate after completing 5 real-world tasks.` },
+        { property: "og:title", content: `${name} Internship | Virtual Internship with Certificate & Real Projects | Skyrovix` },
+        { property: "og:description", content: `${desc} Get an instant offer letter, digital ID card, and earn a QR-verified certificate after completing real-world tasks. Apply in minutes.` },
         { property: "og:url", content: canonicalUrl },
         { property: "og:image", content: "https://skyrovix.online/og-default.png" },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },
-        { property: "og:image:alt", content: `${name} Virtual Internship — Skyrovix` },
+        { property: "og:image:alt", content: `${name} Virtual Internship with Certificate — Skyrovix` },
         { property: "og:image:type", content: "image/png" },
         { property: "og:locale", content: "en_IN" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:site", content: "@skyrovix" },
-        { name: "twitter:title", content: `${name} Internship — Virtual Program with Certificate | Skyrovix` },
-        { name: "twitter:description", content: `${desc} Earn a QR-verified certificate with offer letter and digital ID card.` },
+        { name: "twitter:title", content: `${name} Internship | Virtual Internship with Certificate | Skyrovix` },
+        { name: "twitter:description", content: `${desc} Get an offer letter, digital ID card & QR-verified certificate. 100% work from home.` },
         { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
-        { name: "twitter:image:alt", content: `${name} Virtual Internship — Skyrovix` },
+        { name: "twitter:image:alt", content: `${name} Virtual Internship Certificate — Skyrovix` },
         { rel: "canonical", href: canonicalUrl },
       ],
     };
