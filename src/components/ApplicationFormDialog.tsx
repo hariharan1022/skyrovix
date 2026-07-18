@@ -160,6 +160,7 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
         photo_url,
         coupon_code: couponApplied?.code ?? null,
         status: "approved",
+        submission_status: "in_progress",
         country,
         state,
         district,

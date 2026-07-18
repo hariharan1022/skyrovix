@@ -5929,3 +5929,16 @@ UPDATE public.courses SET total_topics = (SELECT COUNT(*) FROM public.course_top
 UPDATE public.courses SET total_topics = (SELECT COUNT(*) FROM public.course_topics WHERE course_id = (SELECT id FROM public.courses WHERE slug = 'javascript')) WHERE slug = 'javascript';
 UPDATE public.courses SET total_topics = (SELECT COUNT(*) FROM public.course_topics WHERE course_id = (SELECT id FROM public.courses WHERE slug = 'php')) WHERE slug = 'php';
 UPDATE public.courses SET total_topics = (SELECT COUNT(*) FROM public.course_topics WHERE course_id = (SELECT id FROM public.courses WHERE slug = 'sql')) WHERE slug = 'sql';
+
+-- ═══════════════════════════════════════════════════════════
+-- INTERNSHIP SUBMISSION & VERIFICATION WORKFLOW
+-- ═══════════════════════════════════════════════════════════
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS submission_status TEXT NOT NULL DEFAULT 'in_progress';
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS verified BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS verification_notes TEXT;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS rejection_reason TEXT;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS certificate_generated BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS certificate_generated_at TIMESTAMPTZ;

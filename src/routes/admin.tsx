@@ -19,7 +19,7 @@ import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
   ClipboardCheck, ClipboardList, Brain, IndianRupee, Award, Users, BarChart3,
   Settings, LogOut, Moon, Sun, Bell, Search, ChevronDown, Menu,
-  X, Plus, Eye, CheckCircle2, XCircle, Mail, Download, Sparkles,
+  X, Plus, Eye, CheckCircle2, XCircle, Mail, Download, Sparkles, Shield,
   ChevronRight, ChevronLeft, Clock, TrendingUp, UserPlus, Wallet,
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
@@ -43,6 +43,7 @@ const SIDEBAR_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "applications", label: "Internship Applications", icon: Users },
   { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
+  { id: "verification", label: "Verification Queue", icon: Shield },
   { id: "payments", label: "Payments", icon: Wallet },
   { id: "promotions", label: "Promotions", icon: Percent },
   { id: "popup", label: "Promo Popup", icon: Bell },
@@ -74,12 +75,14 @@ function AdminPanel() {
   useEffect(() => {
     const channel = supabase.channel("admin-realtime");
     const tables = [
-      { table: "applications", icon: UserPlus, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30", label: "New application" },
-      { table: "submissions", icon: ClipboardCheck, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/30", label: "New task submission" },
-      { table: "payments", icon: IndianRupee, color: "text-green-500 bg-green-50 dark:bg-green-950/30", label: "New payment" },
+      { table: "applications", icon: UserPlus, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30", label: "New application", event: "INSERT" },
+      { table: "applications", icon: Shield, color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30", label: "Internship submitted for verification", event: "UPDATE" },
+      { table: "submissions", icon: ClipboardCheck, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/30", label: "New task submission", event: "INSERT" },
+      { table: "payments", icon: IndianRupee, color: "text-green-500 bg-green-50 dark:bg-green-950/30", label: "New payment", event: "INSERT" },
     ];
-    for (const { table, icon, color, label } of tables) {
-      channel.on("postgres_changes" as any, { event: "INSERT", schema: "public", table }, (payload: any) => {
+    for (const { table, icon, color, label, event } of tables) {
+      channel.on("postgres_changes" as any, { event, schema: "public", table }, (payload: any) => {
+        if (event === "UPDATE" && payload.new?.submission_status !== "submitted") return;
         const name = payload.new?.full_name ?? payload.new?.id?.slice(0, 8) ?? "";
         const notif = { icon, text: `${label} from ${name}`, time: "Just now", color };
         setLiveNotifs((prev) => [notif, ...prev].slice(0, 20));
@@ -88,6 +91,7 @@ function AdminPanel() {
         qc.invalidateQueries({ queryKey: ["admin-apps"] });
         qc.invalidateQueries({ queryKey: ["admin-subs"] });
         qc.invalidateQueries({ queryKey: ["admin-payments"] });
+        qc.invalidateQueries({ queryKey: ["admin-verification-pending"] });
       });
     }
     channel.subscribe();
@@ -106,14 +110,15 @@ function AdminPanel() {
   const { data: overview } = useQuery({
     queryKey: ["admin-overview"],
     queryFn: async () => {
-      const [a, s, p, c] = await Promise.all([
+      const [a, s, p, c, v] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }),
         supabase.from("submissions").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("payments").select("id", { count: "exact", head: true }).eq("status", "pending"),
         supabase.from("certificates").select("id", { count: "exact", head: true }),
+        supabase.from("applications").select("id", { count: "exact", head: true }).eq("submission_status", "submitted"),
       ]);
       return {
-        apps: a.count ?? 0, subs: s.count ?? 0, pays: p.count ?? 0, certs: c.count ?? 0,
+        apps: a.count ?? 0, subs: s.count ?? 0, pays: p.count ?? 0, certs: c.count ?? 0, pendingVerification: v.count ?? 0,
       };
     },
   });
@@ -250,6 +255,7 @@ function AdminPanel() {
             {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} />}
             {active === "applications" && <ApplicationsSection />}
             {active === "submissions" && <SubmissionsSection />}
+            {active === "verification" && <VerificationSection />}
             {active === "payments" && <PaymentsSection />}
             {active === "promotions" && <PromotionsSection />}
             {active === "popup" && <PromoPopupSection />}
@@ -294,7 +300,7 @@ function NotificationsDropdown({ onClose, notifs }: { onClose: () => void; notif
 // DASHBOARD
 // ══════════════════════════════════════════════
 function DashboardSection({ greeting, overview, onNavigate }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void }) {
-  const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0 });
+  const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0, pendingVerification: 0 });
   useEffect(() => {
     if (!overview) return;
     const timer = setInterval(() => {
@@ -303,6 +309,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
         subs: Math.min(c.subs + 1, overview.subs),
         pays: Math.min(c.pays + 1, overview.pays),
         certs: Math.min(c.certs + 2, overview.certs),
+        pendingVerification: Math.min(c.pendingVerification + 1, overview.pendingVerification),
       }));
     }, 30);
     setTimeout(() => clearInterval(timer), 1000);
@@ -311,9 +318,9 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
 
   const stats = [
     { label: "Applications", value: counts.apps, icon: Users, change: "+12 Today", color: "from-blue-500 to-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-    { label: "Pending Submissions", value: counts.subs, icon: FileText, change: "Need Review", color: "from-amber-500 to-orange-500", bg: "bg-amber-50 dark:bg-amber-950/30" },
-    { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "₹18,000 Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30" },
-    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "+15 This Week", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
+    { label: "Pending Verification", value: overview?.pendingVerification ?? 0, icon: Shield, change: "Need Review", color: "from-purple-500 to-violet-500", bg: "bg-purple-50 dark:bg-purple-950/30" },
+    { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30" },
+    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "Total", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
   ];
 
   return (
@@ -797,22 +804,7 @@ function PaymentsSection() {
     } else {
       const { error } = await supabase.from("payments").update({ status: "verified", verified_at: new Date().toISOString() }).eq("id", paymentId);
       if (error) return toast.error(error.message);
-      const cert_id = generateCertId();
-      const hash = crypto.randomUUID().replace(/-/g, "").slice(0, 32);
-      const { error: cerr } = await supabase.from("certificates").insert({ application_id: applicationId, certificate_id: cert_id, verification_hash: hash });
-      if (cerr) return toast.error(cerr.message);
-      toast.success(`Payment verified, certificate ${cert_id} issued`);
-      (async () => {
-        try {
-          const { data: pmt } = await supabase.from("payments").select("*, applications!inner(full_name, intern_id, domain, email, user_id)").eq("id", paymentId).single();
-          if (pmt?.applications?.email) {
-            const { sendCertificateEmail } = await import("@/lib/email-helpers");
-            const app = pmt.applications as any;
-            const result = await sendCertificateEmail({ to: app.email, studentName: app.full_name, studentId: app.user_id, certId: cert_id, domainName: app.domain, internId: app.intern_id });
-            if (!result.success) console.warn("[Email] Certificate email not sent:", result.error);
-          }
-        } catch (e) { console.warn("[Email] Failed to send certificate:", e); }
-      })();
+      toast.success("Payment verified — certificate will be issued after admin approves internship submission.");
     }
     qc.invalidateQueries({ queryKey: ["admin-payments"] });
   };
@@ -870,6 +862,278 @@ function PaymentsSection() {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// VERIFICATION QUEUE
+// ══════════════════════════════════════════════
+function VerificationSection() {
+  const qc = useQueryClient();
+  const { user } = useAuth();
+  const [selectedApp, setSelectedApp] = useState<any | null>(null);
+  const [rejectDialog, setRejectDialog] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const { data: pendingApps } = useQuery({
+    queryKey: ["admin-verification-pending"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("*, payments(utr_number, amount, status)")
+        .in("submission_status", ["submitted"])
+        .order("submitted_at", { ascending: false });
+      return data ?? [];
+    },
+    refetchInterval: 10_000,
+  });
+
+  const { data: reviewedApps } = useQuery({
+    queryKey: ["admin-verification-reviewed"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("*, payments(utr_number, amount, status)")
+        .in("submission_status", ["approved", "rejected"])
+        .order("verified_at", { ascending: false });
+      return data ?? [];
+    },
+    refetchInterval: 10_000,
+  });
+
+  const handleApprove = async (app: any) => {
+    setActionLoading(app.id);
+    try {
+      // Generate certificate
+      const cert_id = generateCertId();
+      const hash = crypto.randomUUID().replace(/-/g, "").slice(0, 32);
+      const { error: cerr } = await supabase.from("certificates").insert({
+        application_id: app.id,
+        certificate_id: cert_id,
+        verification_hash: hash,
+      });
+      if (cerr) throw cerr;
+
+      // Update application
+      const { error: updErr } = await supabase
+        .from("applications")
+        .update({
+          submission_status: "approved",
+          verified: true,
+          verified_by: user?.id,
+          verified_at: new Date().toISOString(),
+          certificate_generated: true,
+          certificate_generated_at: new Date().toISOString(),
+          verification_notes: null,
+          rejection_reason: null,
+        })
+        .eq("id", app.id);
+      if (updErr) throw updErr;
+
+      toast.success(`Internship approved! Certificate ${cert_id} issued.`);
+
+      // Send certificate email
+      (async () => {
+        try {
+          const { sendCertificateEmail } = await import("@/lib/email-helpers");
+          const result = await sendCertificateEmail({
+            to: app.email,
+            studentName: app.full_name,
+            studentId: app.user_id,
+            certId: cert_id,
+            domainName: getDomain(app.domain)?.name ?? app.domain,
+            internId: app.intern_id,
+          });
+          if (!result.success) console.warn("[Email] Certificate email not sent:", result.error);
+        } catch (e) { console.warn("[Email] Failed to send certificate:", e); }
+      })();
+
+      qc.invalidateQueries({ queryKey: ["admin-verification-pending"] });
+      qc.invalidateQueries({ queryKey: ["admin-verification-reviewed"] });
+      qc.invalidateQueries({ queryKey: ["admin-overview"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to approve internship");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!rejectDialog) return;
+    setActionLoading(rejectDialog.id);
+    try {
+      const { error: updErr } = await supabase
+        .from("applications")
+        .update({
+          submission_status: "rejected",
+          verified: false,
+          verified_by: user?.id,
+          verified_at: new Date().toISOString(),
+          rejection_reason: rejectReason || "Incomplete submission",
+          verification_notes: rejectReason || "Rejected by admin",
+        })
+        .eq("id", rejectDialog.id);
+      if (updErr) throw updErr;
+
+      toast.success("Internship rejected");
+      setRejectDialog(null);
+      setRejectReason("");
+
+      qc.invalidateQueries({ queryKey: ["admin-verification-pending"] });
+      qc.invalidateQueries({ queryKey: ["admin-verification-reviewed"] });
+      qc.invalidateQueries({ queryKey: ["admin-overview"] });
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reject internship");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  return (
+    <div className="animate-fade-in-up space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Internship Verification Queue</h2>
+          <p className="text-sm text-muted-foreground">{pendingApps?.length ?? 0} pending, {reviewedApps?.length ?? 0} reviewed</p>
+        </div>
+      </div>
+
+      {/* Pending */}
+      {pendingApps && pendingApps.length > 0 && (
+        <div>
+          <h3 className="mb-3 text-sm font-semibold text-amber-600 flex items-center gap-2"><Clock className="size-4" /> Pending Verification ({pendingApps.length})</h3>
+          <div className="space-y-3">
+            {pendingApps.map((a: any) => (
+              <div key={a.id} className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="grid size-10 shrink-0 place-items-center rounded-full brand-gradient text-sm font-bold text-white">{a.full_name?.charAt(0)?.toUpperCase() ?? "?"}</div>
+                    <div>
+                      <p className="font-semibold text-sm">{a.full_name}</p>
+                      <p className="text-xs text-muted-foreground">{a.intern_id} · {getDomain(a.domain)?.name ?? a.domain} · {a.duration ?? 1} Month(s)</p>
+                    </div>
+                  </div>
+                  <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs">Submitted</Badge>
+                </div>
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                  <div><span className="text-muted-foreground">Applied</span><p className="font-semibold">{new Date(a.created_at).toLocaleDateString("en-IN")}</p></div>
+                  <div><span className="text-muted-foreground">Submitted</span><p className="font-semibold">{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</p></div>
+                  <div><span className="text-muted-foreground">Payment</span><p className="font-semibold">{a.payments?.[0] ? (a.payments[0].utr_number === "FREE_COUPON" ? "Free Coupon" : `₹${a.payments[0].amount}`) : "—"}</p></div>
+                  <div><span className="text-muted-foreground">Status</span><p className="font-semibold capitalize">{a.payments?.[0]?.status ?? "—"}</p></div>
+                </div>
+                {a.coupon_code && <p className="mt-2 text-xs text-muted-foreground">Coupon: <span className="font-mono font-bold">{a.coupon_code}</span></p>}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0 rounded-xl"
+                    disabled={actionLoading === a.id}
+                    onClick={() => handleApprove(a)}>
+                    {actionLoading === a.id ? <Loader2 className="size-3.5 animate-spin mr-1" /> : <CheckCircle2 className="size-3.5 mr-1" />}
+                    Approve & Issue Certificate
+                  </Button>
+                  <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-xl"
+                    disabled={actionLoading === a.id}
+                    onClick={() => { setRejectDialog(a); setRejectReason(""); }}>
+                    <XCircle className="size-3.5 mr-1" /> Reject
+                  </Button>
+                  <Button size="sm" variant="outline" className="rounded-xl border-border/60" onClick={() => setSelectedApp(selectedApp?.id === a.id ? null : a)}>
+                    <Eye className="size-3.5 mr-1" /> {selectedApp?.id === a.id ? "Hide" : "View"} Details
+                  </Button>
+                </div>
+                {selectedApp?.id === a.id && (
+                  <div className="mt-4 rounded-xl border border-border/40 bg-muted/30 p-4 text-xs space-y-2">
+                    <p><span className="font-semibold">Email:</span> {a.email}</p>
+                    <p><span className="font-semibold">Phone:</span> {a.phone ?? "—"}</p>
+                    <p><span className="font-semibold">College:</span> {a.college} · {a.course} ({a.year})</p>
+                    <p><span className="font-semibold">Location:</span> {[a.city, a.district, a.state, a.country].filter(Boolean).join(", ") || "—"}</p>
+                    <p><span className="font-semibold">Duration:</span> {a.duration ?? 1} Month(s)</p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(!pendingApps || pendingApps.length === 0) && (
+        <div className="rounded-2xl border border-border/50 bg-white/60 p-12 text-center backdrop-blur dark:bg-[#1E293B]/60">
+          <Shield className="size-12 mx-auto mb-4 text-muted-foreground/50" />
+          <h3 className="font-bold text-base">No Pending Verifications</h3>
+          <p className="text-sm text-muted-foreground mt-1">All submitted internships have been reviewed.</p>
+        </div>
+      )}
+
+      {/* Reviewed */}
+      {reviewedApps && reviewedApps.length > 0 && (
+        <div className="mt-6">
+          <h3 className="mb-3 text-sm font-semibold text-muted-foreground">Reviewed ({reviewedApps.length})</h3>
+          <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/50 text-xs uppercase text-muted-foreground">
+                  <th className="px-4 py-3 text-left">Student</th>
+                  <th className="px-4 py-3 text-left">Domain</th>
+                  <th className="px-4 py-3 text-left">Submitted</th>
+                  <th className="px-4 py-3 text-left">Verified</th>
+                  <th className="px-4 py-3 text-left">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviewedApps.map((a: any) => (
+                  <tr key={a.id} className="border-b border-border/30 transition hover:bg-accent/20">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="grid size-8 place-items-center rounded-full bg-secondary text-xs font-bold">{a.full_name?.charAt(0)}</div>
+                        <div>
+                          <p className="font-medium text-sm">{a.full_name}</p>
+                          <p className="text-xs text-muted-foreground">{a.intern_id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3"><Badge variant="secondary" className="text-xs">{getDomain(a.domain)?.name ?? a.domain}</Badge></td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{a.verified_at ? new Date(a.verified_at).toLocaleDateString("en-IN") : "—"}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`text-xs ${a.submission_status === "approved" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"}`}>
+                        {a.submission_status === "approved" ? "Approved" : "Rejected"}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Reject Dialog */}
+      {rejectDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => !actionLoading && setRejectDialog(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">Reject Internship</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Reject internship for <span className="font-semibold text-foreground">{rejectDialog.full_name}</span>.</p>
+            <div className="mt-4">
+              <Label className="text-xs">Reason for rejection</Label>
+              <Textarea
+                placeholder="Provide feedback — student will see this..."
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows={4}
+                className="mt-1 text-xs"
+              />
+              <p className="mt-1 text-[10px] text-muted-foreground">Common reasons: Missing files, Incomplete project, Incorrect GitHub repo, Project not working</p>
+            </div>
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setRejectDialog(null); setRejectReason(""); }} disabled={actionLoading === rejectDialog.id}>Cancel</Button>
+              <Button size="sm" className="rounded-xl bg-red-600 hover:bg-red-700 text-white border-0"
+                disabled={actionLoading === rejectDialog.id || !rejectReason.trim()}
+                onClick={handleReject}>
+                {actionLoading === rejectDialog.id ? "Rejecting..." : "Reject Submission"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

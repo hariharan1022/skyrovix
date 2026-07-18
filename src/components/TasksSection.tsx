@@ -187,12 +187,14 @@ export function TasksSection({
   submissions: rawSubmissions,
   appId,
   duration,
+  submissionStatus,
   onChange,
 }: {
   domainSlug: string;
   submissions: Submission[];
   appId: string;
   duration?: number;
+  submissionStatus?: string;
   onChange: () => void;
 }) {
   const [search, setSearch] = useState("");
@@ -410,6 +412,7 @@ export function TasksSection({
               domain={domainData}
               appId={appId}
               tasksReady={tasksReady}
+              submissionStatus={submissionStatus}
               onSubmitted={() => {
                 handleChange();
                 if (task.submission?.status !== "approved") {
@@ -716,6 +719,7 @@ function TaskCard({
   domain,
   appId,
   tasksReady,
+  submissionStatus,
   onSubmitted,
 }: {
   task: {
@@ -734,6 +738,7 @@ function TaskCard({
   domain: { slug: string; name: string; icon: string; color: string } | undefined;
   appId: string;
   tasksReady: boolean;
+  submissionStatus?: string;
   onSubmitted: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -741,7 +746,7 @@ function TaskCard({
   const [showHistory, setShowHistory] = useState(false);
   const { submission, status, dueDate, remaining, lockedByLinkedin } = task;
   const isOverdue = status === "overdue";
-  const isLocked = lockedByLinkedin && task.taskNumber > 0;
+  const isLocked = (lockedByLinkedin && task.taskNumber > 0) || submissionStatus === "submitted" || submissionStatus === "approved";
 
   const loadHistory = async () => {
     if (!submission) return;
@@ -849,7 +854,9 @@ function TaskCard({
             </div>
           ) : isLocked ? (
             <p className="text-center text-xs text-muted-foreground py-2 font-medium">
-              Complete the LinkedIn post task first to unlock.
+              {submissionStatus === "submitted" || submissionStatus === "approved"
+                ? "Internship submitted for verification — tasks are locked."
+                : "Complete the LinkedIn post task first to unlock."}
             </p>
           ) : (
             <div className="space-y-3">
