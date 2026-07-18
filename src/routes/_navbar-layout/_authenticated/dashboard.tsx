@@ -31,7 +31,7 @@ import {
   Phone, Calendar, ChevronRight, ExternalLink, Shield, Bell, Trophy,
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
   ListChecks, LayoutDashboard, Flag, AlertTriangle, AlertCircle, Zap, Hash, Circle, Loader2,
-  TrendingUp, Star, Lock, Eye, LogOut,
+  TrendingUp, Lock, Eye, LogOut,
   Settings, Wallet, CreditCard, ScrollText, Briefcase, Code2,
   Share2, HelpCircle, Package, Users,
 } from "lucide-react";
@@ -1360,6 +1360,7 @@ function Dashboard() {
     { id: "payment",    label: "Payment",                icon: CreditCard },
     { id: "certificates",label: "Certificates",          icon: Award },
     { id: "profile",    label: "Profile",                icon: User },
+
   ];
 
   const sidebarNav = (

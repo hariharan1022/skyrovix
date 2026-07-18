@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, Share2, HelpCircle, Package, CreditCard } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, Share2, HelpCircle, Package, CreditCard, MessageSquare } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ const DASHBOARD_ITEMS = [
   { to: "/dashboard", label: "Certificates", icon: Award, search: { tab: "certificates" } },
   { to: "/dashboard", label: "Profile", icon: User, search: { tab: "profile" } },
   { to: "/dashboard", label: "Help", icon: HelpCircle, search: { tab: "help" } },
+  { to: "/review", label: "Review", icon: MessageSquare },
 ] as const;
 
 export function Navbar() {
@@ -47,7 +48,7 @@ export function Navbar() {
 
   const pathname = router.location.pathname;
   const currentTab = (router.location.search as Record<string, string | undefined>)?.tab;
-  const isDashboardPage = pathname === "/dashboard";
+  const isDashboardPage = pathname === "/dashboard" || pathname.startsWith("/review");
   const itemsToRender = isDashboardPage ? DASHBOARD_ITEMS : NAV;
 
   const signOut = async () => {

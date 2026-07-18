@@ -22,6 +22,8 @@ import { Route as NavbarLayoutIndexRouteImport } from './routes/_navbar-layout/i
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
 import { Route as NavbarLayoutAboutRouteImport } from './routes/_navbar-layout/about'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
+import { Route as ApiCronCleanupSessionsRouteImport } from './routes/api.cron.cleanup-sessions'
+import { Route as NavbarLayoutAuthenticatedReviewRouteImport } from './routes/_navbar-layout/_authenticated/review'
 import { Route as NavbarLayoutAuthenticatedDashboardRouteImport } from './routes/_navbar-layout/_authenticated/dashboard'
 
 const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
@@ -88,6 +90,17 @@ const NavbarLayoutAuthenticatedRouteRoute =
     id: '/_authenticated',
     getParentRoute: () => NavbarLayoutRoute,
   } as any)
+const ApiCronCleanupSessionsRoute = ApiCronCleanupSessionsRouteImport.update({
+  id: '/api/cron/cleanup-sessions',
+  path: '/api/cron/cleanup-sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NavbarLayoutAuthenticatedReviewRoute =
+  NavbarLayoutAuthenticatedReviewRouteImport.update({
+    id: '/review',
+    path: '/review',
+    getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
+  } as any)
 const NavbarLayoutAuthenticatedDashboardRoute =
   NavbarLayoutAuthenticatedDashboardRouteImport.update({
     id: '/dashboard',
@@ -108,6 +121,8 @@ export interface FileRoutesByFullPath {
   '/domains/$slug': typeof DomainsSlugRoute
   '/domains/': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
@@ -121,6 +136,8 @@ export interface FileRoutesByTo {
   '/domains/$slug': typeof DomainsSlugRoute
   '/domains': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -138,6 +155,8 @@ export interface FileRoutesById {
   '/_navbar-layout/': typeof NavbarLayoutIndexRoute
   '/domains/': typeof DomainsIndexRoute
   '/_navbar-layout/_authenticated/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
+  '/_navbar-layout/_authenticated/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -154,6 +173,8 @@ export interface FileRouteTypes {
     | '/domains/$slug'
     | '/domains/'
     | '/dashboard'
+    | '/review'
+    | '/api/cron/cleanup-sessions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
@@ -167,6 +188,8 @@ export interface FileRouteTypes {
     | '/domains/$slug'
     | '/domains'
     | '/dashboard'
+    | '/review'
+    | '/api/cron/cleanup-sessions'
   id:
     | '__root__'
     | '/_navbar-layout'
@@ -183,6 +206,8 @@ export interface FileRouteTypes {
     | '/_navbar-layout/'
     | '/domains/'
     | '/_navbar-layout/_authenticated/dashboard'
+    | '/_navbar-layout/_authenticated/review'
+    | '/api/cron/cleanup-sessions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,6 +219,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   TermsRoute: typeof TermsRoute
   VerifyCertificateRoute: typeof VerifyCertificateRoute
+  ApiCronCleanupSessionsRoute: typeof ApiCronCleanupSessionsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -289,6 +315,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedRouteRouteImport
       parentRoute: typeof NavbarLayoutRoute
     }
+    '/api/cron/cleanup-sessions': {
+      id: '/api/cron/cleanup-sessions'
+      path: '/api/cron/cleanup-sessions'
+      fullPath: '/api/cron/cleanup-sessions'
+      preLoaderRoute: typeof ApiCronCleanupSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_navbar-layout/_authenticated/review': {
+      id: '/_navbar-layout/_authenticated/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof NavbarLayoutAuthenticatedReviewRouteImport
+      parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
+    }
     '/_navbar-layout/_authenticated/dashboard': {
       id: '/_navbar-layout/_authenticated/dashboard'
       path: '/dashboard'
@@ -301,12 +341,14 @@ declare module '@tanstack/react-router' {
 
 interface NavbarLayoutAuthenticatedRouteRouteChildren {
   NavbarLayoutAuthenticatedDashboardRoute: typeof NavbarLayoutAuthenticatedDashboardRoute
+  NavbarLayoutAuthenticatedReviewRoute: typeof NavbarLayoutAuthenticatedReviewRoute
 }
 
 const NavbarLayoutAuthenticatedRouteRouteChildren: NavbarLayoutAuthenticatedRouteRouteChildren =
   {
     NavbarLayoutAuthenticatedDashboardRoute:
       NavbarLayoutAuthenticatedDashboardRoute,
+    NavbarLayoutAuthenticatedReviewRoute: NavbarLayoutAuthenticatedReviewRoute,
   }
 
 const NavbarLayoutAuthenticatedRouteRouteWithChildren =
@@ -353,6 +395,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   TermsRoute: TermsRoute,
   VerifyCertificateRoute: VerifyCertificateRoute,
+  ApiCronCleanupSessionsRoute: ApiCronCleanupSessionsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
