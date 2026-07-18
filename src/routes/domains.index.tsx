@@ -17,6 +17,8 @@ import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loa
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDIA_STATES, STATE_DISTRICTS } from "@/lib/india-locations";
 
 export const Route = createFileRoute("/domains/")({
   head: () => ({
@@ -68,6 +70,15 @@ function DomainsPage() {
   const [college, setCollege] = useState("");
   const [course, setCourse] = useState("");
   const [year, setYear] = useState("");
+
+  // Location and Hear about us fields
+  const [country, setCountry] = useState("India");
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [hearAbout, setHearAbout] = useState("");
+  const [referralName, setReferralName] = useState("");
 
   // Fetch profile if user is logged in
   const { data: profile } = useQuery({
@@ -135,6 +146,19 @@ function DomainsPage() {
   const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!applyDomain) return toast.error("Please select a domain");
+    
+    // Front-end Validation for Location and Hear About fields
+    if (!state) return toast.error("State / Union Territory is required");
+    if (!district) return toast.error("District is required");
+    if (!city.trim()) return toast.error("City / Town is required");
+    if (!/^\d{6}$/.test(pincode)) {
+      return toast.error("PIN Code must be exactly 6 digits");
+    }
+    if (!hearAbout) return toast.error("Please select how you heard about us");
+    if ((hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") && !referralName.trim()) {
+      return toast.error("Referral Name is required for selected referral source");
+    }
+
     const fd = new FormData(e.currentTarget);
     setApplying(true);
     try {
@@ -197,6 +221,13 @@ function DomainsPage() {
         photo_url,
         coupon_code: couponApplied?.code ?? null,
         status: "approved",
+        country,
+        state,
+        district,
+        city,
+        pincode,
+        hear_about: hearAbout,
+        referral_name: (hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") ? referralName : null,
       };
       const { error: insertError } = await supabase.from("applications").insert(payload);
       if (insertError) throw insertError;
@@ -407,6 +438,123 @@ function DomainsPage() {
                       <div className="flex gap-2">
                         <Input type="file" accept="image/*" onChange={e => setPhotoFile(e.target.files?.[0] ?? null)} className="h-11 file:text-xs rounded-xl bg-background/50 border-border/60 file:mr-4 file:py-1 file:px-3 file:rounded-xl file:border-0 file:bg-[#07284a] file:text-white hover:file:bg-[#07284a]/90 file:cursor-pointer" />
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Location Details section */}
+                  <div className="border-t border-border/40 pt-4 mt-2">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-foreground mb-3 flex items-center gap-1.5">
+                      📍 Location Details
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-bold text-foreground">Country *</Label>
+                        <Select value={country} onValueChange={setCountry} required>
+                          <SelectTrigger className="rounded-xl h-11 bg-background/50 border-border/60">
+                            <SelectValue placeholder="Select Country" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="India">🇮🇳 India</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-bold text-foreground">State / Union Territory *</Label>
+                        <SearchableSelect
+                          options={INDIA_STATES}
+                          value={state}
+                          onChange={(val) => {
+                            setState(val);
+                            setDistrict("");
+                          }}
+                          placeholder="Select State / UT"
+                          searchPlaceholder="Search State..."
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-3 mt-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">District *</Label>
+                      <SearchableSelect
+                        options={state ? STATE_DISTRICTS[state] || [] : []}
+                        value={district}
+                        onChange={setDistrict}
+                        placeholder="Select District"
+                        searchPlaceholder="Search District..."
+                        disabled={!state}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">City / Town *</Label>
+                      <Input
+                        name="city"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        required
+                        placeholder="Enter your City / Town"
+                        className="h-11 rounded-xl bg-background/50 border-border/60"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">PIN Code *</Label>
+                      <Input
+                        name="pincode"
+                        type="number"
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value)}
+                        required
+                        placeholder="6 Digit PIN Code"
+                        className="h-11 rounded-xl bg-background/50 border-border/60"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Discovery / Referral Section */}
+                  <div className="border-t border-border/40 pt-4 mt-2">
+                    <h3 className="text-xs sm:text-sm font-extrabold text-foreground mb-3 flex items-center gap-1.5">
+                      ❓ Discovery
+                    </h3>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label className="text-xs sm:text-sm font-bold text-foreground">How did you hear about Skyrovix? *</Label>
+                        <SearchableSelect
+                          options={[
+                            "Google Search",
+                            "Instagram",
+                            "LinkedIn",
+                            "YouTube",
+                            "Facebook",
+                            "WhatsApp",
+                            "Telegram",
+                            "Friend / Classmate",
+                            "Existing Skyrovix Intern",
+                            "Other"
+                          ]}
+                          value={hearAbout}
+                          onChange={setHearAbout}
+                          placeholder="Select Source"
+                          searchPlaceholder="Search options..."
+                        />
+                      </div>
+
+                      {(hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") && (
+                        <div className="space-y-2">
+                          <Label className="text-xs sm:text-sm font-bold text-foreground">Referral Name *</Label>
+                          <Input
+                            name="referral_name"
+                            value={referralName}
+                            onChange={(e) => setReferralName(e.target.value)}
+                            required
+                            placeholder="Enter friend/intern's full name"
+                            className="h-11 rounded-xl bg-background/50 border-border/60"
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 

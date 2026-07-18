@@ -11,6 +11,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2, Sparkles } from "lucide-react";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDIA_STATES, STATE_DISTRICTS } from "@/lib/india-locations";
 
 interface Props {
   open: boolean;
@@ -29,6 +31,15 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
   const [couponCode, setCouponCode] = useState("");
   const [couponApplied, setCouponApplied] = useState<{ code: string; discount: string } | null>(null);
   const [validatingCoupon, setValidatingCoupon] = useState(false);
+
+  // Location and Hear about us fields
+  const [country, setCountry] = useState("India");
+  const [state, setState] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [hearAbout, setHearAbout] = useState("");
+  const [referralName, setReferralName] = useState("");
 
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -61,12 +72,32 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
     setPhotoFile(null);
     setCouponCode("");
     setCouponApplied(null);
+    setCountry("India");
+    setState("");
+    setDistrict("");
+    setCity("");
+    setPincode("");
+    setHearAbout("");
+    setReferralName("");
   };
 
   const submitApplication = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const domain = defaultDomain || applyDomain;
     if (!domain) return toast.error("Please select a domain");
+
+    // Front-end Validation for Location and Hear About fields
+    if (!state) return toast.error("State / Union Territory is required");
+    if (!district) return toast.error("District is required");
+    if (!city.trim()) return toast.error("City / Town is required");
+    if (!/^\d{6}$/.test(pincode)) {
+      return toast.error("PIN Code must be exactly 6 digits");
+    }
+    if (!hearAbout) return toast.error("Please select how you heard about us");
+    if ((hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") && !referralName.trim()) {
+      return toast.error("Referral Name is required for selected referral source");
+    }
+
     const fd = new FormData(e.currentTarget);
     setApplying(true);
     try {
@@ -129,6 +160,13 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
         photo_url,
         coupon_code: couponApplied?.code ?? null,
         status: "approved",
+        country,
+        state,
+        district,
+        city,
+        pincode,
+        hear_about: hearAbout,
+        referral_name: (hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") ? referralName : null,
       };
       const { error: insertError } = await (supabase.from("applications" as any) as any).insert(payload);
       if (insertError) throw insertError;
@@ -221,8 +259,123 @@ export function ApplicationFormDialog({ open, onOpenChange, defaultDomain, onSuc
             <Input name="course" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
           </div>
           <div>
-            <Label className="text-xs sm:text-sm">Year</Label>
+            <Label className="text-xs sm:text-sm font-semibold text-foreground">Year *</Label>
             <Input name="year" placeholder="e.g. 3rd year" required className="mt-1 rounded-xl h-9 sm:h-10 text-sm" />
+          </div>
+
+          {/* Location details */}
+          <div className="col-span-2 border-t border-border/40 pt-3 mt-1">
+            <h4 className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5">📍 Location Details</h4>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">Country *</Label>
+                <Select value={country} onValueChange={setCountry} required>
+                  <SelectTrigger className="mt-1 rounded-xl h-9 sm:h-10 text-sm bg-background/50 border-border/60">
+                    <SelectValue placeholder="Select Country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="India">🇮🇳 India</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">State / Union Territory *</Label>
+                <div className="mt-1">
+                  <SearchableSelect
+                    options={INDIA_STATES}
+                    value={state}
+                    onChange={(val) => {
+                      setState(val);
+                      setDistrict("");
+                    }}
+                    placeholder="Select State"
+                    searchPlaceholder="Search State..."
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-3 mt-3">
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">District *</Label>
+                <div className="mt-1">
+                  <SearchableSelect
+                    options={state ? STATE_DISTRICTS[state] || [] : []}
+                    value={district}
+                    onChange={setDistrict}
+                    placeholder="Select District"
+                    searchPlaceholder="Search District..."
+                    disabled={!state}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">City / Town *</Label>
+                <Input
+                  name="city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                  placeholder="City / Town"
+                  className="mt-1 rounded-xl h-9 sm:h-10 text-sm"
+                />
+              </div>
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">PIN Code *</Label>
+                <Input
+                  name="pincode"
+                  type="number"
+                  value={pincode}
+                  onChange={(e) => setPincode(e.target.value)}
+                  required
+                  placeholder="6 Digit PIN"
+                  className="mt-1 rounded-xl h-9 sm:h-10 text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Discovery Source */}
+          <div className="col-span-2 border-t border-border/40 pt-3 mt-1">
+            <h4 className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5">❓ Discovery</h4>
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+              <div>
+                <Label className="text-xs sm:text-sm font-semibold text-foreground">How did you hear about Skyrovix? *</Label>
+                <div className="mt-1">
+                  <SearchableSelect
+                    options={[
+                      "Google Search",
+                      "Instagram",
+                      "LinkedIn",
+                      "YouTube",
+                      "Facebook",
+                      "WhatsApp",
+                      "Telegram",
+                      "Friend / Classmate",
+                      "Existing Skyrovix Intern",
+                      "Other"
+                    ]}
+                    value={hearAbout}
+                    onChange={setHearAbout}
+                    placeholder="Select Source"
+                    searchPlaceholder="Search options..."
+                  />
+                </div>
+              </div>
+
+              {(hearAbout === "Friend / Classmate" || hearAbout === "Existing Skyrovix Intern") && (
+                <div className="animate-fade-in">
+                  <Label className="text-xs sm:text-sm font-semibold text-foreground">Referral Name *</Label>
+                  <Input
+                    name="referral_name"
+                    value={referralName}
+                    onChange={(e) => setReferralName(e.target.value)}
+                    required
+                    placeholder="Friend/Intern's full name"
+                    className="mt-1 rounded-xl h-9 sm:h-10 text-sm"
+                  />
+                </div>
+              )}
+            </div>
           </div>
           {!defaultDomain && (
             <div>

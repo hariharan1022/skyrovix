@@ -1167,6 +1167,76 @@ function AnalyticsSection() {
     ...cfg,
   });
 
+  const { data: locationStats } = useQuery({
+    queryKey: ["admin-analytics-locations"],
+    queryFn: async () => {
+      const { data } = await supabase.from("applications").select("country, state, district, city, hear_about, referral_name");
+      if (!data || data.length === 0) {
+        return { countries: [], states: [], districts: [], cities: [], sources: [], referrals: [] };
+      }
+
+      const countryMap: Record<string, number> = {};
+      const stateMap: Record<string, number> = {};
+      const districtMap: Record<string, number> = {};
+      const cityMap: Record<string, number> = {};
+      const sourceMap: Record<string, number> = {};
+      const referralMap: Record<string, number> = {};
+
+      data.forEach((row: any) => {
+        const country = row.country || "India";
+        const state = row.state || "Not Provided";
+        const district = row.district || "Not Provided";
+        const city = row.city || "Not Provided";
+        const source = row.hear_about || "Direct / Search";
+        const refName = row.referral_name;
+
+        countryMap[country] = (countryMap[country] || 0) + 1;
+        stateMap[state] = (stateMap[state] || 0) + 1;
+        districtMap[district] = (districtMap[district] || 0) + 1;
+        cityMap[city] = (cityMap[city] || 0) + 1;
+        sourceMap[source] = (sourceMap[source] || 0) + 1;
+        
+        if (refName && refName.trim()) {
+          referralMap[refName] = (referralMap[refName] || 0) + 1;
+        }
+      });
+
+      const total = data.length || 1;
+
+      const countries = Object.entries(countryMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+
+      const states = Object.entries(stateMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+
+      const districts = Object.entries(districtMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+
+      const cities = Object.entries(cityMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+
+      const sources = Object.entries(sourceMap)
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, count]) => ({ label, count, pct: Math.round((count / total) * 100) }));
+
+      const referrals = Object.entries(referralMap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name, count]) => ({ name, count }));
+
+      return { countries, states, districts, cities, sources, referrals };
+    },
+    ...cfg,
+  });
+
   const maxReg = Math.max(...regData, 1);
   const maxRev = Math.max(...(revenue?.data ?? []), 1);
 
@@ -1260,6 +1330,151 @@ function AnalyticsSection() {
               ))}
             </div>
           )}
+        </div>
+      </div>
+
+      {/* ─── Location & Discovery Analytics ─── */}
+      <div className="border-t border-border/40 pt-6 mt-8">
+        <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+          🌍 Location & Discovery Analytics
+        </h3>
+        <div className="grid gap-4 lg:grid-cols-2">
+          
+          {/* Countries */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Students by Country</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Geographic country stats</p>
+            {!locationStats || locationStats.countries.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+            ) : (
+              <div className="space-y-3">
+                {locationStats.countries.map((c) => (
+                  <div key={c.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span>{c.label === "India" ? "🇮🇳 India" : c.label}</span>
+                      <span className="font-semibold text-muted-foreground">{c.count} students ({c.pct}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all" style={{ width: `${c.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* States */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Students by State / UT (Top 10)</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Distribution across Indian States</p>
+            {!locationStats || locationStats.states.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+            ) : (
+              <div className="space-y-3">
+                {locationStats.states.map((s) => (
+                  <div key={s.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span>{s.label}</span>
+                      <span className="font-semibold text-muted-foreground">{s.count} ({s.pct}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-blue-500 to-[#07284a] transition-all" style={{ width: `${s.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Districts */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Students by District (Top 10)</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Distribution by District</p>
+            {!locationStats || locationStats.districts.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+            ) : (
+              <div className="space-y-3">
+                {locationStats.districts.map((d) => (
+                  <div key={d.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span>{d.label}</span>
+                      <span className="font-semibold text-muted-foreground">{d.count} ({d.pct}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all" style={{ width: `${d.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Cities */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Students by City / Town (Top 10)</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Distribution by City</p>
+            {!locationStats || locationStats.cities.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+            ) : (
+              <div className="space-y-3">
+                {locationStats.cities.map((c) => (
+                  <div key={c.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span>{c.label}</span>
+                      <span className="font-semibold text-muted-foreground">{c.count} ({c.pct}%)</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 transition-all" style={{ width: `${c.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Discovery Source Comparison */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Discovery Sources Comparison</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Google vs Instagram vs LinkedIn etc.</p>
+            {!locationStats || locationStats.sources.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No data available</p>
+            ) : (
+              <div className="space-y-3">
+                {locationStats.sources.map((src) => (
+                  <div key={src.label}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-medium">{src.label}</span>
+                      <span className="font-semibold text-muted-foreground">{src.count} ({src.pct}%)</span>
+                    </div>
+                    <div className="h-2.5 rounded-full bg-secondary/80 overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-600 transition-all" style={{ width: `${src.pct}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Referral Name Tracker */}
+          <div className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="mb-1 font-semibold">Referral Name Tracker (Top 10)</h3>
+            <p className="mb-4 text-xs text-muted-foreground">Top classmates / existing interns referred</p>
+            {!locationStats || locationStats.referrals.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">No referrals recorded yet</p>
+            ) : (
+              <div className="divide-y divide-border/30">
+                {locationStats.referrals.map((r, idx) => (
+                  <div key={idx} className="flex items-center justify-between py-2.5 text-xs">
+                    <span className="font-medium text-sm">{r.name}</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-md">
+                      {r.count} referrals
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
