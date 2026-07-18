@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { toast } from "sonner";
 import { GraduationCap, Sparkles, ArrowRight, Loader2 } from "lucide-react";
+import { useLoginTracker } from "@/lib/use-login-tracker";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -23,6 +24,7 @@ function AuthPage() {
   const search = Route.useSearch();
   const redirect = search.redirect ?? "/dashboard";
   const [loading, setLoading] = useState(false);
+  const { startTracking } = useLoginTracker();
 
   useEffect(() => {
     // Scrub any sensitive params that leaked into the URL (e.g. from a
@@ -46,6 +48,9 @@ function AuthPage() {
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back!");
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) startTracking(data.session.user.id);
+    });
     navigate({ to: redirect });
   };
 

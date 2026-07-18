@@ -3,6 +3,24 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
+// Periodically mark stale login sessions offline (every 5 minutes)
+if (typeof setInterval !== "undefined") {
+  const STALE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  setInterval(async () => {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const cutoff = new Date(Date.now() - STALE_TIMEOUT).toISOString();
+      await supabaseAdmin
+        .from("login_sessions")
+        .update({ status: "offline" })
+        .eq("status", "online")
+        .lt("last_active", cutoff);
+    } catch (e) {
+      console.error("[Cleanup] Failed to mark stale sessions:", e);
+    }
+  }, 5 * 60 * 1000);
+}
+
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };

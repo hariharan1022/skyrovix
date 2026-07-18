@@ -103,8 +103,8 @@ function AboutPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { value: "10+", label: "Domains" },
-                  { value: "5", label: "Tasks per track" },
+                  { value: "25+", label: "Domains" },
+                  { value: "300+", label: "Projects" },
                   { value: "100%", label: "Self-paced" },
                   { value: "₹100", label: "Certification fee" },
                 ].map((s, i) => (

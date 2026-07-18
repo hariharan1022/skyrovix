@@ -127,12 +127,12 @@ function Landing() {
 
                 <div className="mt-8 sm:mt-12 flex items-center justify-center md:justify-start gap-4 sm:gap-8">
                   <div>
-                    <div className="text-xl sm:text-3xl font-bold brand-text">10</div>
+                    <div className="text-xl sm:text-3xl font-bold brand-text">25+</div>
                     <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
                   </div>
                   <div className="h-6 sm:h-10 w-px bg-border" />
                   <div>
-                    <div className="text-xl sm:text-3xl font-bold brand-text">50+</div>
+                    <div className="text-xl sm:text-3xl font-bold brand-text">300+</div>
                     <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
                   </div>
                   <div className="h-6 sm:h-10 w-px bg-border" />
@@ -165,14 +165,14 @@ function Landing() {
                     MSME-registered. <span className="brand-text">Student-built.</span>
                   </h2>
                   <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    We run a task-based virtual internship program across 10 domains. Apply free, get
-                    an instant offer letter and ID card, complete 5 real projects, earn a QR-verified
+                    We run a task-based virtual internship program across 25+ domains. Apply free, get
+                    an instant offer letter and ID card, complete 300+ real projects, earn a QR-verified
                     certificate.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { value: "10+", label: "Domains" }, { value: "5", label: "Tasks per track" },
+                    { value: "25+", label: "Domains" }, { value: "300+", label: "Projects" },
                     { value: "100%", label: "Online" }, { value: "₹100", label: "Cert fee" },
                   ].map((s) => (
                     <div key={s.label} className="rounded-xl border border-border/40 bg-white/50 dark:bg-[#0f172a]/50 p-3.5 text-center">
@@ -301,8 +301,8 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-4">
           <div className="grid gap-6 sm:grid-cols-3">
             {[
-              { icon: Briefcase, value: "10+", label: "Internship Domains", desc: "Industry-aligned tracks" },
-              { icon: Code2, value: "50+", label: "Practical Tasks", desc: "Portfolio-grade development" },
+              { icon: Briefcase, value: "25+", label: "Internship Domains", desc: "Industry-aligned tracks" },
+              { icon: Code2, value: "300+", label: "Projects", desc: "Hands-on real-world projects" },
               { icon: Award, value: "1500+", label: "Verified Certificates", desc: "QR-code shareable credentials" },
             ].map((stat, i) => (
               <FadeUp key={i} delay={i * 0.1}>
@@ -396,12 +396,47 @@ const FAQ_ITEMS = [
   { q: "What is the Skyrovix internship program?", a: "It is a task-based virtual internship where you complete 5 real-world projects in your chosen domain. You get an instant offer letter, digital ID card, mentor reviews, and a verified certificate with QR code upon completion." },
   { q: "Is there any application fee?", a: "No. Applying and receiving the offer letter and ID card is completely free. A ₹100 certification fee is payable only after completing all 5 tasks, just before the certificate is issued." },
   { q: "How long does the internship take?", a: "The internship is self-paced. Most students complete it in 2–4 weeks, but you can finish faster or take more time depending on your schedule." },
-  { q: "What domains are available?", a: "We offer 10 domains: Full Stack Development, Frontend, Backend, Data Science, AI & ML, UI/UX Design, Python, Java, Cyber Security, and Digital Marketing." },
+  { q: "What domains are available?", a: "We offer 25+ domains including Full Stack Development, Frontend, Backend, Data Science, AI & ML, UI/UX Design, Python, Java, Cyber Security, Digital Marketing, and many more." },
   { q: "Will I get an offer letter and ID card?", a: "Yes. Immediately after applying, you receive an instant offer letter and a digital ID card with your name, domain, intern ID, and a QR code." },
   { q: "Is the certificate verifiable?", a: "Yes. Every certificate has a unique ID and QR code. Employers can verify its authenticity on our Verify Certificate page." },
   { q: "Who reviews my task submissions?", a: "Each task is reviewed by our mentor team. You'll receive feedback and can resubmit if needed. A task is marked approved once it meets the required standards." },
   { q: "Do I get a certificate if I don't complete all tasks?", a: "The certificate is issued only after you complete and get approval on all 5 tasks and pay the ₹100 certification fee." },
 ];
+
+const FEATURED_REVIEWS = [
+  { id: "featured-1", rating: 5, content: "The Skyrovix Virtual Internship gave me practical experience through real-world tasks. The structured learning path, quick support, and verified certificate made it an excellent learning experience.", name: "Vishal R", role: "Full Stack Development Intern" },
+  { id: "featured-2", rating: 5, content: "I improved my AI and prompt engineering skills significantly during this internship. The tasks were well designed, and the verification process made the certificate more valuable.", name: "Gandhi Rajan", role: "Prompt Engineering Intern" },
+  { id: "featured-3", rating: 5, content: "The internship provided hands-on assignments that helped me understand real cybersecurity concepts. I highly recommend Skyrovix to students looking for practical learning.", name: "Rohit", role: "Cyber Security Intern" },
+  { id: "featured-4", rating: 5, content: "I enjoyed completing the project-based tasks. The dashboard, offer letter, and certificate verification system were smooth and professional.", name: "Sivaraman", role: "Python Development Intern" },
+  { id: "featured-5", rating: 5, content: "The internship helped me strengthen both frontend and backend development skills. The learning experience was organized, and the admin verification process ensured quality.", name: "Manikandan", role: "Full Stack Development Intern" },
+  { id: "featured-6", rating: 5, content: "Skyrovix provides an excellent platform for students to gain industry-oriented experience. The practical projects and mentor feedback were extremely helpful.", name: "Sharik", role: "AI & Machine Learning Intern" },
+];
+
+function ReviewCard({ name, role, content, rating, index }: { name: string; role: string; content: string; rating: number; index: number }) {
+  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  return (
+    <FadeUp delay={0.1 + index * 0.1}>
+      <div className="group rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 transition-all card-elevated hover:card-elevated-hover">
+        <div className="flex gap-1 mb-3">
+          {Array.from({ length: 5 }).map((_, si) => (
+            <Star key={si} className={`size-4 ${si < rating ? "text-amber-400" : "text-muted-foreground/20"}`} fill={si < rating ? "currentColor" : "none"} />
+          ))}
+        </div>
+        <Quote className="size-5 text-[#07284a]/20 dark:text-[#60a5fa]/20 mb-2" />
+        <p className="text-sm text-muted-foreground leading-relaxed italic">&ldquo;{content}&rdquo;</p>
+        <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-3">
+          <Avatar className="size-8">
+            <AvatarFallback className="text-[9px] bg-[#07284a]/10 dark:bg-[#1d4ed8]/10 text-[#07284a] dark:text-[#60a5fa]">{initials}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-semibold">{name}</p>
+            <p className="text-[11px] text-muted-foreground">{role}</p>
+          </div>
+        </div>
+      </div>
+    </FadeUp>
+  );
+}
 
 function ReviewsGrid() {
   const { data: reviews = [], isLoading } = useRecentReviews(6);
@@ -415,66 +450,33 @@ function ReviewsGrid() {
     );
   }
 
-  if (reviews.length === 0) {
-    return (
-      <div className="text-center py-16 space-y-3">
-        <MessageSquare className="size-10 mx-auto text-muted-foreground/40" />
-        <p className="text-muted-foreground">No reviews yet. Be the first student to share your experience.</p>
-      </div>
-    );
-  }
+  const totalReviews = stats.total + FEATURED_REVIEWS.length;
 
   return (
     <div className="space-y-8">
-      {/* Summary */}
       <div className="flex flex-wrap items-center justify-center gap-6 text-center">
-        <div>
-          <span className="text-3xl font-bold">{stats.average > 0 ? stats.average : "—"}</span>
-          <div className="flex gap-0.5 mt-1 justify-center">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} className={`size-4 ${i < Math.round(stats.average) ? "text-amber-400" : "text-muted-foreground/30"}`} fill={i < Math.round(stats.average) ? "currentColor" : "none"} />
-            ))}
-          </div>
-        </div>
+        {stats.total > 0 && (
+          <>
+            <div>
+              <span className="text-3xl font-bold">{stats.average}</span>
+              <div className="flex gap-0.5 mt-1 justify-center">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={`size-4 ${i < Math.round(stats.average) ? "text-amber-400" : "text-muted-foreground/30"}`} fill={i < Math.round(stats.average) ? "currentColor" : "none"} />
+                ))}
+              </div>
+            </div>
+            <div className="h-8 w-px bg-border" />
+          </>
+        )}
         <div className="text-sm text-muted-foreground">
-          <span className="text-2xl font-bold text-foreground">{stats.total}</span><br />
-          review{stats.total !== 1 ? "s" : ""}
+          <span className="text-2xl font-bold text-foreground">{totalReviews}</span><br />
+          review{totalReviews !== 1 ? "s" : ""}
         </div>
       </div>
-      {/* Cards */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {reviews.map((r, i) => {
-          const name = r.profiles?.full_name ?? "Anonymous";
-          const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
-          const avatarUrl = r.profiles?.photo_url;
-          const date = new Date(r.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-          return (
-            <FadeUp key={r.id} delay={0.1 + i * 0.1}>
-              <div className="group rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 transition-all card-elevated hover:card-elevated-hover">
-                <div className="flex gap-1 mb-3">
-                  {Array.from({ length: 5 }).map((_, si) => (
-                    <Star key={si} className={`size-4 ${si < r.rating ? "text-amber-400" : "text-muted-foreground/20"}`} fill={si < r.rating ? "currentColor" : "none"} />
-                  ))}
-                </div>
-                <Quote className="size-5 text-[#07284a]/20 dark:text-[#60a5fa]/20 mb-2" />
-                <p className="text-sm text-muted-foreground leading-relaxed italic">&ldquo;{r.content}&rdquo;</p>
-                <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-3">
-                  <Avatar className="size-8">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt={name} className="size-full object-cover rounded-full" />
-                    ) : (
-                      <AvatarFallback className="text-[9px] bg-[#07284a]/10 dark:bg-[#1d4ed8]/10 text-[#07284a] dark:text-[#60a5fa]">{initials}</AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-semibold">{name}</p>
-                    <p className="text-[11px] text-muted-foreground">{date}</p>
-                  </div>
-                </div>
-              </div>
-            </FadeUp>
-          );
-        })}
+        {FEATURED_REVIEWS.map((r, i) => (
+          <ReviewCard key={r.id} name={r.name} role={r.role} content={r.content} rating={r.rating} index={i} />
+        ))}
       </div>
     </div>
   );

@@ -33,3 +33,5 @@ src/lib/email-assets.ts
 *.njsproj
 *.sln
 *.sw?
+.vercel
+.env*

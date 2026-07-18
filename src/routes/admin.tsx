@@ -24,7 +24,7 @@ import {
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
   PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent, Briefcase,
-  Loader2,
+  Loader2, Activity, Wifi, WifiOff, LogIn, Monitor, Smartphone, Tablet,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -50,8 +50,10 @@ const SIDEBAR_ITEMS = [
   { id: "popup", label: "Promo Popup", icon: Bell },
   { id: "certificates", label: "Certificates", icon: Award },
   { id: "students", label: "Students", icon: GraduationCap },
+  { id: "login-history", label: "Login History", icon: Activity },
   { id: "email-logs", label: "Email Logs", icon: Mail },
   { id: "analytics", label: "Analytics", icon: BarChart3 },
+  { id: "login-analytics", label: "Login Analytics", icon: Activity },
   { id: "settings", label: "Settings", icon: Settings },
 ] as const;
 
@@ -67,6 +69,7 @@ function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState("");
   const [notifOpen, setNotifOpen] = useState(false);
   const [liveNotifs, setLiveNotifs] = useState<Array<{ icon: any; text: string; time: string; color: string }>>([]);
+  const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
     if (dark) document.documentElement.classList.add("dark");
@@ -93,8 +96,32 @@ function AdminPanel() {
         qc.invalidateQueries({ queryKey: ["admin-subs"] });
         qc.invalidateQueries({ queryKey: ["admin-payments"] });
         qc.invalidateQueries({ queryKey: ["admin-verification-pending"] });
+        qc.invalidateQueries({ queryKey: ["admin-student-sessions"] });
+        qc.invalidateQueries({ queryKey: ["admin-login-history"] });
+        qc.invalidateQueries({ queryKey: ["admin-online-count"] });
       });
     }
+    // Subscribe to login_sessions for live online count + login notifications
+    channel.on("postgres_changes" as any, { event: "INSERT", schema: "public", table: "login_sessions" }, async (payload: any) => {
+      const studentId = payload.new?.student_id;
+      if (studentId) {
+        const { data: app } = await supabase.from("applications").select("full_name").eq("user_id", studentId).maybeSingle();
+        const name = app?.full_name ?? userId.slice(0, 8);
+        const notif = { icon: LogIn, text: `${name} logged in`, time: "Just now", color: "text-green-500 bg-green-50 dark:bg-green-950/30" };
+        setLiveNotifs((prev) => [notif, ...prev].slice(0, 20));
+        toast.success(`${name} logged in`, { description: "New student login", duration: 4000 });
+      }
+      const { count } = await supabase.from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
+      setOnlineCount(count ?? 0);
+      qc.invalidateQueries({ queryKey: ["admin-login-history"] });
+      qc.invalidateQueries({ queryKey: ["admin-online-count"] });
+    });
+    channel.on("postgres_changes" as any, { event: "UPDATE", schema: "public", table: "login_sessions" }, async () => {
+      const { count } = await supabase.from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
+      setOnlineCount(count ?? 0);
+      qc.invalidateQueries({ queryKey: ["admin-login-history"] });
+      qc.invalidateQueries({ queryKey: ["admin-online-count"] });
+    });
     channel.subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
@@ -110,6 +137,7 @@ function AdminPanel() {
   // ─── Data ───
   const { data: overview } = useQuery({
     queryKey: ["admin-overview"],
+    refetchInterval: 30_000,
     queryFn: async () => {
       const [a, s, p, c, v] = await Promise.all([
         supabase.from("applications").select("id", { count: "exact", head: true }),
@@ -253,7 +281,7 @@ function AdminPanel() {
               </div>
             )}
 
-            {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} />}
+            {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} onlineCount={onlineCount} />}
             {active === "applications" && <ApplicationsSection />}
             {active === "submissions" && <SubmissionsSection />}
             {active === "verification" && <VerificationSection />}
@@ -262,8 +290,10 @@ function AdminPanel() {
             {active === "popup" && <PromoPopupSection />}
             {active === "certificates" && <CertificatesSection />}
             {active === "students" && <StudentsSection />}
+            {active === "login-history" && <LoginHistorySection />}
             {active === "email-logs" && <EmailLogsSection />}
             {active === "analytics" && <AnalyticsSection />}
+            {active === "login-analytics" && <LoginAnalyticsSection />}
             {active === "settings" && <SettingsSection />}
           </main>
         </div>
@@ -300,7 +330,7 @@ function NotificationsDropdown({ onClose, notifs }: { onClose: () => void; notif
 // ══════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════
-function DashboardSection({ greeting, overview, onNavigate }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void }) {
+function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0 }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void; onlineCount?: number }) {
   const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0, pendingVerification: 0 });
   useEffect(() => {
     if (!overview) return;
@@ -340,7 +370,7 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {stats.map((s, i) => {
           const Icon = s.icon;
           return (
@@ -359,6 +389,23 @@ function DashboardSection({ greeting, overview, onNavigate }: { greeting: string
             </div>
           );
         })}
+        {/* Online Students Card */}
+        <div
+          className="group cursor-pointer rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/5 dark:bg-[#1E293B]/70 dark:hover:shadow-white/5"
+          onClick={() => onNavigate("login-history")}
+        >
+          <div className="flex items-start justify-between">
+            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-green-50 dark:bg-green-950/30">
+              <Activity className="size-5 text-green-600 dark:text-green-400" />
+            </div>
+            <span className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 px-2 py-0.5 text-[10px] font-medium text-white">Live</span>
+          </div>
+          <div className="flex items-baseline gap-1">
+            <p className="mt-4 font-display text-3xl font-bold">{onlineCount}</p>
+            <span className="text-sm text-green-600 dark:text-green-400">online</span>
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">Students Online Now</p>
+        </div>
       </div>
     </div>
   );
@@ -1262,52 +1309,53 @@ function CertificatesSection() {
 function StudentsSection() {
   const [search, setSearch] = useState("");
   const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
-  const { data } = useQuery({
+  const { data: students } = useQuery({
     queryKey: ["admin-students"],
     queryFn: async () => {
       const { data } = await supabase
         .from("applications")
-        .select("id, full_name, email, phone, college, course, year, domain, intern_id, created_at, status")
+        .select("id, user_id, full_name, email, phone, college, course, year, domain, intern_id, created_at, status, offer_issued_at")
         .order("created_at", { ascending: false });
       return data ?? [];
     },
   });
+  const { data: sessions } = useQuery({
+    queryKey: ["admin-student-sessions"],
+    refetchInterval: 30_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("login_sessions")
+        .select("student_id, status, last_active, device, browser")
+        .order("last_active", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const sessionMap = useMemo(() => {
+    const map = new Map<string, any>();
+    if (!sessions) return map;
+    for (const s of sessions) {
+      if (!map.has(s.student_id)) map.set(s.student_id, s);
+    }
+    return map;
+  }, [sessions]);
 
   const filtered = useMemo(() => {
-    if (!search) return data ?? [];
+    if (!students) return [];
+    if (!search) return students;
     const q = search.toLowerCase();
-    return data!.filter((s) =>
+    return students.filter((s: any) =>
       s.full_name?.toLowerCase().includes(q) ||
       s.email?.toLowerCase().includes(q) ||
       s.intern_id?.toLowerCase().includes(q) ||
       s.college?.toLowerCase().includes(q)
     );
-  }, [data, search]);
+  }, [students, search]);
 
   return (
     <div className="animate-fade-in-up space-y-4">
       {selectedStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedStudent(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">{selectedStudent.full_name}</h3>
-              <button onClick={() => setSelectedStudent(null)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-muted-foreground text-xs">Email</p><p>{selectedStudent.email}</p></div>
-                <div><p className="text-muted-foreground text-xs">Phone</p><p>{selectedStudent.phone ?? "—"}</p></div>
-                <div><p className="text-muted-foreground text-xs">Domain</p><p>{getDomain(selectedStudent.domain)?.name ?? selectedStudent.domain}</p></div>
-                <div><p className="text-muted-foreground text-xs">Status</p><Badge className="text-xs">{selectedStudent.status}</Badge></div>
-                <div className="col-span-2"><p className="text-muted-foreground text-xs">College</p><p>{selectedStudent.college} · {selectedStudent.course} ({selectedStudent.year})</p></div>
-                <div><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-mono text-xs">{selectedStudent.intern_id}</p></div>
-                <div><p className="text-muted-foreground text-xs">Joined</p><p>{new Date(selectedStudent.created_at).toLocaleDateString("en-IN")}</p></div>
-              </div>
-              <a href={`mailto:${selectedStudent.email}`} className="mt-3 flex items-center gap-2 text-sm text-blue-600 hover:underline"><Mail className="size-3.5" /> Send Email</a>
-            </div>
-          </div>
-        </div>
+        <StudentDetailModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
       )}
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -1319,37 +1367,53 @@ function StudentsSection() {
           <thead>
             <tr className="border-b border-border/50 text-xs uppercase text-muted-foreground">
               <th className="px-4 py-3 text-left">Student</th>
+              <th className="px-4 py-3 text-left">Status</th>
               <th className="px-4 py-3 text-left">Domain</th>
               <th className="px-4 py-3 text-left">College</th>
               <th className="px-4 py-3 text-left">Intern ID</th>
+              <th className="px-4 py-3 text-left">Last Login</th>
               <th className="px-4 py-3 text-left">Joined</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No students found.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">No students found.</td></tr>
             )}
-            {filtered.map((s) => (
-              <tr key={s.id} className="border-b border-border/30 transition hover:bg-accent/20">
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-8 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{s.full_name.charAt(0)}</div>
-                    <div><p className="font-medium text-sm">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.email}</p></div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-xs"><Badge variant="secondary">{getDomain(s.domain)?.name ?? s.domain}</Badge></td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{s.college}</td>
-                <td className="px-4 py-3 font-mono text-xs">{s.intern_id}</td>
-                <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString("en-IN")}</td>
-                <td className="px-4 py-3 text-right">
-                  <div className="flex justify-end gap-1">
-                    <button onClick={() => setSelectedStudent(s)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="View"><Eye className="size-4" /></button>
-                    <a href={`mailto:${s.email}`} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="Send Email"><Mail className="size-4" /></a>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {filtered.map((s: any) => {
+              const sess = sessionMap.get(s.user_id);
+              const isOnline = sess?.status === "online";
+              return (
+                <tr key={s.id} className="border-b border-border/30 transition hover:bg-accent/20">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-8 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{s.full_name.charAt(0)}</div>
+                      <div><p className="font-medium text-sm">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.email}</p></div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {isOnline ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/30 dark:text-green-400"><Wifi className="size-3" /> Online</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-950/30 dark:text-gray-400"><WifiOff className="size-3" /> Offline</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-xs"><Badge variant="secondary">{getDomain(s.domain)?.name ?? s.domain}</Badge></td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{s.college}</td>
+                  <td className="px-4 py-3 font-mono text-xs">{s.intern_id}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {sess?.last_active ? new Date(sess.last_active).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString("en-IN")}</td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex justify-end gap-1">
+                      <button onClick={() => setSelectedStudent(s)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="View"><Eye className="size-4" /></button>
+                      <a href={`mailto:${s.email}`} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50" title="Send Email"><Mail className="size-4" /></a>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -1897,7 +1961,7 @@ function EmailLogsSection() {
                 <td className="px-4 py-3 text-xs text-muted-foreground">{log.sent_at ? new Date(log.sent_at).toLocaleString("en-IN") : "—"}</td>
                 <td className="px-4 py-3 text-xs text-red-500 max-w-[200px] truncate" title={log.error_message ?? ""}>{log.error_message ?? "—"}</td>
                 <td className="px-4 py-3 text-right">
-                  {log.status === "failed" && (
+                    {log.status === "failed" && (
                     <button onClick={() => resend(log)} className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 transition" title="Resend email">
                       <RefreshCw className="size-3.5" /> Resend
                     </button>
@@ -1911,3 +1975,509 @@ function EmailLogsSection() {
     </div>
   );
 }
+
+// ══════════════════════════════════════════════
+// LOGIN HISTORY
+// ══════════════════════════════════════════════
+function LoginHistorySection() {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState<"all" | "online" | "offline">("all");
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const [dateFrom, setDateFrom] = useState(todayStr);
+  const [dateTo, setDateTo] = useState(todayStr);
+
+  const { data: raw } = useQuery({
+    queryKey: ["admin-login-history"],
+    refetchInterval: 15_000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("login_sessions")
+        .select("id, student_id, status, ip_address, city, state, country, device, browser, os, last_active, login_time, logout_time")
+        .order("last_active", { ascending: false })
+        .limit(500);
+      return data ?? [];
+    },
+  });
+
+  const { data: appMap } = useQuery({
+    queryKey: ["admin-login-history-apps"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("applications")
+        .select("user_id, full_name, email, intern_id, college, domain");
+      const map: Record<string, any> = {};
+      for (const a of data ?? []) map[a.user_id] = a;
+      return map;
+    },
+  });
+
+  const filtered = useMemo(() => {
+    if (!raw) return [];
+    let list = raw;
+    if (filter === "online") list = list.filter((s: any) => s.status === "online");
+    else if (filter === "offline") list = list.filter((s: any) => s.status === "offline");
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((s: any) => {
+        const app = appMap?.[s.student_id];
+        return app?.full_name?.toLowerCase().includes(q) ||
+          app?.email?.toLowerCase().includes(q) ||
+          app?.intern_id?.toLowerCase().includes(q) ||
+          app?.college?.toLowerCase().includes(q) ||
+          s.ip_address?.includes(q) ||
+          s.city?.toLowerCase().includes(q);
+      });
+    }
+    if (dateFrom) {
+      const from = new Date(dateFrom);
+      list = list.filter((s: any) => new Date(s.last_active) >= from);
+    }
+    if (dateTo) {
+      const to = new Date(dateTo);
+      to.setHours(23, 59, 59, 999);
+      list = list.filter((s: any) => new Date(s.last_active) <= to);
+    }
+    return list;
+  }, [raw, filter, search, appMap, dateFrom, dateTo]);
+
+  const DeviceIcon = ({ dt }: { dt: string }) => {
+    if (dt === "mobile") return <Smartphone className="size-3.5" />;
+    if (dt === "tablet") return <Tablet className="size-3.5" />;
+    return <Monitor className="size-3.5" />;
+  };
+
+  return (
+    <div className="animate-fade-in-up space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">Login History</h2>
+          <p className="text-sm text-muted-foreground">{raw?.length ?? 0} sessions recorded</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-36 rounded-xl border-border/60 text-xs" />
+          <span className="text-xs text-muted-foreground">to</span>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-36 rounded-xl border-border/60 text-xs" />
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex gap-1 rounded-xl bg-muted/50 p-1">
+          {(["all", "online", "offline"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                filter === f ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {f === "all" ? "All Sessions" : f === "online" ? "Online" : "Offline"}
+            </button>
+          ))}
+        </div>
+        <Input placeholder="Search by name, email, ID, IP, city..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-72 rounded-xl border-border/60" />
+      </div>
+
+      <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border/50 text-xs uppercase text-muted-foreground">
+              <th className="px-4 py-3 text-left">Student</th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-left">Device</th>
+              <th className="px-4 py-3 text-left">Location</th>
+              <th className="px-4 py-3 text-left">IP Address</th>
+              <th className="px-4 py-3 text-left">Logged In</th>
+              <th className="px-4 py-3 text-left">Last Active</th>
+              <th className="px-4 py-3 text-left">Logged Out</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 && (
+              <tr><td colSpan={8} className="px-4 py-12 text-center text-muted-foreground">No login sessions found.</td></tr>
+            )}
+              {filtered.map((s: any) => {
+              const app = appMap?.[s.student_id];
+              return (
+                <tr key={s.id} className="border-b border-border/30 transition hover:bg-accent/20">
+                  <td className="px-4 py-3">
+                    {app ? (
+                      <div>
+                        <p className="font-medium text-sm">{app.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{app.email}</p>
+                        {app.intern_id && <p className="font-mono text-[10px] text-muted-foreground">{app.intern_id}</p>}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{s.student_id?.slice(0, 12)}...</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {s.status === "online" ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:bg-green-950/30 dark:text-green-400"><Wifi className="size-3" /> Online</span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-950/30 dark:text-gray-400"><WifiOff className="size-3" /> Offline</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <DeviceIcon dt={s.device} />
+                      <span>{s.browser ?? "—"}</span>
+                      {s.os && <span className="text-[10px]">({s.os})</span>}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground">
+                    {[s.city, s.state, s.country].filter(Boolean).join(", ") || "—"}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-[10px] text-muted-foreground">{s.ip_address || "—"}</td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {s.login_time ? new Date(s.login_time).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {s.last_active ? new Date(s.last_active).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-muted-foreground whitespace-nowrap">
+                    {s.logout_time ? new Date(s.logout_time).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : s.status === "online" ? "—" : "—"}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// STUDENT DETAIL MODAL
+// ══════════════════════════════════════════════
+function StudentDetailModal({ student, onClose }: { student: any; onClose: () => void }) {
+  const [tab, setTab] = useState<"profile" | "payments" | "submissions" | "certificates" | "login-history">("profile");
+
+  const { data: payments } = useQuery({
+    queryKey: ["admin-student-payments", student.user_id],
+    enabled: tab === "payments",
+    queryFn: async () => {
+      const { data } = await supabase.from("payments").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const { data: submissions } = useQuery({
+    queryKey: ["admin-student-submissions", student.user_id],
+    enabled: tab === "submissions",
+    queryFn: async () => {
+      const { data } = await supabase.from("submissions").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const { data: certificates } = useQuery({
+    queryKey: ["admin-student-certificates", student.user_id],
+    enabled: tab === "certificates",
+    queryFn: async () => {
+      const { data } = await supabase.from("certificates").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const { data: loginSessions } = useQuery({
+    queryKey: ["admin-student-login-sessions", student.user_id],
+    enabled: tab === "login-history",
+    queryFn: async () => {
+      const { data } = await supabase.from("login_sessions").select("*").eq("student_id", student.user_id).order("last_active", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const tabs = [
+    { id: "profile" as const, label: "Profile", icon: Eye },
+    { id: "payments" as const, label: "Payments", icon: IndianRupee },
+    { id: "submissions" as const, label: "Submissions", icon: ClipboardCheck },
+    { id: "certificates" as const, label: "Certificates", icon: Award },
+    { id: "login-history" as const, label: "Login History", icon: Activity },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-full brand-gradient text-sm font-bold text-white">{student.full_name?.charAt(0)}</div>
+            <div>
+              <h3 className="font-bold text-lg">{student.full_name}</h3>
+              <p className="text-xs text-muted-foreground">{student.email} · {student.intern_id}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex gap-1 rounded-xl bg-muted/50 p-1 mb-6 overflow-x-auto">
+          {tabs.map((t) => {
+            const Icon = t.icon;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${
+                  tab === t.id ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Icon className="size-3.5" /> {t.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Profile Tab */}
+        {tab === "profile" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Domain</p><p className="font-medium">{getDomain(student.domain)?.name ?? student.domain}</p></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">College</p><p className="font-medium">{student.college ?? "—"}</p></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Course</p><p className="font-medium">{student.course ?? "—"} ({student.year ?? "—"})</p></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Phone</p><p className="font-medium">{student.phone ?? "—"}</p></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Status</p><Badge>{student.status ?? "Active"}</Badge></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Joined</p><p className="font-medium">{new Date(student.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p></div>
+              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Offer Issued</p><p className="font-medium">{student.offer_issued_at ? new Date(student.offer_issued_at).toLocaleDateString("en-IN") : "—"}</p></div>
+            </div>
+            <a href={`mailto:${student.email}`} className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"><Mail className="size-3.5" /> Send Email</a>
+          </div>
+        )}
+
+        {/* Payments Tab */}
+        {tab === "payments" && (
+          <div className="space-y-3">
+            {(!payments || payments.length === 0) ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">No payment records found.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border/40">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                    <th className="px-3 py-2 text-left">Amount</th>
+                    <th className="px-3 py-2 text-left">Status</th>
+                    <th className="px-3 py-2 text-left">Method</th>
+                    <th className="px-3 py-2 text-left">UTR</th>
+                    <th className="px-3 py-2 text-left">Date</th>
+                  </tr></thead>
+                  <tbody>
+                    {payments.map((p: any) => (
+                      <tr key={p.id} className="border-b border-border/20 hover:bg-accent/20">
+                        <td className="px-3 py-2 font-medium">{p.amount ? `₹${p.amount.toLocaleString("en-IN")}` : "—"}</td>
+                        <td className="px-3 py-2"><Badge className={`text-xs ${p.status === "verified" ? "bg-green-100 text-green-700" : p.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{p.status}</Badge></td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{p.payment_method ?? "—"}</td>
+                        <td className="px-3 py-2 font-mono text-[10px] text-muted-foreground">{p.utr ?? "—"}</td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Submissions Tab */}
+        {tab === "submissions" && (
+          <div className="space-y-3">
+            {(!submissions || submissions.length === 0) ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">No task submissions found.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border/40">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                    <th className="px-3 py-2 text-left">Task</th>
+                    <th className="px-3 py-2 text-left">Status</th>
+                    <th className="px-3 py-2 text-left">Submitted</th>
+                    <th className="px-3 py-2 text-left">URL</th>
+                  </tr></thead>
+                  <tbody>
+                    {submissions.map((s: any) => (
+                      <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
+                        <td className="px-3 py-2 text-xs">{s.task_name ?? `Task #${s.task_index ?? ""}`}</td>
+                        <td className="px-3 py-2"><Badge className={`text-xs ${s.status === "approved" ? "bg-green-100 text-green-700" : s.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{s.status}</Badge></td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString("en-IN")}</td>
+                        <td className="px-3 py-2 text-xs">{s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate block max-w-[200px]">{s.url}</a> : "—"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Certificates Tab */}
+        {tab === "certificates" && (
+          <div className="space-y-3">
+            {(!certificates || certificates.length === 0) ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">No certificates issued yet.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border/40">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                    <th className="px-3 py-2 text-left">Type</th>
+                    <th className="px-3 py-2 text-left">Cert ID</th>
+                    <th className="px-3 py-2 text-left">Issued</th>
+                    <th className="px-3 py-2 text-left">Status</th>
+                  </tr></thead>
+                  <tbody>
+                    {certificates.map((c: any) => (
+                      <tr key={c.id} className="border-b border-border/20 hover:bg-accent/20">
+                        <td className="px-3 py-2 text-xs capitalize">{c.type ?? "Certificate"}</td>
+                        <td className="px-3 py-2 font-mono text-[10px]">{c.certificate_id ?? "—"}</td>
+                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("en-IN")}</td>
+                        <td className="px-3 py-2"><Badge className="text-xs bg-green-100 text-green-700">Issued</Badge></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Login History Tab */}
+        {tab === "login-history" && (
+          <div className="space-y-3">
+            {(!loginSessions || loginSessions.length === 0) ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">No login sessions recorded.</p>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-border/40">
+                <table className="w-full text-sm">
+                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                    <th className="px-3 py-2 text-left">Status</th>
+                    <th className="px-3 py-2 text-left">Device</th>
+                    <th className="px-3 py-2 text-left">Browser</th>
+                    <th className="px-3 py-2 text-left">Location</th>
+                    <th className="px-3 py-2 text-left">Logged In</th>
+                    <th className="px-3 py-2 text-left">Last Active</th>
+                    <th className="px-3 py-2 text-left">Duration</th>
+                  </tr></thead>
+                  <tbody>
+                    {loginSessions.map((s: any) => {
+                      const duration = s.login_time && s.logout_time
+                        ? Math.round((new Date(s.logout_time).getTime() - new Date(s.login_time).getTime()) / 60000)
+                        : s.login_time && s.last_active
+                        ? Math.round((new Date(s.last_active).getTime() - new Date(s.login_time).getTime()) / 60000)
+                        : null;
+                      return (
+                        <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
+                          <td className="px-3 py-2">
+                            {s.status === "online" ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700"><Wifi className="size-3" /> Online</span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500"><WifiOff className="size-3" /> Offline</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground capitalize">{s.device ?? "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{s.browser ?? "—"}{s.os ? ` (${s.os})` : ""}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{[s.city, s.state, s.country].filter(Boolean).join(", ") || "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.login_time ? new Date(s.login_time).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.last_active ? new Date(s.last_active).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{duration !== null ? `${duration} min` : "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// LOGIN ANALYTICS
+// ══════════════════════════════════════════════
+function LoginAnalyticsSection() {
+  const { data: sessions } = useQuery({
+    queryKey: ["admin-login-analytics"],
+    refetchInterval: 60_000,
+    queryFn: async () => {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const { data } = await supabase
+        .from("login_sessions")
+        .select("student_id, status, login_time, logout_time, last_active")
+        .gte("login_time", thirtyDaysAgo.toISOString())
+        .order("login_time", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0, 10);
+  const weekAgo = new Date(now); weekAgo.setDate(weekAgo.getDate() - 7);
+  const monthAgo = new Date(now); monthAgo.setDate(monthAgo.getDate() - 30);
+
+  const stats = useMemo(() => {
+    if (!sessions) return null;
+    const uniqueUsers = new Set(sessions.map((s: any) => s.student_id));
+    const dau = new Set(sessions.filter((s: any) => s.login_time?.startsWith(todayStr)).map((s: any) => s.student_id));
+    const wau = new Set(sessions.filter((s: any) => new Date(s.login_time) >= weekAgo).map((s: any) => s.student_id));
+    const mau = new Set(sessions.filter((s: any) => new Date(s.login_time) >= monthAgo).map((s: any) => s.student_id));
+    const totalSessions = sessions.length;
+    const nowOnline = sessions.filter((s: any) => s.status === "online").length;
+    const durations: number[] = [];
+    for (const s of sessions) {
+      if (s.login_time && s.logout_time) {
+        durations.push(Math.round((new Date(s.logout_time).getTime() - new Date(s.login_time).getTime()) / 60000));
+      }
+    }
+    const avgDuration = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
+    const peakHour = Array(24).fill(0);
+    for (const s of sessions) {
+      if (s.login_time) {
+        const h = new Date(s.login_time).getHours();
+        peakHour[h]++;
+      }
+    }
+    const peakHourIdx = peakHour.indexOf(Math.max(...peakHour));
+    return { uniqueUsers: uniqueUsers.size, dau: dau.size, wau: wau.size, mau: mau.size, totalSessions, nowOnline, avgDuration, peakHour: peakHourIdx };
+  }, [sessions]);
+
+  const statCards = stats ? [
+    { label: "Currently Online", value: stats.nowOnline, sub: "right now", icon: Wifi, color: "text-green-600 bg-green-50 dark:bg-green-950/30" },
+    { label: "Active Today (DAU)", value: stats.dau, sub: `${((stats.dau / stats.uniqueUsers) * 100 || 0).toFixed(0)}% of users`, icon: TrendingUp, color: "text-blue-600 bg-blue-50 dark:bg-blue-950/30" },
+    { label: "Active This Week (WAU)", value: stats.wau, sub: `${((stats.wau / stats.uniqueUsers) * 100 || 0).toFixed(0)}% of users`, icon: TrendingUp, color: "text-purple-600 bg-purple-50 dark:bg-purple-950/30" },
+    { label: "Active This Month (MAU)", value: stats.mau, sub: `out of ${stats.uniqueUsers} total users`, icon: BarChart3, color: "text-[#07284a] bg-[#07284a]/10 dark:bg-[#07284a]/30" },
+    { label: "Total Sessions (30d)", value: stats.totalSessions, sub: `${(stats.totalSessions / 30).toFixed(1)}/day avg`, icon: Activity, color: "text-amber-600 bg-amber-50 dark:bg-amber-950/30" },
+    { label: "Avg Session Duration", value: `${stats.avgDuration}m`, sub: stats.avgDuration > 0 ? `${Math.round(stats.avgDuration / 60)}h ${stats.avgDuration % 60}m` : "", icon: Clock, color: "text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30" },
+    { label: "Peak Login Hour", value: `${stats.peakHour}:00`, sub: `${peakHourLabels[stats.peakHour]}`, icon: Clock, color: "text-rose-600 bg-rose-50 dark:bg-rose-950/30" },
+  ] : [];
+
+  return (
+    <div className="animate-fade-in-up space-y-4">
+      <h2 className="text-2xl font-bold">Login Analytics</h2>
+      <p className="text-sm text-muted-foreground">Login activity over the last 30 days</p>
+      {!stats ? (
+        <p className="py-12 text-center text-muted-foreground">Loading analytics...</p>
+      ) : stats.uniqueUsers === 0 ? (
+        <p className="py-12 text-center text-muted-foreground">No login data available yet.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {statCards.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <div key={i} className="rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`grid size-10 place-items-center rounded-xl ${s.color}`}><Icon className="size-5" /></div>
+                </div>
+                <p className="font-display text-3xl font-bold">{s.value}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
+                <p className="text-xs text-muted-foreground/70">{s.sub}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const peakHourLabels = ["Midnight", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "Noon", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM"];
