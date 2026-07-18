@@ -24,6 +24,7 @@ import {
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
   PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent, Briefcase,
+  Loader2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -876,15 +877,31 @@ function VerificationSection() {
   const [rejectDialog, setRejectDialog] = useState<any | null>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [paymentMap, setPaymentMap] = useState<Record<string, any>>({});
+
+  // Fetch payments separately to avoid schema cache issues with reverse join
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from("payments")
+        .select("application_id, utr_number, amount, status");
+      if (data) {
+        const map: Record<string, any> = {};
+        for (const p of data) map[p.application_id] = p;
+        setPaymentMap(map);
+      }
+    })();
+  }, []);
 
   const { data: pendingApps } = useQuery({
     queryKey: ["admin-verification-pending"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("applications")
-        .select("*, payments(utr_number, amount, status)")
-        .in("submission_status", ["submitted"])
+        .select("*")
+        .eq("submission_status", "submitted")
         .order("submitted_at", { ascending: false });
+      if (error) { console.error("Failed to fetch pending apps:", error); return []; }
       return data ?? [];
     },
     refetchInterval: 10_000,
@@ -893,11 +910,12 @@ function VerificationSection() {
   const { data: reviewedApps } = useQuery({
     queryKey: ["admin-verification-reviewed"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("applications")
-        .select("*, payments(utr_number, amount, status)")
+        .select("*")
         .in("submission_status", ["approved", "rejected"])
         .order("verified_at", { ascending: false });
+      if (error) { console.error("Failed to fetch reviewed apps:", error); return []; }
       return data ?? [];
     },
     refetchInterval: 10_000,
@@ -1020,8 +1038,8 @@ function VerificationSection() {
                 <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                   <div><span className="text-muted-foreground">Applied</span><p className="font-semibold">{new Date(a.created_at).toLocaleDateString("en-IN")}</p></div>
                   <div><span className="text-muted-foreground">Submitted</span><p className="font-semibold">{a.submitted_at ? new Date(a.submitted_at).toLocaleDateString("en-IN") : "—"}</p></div>
-                  <div><span className="text-muted-foreground">Payment</span><p className="font-semibold">{a.payments?.[0] ? (a.payments[0].utr_number === "FREE_COUPON" ? "Free Coupon" : `₹${a.payments[0].amount}`) : "—"}</p></div>
-                  <div><span className="text-muted-foreground">Status</span><p className="font-semibold capitalize">{a.payments?.[0]?.status ?? "—"}</p></div>
+                  <div><span className="text-muted-foreground">Payment</span><p className="font-semibold">{paymentMap[a.id] ? (paymentMap[a.id].utr_number === "FREE_COUPON" ? "Free Coupon" : `₹${paymentMap[a.id].amount}`) : "—"}</p></div>
+                  <div><span className="text-muted-foreground">Status</span><p className="font-semibold capitalize">{paymentMap[a.id]?.status ?? "—"}</p></div>
                 </div>
                 {a.coupon_code && <p className="mt-2 text-xs text-muted-foreground">Coupon: <span className="font-mono font-bold">{a.coupon_code}</span></p>}
                 <div className="mt-4 flex flex-wrap gap-2">
