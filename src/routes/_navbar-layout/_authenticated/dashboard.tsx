@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { ApplicationFormDialog } from "@/components/ApplicationFormDialog";
+import { SearchableSelect } from "@/components/ui/searchable-select";
+import { INDIA_STATES, STATE_DISTRICTS } from "@/lib/india-locations";
 import { DOMAINS, DURATIONS, PAYMENT, COMPANY, generateInternId, generateCertId, getDomain } from "@/lib/constants";
 import { validateCoupon, calculateDiscountedAmount, formatDiscount } from "@/lib/coupons";
 import type { CouponResult } from "@/lib/coupons";
@@ -330,6 +332,15 @@ function Dashboard() {
   const [validatingNewCoupon, setValidatingNewCoupon] = useState(false);
   const [submittingNewApp, setSubmittingNewApp] = useState(false);
 
+  // New domain location + referral states
+  const [newCountry, setNewCountry] = useState("India");
+  const [newState, setNewState] = useState("");
+  const [newDistrict, setNewDistrict] = useState("");
+  const [newCity, setNewCity] = useState("");
+  const [newPincode, setNewPincode] = useState("");
+  const [newHearAbout, setNewHearAbout] = useState("");
+  const [newReferralName, setNewReferralName] = useState("");
+
   const handleApplyNewCoupon = async () => {
     if (!newCouponCode.trim()) return;
     setValidatingNewCoupon(true);
@@ -358,6 +369,16 @@ function Dashboard() {
   const handleApplyNewDomain = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDomain) return toast.error("Please select a domain");
+
+    // Location & Discovery validation
+    if (!newState) return toast.error("State / Union Territory is required");
+    if (!newDistrict) return toast.error("District is required");
+    if (!newCity.trim()) return toast.error("City / Town is required");
+    if (!/^\d{6}$/.test(newPincode)) return toast.error("PIN Code must be exactly 6 digits");
+    if (!newHearAbout) return toast.error("Please select how you heard about us");
+    if ((newHearAbout === "Friend / Classmate" || newHearAbout === "Existing Skyrovix Intern") && !newReferralName.trim()) {
+      return toast.error("Referral Name is required");
+    }
     
     // Check if already enrolled in this domain and active/pending
     const alreadyEnrolled = appsList?.some(a => a.domain === newDomain && (a.status === "ongoing" || a.status === "approved" || a.status === "pending"));
@@ -385,6 +406,13 @@ function Dashboard() {
         photo_url: app?.photo_url ?? null,
         coupon_code: newCouponApplied?.code ?? null,
         status: "approved",
+        country: newCountry,
+        state: newState,
+        district: newDistrict,
+        city: newCity,
+        pincode: newPincode,
+        hear_about: newHearAbout,
+        referral_name: (newHearAbout === "Friend / Classmate" || newHearAbout === "Existing Skyrovix Intern") ? newReferralName : null,
       };
 
       const { error: insertError } = await supabase.from("applications").insert(payload);
@@ -418,6 +446,13 @@ function Dashboard() {
       setNewDuration(1);
       setNewCouponCode("");
       setNewCouponApplied(null);
+      setNewCountry("India");
+      setNewState("");
+      setNewDistrict("");
+      setNewCity("");
+      setNewPincode("");
+      setNewHearAbout("");
+      setNewReferralName("");
     } catch (err: any) {
       toast.error(err.message || "Failed to submit application");
     } finally {
@@ -882,19 +917,16 @@ function Dashboard() {
     }
 
     if (active === "internships") {
+      const enrolledSlugsForNew = new Set(appsList?.filter(a => a.status === "ongoing" || a.status === "approved" || a.status === "pending").map(a => a.domain) ?? []);
       return (
         <div className="space-y-6">
-          <DashboardHero badge="My Internships" title="My Internships" description="View all your enrolled internship domains and their progress." icon={Briefcase} />
+          <DashboardHero badge="My Internships" title="My Internships" description="View all your enrolled internship domains, track progress, and apply for new internship streams." icon={Briefcase} />
+
+          {/* Enrolled Internships List */}
           <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Enrolled Streams</h4>
             {appsList?.length ? (
               <div className="space-y-4">
-                <div className="flex justify-between items-center px-1">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Enrolled Streams</h4>
-                  <Button size="sm" variant="outline" className="rounded-xl border-border/50 text-[11px] font-semibold gap-1.5 h-8 bg-white shadow-sm hover:-translate-y-0.5 transition-transform"
-                    onClick={() => navigate({ to: "/domains" })}>
-                    <Sparkles className="size-3 text-amber-500" /> Apply for Another Domain
-                  </Button>
-                </div>
                 {appsList.map((a) => {
                   const d = getDomain(a.domain);
                   const aSubs = allAppSubmissions?.filter((s: any) => s.application_id === a.id) ?? [];
@@ -928,13 +960,201 @@ function Dashboard() {
                 })}
               </div>
             ) : (
-              <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-12 text-center backdrop-blur-xl dark:bg-slate-900/40">
+              <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-8 text-center backdrop-blur-xl dark:bg-slate-900/40">
                 <Briefcase className="size-12 mx-auto mb-4 text-muted-foreground/50" />
                 <h3 className="text-base font-bold">No Internships Yet</h3>
-                <p className="text-sm text-muted-foreground mt-1">Apply for an internship to get started.</p>
-                <Button size="sm" className="mt-5 brand-gradient text-white border-0 rounded-2xl px-5 h-10 font-medium" onClick={() => navigate({ to: "/domains" })}>Apply Now</Button>
+                <p className="text-sm text-muted-foreground mt-1">Use the form below to apply for your first internship.</p>
               </div>
             )}
+          </div>
+
+          {/* ─── Apply for New Internship Form ─── */}
+          <div className="rounded-3xl border border-[#07284a]/20 bg-gradient-to-br from-[#07284a]/5 to-blue-400/5 backdrop-blur-xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="grid size-10 shrink-0 place-items-center rounded-2xl brand-gradient text-white shadow-md">
+                <Sparkles className="size-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-foreground">Apply for New Internship Domain</h3>
+                <p className="text-xs text-muted-foreground">Fill in the details to start a new internship stream instantly.</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleApplyNewDomain} className="space-y-5">
+              {/* Domain Selector */}
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm font-bold text-foreground">Select Internship Domain *</Label>
+                <Select value={newDomain} onValueChange={setNewDomain} required>
+                  <SelectTrigger className="rounded-xl h-11 bg-background/50 border-border/60">
+                    <SelectValue placeholder="Choose a learning stream..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DOMAINS.map((d) => {
+                      const isEnrolled = enrolledSlugsForNew.has(d.slug);
+                      return (
+                        <SelectItem key={d.slug} value={d.slug} disabled={isEnrolled}>
+                          {d.icon} {d.name} {isEnrolled && "(Already Enrolled)"}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Duration */}
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm font-bold text-foreground">Internship Duration *</Label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {DURATIONS.map((d) => (
+                    <button
+                      key={d.value}
+                      type="button"
+                      onClick={() => setNewDuration(d.value)}
+                      className={`rounded-2xl border p-3.5 text-left transition-all ${
+                        newDuration === d.value
+                          ? "border-[#07284a] bg-[#07284a]/5 dark:border-blue-500 dark:bg-blue-500/10 ring-1 ring-[#07284a]/10"
+                          : "border-border/60 bg-background/30 hover:border-border"
+                      }`}
+                    >
+                      <p className="text-xs sm:text-sm font-extrabold text-foreground">{d.label}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-snug">{d.desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Location Details */}
+              <div className="border-t border-border/40 pt-5">
+                <h4 className="text-xs sm:text-sm font-extrabold text-foreground mb-3 flex items-center gap-1.5">📍 Location Details</h4>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">Country *</Label>
+                    <Select value={newCountry} onValueChange={setNewCountry} required>
+                      <SelectTrigger className="rounded-xl h-11 bg-background/50 border-border/60">
+                        <SelectValue placeholder="Select Country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="India">🇮🇳 India</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">State / Union Territory *</Label>
+                    <SearchableSelect
+                      options={INDIA_STATES}
+                      value={newState}
+                      onChange={(val) => { setNewState(val); setNewDistrict(""); }}
+                      placeholder="Select State / UT"
+                      searchPlaceholder="Search State..."
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3 mt-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">District *</Label>
+                    <SearchableSelect
+                      options={newState ? STATE_DISTRICTS[newState] || [] : []}
+                      value={newDistrict}
+                      onChange={setNewDistrict}
+                      placeholder="Select District"
+                      searchPlaceholder="Search District..."
+                      disabled={!newState}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">City / Town *</Label>
+                    <Input
+                      value={newCity}
+                      onChange={(e) => setNewCity(e.target.value)}
+                      required
+                      placeholder="Enter your City / Town"
+                      className="h-11 rounded-xl bg-background/50 border-border/60"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">PIN Code *</Label>
+                    <Input
+                      type="number"
+                      value={newPincode}
+                      onChange={(e) => setNewPincode(e.target.value)}
+                      required
+                      placeholder="6 Digit PIN Code"
+                      className="h-11 rounded-xl bg-background/50 border-border/60"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Discovery Source */}
+              <div className="border-t border-border/40 pt-5">
+                <h4 className="text-xs sm:text-sm font-extrabold text-foreground mb-3 flex items-center gap-1.5">❓ Discovery</h4>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-xs sm:text-sm font-bold text-foreground">How did you hear about Skyrovix? *</Label>
+                    <SearchableSelect
+                      options={["Google Search","Instagram","LinkedIn","YouTube","Facebook","WhatsApp","Telegram","Friend / Classmate","Existing Skyrovix Intern","Other"]}
+                      value={newHearAbout}
+                      onChange={setNewHearAbout}
+                      placeholder="Select Source"
+                      searchPlaceholder="Search options..."
+                    />
+                  </div>
+                  {(newHearAbout === "Friend / Classmate" || newHearAbout === "Existing Skyrovix Intern") && (
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Referral Name *</Label>
+                      <Input
+                        value={newReferralName}
+                        onChange={(e) => setNewReferralName(e.target.value)}
+                        required
+                        placeholder="Enter friend/intern's full name"
+                        className="h-11 rounded-xl bg-background/50 border-border/60"
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Coupon Code */}
+              <div className="space-y-2">
+                <Label className="text-xs sm:text-sm font-bold text-foreground">Promo / Coupon Code (Optional)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Enter coupon code"
+                    value={newCouponCode}
+                    onChange={(e) => setNewCouponCode(e.target.value)}
+                    disabled={!!newCouponApplied}
+                    className="rounded-xl h-11 bg-background/50 border-border/60"
+                  />
+                  {newCouponApplied ? (
+                    <Button type="button" variant="outline" className="rounded-xl h-11 px-4 text-red-500" onClick={handleRemoveNewCoupon}>Remove</Button>
+                  ) : (
+                    <Button type="button" variant="outline" className="rounded-xl h-11 px-5" onClick={handleApplyNewCoupon} disabled={validatingNewCoupon || !newCouponCode.trim()}>
+                      {validatingNewCoupon ? <Loader2 className="size-4 animate-spin" /> : "Apply"}
+                    </Button>
+                  )}
+                </div>
+                {newCouponApplied && (
+                  <p className="text-xs text-emerald-600 font-bold mt-1">Coupon applied: {newCouponApplied.discount}</p>
+                )}
+              </div>
+
+              {/* Submit */}
+              <Button
+                type="submit"
+                className="w-full brand-gradient text-white border-0 rounded-2xl h-12 text-sm font-extrabold shadow-lg shadow-[#07284a]/15 hover:shadow-xl hover:shadow-[#07284a]/25 transition-all"
+                disabled={submittingNewApp}
+              >
+                {submittingNewApp ? (
+                  <span className="flex items-center gap-2 justify-center">
+                    <Loader2 className="size-4 animate-spin" /> Submitting Application...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2 justify-center">
+                    Apply & Launch Internship <ArrowRight className="size-4" />
+                  </span>
+                )}
+              </Button>
+            </form>
           </div>
         </div>
       );
