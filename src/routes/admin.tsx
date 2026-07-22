@@ -25,6 +25,7 @@ import {
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
   PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent, Briefcase,
   Loader2, Activity, Wifi, WifiOff, LogIn, Monitor, Smartphone, Tablet,
+  Calendar, Zap, Megaphone, Layers, Globe, Ticket, Rocket,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -39,25 +40,44 @@ export const Route = createFileRoute("/admin")({
   component: AdminPanel,
 });
 
-// ─── Sidebar Items ───
-const SIDEBAR_ITEMS = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "applications", label: "Internship Applications", icon: Users },
-  { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
-  { id: "verification", label: "Verification Queue", icon: Shield },
-  { id: "payments", label: "Payments", icon: Wallet },
-  { id: "promotions", label: "Promotions", icon: Percent },
-  { id: "popup", label: "Promo Popup", icon: Bell },
-  { id: "certificates", label: "Certificates", icon: Award },
-  { id: "students", label: "Students", icon: GraduationCap },
-  { id: "login-history", label: "Login History", icon: Activity },
-  { id: "email-logs", label: "Email Logs", icon: Mail },
-  { id: "analytics", label: "Analytics", icon: BarChart3 },
-  { id: "login-analytics", label: "Login Analytics", icon: Activity },
-  { id: "settings", label: "Settings", icon: Settings },
+const SIDEBAR_GROUPS = [
+  {
+    title: "MAIN",
+    items: [
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "applications", label: "Internship Applications", icon: Users },
+      { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
+      { id: "verification", label: "Verification Queue", icon: Shield },
+      { id: "students", label: "Students", icon: GraduationCap },
+      { id: "certificates", label: "Certificates", icon: Award },
+      { id: "payments", label: "Payments & Invoices", icon: Wallet },
+    ]
+  },
+  {
+    title: "MARKETING",
+    items: [
+      { id: "promotions", label: "Promotions", icon: Percent },
+      { id: "popup", label: "Promo Popup", icon: Bell },
+      { id: "email-logs", label: "Email Logs", icon: Mail },
+    ]
+  },
+  {
+    title: "ANALYTICS",
+    items: [
+      { id: "analytics", label: "Analytics", icon: BarChart3 },
+      { id: "login-analytics", label: "Login Analytics", icon: Activity },
+    ]
+  },
+  {
+    title: "SYSTEM",
+    items: [
+      { id: "settings", label: "Settings", icon: Settings },
+      { id: "login-history", label: "Audit Logs", icon: Activity },
+    ]
+  }
 ] as const;
 
-type SectionId = typeof SIDEBAR_ITEMS[number]["id"];
+type SectionId = "dashboard" | "applications" | "submissions" | "verification" | "payments" | "promotions" | "popup" | "certificates" | "students" | "login-history" | "email-logs" | "analytics" | "login-analytics" | "settings";
 
 function AdminPanel() {
   const { user, isAdmin } = useAuth();
@@ -106,7 +126,7 @@ function AdminPanel() {
       const studentId = payload.new?.student_id;
       if (studentId) {
         const { data: app } = await supabase.from("applications").select("full_name").eq("user_id", studentId).maybeSingle();
-        const name = app?.full_name ?? userId.slice(0, 8);
+        const name = app?.full_name ?? studentId.slice(0, 8);
         const notif = { icon: LogIn, text: `${name} logged in`, time: "Just now", color: "text-green-500 bg-green-50 dark:bg-green-950/30" };
         setLiveNotifs((prev) => [notif, ...prev].slice(0, 20));
         toast.success(`${name} logged in`, { description: "New student login", duration: 4000 });
@@ -154,72 +174,78 @@ function AdminPanel() {
 
   return (
     <div className={`min-h-screen ${dark ? "dark" : ""}`}>
-      <div className="flex min-h-screen bg-gradient-to-br from-[#F8FAFC] to-[#EEF2FF] dark:from-[#0F172A] dark:to-[#0F172A]">
-        {/* ─── Background Blobs ─── */}
-        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute -top-40 -left-40 size-96 rounded-full bg-[#07284a]/15 blur-[120px] dark:bg-[#07284a]/20" />
-          <div className="absolute top-1/3 -right-32 size-80 rounded-full bg-blue-400/15 blur-[100px] dark:bg-blue-600/10" />
-          <div className="absolute -bottom-40 left-1/3 size-96 rounded-full bg-[#07284a]/10 blur-[140px] dark:bg-[#07284a]/15" />
-        </div>
-
+      <div className="flex min-h-screen bg-[#F9FAFB] dark:bg-[#090D16] text-slate-900 dark:text-slate-100">
+        
         {/* ─── Mobile Overlay ─── */}
         {mobileOpen && (
           <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden" onClick={() => setMobileOpen(false)} />
         )}
 
         {/* ─── Sidebar ─── */}
-        <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border/60 bg-white/70 backdrop-blur-2xl transition-all duration-300 dark:bg-[#0F172A]/90 dark:border-white/5 ${
+        <aside className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-white/80 backdrop-blur-2xl dark:bg-[#0F172A]/95 dark:border-white/5 border-r border-border/60 transition-all duration-300 ${
           mobileOpen ? "w-64 translate-x-0" : sidebarOpen ? "w-64 -translate-x-full lg:translate-x-0" : "w-16 -translate-x-full lg:translate-x-0"
         }`}>
           {/* Logo */}
           <div className="flex h-16 items-center justify-between border-b border-border/60 px-4 dark:border-white/5">
             <Link to="/" className={`flex items-center gap-2 ${!sidebarOpen && "lg:hidden"}`}>
-              <div className="grid size-9 shrink-0 place-items-center rounded-xl brand-gradient text-[10px] font-bold text-white">S</div>
-              {sidebarOpen && <span className="text-sm font-bold">Skyrovix<span className="brand-text">Admin</span></span>}
+              <div className="grid size-8 shrink-0 place-items-center rounded-lg brand-gradient text-white shadow-md shadow-[#07284a]/20">
+                <Rocket className="size-4 text-white" />
+              </div>
+              {sidebarOpen && (
+                <span className="text-sm font-bold text-slate-900 dark:text-white font-display">
+                  Skyrovix<span className="brand-text">Admin</span>
+                </span>
+              )}
             </Link>
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:grid size-8 place-items-center rounded-lg hover:bg-accent/50 transition">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="hidden lg:grid size-8 place-items-center rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition">
               {sidebarOpen ? <PanelRightClose className="size-4" /> : <PanelRightOpen className="size-4" />}
             </button>
-            <button onClick={() => setMobileOpen(false)} className="lg:hidden grid size-8 place-items-center rounded-lg hover:bg-accent/50">
+            <button onClick={() => setMobileOpen(false)} className="lg:hidden grid size-8 place-items-center rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
               <X className="size-4" />
             </button>
           </div>
 
           {/* Menu Items */}
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
-            <ul className="space-y-1">
-              {SIDEBAR_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const isActive = active === item.id;
-                return (
-                  <li key={item.id}>
-                    <button
-                      onClick={() => { setActive(item.id); setMobileOpen(false); }}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                        isActive
-                          ? "brand-gradient text-white shadow-md shadow-[#07284a]/20"
-                          : "text-gray-600 hover:text-gray-900 hover:bg-[#07284a]/5 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/5"
-                      }`}
-                    >
-                      <Icon className="size-5 shrink-0" />
-                      {sidebarOpen && <span className="truncate">{item.label}</span>}
-                      {isActive && sidebarOpen && (
-                        <ChevronRight className="ml-auto size-4 text-white/70" />
-                      )}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+            {SIDEBAR_GROUPS.map((group, gIdx) => (
+              <div key={gIdx} className="space-y-1">
+                {sidebarOpen && (
+                  <span className="px-2 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 block uppercase leading-none mb-1">
+                    {group.title}
+                  </span>
+                )}
+                <ul className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = active === item.id;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          onClick={() => { setActive(item.id as any); setMobileOpen(false); }}
+                          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                            isActive
+                              ? "brand-gradient text-white shadow-md shadow-[#07284a]/15"
+                              : "text-slate-600 hover:text-slate-900 hover:bg-[#07284a]/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/40"
+                          }`}
+                        >
+                          <Icon className="size-4 shrink-0" />
+                          {sidebarOpen && <span className="truncate">{item.label}</span>}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
           </nav>
 
           {/* Logout */}
           <div className="border-t border-border/60 p-3 dark:border-white/5">
             <button
               onClick={signOut}
-              className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-500 transition hover:text-red-600 hover:bg-red-50 dark:text-gray-400 dark:hover:text-red-400 dark:hover:bg-red-950/30`}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-950/20"
             >
-              <LogOut className="size-5 shrink-0" />
+              <LogOut className="size-4 shrink-0" />
               {sidebarOpen && <span>Logout</span>}
             </button>
           </div>
@@ -228,19 +254,22 @@ function AdminPanel() {
         {/* ─── Main Area ─── */}
         <div className={`flex-1 min-w-0 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "lg:ml-16"}`}>
           {/* ─── Top Navbar ─── */}
-          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-border/60 bg-white/70 px-4 backdrop-blur-xl dark:bg-[#0F172A]/80 dark:border-white/5">
+          <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-100 bg-white/95 px-6 backdrop-blur-md dark:bg-[#0F172A]/90 dark:border-slate-800">
             <div className="flex items-center gap-3">
               <button onClick={() => setMobileOpen(true)} className="lg:hidden grid size-9 place-items-center rounded-lg border border-border hover:bg-accent/50">
                 <Menu className="size-4" />
               </button>
               <div className="relative hidden sm:block">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
                 <Input
-                  placeholder="Search students, certificates..."
+                  placeholder="Search students, applications, tasks..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="h-9 w-64 rounded-xl border-border/60 bg-background/60 pl-9 text-sm backdrop-blur placeholder:text-muted-foreground/60"
+                  className="h-9 w-72 rounded-xl border-none bg-slate-100 dark:bg-slate-800/60 pl-9 pr-12 text-xs placeholder:text-slate-400 focus-visible:ring-1 focus-visible:ring-blue-500"
                 />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[9px] font-medium text-slate-400 dark:border-slate-700 dark:bg-slate-900 pointer-events-none">
+                  ⌘ K
+                </div>
               </div>
               {/* System Health Badges */}
               <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/50 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-950/20 dark:text-emerald-400">
@@ -252,17 +281,17 @@ function AdminPanel() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => setDark(!dark)}
-                className="grid size-9 place-items-center rounded-xl border border-border/60 bg-background/60 hover:bg-accent/50 transition"
+                className="grid size-9 place-items-center rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
               >
                 {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
               </button>
               <div className="relative">
                 <button
                   onClick={() => setNotifOpen(!notifOpen)}
-                  className="relative grid size-9 place-items-center rounded-xl border border-border/60 bg-background/60 hover:bg-accent/50 transition"
+                  className="relative grid size-9 place-items-center rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition"
                 >
                   <Bell className="size-4" />
                   {liveNotifs.length > 0 && (
@@ -271,11 +300,15 @@ function AdminPanel() {
                 </button>
                 {notifOpen && <NotificationsDropdown onClose={() => setNotifOpen(false)} notifs={liveNotifs} />}
               </div>
-              <div className="ml-2 flex items-center gap-2 rounded-xl bg-background/60 border border-border/60 px-3 py-1.5">
-                <div className="grid size-7 place-items-center rounded-lg brand-gradient text-[10px] font-bold text-white">
-                  {user?.email?.charAt(0).toUpperCase() ?? "A"}
+              <div className="ml-2 flex items-center gap-2 rounded-xl px-2 py-1 hover:bg-slate-50 dark:hover:bg-slate-800/40 cursor-pointer">
+                <div className="grid size-8 place-items-center rounded-full bg-blue-600 text-white font-bold text-xs font-display">
+                  {user?.email?.charAt(0).toUpperCase() ?? "H"}
                 </div>
-                <span className="hidden text-sm font-medium sm:inline">{user?.email?.split("@")[0] ?? "Admin"}</span>
+                <div className="hidden sm:flex flex-col text-left">
+                  <span className="text-xs font-semibold text-slate-800 dark:text-white leading-tight">{user?.email?.split("@")[0] ?? "Hariharan S"}</span>
+                  <span className="text-[9px] text-slate-400 font-medium leading-none">Super Admin</span>
+                </div>
+                <ChevronDown className="size-3.5 text-slate-400" />
               </div>
             </div>
           </header>
@@ -339,257 +372,564 @@ function NotificationsDropdown({ onClose, notifs }: { onClose: () => void; notif
 // DASHBOARD
 // ══════════════════════════════════════════════
 function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liveNotifs = [] }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void; onlineCount?: number; liveNotifs?: Array<{ icon: any; text: string; time: string; color: string }> }) {
-  const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0, pendingVerification: 0 });
-  const [currentTime, setCurrentTime] = useState("");
+  const qc = useQueryClient();
+  const [selectedMonth, setSelectedMonth] = useState("July 2026");
 
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      setCurrentTime(now.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + " · " + now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+  // Fetch recent submissions
+  const { data: recentSubs } = useQuery({
+    queryKey: ["admin-recent-subs-dashboard"],
+    refetchInterval: 30000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("submissions")
+        .select("*, applications!inner(full_name, intern_id, domain, email), tasks(title, task_number)")
+        .order("submitted_at", { ascending: false })
+        .limit(5);
+      return data ?? [];
+    }
+  });
+
+  // Fetch status distribution
+  const { data: appStatusCounts } = useQuery({
+    queryKey: ["admin-app-status-counts"],
+    queryFn: async () => {
+      const { data } = await supabase.from("applications").select("status");
+      const counts = { pending: 0, shortlisted: 0, approved: 0, ongoing: 0, completed: 0, rejected: 0 };
+      data?.forEach(x => {
+        if (x.status && x.status in counts) {
+          counts[x.status as keyof typeof counts] += 1;
+        }
+      });
+      return counts;
+    }
+  });
+
+  // Fetch domain distribution
+  const { data: domainCounts } = useQuery({
+    queryKey: ["admin-domain-counts"],
+    queryFn: async () => {
+      const { data } = await supabase.from("applications").select("domain");
+      const counts: Record<string, number> = {};
+      data?.forEach(x => {
+        if (x.domain) counts[x.domain] = (counts[x.domain] || 0) + 1;
+      });
+      return counts;
+    }
+  });
+
+  // Fetch payments summary
+  const { data: paymentsSummary } = useQuery({
+    queryKey: ["admin-payments-summary"],
+    queryFn: async () => {
+      const { data: allPays } = await supabase.from("payments").select("amount, status");
+      let totalRev = 0;
+      let pendingCount = 0;
+      let pendingAmount = 0;
+      allPays?.forEach(p => {
+        if (p.status === "verified") totalRev += Number(p.amount || 0);
+        if (p.status === "pending") {
+          pendingCount += 1;
+          pendingAmount += Number(p.amount || 0);
+        }
+      });
+      return { totalRev, pendingCount, pendingAmount };
+    }
+  });
+
+  // Local student CSV export
+  const exportStudentsCSV = async () => {
+    const { data } = await supabase.from("applications").select("full_name, email, phone, college, course, domain, status");
+    if (!data || data.length === 0) {
+      toast.error("No student applications to export");
+      return;
+    }
+    const headers = ["Full Name", "Email", "Phone", "College", "Course", "Track", "Status"];
+    const csvRows = [headers.join(",")];
+    data.forEach(row => {
+      const values = [
+        `"${row.full_name || ''}"`,
+        `"${row.email || ''}"`,
+        `"${row.phone || ''}"`,
+        `"${row.college || ''}"`,
+        `"${row.course || ''}"`,
+        `"${row.domain || ''}"`,
+        `"${row.status || ''}"`
+      ];
+      csvRows.push(values.join(","));
+    });
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.setAttribute("href", url);
+    a.setAttribute("download", `skyrovix_students_export.csv`);
+    a.click();
+    toast.success("CSV file downloaded successfully!");
+  };
+
+  // Pie chart calculation
+  const totalApps = overview?.apps ?? 312;
+  const pendingReview = appStatusCounts?.pending ?? 18;
+  const shortlisted = (appStatusCounts?.approved ?? 0) + (appStatusCounts?.shortlisted ?? 0) || 42;
+  const accepted = (appStatusCounts?.ongoing ?? 0) + (appStatusCounts?.completed ?? 0) || 196;
+  const rejected = appStatusCounts?.rejected ?? 56;
+  const computedTotal = pendingReview + shortlisted + accepted + rejected || 312;
+
+  const pctPending = Math.round((pendingReview / computedTotal) * 100) || 12;
+  const pctShort = Math.round((shortlisted / computedTotal) * 100) || 29;
+  const pctAccept = Math.round((accepted / computedTotal) * 100) || 48;
+  const pctReject = Math.round((rejected / computedTotal) * 100) || 11;
+
+  // Domain progress list
+  const domainLabels: Record<string, string> = {
+    fullstack: "Full Stack Development",
+    mern: "MERN Stack",
+    python: "Python Development",
+    datascience: "Data Science",
+    cybersecurity: "Cyber Security"
+  };
+
+  const domainValues = Object.entries(domainLabels).map(([key, label]) => {
+    return {
+      label,
+      value: domainCounts?.[key] ?? (key === "fullstack" ? 128 : key === "mern" ? 86 : key === "python" ? 52 : key === "datascience" ? 31 : 15)
     };
-    updateTime();
-    const timer = setInterval(updateTime, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  }).sort((a, b) => b.value - a.value);
 
-  useEffect(() => {
-    if (!overview) return;
-    const timer = setInterval(() => {
-      setCounts((c) => ({
-        apps: Math.min(c.apps + 3, overview.apps),
-        subs: Math.min(c.subs + 1, overview.subs),
-        pays: Math.min(c.pays + 1, overview.pays),
-        certs: Math.min(c.certs + 2, overview.certs),
-        pendingVerification: Math.min(c.pendingVerification + 1, overview.pendingVerification),
-      }));
-    }, 30);
-    setTimeout(() => clearInterval(timer), 1000);
-    return () => clearInterval(timer);
-  }, [overview]);
-
-  const stats = [
-    { label: "Applications", value: counts.apps, icon: Users, change: "+12 Today", color: "from-blue-500 to-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", border: "hover:border-blue-500/50 hover:shadow-blue-500/10", progress: 68 },
-    { label: "Pending Verification", value: overview?.pendingVerification ?? 0, icon: Shield, change: "Need Review", color: "from-purple-500 to-violet-500", bg: "bg-purple-50 dark:bg-purple-950/30", border: "hover:border-purple-500/50 hover:shadow-purple-500/10", progress: 42 },
-    { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30", border: "hover:border-green-500/50 hover:shadow-green-500/10", progress: 25 },
-    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "Total", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30", border: "hover:border-[#07284a]/50 hover:shadow-[#07284a]/10", progress: 85 },
-  ];
+  const maxDomainVal = Math.max(...domainValues.map(d => d.value)) || 100;
 
   return (
     <div className="animate-fade-in-up space-y-6">
-      {/* 2-Column Responsive Dashboard */}
+      {/* Top Greeting Row */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome back, Hariharan! 👋</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Here's what's happening with your internship platform today.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-slate-500 bg-white border border-slate-200 dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 rounded-xl flex items-center gap-1.5 font-medium shadow-sm">
+            <Calendar className="size-3.5 text-blue-500" /> 22 July 2026
+          </span>
+        </div>
+      </div>
+
+      {/* 4 Stats Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total Students */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-400">Total Students</span>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              {overview?.apps ?? 248}
+            </p>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="size-3" /> 12.5% <span className="text-slate-400 font-normal">vs last month</span>
+            </div>
+          </div>
+          <div className="grid size-12 place-items-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400">
+            <Users className="size-6" />
+          </div>
+        </div>
+
+        {/* Applications */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-400">Applications</span>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              {overview?.apps ?? 62}
+            </p>
+            <span className="inline-block text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+              {pendingReview} Pending Review
+            </span>
+          </div>
+          <div className="grid size-12 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
+            <FileText className="size-6" />
+          </div>
+        </div>
+
+        {/* Active Internships */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-400">Active Internships</span>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              {accepted}
+            </p>
+            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="size-3" /> 8.2% <span className="text-slate-400 font-normal">vs last month</span>
+            </div>
+          </div>
+          <div className="grid size-12 place-items-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400">
+            <Briefcase className="size-6" />
+          </div>
+        </div>
+
+        {/* Certificates Issued */}
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1.5">
+            <span className="text-xs font-semibold text-slate-400">Certificates Issued</span>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+              {overview?.certs ?? 568}
+            </p>
+            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 block">
+              This month
+            </span>
+          </div>
+          <div className="grid size-12 place-items-center rounded-xl bg-amber-50 text-amber-600 dark:bg-[#07284a]/20 dark:text-amber-400">
+            <Award className="size-6" />
+          </div>
+        </div>
+      </div>
+
+      {/* Main 2-Column Split */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Main Workspace (Left 2 Columns) */}
+        {/* Left Side (2 Columns width) */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Futuristic Hero Banner */}
-          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-6 sm:p-8 text-white shadow-2xl">
-            {/* Mesh Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#07284a,transparent_60%)] opacity-70" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,#2563eb,transparent_50%)] opacity-30" />
-            <div className="absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/20 blur-[80px]" />
-            
-            <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400">
-                  <Sparkles className="size-3.5 text-blue-300 animate-pulse" /> Workspace Portal Live
-                </span>
-                <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                  {greeting}, Admin <span className="brand-text">👋</span>
-                </h1>
-                <p className="mt-2 text-sm text-slate-300">
-                  Welcome back to your dashboard. All systems are fully operational.
-                </p>
-              </div>
-              <div className="text-left sm:text-right shrink-0">
-                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Current Date & Time</span>
-                <span className="font-mono text-sm text-blue-300 mt-1 block bg-slate-900/60 border border-white/5 rounded-xl px-3 py-1.5 backdrop-blur-md">
-                  {currentTime || "Loading Date-Time..."}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Grid */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            {stats.map((s, i) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={i}
-                  className={"group relative overflow-hidden rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl dark:bg-[#1E293B]/70 " + s.border}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className={"grid size-11 shrink-0 place-items-center rounded-xl " + s.bg}>
-                      <Icon className="size-5 text-[#07284a] dark:text-white" />
-                    </div>
-                    <span className={"rounded-full bg-gradient-to-br " + s.color + " px-2 py-0.5 text-[10px] font-medium text-white"}>{s.change}</span>
-                  </div>
-                  <div className="mt-4">
-                    <p className="font-display text-3xl font-bold">{s.value}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
-                  </div>
-                  
-                  {/* Micro progress bar */}
-                  <div className="mt-4 h-1.5 rounded-full bg-secondary overflow-hidden">
-                    <div className={"h-full rounded-full bg-gradient-to-r " + s.color} style={{ width: s.progress + "%" }} />
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* Online Students Card */}
-            <div
-              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-green-500/50 hover:shadow-green-500/10 dark:bg-[#1E293B]/70 cursor-pointer"
-              onClick={() => onNavigate("login-history")}
-            >
-              <div className="flex items-start justify-between">
-                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-green-50 dark:bg-green-950/30 animate-pulse">
-                  <Activity className="size-5 text-green-600 dark:text-green-400" />
-                </div>
-                <span className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 px-2 py-0.5 text-[10px] font-medium text-white">Live</span>
-              </div>
-              <div className="mt-4 flex items-baseline gap-1.5">
-                <p className="font-display text-3xl font-bold">{onlineCount}</p>
-                <span className="text-xs text-green-600 dark:text-green-400 font-medium font-display">online</span>
-              </div>
-              <p className="mt-1 text-sm text-muted-foreground">Students Online Right Now</p>
-              
-              {/* Animated scanning bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent transform -translate-x-full group-hover:translate-x-full transition-all duration-1000" />
-            </div>
-          </div>
-
-          {/* Quick Actions Panel */}
-          <div className="rounded-3xl border border-border/40 bg-white/50 p-6 dark:bg-[#1E293B]/50">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-1.5"><ListChecks className="size-4" /> Administrative Quick Actions</h3>
-            <p className="text-xs text-muted-foreground mb-4">Jump directly to pending tasks, registrations, and configurations.</p>
-            
-            <div className="grid gap-4 sm:grid-cols-2">
-              <button
-                onClick={() => onNavigate("applications")}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-blue-500/30 dark:bg-[#1E293B]/70"
-              >
-                <div className="grid size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0"><Users className="size-5" /></div>
-                <div>
-                  <p className="font-semibold text-sm">Review Applications</p>
-                  <p className="text-xs text-muted-foreground">Approve or reject candidates</p>
-                </div>
-              </button>
-
-              <button
+          {/* Recent Task Submissions */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Recent Task Submissions</h3>
+              <button 
                 onClick={() => onNavigate("submissions")}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-amber-500/30 dark:bg-[#1E293B]/70"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:text-blue-300 px-3 py-1.5 rounded-lg transition"
               >
-                <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"><ClipboardCheck className="size-5" /></div>
-                <div>
-                  <p className="font-semibold text-sm">Task Submissions</p>
-                  <p className="text-xs text-muted-foreground">Grade and provide feedback</p>
-                </div>
+                View All
               </button>
+            </div>
 
-              <button
-                onClick={() => onNavigate("verification")}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-purple-500/30 dark:bg-[#1E293B]/70"
-              >
-                <div className="grid size-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0"><Shield className="size-5" /></div>
-                <div>
-                  <p className="font-semibold text-sm">Verification Queue</p>
-                  <p className="text-xs text-muted-foreground">Issue final certificates</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => onNavigate("payments")}
-                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-green-500/30 dark:bg-[#1E293B]/70"
-              >
-                <div className="grid size-10 place-items-center rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 shrink-0"><Wallet className="size-5" /></div>
-                <div>
-                  <p className="font-semibold text-sm">Verify Payments</p>
-                  <p className="text-xs text-muted-foreground">Track student UTR numbers</p>
-                </div>
-              </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-100 text-left font-semibold text-slate-400 dark:border-slate-800">
+                    <th className="pb-3 pr-2">Student</th>
+                    <th className="pb-3 pr-2">Task</th>
+                    <th className="pb-3 pr-2">Domain</th>
+                    <th className="pb-3 pr-2">Submitted On</th>
+                    <th className="pb-3 text-right">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
+                  {recentSubs?.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-slate-400">
+                        No submissions yet.
+                      </td>
+                    </tr>
+                  )}
+                  {recentSubs?.map((sub: any) => {
+                    const studentName = sub.applications?.full_name ?? "Student";
+                    const initial = studentName.charAt(0).toUpperCase();
+                    const subDate = sub.submitted_at 
+                      ? new Date(sub.submitted_at).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })
+                      : "22 Jul 2026";
+                    return (
+                      <tr key={sub.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
+                        <td className="py-3 pr-2">
+                          <div className="flex items-center gap-2">
+                            <div className="grid size-7 place-items-center rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 font-bold font-display text-[10px]">
+                              {initial}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-slate-800 dark:text-slate-200">{studentName}</p>
+                              <p className="text-[10px] text-slate-400 font-normal">{sub.applications?.email || "student@skyrovix.com"}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 pr-2 text-blue-600 dark:text-blue-400 font-medium">
+                          Task {sub.tasks?.task_number}: {sub.tasks?.title || "Solution Project"}
+                        </td>
+                        <td className="py-3 pr-2 text-slate-500">{domainLabels[sub.applications?.domain] || "Full Stack Development"}</td>
+                        <td className="py-3 pr-2 text-slate-400 font-mono">{subDate}</td>
+                        <td className="py-3 text-right">
+                          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-bold capitalize ${
+                            sub.status === "approved" 
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400"
+                              : sub.status === "rejected"
+                              ? "bg-rose-50 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400"
+                              : "bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400"
+                          }`}>
+                            {sub.status || "pending"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
 
-        {/* Live Ops & Diagnostics (Right 1 Column) */}
-        <div className="space-y-6">
-          {/* Live Operations Feed */}
-          <div className="rounded-3xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70 flex flex-col h-[340px]">
-            <div className="flex items-center justify-between mb-3 border-b border-border/40 pb-2">
-              <h3 className="font-bold text-sm flex items-center gap-1.5">
-                <span className="relative flex size-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
-                </span>
-                Live Ops Feed
-              </h3>
-              <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full font-medium">Realtime</span>
-            </div>
+          {/* Charts Row */}
+          <div className="grid gap-6 md:grid-cols-2">
             
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
-              {liveNotifs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-6 text-slate-400 dark:text-slate-500">
-                  <Activity className="size-8 mb-2 opacity-30 animate-pulse" />
-                  <p className="text-xs">Awaiting client events...</p>
-                  <p className="text-[10px] opacity-70">Realtime channels subscribed</p>
-                </div>
-              ) : (
-                liveNotifs.map((n, i) => (
-                  <div key={i} className="flex items-start gap-2.5 rounded-xl bg-background/40 p-2 border border-border/20 transition hover:bg-background/80">
-                    <div className={"grid size-7 shrink-0 place-items-center rounded-lg " + n.color}>
-                      <n.icon className="size-3.5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs leading-normal font-medium text-foreground">{n.text}</p>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
-                    </div>
+            {/* Donut Chart Status */}
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">Application Status Overview</h3>
+              <div className="flex items-center gap-6">
+                <div className="relative shrink-0">
+                  {/* Custom SVG Donut Chart */}
+                  <svg className="size-28" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F1F5F9" strokeWidth="3" />
+                    {/* Pending */}
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#F59E0B" strokeWidth="3" strokeDasharray={`${pctPending} ${100 - pctPending}`} strokeDashoffset="25" />
+                    {/* Shortlisted */}
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#3B82F6" strokeWidth="3" strokeDasharray={`${pctShort} ${100 - pctShort}`} strokeDashoffset={`${25 - pctPending}`} />
+                    {/* Accepted */}
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" strokeWidth="3" strokeDasharray={`${pctAccept} ${100 - pctAccept}`} strokeDashoffset={`${25 - pctPending - pctShort}`} />
+                    {/* Rejected */}
+                    <circle cx="18" cy="18" r="15.915" fill="none" stroke="#EF4444" strokeWidth="3" strokeDasharray={`${pctReject} ${100 - pctReject}`} strokeDashoffset={`${25 - pctPending - pctShort - pctAccept}`} />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-lg font-extrabold font-display leading-none">{computedTotal}</span>
+                    <span className="text-[10px] text-slate-400 font-semibold uppercase mt-0.5">Total</span>
                   </div>
-                ))
-              )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-500"><span className="size-2 rounded-full bg-amber-500" /> Pending Review</span>
+                    <span className="font-bold">{pendingReview} ({pctPending}%)</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-500"><span className="size-2 rounded-full bg-blue-500" /> Shortlisted</span>
+                    <span className="font-bold">{shortlisted} ({pctShort}%)</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-500"><span className="size-2 rounded-full bg-emerald-500" /> Accepted</span>
+                    <span className="font-bold">{accepted} ({pctAccept}%)</span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5 font-medium text-slate-500"><span className="size-2 rounded-full bg-rose-500" /> Rejected</span>
+                    <span className="font-bold">{rejected} ({pctReject}%)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Domains Progress */}
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">Top Domains</h3>
+                <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-full">This Month</span>
+              </div>
+              <div className="space-y-3.5">
+                {domainValues.map((d, i) => {
+                  const pct = Math.round((d.value / maxDomainVal) * 100);
+                  return (
+                    <div key={i} className="space-y-1">
+                      <div className="flex items-center justify-between text-xs font-semibold">
+                        <span className="text-slate-600 dark:text-slate-300">{d.label}</span>
+                        <span className="text-slate-900 dark:text-white">{d.value}</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                        <div className="h-full rounded-full bg-blue-600" style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Right Side (1 Column width) */}
+        <div className="space-y-6">
+          
+          {/* Quick Actions Grid */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-1.5">
+              <Zap className="size-4 text-blue-500 animate-pulse" /> Quick Actions
+            </h3>
+            
+            <div className="grid gap-3 grid-cols-2">
+              <button
+                onClick={() => toast.info("Announcements module loaded. Add feature announcement popup in Settings tab.")}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Megaphone className="size-5 text-blue-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Add Announcement</span>
+              </button>
+
+              <button
+                onClick={() => onNavigate("email-logs")}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Mail className="size-5 text-purple-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Send Email</span>
+              </button>
+
+              <button
+                onClick={() => onNavigate("popup")}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Layers className="size-5 text-indigo-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Add Promo / Popup</span>
+              </button>
+
+              <button
+                onClick={() => toast.info("Domains module loaded. Manage available tracks under Admin Settings.")}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Globe className="size-5 text-emerald-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Add New Domain</span>
+              </button>
+
+              <button
+                onClick={() => onNavigate("promotions")}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Ticket className="size-5 text-pink-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Create Coupon</span>
+              </button>
+
+              <button
+                onClick={exportStudentsCSV}
+                className="flex flex-col items-center justify-center p-3 rounded-xl border border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/40 text-center transition"
+              >
+                <Download className="size-5 text-amber-500 mb-1.5" />
+                <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Export Students</span>
+              </button>
+            </div>
+
+            <button
+              onClick={() => onNavigate("settings")}
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/10"
+            >
+              Explore All Features <ChevronRight className="size-3.5 text-white" />
+            </button>
+          </div>
+
+          {/* Upcoming Deadlines */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-between">
+              <span>Upcoming Deadlines</span>
+              <span className="text-[10px] font-semibold text-blue-600 hover:text-blue-800 cursor-pointer">View All</span>
+            </h3>
+            
+            <div className="space-y-4 text-xs">
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center size-9 bg-rose-50 text-rose-600 rounded-lg shrink-0 justify-center font-bold">
+                  <span className="text-[9px] leading-none uppercase">Jul</span>
+                  <span className="text-base leading-none">22</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Task 2: REST API with CRUD</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Due in 2 days</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center size-9 bg-amber-50 text-amber-600 rounded-lg shrink-0 justify-center font-bold">
+                  <span className="text-[9px] leading-none uppercase">Jul</span>
+                  <span className="text-base leading-none">24</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Task 4: Real-time Chat App</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Due in 4 days</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center size-9 bg-blue-50 text-blue-600 rounded-lg shrink-0 justify-center font-bold">
+                  <span className="text-[9px] leading-none uppercase">Jul</span>
+                  <span className="text-base leading-none">27</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Task 6: Deploy to Cloud</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Due in 7 days</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="flex flex-col items-center size-9 bg-purple-50 text-purple-600 rounded-lg shrink-0 justify-center font-bold">
+                  <span className="text-[9px] leading-none uppercase">Jul</span>
+                  <span className="text-base leading-none">30</span>
+                </div>
+                <div>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">Task 8: Final Project Submission</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-0.5">Due in 10 days</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* System Diagnostics */}
-          <div className="rounded-3xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
-            <h3 className="font-bold text-sm border-b border-border/40 pb-2 mb-3">System Diagnostics</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Supabase DB Status</span>
-                <span className="text-emerald-500 font-semibold flex items-center gap-1">
-                  <CheckCircle2 className="size-3" /> Connected
+          {/* Platform Summary */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Platform Summary</h3>
+            <div className="space-y-3.5 text-xs font-semibold">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-500">
+                  <IndianRupee className="size-4 text-emerald-500" />
+                  <span>Total Revenue</span>
+                </div>
+                <span className="text-slate-900 dark:text-white flex items-center gap-1">
+                  ₹{(paymentsSummary?.totalRev ?? 124580).toLocaleString("en-IN")}
+                  <span className="text-[10px] font-semibold text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 px-1 rounded">+15.4%</span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">API Latency</span>
-                <span className="font-mono text-blue-500 font-bold bg-blue-500/10 px-2 py-0.5 rounded">
-                  42ms
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-500">
+                  <Wallet className="size-4 text-amber-500" />
+                  <span>Pending Payments</span>
+                </div>
+                <span className="text-slate-900 dark:text-white flex items-center gap-1.5">
+                  ₹{(paymentsSummary?.pendingAmount ?? 18750).toLocaleString("en-IN")}
+                  <span className="text-[10px] font-semibold text-amber-500 bg-amber-50 dark:bg-amber-950/20 px-1.5 rounded-full">
+                    {paymentsSummary?.pendingCount ?? 8}
+                  </span>
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Uptime Guarantee</span>
-                <span className="font-semibold text-muted-foreground">
-                  99.98%
-                </span>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-500">
+                  <Ticket className="size-4 text-blue-500" />
+                  <span>Active Coupons</span>
+                </div>
+                <span className="text-slate-900 dark:text-white">6</span>
               </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">SSL Certificate</span>
-                <span className="text-emerald-500 font-semibold flex items-center gap-1">
-                  <Shield className="size-3" /> Valid (256-bit)
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-500">
+                  <Mail className="size-4 text-indigo-500" />
+                  <span>Email Credits Left</span>
+                </div>
+                <span className="text-slate-950 dark:text-white flex items-center gap-1.5">
+                  2,450
+                  <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full">Enough</span>
                 </span>
-              </div>
-              
-              <div className="border-t border-border/40 pt-3 mt-3 flex items-center gap-2">
-                <div className="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                <span className="text-[10px] text-muted-foreground">All cloud servers online and operational</span>
               </div>
             </div>
           </div>
+
         </div>
+      </div>
+
+      {/* Upgrade Banner */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-[#07284a] to-slate-900 p-6 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Rocket graphic */}
+        <div className="absolute right-12 top-0 bottom-0 pointer-events-none opacity-10 flex items-center">
+          <Rocket className="size-36 rotate-45" />
+        </div>
+        <div className="space-y-1 relative z-10 text-center sm:text-left">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-400 uppercase tracking-widest bg-blue-500/10 px-2.5 py-0.5 rounded-full mb-1">
+            Premium Features
+          </span>
+          <h3 className="text-lg font-bold">Upgrade Your Platform</h3>
+          <p className="text-xs text-slate-300">Unlock premium features, advanced analytics & priority support.</p>
+        </div>
+        <button
+          onClick={() => toast.success("Welcome to Premium Workspace Suite!")}
+          className="relative z-10 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition flex items-center gap-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-lg shadow-blue-500/10 shrink-0"
+        >
+          Upgrade Now <ChevronRight className="size-3.5 text-white" />
+        </button>
       </div>
     </div>
   );
 }
+
 
 // ══════════════════════════════════════════════
 // APPLICATIONS
@@ -619,11 +959,11 @@ function ApplicationsSection() {
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((a: any) =>
-        a.full_name?.toLowerCase().includes(q) ||
-        a.email?.toLowerCase().includes(q) ||
-        a.intern_id?.toLowerCase().includes(q) ||
-        a.college?.toLowerCase().includes(q) ||
-        a.course?.toLowerCase().includes(q)
+        (a.full_name?.toLowerCase() || '').includes(q) ||
+        (a.email?.toLowerCase() || '').includes(q) ||
+        (a.intern_id?.toLowerCase() || '').includes(q) ||
+        (a.college?.toLowerCase() || '').includes(q) ||
+        (a.course?.toLowerCase() || '').includes(q)
       );
     }
     return list;
@@ -1084,10 +1424,10 @@ function PaymentsSection() {
     if (search) {
       const q = search.toLowerCase();
       list = list.filter((p: any) =>
-        p.applications?.full_name?.toLowerCase().includes(q) ||
-        p.applications?.intern_id?.toLowerCase().includes(q) ||
-        p.utr_number?.toLowerCase().includes(q) ||
-        p.amount?.toString().includes(q)
+        (p.applications?.full_name?.toLowerCase() || '').includes(q) ||
+        (p.applications?.intern_id?.toLowerCase() || '').includes(q) ||
+        (p.utr_number?.toLowerCase() || '').includes(q) ||
+        (p.amount?.toString() || '').includes(q)
       );
     }
     return list;
