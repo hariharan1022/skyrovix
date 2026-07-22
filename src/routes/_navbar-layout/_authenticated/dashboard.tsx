@@ -145,6 +145,28 @@ function Dashboard() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel(`student-realtime-${user.id}`);
+    channel
+      .on("postgres_changes", { event: "*", schema: "public", table: "applications" }, () => {
+        qc.invalidateQueries({ queryKey: ["my-applications", user.id] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "submissions" }, () => {
+        qc.invalidateQueries({ queryKey: ["all-submissions"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "certificates" }, () => {
+        qc.invalidateQueries({ queryKey: ["all-certs"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "payments" }, () => {
+        qc.invalidateQueries({ queryKey: ["all-payments"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, qc]);
+
   const { data: profile } = useQuery({
     queryKey: ["my-profile-details", user?.id],
     enabled: !!user,
