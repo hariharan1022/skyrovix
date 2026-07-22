@@ -51,6 +51,8 @@ const SIDEBAR_GROUPS = [
       { id: "students", label: "Students", icon: GraduationCap },
       { id: "certificates", label: "Certificates", icon: Award },
       { id: "payments", label: "Payments & Invoices", icon: Wallet },
+      { id: "domains", label: "Internship Domains", icon: FolderTree },
+      { id: "tasks", label: "Manage Tasks", icon: BookOpen },
     ]
   },
   {
@@ -77,7 +79,7 @@ const SIDEBAR_GROUPS = [
   }
 ] as const;
 
-type SectionId = "dashboard" | "applications" | "submissions" | "verification" | "payments" | "promotions" | "popup" | "certificates" | "students" | "login-history" | "email-logs" | "analytics" | "login-analytics" | "settings";
+type SectionId = "dashboard" | "applications" | "submissions" | "verification" | "payments" | "promotions" | "popup" | "certificates" | "students" | "login-history" | "email-logs" | "analytics" | "login-analytics" | "settings" | "domains" | "tasks";
 
 function AdminPanel() {
   const { user, isAdmin } = useAuth();
@@ -336,6 +338,8 @@ function AdminPanel() {
             {active === "analytics" && <AnalyticsSection />}
             {active === "login-analytics" && <LoginAnalyticsSection />}
             {active === "settings" && <SettingsSection />}
+            {active === "domains" && <DomainsSection />}
+            {active === "tasks" && <TasksSection />}
           </main>
         </div>
       </div>
@@ -3102,3 +3106,498 @@ function LoginAnalyticsSection() {
 }
 
 const peakHourLabels = ["Midnight", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "Noon", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM"];
+
+// ══════════════════════════════════════════════
+// DOMAINS MANAGEMENT SECTION
+// ══════════════════════════════════════════════
+function DomainsSection() {
+  const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [editingDomain, setEditingDomain] = useState<any>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Form states
+  const [name, setName] = useState("");
+  const [domainCode, setDomainCode] = useState("");
+  const [slug, setSlug] = useState("");
+  const [difficulty, setDifficulty] = useState("intermediate");
+  const [durationWeeks, setDurationWeeks] = useState(4);
+  const [passMarks, setPassMarks] = useState(60);
+  const [description, setDescription] = useState("");
+  const [isPublished, setIsPublished] = useState(false);
+
+  const { data: courses, isLoading } = useQuery({
+    queryKey: ["admin-courses"],
+    queryFn: async () => {
+      const { data } = await supabase.from("courses").select("*").order("name", { ascending: true });
+      return data ?? [];
+    }
+  });
+
+  const filtered = useMemo(() => {
+    if (!courses) return [];
+    if (!search) return courses;
+    const q = search.toLowerCase();
+    return courses.filter((c: any) =>
+      c.name.toLowerCase().includes(q) ||
+      c.domain.toLowerCase().includes(q) ||
+      c.slug.toLowerCase().includes(q)
+    );
+  }, [courses, search]);
+
+  const openAdd = () => {
+    setEditingDomain(null);
+    setName("");
+    setDomainCode("");
+    setSlug("");
+    setDifficulty("intermediate");
+    setDurationWeeks(4);
+    setPassMarks(60);
+    setDescription("");
+    setIsPublished(false);
+    setShowForm(true);
+  };
+
+  const openEdit = (d: any) => {
+    setEditingDomain(d);
+    setName(d.name);
+    setDomainCode(d.domain);
+    setSlug(d.slug);
+    setDifficulty(d.difficulty || "intermediate");
+    setDurationWeeks(d.duration_weeks || 4);
+    setPassMarks(d.pass_marks || 60);
+    setDescription(d.short_description || "");
+    setIsPublished(d.is_published || false);
+    setShowForm(true);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !domainCode || !slug) {
+      toast.error("Please fill in Name, Domain Code, and Slug.");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      name,
+      domain: domainCode,
+      slug,
+      difficulty,
+      duration_weeks: durationWeeks,
+      pass_marks: passMarks,
+      short_description: description,
+      is_published: isPublished,
+      quiz_marks: 10,
+      quiz_duration_min: 15,
+      total_tasks: 0,
+      total_topics: 0
+    };
+
+    let error;
+    if (editingDomain) {
+      const { error: err } = await supabase.from("courses").update(payload).eq("id", editingDomain.id);
+      error = err;
+    } else {
+      const { error: err } = await supabase.from("courses").insert(payload);
+      error = err;
+    }
+
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(editingDomain ? "Domain updated successfully!" : "Domain created successfully!");
+      setShowForm(false);
+      qc.invalidateQueries({ queryKey: ["admin-courses"] });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    const { error } = await supabase.from("courses").delete().eq("id", deletingId);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Domain deleted successfully!");
+      qc.invalidateQueries({ queryKey: ["admin-courses"] });
+    }
+    setDeletingId(null);
+  };
+
+  return (
+    <div className="animate-fade-in-up space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Internship Domains</h2>
+          <p className="text-sm text-muted-foreground">Manage internship domains — add, edit, or remove learning tracks</p>
+        </div>
+        <Button onClick={openAdd} className="brand-gradient text-white border-0 gap-1.5 h-10">
+          <Plus className="size-4" /> Add Domain
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            placeholder="Search domains..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9 h-10 border-slate-200 text-xs"
+          />
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+        <table className="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">
+              <th className="p-4">Name</th>
+              <th className="p-4">Domain Code</th>
+              <th className="p-4">Slug</th>
+              <th className="p-4">Duration</th>
+              <th className="p-4">Pass Marks</th>
+              <th className="p-4">Status</th>
+              <th className="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
+            {isLoading && (
+              <tr>
+                <td colSpan={7} className="p-8 text-center text-slate-400">Loading domains...</td>
+              </tr>
+            )}
+            {!isLoading && filtered.length === 0 && (
+              <tr>
+                <td colSpan={7} className="p-8 text-center text-slate-400">No domains found.</td>
+              </tr>
+            )}
+            {!isLoading && filtered.map((d: any) => (
+              <tr key={d.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
+                <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{d.name}</td>
+                <td className="p-4 font-mono">{d.domain}</td>
+                <td className="p-4 font-mono text-slate-500">{d.slug}</td>
+                <td className="p-4">{d.duration_weeks} Weeks</td>
+                <td className="p-4">{d.pass_marks}%</td>
+                <td className="p-4">
+                  <Badge className={`text-xs ${
+                    d.is_published ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
+                  }`}>
+                    {d.is_published ? "Published" : "Draft"}
+                  </Badge>
+                </td>
+                <td className="p-4 text-right space-x-1.5">
+                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg border-slate-200" onClick={() => openEdit(d)}>
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg text-rose-600 hover:text-rose-700 border-slate-200 hover:bg-rose-50" onClick={() => setDeletingId(d.id)}>
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Form Dialog */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">{editingDomain ? "Edit Domain" : "Add Domain"}</h3>
+            <form onSubmit={save} className="space-y-4">
+              <div>
+                <Label className="text-xs">Domain Name</Label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. MERN Stack Development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs">Domain Code</Label>
+                  <Input value={domainCode} onChange={(e) => setDomainCode(e.target.value)} placeholder="e.g. mern" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" disabled={!!editingDomain} />
+                </div>
+                <div>
+                  <Label className="text-xs">Slug</Label>
+                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. mern-stack-development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs">Duration (Weeks)</Label>
+                  <Input type="number" value={durationWeeks} onChange={(e) => setDurationWeeks(Number(e.target.value))} min={1} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                </div>
+                <div>
+                  <Label className="text-xs">Difficulty</Label>
+                  <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="w-full mt-1 rounded-xl border border-slate-200 bg-white p-2 text-xs dark:bg-slate-800 dark:border-slate-700 h-9">
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Pass Marks (%)</Label>
+                  <Input type="number" value={passMarks} onChange={(e) => setPassMarks(Number(e.target.value))} min={0} max={100} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Description</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide short details about the track..." rows={3} className="mt-1 text-xs rounded-xl border-slate-200" />
+              </div>
+              <div className="flex items-center gap-2 pt-2">
+                <input type="checkbox" id="isPublished" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="rounded border-slate-200" />
+                <Label htmlFor="isPublished" className="text-xs font-semibold select-none cursor-pointer">Publish and make active for student enrollments</Label>
+              </div>
+              <div className="flex gap-3 justify-end pt-4">
+                <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deletingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
+          <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">Delete Domain</h3>
+            <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this domain? This action is permanent and might fail if there are dependent user enrollments.</p>
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
+              <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════
+// TASKS MANAGEMENT SECTION
+// ══════════════════════════════════════════════
+function TasksSection() {
+  const qc = useQueryClient();
+  const [selectedDomain, setSelectedDomain] = useState<string>("all");
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  // Form states
+  const [title, setTitle] = useState("");
+  const [domain, setDomain] = useState("");
+  const [taskNumber, setTaskNumber] = useState(1);
+  const [description, setDescription] = useState("");
+  const [resources, setResources] = useState("");
+
+  const { data: domains } = useQuery({
+    queryKey: ["admin-courses-options"],
+    queryFn: async () => {
+      const { data } = await supabase.from("courses").select("domain, name");
+      return data ?? [];
+    }
+  });
+
+  const { data: tasks, isLoading } = useQuery({
+    queryKey: ["admin-tasks-list"],
+    queryFn: async () => {
+      const { data } = await supabase.from("tasks").select("*").order("domain", { ascending: true }).order("task_number", { ascending: true });
+      return data ?? [];
+    }
+  });
+
+  const filteredTasks = useMemo(() => {
+    if (!tasks) return [];
+    if (selectedDomain === "all") return tasks;
+    return tasks.filter((t: any) => t.domain === selectedDomain);
+  }, [tasks, selectedDomain]);
+
+  const openAdd = () => {
+    setEditingTask(null);
+    setTitle("");
+    setDomain(selectedDomain !== "all" ? selectedDomain : (domains?.[0]?.domain ?? ""));
+    setTaskNumber(tasks?.filter((t: any) => t.domain === (selectedDomain !== "all" ? selectedDomain : (domains?.[0]?.domain ?? ""))).length + 1 || 1);
+    setDescription("");
+    setResources("");
+    setShowForm(true);
+  };
+
+  const openEdit = (t: any) => {
+    setEditingTask(t);
+    setTitle(t.title);
+    setDomain(t.domain);
+    setTaskNumber(t.task_number);
+    setDescription(t.description);
+    setResources(t.resources || "");
+    setShowForm(true);
+  };
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title || !domain || !taskNumber) {
+      toast.error("Please fill in Title, Domain, and Task Number.");
+      return;
+    }
+    setSaving(true);
+    const payload = {
+      title,
+      domain,
+      task_number: taskNumber,
+      description,
+      resources: resources || null
+    };
+
+    let error;
+    if (editingTask) {
+      const { error: err } = await supabase.from("tasks").update(payload).eq("id", editingTask.id);
+      error = err;
+    } else {
+      const { error: err } = await supabase.from("tasks").insert(payload);
+      error = err;
+    }
+
+    setSaving(false);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success(editingTask ? "Task updated successfully!" : "Task created successfully!");
+      setShowForm(false);
+      qc.invalidateQueries({ queryKey: ["admin-tasks-list"] });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    const { error } = await supabase.from("tasks").delete().eq("id", deletingId);
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Task deleted successfully!");
+      qc.invalidateQueries({ queryKey: ["admin-tasks-list"] });
+    }
+    setDeletingId(null);
+  };
+
+  return (
+    <div className="animate-fade-in-up space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Manage Internship Tasks</h2>
+          <p className="text-sm text-muted-foreground">Create and update structured curriculum tasks</p>
+        </div>
+        <Button onClick={openAdd} className="brand-gradient text-white border-0 gap-1.5 h-10">
+          <Plus className="size-4" /> Add Task
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Label className="text-xs font-semibold text-slate-500">Filter by Domain:</Label>
+        <select value={selectedDomain} onChange={(e) => setSelectedDomain(e.target.value)} className="rounded-xl border border-slate-200 bg-white p-2 text-xs max-w-xs dark:bg-slate-800 dark:border-slate-700 h-9">
+          <option value="all">All Domains</option>
+          {domains?.map((d: any) => (
+            <option key={d.domain} value={d.domain}>{d.name} ({d.domain})</option>
+          ))}
+        </select>
+      </div>
+
+      <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+        <table className="w-full text-xs text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">
+              <th className="p-4 w-24">Task #</th>
+              <th className="p-4">Title</th>
+              <th className="p-4">Domain</th>
+              <th className="p-4">Description Preview</th>
+              <th className="p-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
+            {isLoading && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-slate-400">Loading tasks...</td>
+              </tr>
+            )}
+            {!isLoading && filteredTasks.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-slate-400">No tasks created.</td>
+              </tr>
+            )}
+            {!isLoading && filteredTasks.map((t: any) => (
+              <tr key={t.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
+                <td className="p-4 font-mono font-bold">Task {t.task_number}</td>
+                <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{t.title}</td>
+                <td className="p-4 font-mono text-slate-500">{t.domain}</td>
+                <td className="p-4 max-w-sm truncate text-slate-500">{t.description}</td>
+                <td className="p-4 text-right space-x-1.5">
+                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg border-slate-200" onClick={() => openEdit(t)}>
+                    Edit
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg text-rose-600 hover:text-rose-700 border-slate-200 hover:bg-rose-50" onClick={() => setDeletingId(t.id)}>
+                    Delete
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Form Dialog */}
+      {showForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}>
+          <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold mb-4">{editingTask ? "Edit Task" : "Add Task"}</h3>
+            <form onSubmit={save} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs">Domain</Label>
+                  <select value={domain} onChange={(e) => setDomain(e.target.value)} className="w-full mt-1 rounded-xl border border-slate-200 bg-white p-2 text-xs dark:bg-slate-800 dark:border-slate-700 h-9" required>
+                    {domains?.map((d: any) => (
+                      <option key={d.domain} value={d.domain}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label className="text-xs">Task Number</Label>
+                  <Input type="number" value={taskNumber} onChange={(e) => setTaskNumber(Number(e.target.value))} min={1} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">Task Title</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build an Intent Recognition Chatbot" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+              </div>
+              <div>
+                <Label className="text-xs">Task Description</Label>
+                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter details about requirements, expected outcome..." rows={5} className="mt-1 text-xs rounded-xl border-slate-200" required />
+              </div>
+              <div>
+                <Label className="text-xs">Resources (Optional)</Label>
+                <Textarea value={resources} onChange={(e) => setResources(e.target.value)} placeholder="e.g. https://python.org/docs, https://react.dev" rows={2} className="mt-1 text-xs rounded-xl border-slate-200" />
+              </div>
+              <div className="flex gap-3 justify-end pt-4">
+                <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
+                <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation */}
+      {deletingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
+          <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">Delete Task</h3>
+            <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this task? This action is permanent.</p>
+            <div className="mt-6 flex gap-3 justify-end">
+              <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
+              <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
