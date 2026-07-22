@@ -3362,7 +3362,7 @@ function DomainsSection() {
 // ══════════════════════════════════════════════
 function TasksSection() {
   const qc = useQueryClient();
-  const [selectedDomain, setSelectedDomain] = useState<string>("all");
+  const [viewingDomain, setViewingDomain] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -3375,15 +3375,15 @@ function TasksSection() {
   const [description, setDescription] = useState("");
   const [resources, setResources] = useState("");
 
-  const { data: domains } = useQuery({
+  const { data: domains, isLoading: domainsLoading } = useQuery({
     queryKey: ["admin-courses-options"],
     queryFn: async () => {
-      const { data } = await supabase.from("courses").select("domain, name");
+      const { data } = await supabase.from("courses").select("domain, name, slug").order("name", { ascending: true });
       return data ?? [];
     }
   });
 
-  const { data: tasks, isLoading } = useQuery({
+  const { data: tasks, isLoading: tasksLoading } = useQuery({
     queryKey: ["admin-tasks-list"],
     queryFn: async () => {
       const { data } = await supabase.from("tasks").select("*").order("domain", { ascending: true }).order("task_number", { ascending: true });
@@ -3391,17 +3391,41 @@ function TasksSection() {
     }
   });
 
+  const activeDomainInfo = useMemo(() => {
+    if (!domains || !viewingDomain) return null;
+    return domains.find((d: any) => d.domain === viewingDomain);
+  }, [domains, viewingDomain]);
+
+  const domainTaskCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    if (domains) {
+      domains.forEach((d: any) => {
+        counts[d.domain] = 0;
+      });
+    }
+    if (tasks) {
+      tasks.forEach((t: any) => {
+        if (t.domain in counts) {
+          counts[t.domain]++;
+        } else {
+          counts[t.domain] = 1;
+        }
+      });
+    }
+    return counts;
+  }, [domains, tasks]);
+
   const filteredTasks = useMemo(() => {
-    if (!tasks) return [];
-    if (selectedDomain === "all") return tasks;
-    return tasks.filter((t: any) => t.domain === selectedDomain);
-  }, [tasks, selectedDomain]);
+    if (!tasks || !viewingDomain) return [];
+    return tasks.filter((t: any) => t.domain === viewingDomain);
+  }, [tasks, viewingDomain]);
 
   const openAdd = () => {
+    if (!viewingDomain) return;
     setEditingTask(null);
     setTitle("");
-    setDomain(selectedDomain !== "all" ? selectedDomain : (domains?.[0]?.domain ?? ""));
-    setTaskNumber(tasks?.filter((t: any) => t.domain === (selectedDomain !== "all" ? selectedDomain : (domains?.[0]?.domain ?? ""))).length + 1 || 1);
+    setDomain(viewingDomain);
+    setTaskNumber(filteredTasks.length + 1 || 1);
     setDescription("");
     setResources("");
     setShowForm(true);
@@ -3463,69 +3487,113 @@ function TasksSection() {
     setDeletingId(null);
   };
 
+  const isLoading = domainsLoading || tasksLoading;
+
   return (
     <div className="animate-fade-in-up space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Manage Internship Tasks</h2>
-          <p className="text-sm text-muted-foreground">Create and update structured curriculum tasks</p>
-        </div>
-        <Button onClick={openAdd} className="brand-gradient text-white border-0 gap-1.5 h-10">
-          <Plus className="size-4" /> Add Task
-        </Button>
-      </div>
+      {viewingDomain === null ? (
+        // ─── DOMAINS LIST VIEW ───
+        <>
+          <div>
+            <h2 className="text-2xl font-bold">Manage Curriculum Tasks</h2>
+            <p className="text-sm text-muted-foreground">Select an internship domain to manage its structured curriculum tasks</p>
+          </div>
 
-      <div className="flex items-center gap-3">
-        <Label className="text-xs font-semibold text-slate-500">Filter by Domain:</Label>
-        <select value={selectedDomain} onChange={(e) => setSelectedDomain(e.target.value)} className="rounded-xl border border-slate-200 bg-white p-2 text-xs max-w-xs dark:bg-slate-800 dark:border-slate-700 h-9">
-          <option value="all">All Domains</option>
-          {domains?.map((d: any) => (
-            <option key={d.domain} value={d.domain}>{d.name} ({d.domain})</option>
-          ))}
-        </select>
-      </div>
+          {isLoading ? (
+            <p className="py-12 text-center text-slate-400">Loading domains and tasks...</p>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 pt-2">
+              {domains?.map((d: any) => {
+                const count = domainTaskCounts[d.domain] || 0;
+                return (
+                  <button
+                    key={d.domain}
+                    onClick={() => setViewingDomain(d.domain)}
+                    className="flex flex-col text-left p-5 rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900/60 hover:-translate-y-1 hover:shadow-md hover:border-[#07284a]/20 transition-all duration-300 group"
+                  >
+                    <div className="flex items-center justify-between w-full mb-3">
+                      <div className="grid size-10 place-items-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 group-hover:bg-[#07284a]/5 group-hover:text-[#07284a] transition">
+                        <BookOpen className="size-5" />
+                      </div>
+                      <span className="rounded-full px-2.5 py-0.5 text-[10px] font-bold bg-[#07284a]/5 text-[#07284a] dark:bg-slate-800 dark:text-slate-300">
+                        {count} {count === 1 ? "Task" : "Tasks"}
+                      </span>
+                    </div>
+                    <h3 className="font-display font-bold text-sm text-slate-800 dark:text-white group-hover:text-[#07284a] transition">{d.name}</h3>
+                    <p className="mt-1 text-[10px] font-mono text-slate-400 tracking-wider uppercase">{d.domain}</p>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </>
+      ) : (
+        // ─── DOMAIN TASKS DETAIL VIEW ───
+        <>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setViewingDomain(null)}
+                className="grid size-9 place-items-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <div>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <span>{activeDomainInfo?.name}</span>
+                  <span className="text-xs font-mono font-normal text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                    {viewingDomain}
+                  </span>
+                </h2>
+                <p className="text-xs text-muted-foreground">Manage and sequence structured tasks for this track</p>
+              </div>
+            </div>
+            <Button onClick={openAdd} className="brand-gradient text-white border-0 gap-1.5 h-10 rounded-xl px-4 text-xs font-semibold">
+              <Plus className="size-4" /> Add Task
+            </Button>
+          </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
-        <table className="w-full text-xs text-left border-collapse">
-          <thead>
-            <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">
-              <th className="p-4 w-24">Task #</th>
-              <th className="p-4">Title</th>
-              <th className="p-4">Domain</th>
-              <th className="p-4">Description Preview</th>
-              <th className="p-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
-            {isLoading && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-slate-400">Loading tasks...</td>
-              </tr>
-            )}
-            {!isLoading && filteredTasks.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-slate-400">No tasks created.</td>
-              </tr>
-            )}
-            {!isLoading && filteredTasks.map((t: any) => (
-              <tr key={t.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
-                <td className="p-4 font-mono font-bold">Task {t.task_number}</td>
-                <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{t.title}</td>
-                <td className="p-4 font-mono text-slate-500">{t.domain}</td>
-                <td className="p-4 max-w-sm truncate text-slate-500">{t.description}</td>
-                <td className="p-4 text-right space-x-1.5">
-                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg border-slate-200" onClick={() => openEdit(t)}>
-                    Edit
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg text-rose-600 hover:text-rose-700 border-slate-200 hover:bg-rose-50" onClick={() => setDeletingId(t.id)}>
-                    Delete
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">
+                  <th className="p-4 w-24">Task #</th>
+                  <th className="p-4">Title</th>
+                  <th className="p-4">Description Preview</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
+                {isLoading && (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-slate-400">Loading tasks...</td>
+                  </tr>
+                )}
+                {!isLoading && filteredTasks.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-slate-400">No tasks created for this domain.</td>
+                  </tr>
+                )}
+                {!isLoading && filteredTasks.map((t: any) => (
+                  <tr key={t.id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/20">
+                    <td className="p-4 font-mono font-bold">Task {t.task_number}</td>
+                    <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{t.title}</td>
+                    <td className="p-4 max-w-md truncate text-slate-500">{t.description}</td>
+                    <td className="p-4 text-right space-x-1.5">
+                      <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg border-slate-200" onClick={() => openEdit(t)}>
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 px-2 rounded-lg text-rose-600 hover:text-rose-700 border-slate-200 hover:bg-rose-50" onClick={() => setDeletingId(t.id)}>
+                        Delete
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
 
       {/* Form Dialog */}
       {showForm && (
@@ -3535,12 +3603,10 @@ function TasksSection() {
             <form onSubmit={save} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-xs">Domain</Label>
-                  <select value={domain} onChange={(e) => setDomain(e.target.value)} className="w-full mt-1 rounded-xl border border-slate-200 bg-white p-2 text-xs dark:bg-slate-800 dark:border-slate-700 h-9" required>
-                    {domains?.map((d: any) => (
-                      <option key={d.domain} value={d.domain}>{d.name}</option>
-                    ))}
-                  </select>
+                  <Label className="text-xs text-slate-500">Domain</Label>
+                  <div className="mt-1 w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                    {activeDomainInfo?.name} ({viewingDomain})
+                  </div>
                 </div>
                 <div>
                   <Label className="text-xs">Task Number</Label>
