@@ -3133,11 +3133,11 @@ function DomainsSection() {
     }
   });
 
-  const domainSlugs = new Set(DOMAINS.map((d) => d.slug));
+  const allowedSlugs = new Set(["fullstack", "frontend", "backend", "python", "java", "mernstack", "meanstack", "aiml"]);
 
   const internshipDomains = useMemo(() => {
     if (!courses) return [];
-    return courses.filter((c: any) => domainSlugs.has(c.domain));
+    return courses.filter((c: any) => allowedSlugs.has(c.domain));
   }, [courses]);
 
   const filtered = useMemo(() => {
