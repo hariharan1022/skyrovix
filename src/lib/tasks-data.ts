@@ -14,7 +14,7 @@ export type DomainTasks = {
   tasks: TaskData[];
 };
 
-const ALL_DOMAINS_TASKS: DomainTasks[] = [
+export const ALL_DOMAINS_TASKS: DomainTasks[] = [
   {
     slug: "fullstack",
     name: "Full Stack Development",
