@@ -7,7 +7,7 @@ let currentSessionId: string | null = null;
 export function useLoginTracker() {
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initRef = useRef(false);
-  const markOfflineRef = useRef<((input: { sessionId: string }) => Promise<any>) | null>(null);
+  const markOfflineRef = useRef<((input: { data: { sessionId: string } }) => Promise<any>) | null>(null);
 
   const startTracking = useCallback(async (userId: string) => {
     if (initRef.current) return;
@@ -25,15 +25,17 @@ export function useLoginTracker() {
 
     const { trackLogin } = await import("@/lib/login-tracker");
     const result = await trackLogin({
-      studentId: userId,
-      internId: app?.intern_id,
-      studentName: app?.full_name,
-      email: app?.email,
-      domain: app?.domain,
-      college: app?.college,
-      device,
-      browser,
-      os,
+      data: {
+        studentId: userId,
+        internId: app?.intern_id,
+        studentName: app?.full_name,
+        email: app?.email,
+        domain: app?.domain,
+        college: app?.college,
+        device,
+        browser,
+        os,
+      }
     });
 
     if (result.sessionId) {
@@ -46,7 +48,7 @@ export function useLoginTracker() {
       // Heartbeat every 2 minutes
       heartbeatRef.current = setInterval(async () => {
         const { heartbeat } = await import("@/lib/login-tracker");
-        await heartbeat({ sessionId: currentSessionId! });
+        await heartbeat({ data: { sessionId: currentSessionId! } });
       }, 120_000);
     }
   }, []);
@@ -58,7 +60,7 @@ export function useLoginTracker() {
     }
     if (currentSessionId) {
       const { markOffline } = await import("@/lib/login-tracker");
-      await markOffline({ sessionId: currentSessionId });
+      await markOffline({ data: { sessionId: currentSessionId } });
       currentSessionId = null;
     }
     initRef.current = false;
@@ -67,7 +69,7 @@ export function useLoginTracker() {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (currentSessionId && markOfflineRef.current) {
-        markOfflineRef.current({ sessionId: currentSessionId });
+        markOfflineRef.current({ data: { sessionId: currentSessionId } });
       }
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -79,3 +81,4 @@ export function useLoginTracker() {
 
   return { startTracking, stopTracking };
 }
+
