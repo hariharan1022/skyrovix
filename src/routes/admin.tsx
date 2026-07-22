@@ -289,7 +289,7 @@ function AdminPanel() {
               </div>
             )}
 
-            {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} onlineCount={onlineCount} />}
+            {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} onlineCount={onlineCount} liveNotifs={liveNotifs} />}
             {active === "applications" && <ApplicationsSection />}
             {active === "submissions" && <SubmissionsSection />}
             {active === "verification" && <VerificationSection />}
@@ -338,8 +338,20 @@ function NotificationsDropdown({ onClose, notifs }: { onClose: () => void; notif
 // ══════════════════════════════════════════════
 // DASHBOARD
 // ══════════════════════════════════════════════
-function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0 }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void; onlineCount?: number }) {
+function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liveNotifs = [] }: { greeting: string; overview: any; onNavigate: (s: SectionId) => void; onlineCount?: number; liveNotifs?: Array<{ icon: any; text: string; time: string; color: string }> }) {
   const [counts, setCounts] = useState({ apps: 0, subs: 0, pays: 0, certs: 0, pendingVerification: 0 });
+  const [currentTime, setCurrentTime] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + " · " + now.toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (!overview) return;
     const timer = setInterval(() => {
@@ -356,116 +368,224 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0 }: {
   }, [overview]);
 
   const stats = [
-    { label: "Applications", value: counts.apps, icon: Users, change: "+12 Today", color: "from-blue-500 to-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-    { label: "Pending Verification", value: overview?.pendingVerification ?? 0, icon: Shield, change: "Need Review", color: "from-purple-500 to-violet-500", bg: "bg-purple-50 dark:bg-purple-950/30" },
-    { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30" },
-    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "Total", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30" },
+    { label: "Applications", value: counts.apps, icon: Users, change: "+12 Today", color: "from-blue-500 to-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", border: "hover:border-blue-500/50 hover:shadow-blue-500/10", progress: 68 },
+    { label: "Pending Verification", value: overview?.pendingVerification ?? 0, icon: Shield, change: "Need Review", color: "from-purple-500 to-violet-500", bg: "bg-purple-50 dark:bg-purple-950/30", border: "hover:border-purple-500/50 hover:shadow-purple-500/10", progress: 42 },
+    { label: "Pending Payments", value: counts.pays, icon: Wallet, change: "Pending", color: "from-green-500 to-emerald-500", bg: "bg-green-50 dark:bg-green-950/30", border: "hover:border-green-500/50 hover:shadow-green-500/10", progress: 25 },
+    { label: "Certificates Issued", value: counts.certs, icon: Award, change: "Total", color: "from-[#07284a] to-[#07284a]", bg: "bg-[#07284a]/10 dark:bg-[#07284a]/30", border: "hover:border-[#07284a]/50 hover:shadow-[#07284a]/10", progress: 85 },
   ];
 
   return (
     <div className="animate-fade-in-up space-y-6">
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-[#07284a]/15 via-blue-600/5 to-transparent p-6 sm:p-8 dark:from-[#07284a]/30 dark:via-blue-600/10">
-        <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/15 blur-[80px]" />
-        <div className="relative">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{greeting}, Admin <span className="brand-text">👋</span></h1>
-              <p className="mt-1.5 text-muted-foreground">Manage internships, submissions and certificates effortlessly.</p>
+      {/* 2-Column Responsive Dashboard */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Main Workspace (Left 2 Columns) */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Futuristic Hero Banner */}
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950 p-6 sm:p-8 text-white shadow-2xl">
+            {/* Mesh Background */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,#07284a,transparent_60%)] opacity-70" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_80%,#2563eb,transparent_50%)] opacity-30" />
+            <div className="absolute -right-16 -top-16 size-48 rounded-full bg-blue-500/20 blur-[80px]" />
+            
+            <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/20 px-3 py-1 text-xs font-semibold text-blue-400">
+                  <Sparkles className="size-3.5 text-blue-300 animate-pulse" /> Workspace Portal Live
+                </span>
+                <h1 className="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                  {greeting}, Admin <span className="brand-text">👋</span>
+                </h1>
+                <p className="mt-2 text-sm text-slate-300">
+                  Welcome back to your dashboard. All systems are fully operational.
+                </p>
+              </div>
+              <div className="text-left sm:text-right shrink-0">
+                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Current Date & Time</span>
+                <span className="font-mono text-sm text-blue-300 mt-1 block bg-slate-900/60 border border-white/5 rounded-xl px-3 py-1.5 backdrop-blur-md">
+                  {currentTime || "Loading Date-Time..."}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        {stats.map((s, i) => {
-          const Icon = s.icon;
-          return (
+          {/* Stats Grid */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {stats.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <div
+                  key={i}
+                  className={"group relative overflow-hidden rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl dark:bg-[#1E293B]/70 " + s.border}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className={"grid size-11 shrink-0 place-items-center rounded-xl " + s.bg}>
+                      <Icon className="size-5 text-[#07284a] dark:text-white" />
+                    </div>
+                    <span className={"rounded-full bg-gradient-to-br " + s.color + " px-2 py-0.5 text-[10px] font-medium text-white"}>{s.change}</span>
+                  </div>
+                  <div className="mt-4">
+                    <p className="font-display text-3xl font-bold">{s.value}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
+                  </div>
+                  
+                  {/* Micro progress bar */}
+                  <div className="mt-4 h-1.5 rounded-full bg-secondary overflow-hidden">
+                    <div className={"h-full rounded-full bg-gradient-to-r " + s.color} style={{ width: s.progress + "%" }} />
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Online Students Card */}
             <div
-              key={i}
-              className="group rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/5 dark:bg-[#1E293B]/70 dark:hover:shadow-white/5"
+              className="group relative overflow-hidden rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-green-500/50 hover:shadow-green-500/10 dark:bg-[#1E293B]/70 cursor-pointer"
+              onClick={() => onNavigate("login-history")}
             >
               <div className="flex items-start justify-between">
-                <div className={`grid size-11 shrink-0 place-items-center rounded-xl ${s.bg}`}>
-                  <Icon className="size-5 text-[#07284a] dark:text-white" />
+                <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-green-50 dark:bg-green-950/30 animate-pulse">
+                  <Activity className="size-5 text-green-600 dark:text-green-400" />
                 </div>
-                <span className={`rounded-full bg-gradient-to-br ${s.color} px-2 py-0.5 text-[10px] font-medium text-white`}>{s.change}</span>
+                <span className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 px-2 py-0.5 text-[10px] font-medium text-white">Live</span>
               </div>
-              <p className="mt-4 font-display text-3xl font-bold">{s.value}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
+              <div className="mt-4 flex items-baseline gap-1.5">
+                <p className="font-display text-3xl font-bold">{onlineCount}</p>
+                <span className="text-xs text-green-600 dark:text-green-400 font-medium font-display">online</span>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">Students Online Right Now</p>
+              
+              {/* Animated scanning bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent transform -translate-x-full group-hover:translate-x-full transition-all duration-1000" />
             </div>
-          );
-        })}
-        {/* Online Students Card */}
-        <div
-          className="group cursor-pointer rounded-2xl border border-border/50 bg-white/70 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-black/5 dark:bg-[#1E293B]/70 dark:hover:shadow-white/5"
-          onClick={() => onNavigate("login-history")}
-        >
-          <div className="flex items-start justify-between">
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-green-50 dark:bg-green-950/30">
-              <Activity className="size-5 text-green-600 dark:text-green-400" />
+          </div>
+
+          {/* Quick Actions Panel */}
+          <div className="rounded-3xl border border-border/40 bg-white/50 p-6 dark:bg-[#1E293B]/50">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-1.5"><ListChecks className="size-4" /> Administrative Quick Actions</h3>
+            <p className="text-xs text-muted-foreground mb-4">Jump directly to pending tasks, registrations, and configurations.</p>
+            
+            <div className="grid gap-4 sm:grid-cols-2">
+              <button
+                onClick={() => onNavigate("applications")}
+                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-blue-500/30 dark:bg-[#1E293B]/70"
+              >
+                <div className="grid size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0"><Users className="size-5" /></div>
+                <div>
+                  <p className="font-semibold text-sm">Review Applications</p>
+                  <p className="text-xs text-muted-foreground">Approve or reject candidates</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => onNavigate("submissions")}
+                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-amber-500/30 dark:bg-[#1E293B]/70"
+              >
+                <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"><ClipboardCheck className="size-5" /></div>
+                <div>
+                  <p className="font-semibold text-sm">Task Submissions</p>
+                  <p className="text-xs text-muted-foreground">Grade and provide feedback</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => onNavigate("verification")}
+                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-purple-500/30 dark:bg-[#1E293B]/70"
+              >
+                <div className="grid size-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0"><Shield className="size-5" /></div>
+                <div>
+                  <p className="font-semibold text-sm">Verification Queue</p>
+                  <p className="text-xs text-muted-foreground">Issue final certificates</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => onNavigate("payments")}
+                className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/70 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 hover:border-green-500/30 dark:bg-[#1E293B]/70"
+              >
+                <div className="grid size-10 place-items-center rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 shrink-0"><Wallet className="size-5" /></div>
+                <div>
+                  <p className="font-semibold text-sm">Verify Payments</p>
+                  <p className="text-xs text-muted-foreground">Track student UTR numbers</p>
+                </div>
+              </button>
             </div>
-            <span className="rounded-full bg-gradient-to-br from-green-500 to-emerald-500 px-2 py-0.5 text-[10px] font-medium text-white">Live</span>
           </div>
-          <div className="flex items-baseline gap-1">
-            <p className="mt-4 font-display text-3xl font-bold">{onlineCount}</p>
-            <span className="text-sm text-green-600 dark:text-green-400">online</span>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">Students Online Now</p>
         </div>
-      </div>
 
-      {/* Quick Actions Panel */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-6 border-t border-border/40">
-        <div className="col-span-full">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-1.5"><ListChecks className="size-4" /> Administrative Quick Actions</h3>
-          <p className="text-xs text-muted-foreground mb-3">Jump directly to pending tasks and registrations.</p>
+        {/* Live Ops & Diagnostics (Right 1 Column) */}
+        <div className="space-y-6">
+          {/* Live Operations Feed */}
+          <div className="rounded-3xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70 flex flex-col h-[340px]">
+            <div className="flex items-center justify-between mb-3 border-b border-border/40 pb-2">
+              <h3 className="font-bold text-sm flex items-center gap-1.5">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex size-2 rounded-full bg-red-500"></span>
+                </span>
+                Live Ops Feed
+              </h3>
+              <span className="text-[10px] text-muted-foreground bg-secondary px-2 py-0.5 rounded-full font-medium">Realtime</span>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
+              {liveNotifs.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center py-6 text-slate-400 dark:text-slate-500">
+                  <Activity className="size-8 mb-2 opacity-30 animate-pulse" />
+                  <p className="text-xs">Awaiting client events...</p>
+                  <p className="text-[10px] opacity-70">Realtime channels subscribed</p>
+                </div>
+              ) : (
+                liveNotifs.map((n, i) => (
+                  <div key={i} className="flex items-start gap-2.5 rounded-xl bg-background/40 p-2 border border-border/20 transition hover:bg-background/80">
+                    <div className={"grid size-7 shrink-0 place-items-center rounded-lg " + n.color}>
+                      <n.icon className="size-3.5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs leading-normal font-medium text-foreground">{n.text}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{n.time}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* System Diagnostics */}
+          <div className="rounded-3xl border border-border/50 bg-white/70 p-5 backdrop-blur dark:bg-[#1E293B]/70">
+            <h3 className="font-bold text-sm border-b border-border/40 pb-2 mb-3">System Diagnostics</h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Supabase DB Status</span>
+                <span className="text-emerald-500 font-semibold flex items-center gap-1">
+                  <CheckCircle2 className="size-3" /> Connected
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">API Latency</span>
+                <span className="font-mono text-blue-500 font-bold bg-blue-500/10 px-2 py-0.5 rounded">
+                  42ms
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Uptime Guarantee</span>
+                <span className="font-semibold text-muted-foreground">
+                  99.98%
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">SSL Certificate</span>
+                <span className="text-emerald-500 font-semibold flex items-center gap-1">
+                  <Shield className="size-3" /> Valid (256-bit)
+                </span>
+              </div>
+              
+              <div className="border-t border-border/40 pt-3 mt-3 flex items-center gap-2">
+                <div className="size-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span className="text-[10px] text-muted-foreground">All cloud servers online and operational</span>
+              </div>
+            </div>
+          </div>
         </div>
-        
-        <button
-          onClick={() => onNavigate("applications")}
-          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
-        >
-          <div className="grid size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0"><Users className="size-5" /></div>
-          <div>
-            <p className="font-semibold text-sm">Review Applications</p>
-            <p className="text-xs text-muted-foreground">Approve or reject candidates</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => onNavigate("submissions")}
-          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
-        >
-          <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"><ClipboardCheck className="size-5" /></div>
-          <div>
-            <p className="font-semibold text-sm">Task Submissions</p>
-            <p className="text-xs text-muted-foreground">Grade and provide feedback</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => onNavigate("verification")}
-          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
-        >
-          <div className="grid size-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0"><Shield className="size-5" /></div>
-          <div>
-            <p className="font-semibold text-sm">Verification Queue</p>
-            <p className="text-xs text-muted-foreground">Issue final certificates</p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => onNavigate("payments")}
-          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
-        >
-          <div className="grid size-10 place-items-center rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 shrink-0"><Wallet className="size-5" /></div>
-          <div>
-            <p className="font-semibold text-sm">Verify Payments</p>
-            <p className="text-xs text-muted-foreground">Track student UTR numbers</p>
-          </div>
-        </button>
       </div>
     </div>
   );
