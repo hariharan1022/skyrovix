@@ -103,17 +103,22 @@ function AdminPanel() {
     const tables = [
       { table: "applications", icon: UserPlus, color: "text-blue-500 bg-blue-50 dark:bg-blue-950/30", label: "New application", event: "INSERT" },
       { table: "applications", icon: Shield, color: "text-purple-500 bg-purple-50 dark:bg-purple-950/30", label: "Internship submitted for verification", event: "UPDATE" },
-      { table: "submissions", icon: ClipboardCheck, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/30", label: "New task submission", event: "INSERT" },
-      { table: "submissions", icon: ClipboardCheck, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/30", label: "Task submission updated", event: "UPDATE" },
+      { table: "submissions", icon: ClipboardCheck, color: "text-amber-500 bg-amber-50 dark:bg-amber-950/30", label: "Task submission", event: "*" },
       { table: "payments", icon: IndianRupee, color: "text-green-500 bg-green-50 dark:bg-green-950/30", label: "New payment", event: "INSERT" },
     ];
     for (const { table, icon, color, label, event } of tables) {
       channel.on("postgres_changes" as any, { event, schema: "public", table }, (payload: any) => {
         if (table === "applications" && event === "UPDATE" && payload.new?.submission_status !== "submitted") return;
+        
+        let displayLabel = label;
+        if (table === "submissions") {
+          displayLabel = payload.eventType === "INSERT" ? "New task submission" : payload.eventType === "UPDATE" ? "Task submission updated" : "Task submission deleted";
+        }
+        
         const name = payload.new?.full_name ?? payload.new?.id?.slice(0, 8) ?? "";
-        const notif = { icon, text: `${label} from ${name}`, time: "Just now", color };
+        const notif = { icon, text: `${displayLabel} from ${name}`, time: "Just now", color };
         setLiveNotifs((prev) => [notif, ...prev].slice(0, 20));
-        toast.success(`${label} received`, { description: name, duration: 4000 });
+        toast.success(`${displayLabel} received`, { description: name, duration: 4000 });
         qc.invalidateQueries({ queryKey: ["admin-overview"] });
         qc.invalidateQueries({ queryKey: ["admin-apps"] });
         qc.invalidateQueries({ queryKey: ["admin-subs"] });
