@@ -3133,16 +3133,23 @@ function DomainsSection() {
     }
   });
 
-  const filtered = useMemo(() => {
+  const domainSlugs = new Set(DOMAINS.map((d) => d.slug));
+
+  const internshipDomains = useMemo(() => {
     if (!courses) return [];
-    if (!search) return courses;
+    return courses.filter((c: any) => domainSlugs.has(c.domain));
+  }, [courses]);
+
+  const filtered = useMemo(() => {
+    if (!internshipDomains) return [];
+    if (!search) return internshipDomains;
     const q = search.toLowerCase();
-    return courses.filter((c: any) =>
+    return internshipDomains.filter((c: any) =>
       c.name.toLowerCase().includes(q) ||
       c.domain.toLowerCase().includes(q) ||
       c.slug.toLowerCase().includes(q)
     );
-  }, [courses, search]);
+  }, [internshipDomains, search]);
 
   const openAdd = () => {
     setEditingDomain(null);
