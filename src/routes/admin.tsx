@@ -3118,13 +3118,10 @@ function DomainsSection() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Form states
   const [name, setName] = useState("");
   const [domainCode, setDomainCode] = useState("");
   const [slug, setSlug] = useState("");
-  const [difficulty, setDifficulty] = useState("intermediate");
-  const [durationWeeks, setDurationWeeks] = useState(4);
-  const [passMarks, setPassMarks] = useState(60);
+  const [icon, setIcon] = useState("");
   const [description, setDescription] = useState("");
   const [isPublished, setIsPublished] = useState(false);
 
@@ -3152,9 +3149,7 @@ function DomainsSection() {
     setName("");
     setDomainCode("");
     setSlug("");
-    setDifficulty("intermediate");
-    setDurationWeeks(4);
-    setPassMarks(60);
+    setIcon("");
     setDescription("");
     setIsPublished(false);
     setShowForm(true);
@@ -3165,9 +3160,7 @@ function DomainsSection() {
     setName(d.name);
     setDomainCode(d.domain);
     setSlug(d.slug);
-    setDifficulty(d.difficulty || "intermediate");
-    setDurationWeeks(d.duration_weeks || 4);
-    setPassMarks(d.pass_marks || 60);
+    setIcon(d.icon || "");
     setDescription(d.short_description || "");
     setIsPublished(d.is_published || false);
     setShowForm(true);
@@ -3184,11 +3177,12 @@ function DomainsSection() {
       name,
       domain: domainCode,
       slug,
-      difficulty,
-      duration_weeks: durationWeeks,
-      pass_marks: passMarks,
+      icon: icon || null,
       short_description: description,
       is_published: isPublished,
+      difficulty: "intermediate",
+      duration_weeks: 4,
+      pass_marks: 60,
       quiz_marks: 10,
       quiz_duration_min: 15,
       total_tasks: 0,
@@ -3257,8 +3251,6 @@ function DomainsSection() {
               <th className="p-4">Name</th>
               <th className="p-4">Domain Code</th>
               <th className="p-4">Slug</th>
-              <th className="p-4">Duration</th>
-              <th className="p-4">Pass Marks</th>
               <th className="p-4">Status</th>
               <th className="p-4 text-right">Actions</th>
             </tr>
@@ -3266,12 +3258,12 @@ function DomainsSection() {
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800/40">
             {isLoading && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-slate-400">Loading domains...</td>
+                <td colSpan={5} className="p-8 text-center text-slate-400">Loading domains...</td>
               </tr>
             )}
             {!isLoading && filtered.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-slate-400">No domains found.</td>
+                <td colSpan={5} className="p-8 text-center text-slate-400">No domains found.</td>
               </tr>
             )}
             {!isLoading && filtered.map((d: any) => (
@@ -3279,8 +3271,6 @@ function DomainsSection() {
                 <td className="p-4 font-semibold text-slate-800 dark:text-slate-200">{d.name}</td>
                 <td className="p-4 font-mono">{d.domain}</td>
                 <td className="p-4 font-mono text-slate-500">{d.slug}</td>
-                <td className="p-4">{d.duration_weeks} Weeks</td>
-                <td className="p-4">{d.pass_marks}%</td>
                 <td className="p-4">
                   <Badge className={`text-xs ${
                     d.is_published ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400"
@@ -3322,23 +3312,9 @@ function DomainsSection() {
                   <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. mern-stack-development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="text-xs">Duration (Weeks)</Label>
-                  <Input type="number" value={durationWeeks} onChange={(e) => setDurationWeeks(Number(e.target.value))} min={1} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
-                </div>
-                <div>
-                  <Label className="text-xs">Difficulty</Label>
-                  <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="w-full mt-1 rounded-xl border border-slate-200 bg-white p-2 text-xs dark:bg-slate-800 dark:border-slate-700 h-9">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                  </select>
-                </div>
-                <div>
-                  <Label className="text-xs">Pass Marks (%)</Label>
-                  <Input type="number" value={passMarks} onChange={(e) => setPassMarks(Number(e.target.value))} min={0} max={100} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
-                </div>
+              <div>
+                <Label className="text-xs">Icon (emoji)</Label>
+                <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="e.g. 🛠️" className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
               </div>
               <div>
                 <Label className="text-xs">Description</Label>
