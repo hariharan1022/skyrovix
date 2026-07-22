@@ -3133,7 +3133,7 @@ function DomainsSection() {
     }
   });
 
-  const allowedSlugs = new Set(["fullstack", "frontend", "backend", "python", "java", "mernstack", "meanstack", "aiml"]);
+  const allowedSlugs = new Set(["fullstack", "python", "java", "mernstack", "meanstack", "aiml", "datascience", "uiux", "cybersecurity"]);
 
   const internshipDomains = useMemo(() => {
     if (!courses) return [];
