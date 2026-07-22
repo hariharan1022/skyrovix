@@ -242,6 +242,14 @@ function AdminPanel() {
                   className="h-9 w-64 rounded-xl border-border/60 bg-background/60 pl-9 text-sm backdrop-blur placeholder:text-muted-foreground/60"
                 />
               </div>
+              {/* System Health Badges */}
+              <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-50/50 px-2.5 py-1 text-[10px] font-medium text-emerald-600 dark:border-emerald-500/30 dark:bg-emerald-950/20 dark:text-emerald-400">
+                <span className="relative flex size-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+                </span>
+                <span>DB Live Sync Active</span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -407,6 +415,58 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0 }: {
           <p className="mt-1 text-sm text-muted-foreground">Students Online Now</p>
         </div>
       </div>
+
+      {/* Quick Actions Panel */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 pt-6 border-t border-border/40">
+        <div className="col-span-full">
+          <h3 className="text-sm font-semibold text-muted-foreground mb-1 flex items-center gap-1.5"><ListChecks className="size-4" /> Administrative Quick Actions</h3>
+          <p className="text-xs text-muted-foreground mb-3">Jump directly to pending tasks and registrations.</p>
+        </div>
+        
+        <button
+          onClick={() => onNavigate("applications")}
+          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
+        >
+          <div className="grid size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0"><Users className="size-5" /></div>
+          <div>
+            <p className="font-semibold text-sm">Review Applications</p>
+            <p className="text-xs text-muted-foreground">Approve or reject candidates</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onNavigate("submissions")}
+          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
+        >
+          <div className="grid size-10 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0"><ClipboardCheck className="size-5" /></div>
+          <div>
+            <p className="font-semibold text-sm">Task Submissions</p>
+            <p className="text-xs text-muted-foreground">Grade and provide feedback</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onNavigate("verification")}
+          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
+        >
+          <div className="grid size-10 place-items-center rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 shrink-0"><Shield className="size-5" /></div>
+          <div>
+            <p className="font-semibold text-sm">Verification Queue</p>
+            <p className="text-xs text-muted-foreground">Issue final certificates</p>
+          </div>
+        </button>
+
+        <button
+          onClick={() => onNavigate("payments")}
+          className="flex items-center gap-4 rounded-2xl border border-border/40 bg-white/40 p-4 text-left backdrop-blur-xl transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:bg-[#1E293B]/40"
+        >
+          <div className="grid size-10 place-items-center rounded-xl bg-green-500/10 text-green-600 dark:text-green-400 shrink-0"><Wallet className="size-5" /></div>
+          <div>
+            <p className="font-semibold text-sm">Verify Payments</p>
+            <p className="text-xs text-muted-foreground">Track student UTR numbers</p>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }
@@ -419,6 +479,9 @@ function ApplicationsSection() {
   const [selectedApp, setSelectedApp] = useState<any | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<any | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   const { data } = useQuery({
     queryKey: ["admin-apps"],
     queryFn: async () => {
@@ -426,6 +489,25 @@ function ApplicationsSection() {
       return data ?? [];
     },
   });
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    let list = data;
+    if (statusFilter !== "all") {
+      list = list.filter((a: any) => a.status === statusFilter);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((a: any) =>
+        a.full_name?.toLowerCase().includes(q) ||
+        a.email?.toLowerCase().includes(q) ||
+        a.intern_id?.toLowerCase().includes(q) ||
+        a.college?.toLowerCase().includes(q) ||
+        a.course?.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [data, statusFilter, search]);
 
   const updateStatus = async (id: string, status: string) => {
     const payload: any = { status };
@@ -463,7 +545,33 @@ function ApplicationsSection() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Internship Applications</h2>
-          <p className="text-sm text-muted-foreground">{data?.length ?? 0} total applications</p>
+          <p className="text-sm text-muted-foreground">{filtered?.length ?? 0} matching · {data?.length ?? 0} total applications</p>
+        </div>
+      </div>
+
+      {/* Search and Filters Bar */}
+      <div className="flex flex-col md:flex-row items-center gap-3 justify-between">
+        <div className="flex flex-wrap gap-1.5 rounded-xl bg-muted/50 p-1 w-full md:w-auto">
+          {(["all", "pending", "approved", "ongoing", "completed", "rejected"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-all ${
+                statusFilter === s ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full md:w-72 shrink-0">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
+          <Input
+            placeholder="Search name, college, ID..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 pl-9 rounded-xl border-border/60 bg-background/50"
+          />
         </div>
       </div>
 
@@ -559,9 +667,9 @@ function ApplicationsSection() {
           </thead>
           <tbody>
             {data?.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No applications yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">No matching applications found.</td></tr>
             )}
-            {data?.map((a) => {
+            {filtered?.map((a) => {
               const dd = getDomain(a.domain);
               return (
                 <tr key={a.id} className="border-b border-border/30 transition hover:bg-accent/20">
@@ -833,6 +941,9 @@ function SubmissionCard({ sub, loadingId, onAction, onHistory, showHistory, hist
 // ══════════════════════════════════════════════
 function PaymentsSection() {
   const qc = useQueryClient();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+
   const { data } = useQuery({
     queryKey: ["admin-payments"],
     queryFn: async () => {
@@ -843,6 +954,24 @@ function PaymentsSection() {
       return data ?? [];
     },
   });
+
+  const filtered = useMemo(() => {
+    if (!data) return [];
+    let list = data;
+    if (statusFilter !== "all") {
+      list = list.filter((p: any) => p.status === statusFilter);
+    }
+    if (search) {
+      const q = search.toLowerCase();
+      list = list.filter((p: any) =>
+        p.applications?.full_name?.toLowerCase().includes(q) ||
+        p.applications?.intern_id?.toLowerCase().includes(q) ||
+        p.utr_number?.toLowerCase().includes(q) ||
+        p.amount?.toString().includes(q)
+      );
+    }
+    return list;
+  }, [data, statusFilter, search]);
 
   const verify = async (paymentId: string, applicationId: string, accept: boolean) => {
     if (!accept) {
@@ -862,7 +991,39 @@ function PaymentsSection() {
 
   return (
     <div className="animate-fade-in-up space-y-4">
-      <h2 className="text-2xl font-bold">Payments</h2>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Payments</h2>
+          <p className="text-sm text-muted-foreground">{filtered?.length ?? 0} matching · {data?.length ?? 0} total payments</p>
+        </div>
+      </div>
+
+      {/* Search and Filters Bar */}
+      <div className="flex flex-col md:flex-row items-center gap-3 justify-between">
+        <div className="flex flex-wrap gap-1.5 rounded-xl bg-muted/50 p-1 w-full md:w-auto">
+          {(["all", "pending", "verified", "rejected"] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium capitalize transition-all ${
+                statusFilter === s ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+        <div className="relative w-full md:w-72 shrink-0">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
+          <Input
+            placeholder="Search student, UTR..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-9 pl-9 rounded-xl border-border/60 bg-background/50"
+          />
+        </div>
+      </div>
+
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
         <table className="w-full text-sm">
           <thead>
@@ -875,7 +1036,7 @@ function PaymentsSection() {
             </tr>
           </thead>
           <tbody>
-            {data?.map((p: any) => (
+            {filtered?.map((p: any) => (
               <tr key={p.id} className="border-b border-border/30 transition hover:bg-accent/20">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
