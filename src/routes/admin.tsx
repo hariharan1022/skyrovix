@@ -3329,7 +3329,7 @@ function DomainsSection() {
               </div>
               <div className="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="isPublished" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="rounded border-slate-200" />
-                <Label htmlFor="isPublished" className="text-xs font-semibold select-none cursor-pointer">Publish and make active for student enrollments</Label>
+                <Label htmlFor="isPublished" className="text-xs font-semibold select-none cursor-pointer">Publish and make active for internship applications</Label>
               </div>
               <div className="flex gap-3 justify-end pt-4">
                 <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
