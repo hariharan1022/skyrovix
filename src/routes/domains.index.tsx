@@ -243,7 +243,7 @@ function DomainsPage() {
       });
 
       toast.success("Application submitted! Your internship has started.");
-      navigate({ to: "/dashboard" });
+      navigate({ to: "/dashboard", search: {} as any });
 
       (async () => {
         try {

@@ -141,8 +141,9 @@ function InternshipDetailsPage() {
   });
 
   const taskRoadmap = useMemo(() => {
-    const tasks = userApplication?.duration
-      ? getTasksByDuration(slug, userApplication.duration)
+    const appDur = (userApplication as any)?.duration;
+    const tasks = appDur
+      ? getTasksByDuration(slug, appDur)
       : (getDomainTasks(slug)?.tasks ?? []);
     return tasks.map((task) => ({
       title: task.title,
@@ -153,7 +154,7 @@ function InternshipDetailsPage() {
   const { data: internCount = 0 } = useQuery({
     queryKey: ["intern-count", slug],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc("count_domain_applications", { p_domain: slug });
+      const { data, error } = await supabase.rpc("count_domain_applications" as any, { p_domain: slug });
       if (error) return 0;
       return data ?? 0;
     },
@@ -162,8 +163,8 @@ function InternshipDetailsPage() {
   if (!detail || !domain) throw notFound();
 
   const handleApply = () => {
-    if (!user) { navigate({ to: "/auth" }); return; }
-    navigate({ to: "/domains", search: { apply: slug } as any });
+    if (!user) { navigate({ to: "/auth", search: {} as any }); return; }
+    navigate({ to: "/domains", search: { apply: slug } });
   };
 
   const StatCard = ({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) => (
@@ -511,7 +512,7 @@ function InternshipDetailsPage() {
                     <Sparkles className="size-4" /> Apply Now
                   </Button>
                   <Button variant="outline" className="w-full h-11 rounded-xl gap-2" asChild>
-                    <Link to="/domains"><Download className="size-4" /> View All Internships</Link>
+                    <Link to="/domains" search={{ apply: undefined }}><Download className="size-4" /> View All Internships</Link>
                   </Button>
                 </CardContent>
               </Card>
