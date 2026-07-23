@@ -57,6 +57,16 @@ export const LONG_TAIL_KEYWORDS = [
   "internship for IT students",
   "software development internship online",
   "web development internship India",
+  "internship with AI features",
+  "task based internship online",
+  "project based learning internship",
+  "internship for beginners with certificate",
+  "online training with internship certificate",
+  "skill development internship India",
+  "internship for freshers 2026",
+  "internship for BCA MCA students",
+  "internship for BSc CS students",
+  "intern with certificate of completion",
 ];
 
 // ─── Combined Keywords ───────────────────────────────────────────────────────

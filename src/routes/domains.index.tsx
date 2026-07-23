@@ -13,7 +13,7 @@ import { validateCoupon } from "@/lib/coupons";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loader2, Upload, Lock } from "lucide-react";
+import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loader2, Upload, Lock, ChevronRight } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
