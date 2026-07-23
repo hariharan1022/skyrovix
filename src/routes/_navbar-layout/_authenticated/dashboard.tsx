@@ -1452,18 +1452,7 @@ function Dashboard() {
           <span>Share with Friends</span>
         </button>
 
-        {/* Help */}
-        <button
-          onClick={() => navigate({ search: { tab: "help" } })}
-          className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
-            active === "help"
-              ? "brand-gradient text-white shadow-md shadow-[#07284a]/15"
-              : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground dark:hover:bg-slate-800/30"
-          }`}
-        >
-          <HelpCircle className="size-4 shrink-0 text-blue-500" />
-          <span>Help</span>
-        </button>
+
 
         {/* Logout */}
         <button

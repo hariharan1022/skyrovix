@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_navbar-layout")({
     <>
       <div className="min-h-screen">
         <Navbar />
-        <main className="pt-20 sm:pt-24">
+        <main className="pt-20">
           <Outlet />
         </main>
         <Footer />

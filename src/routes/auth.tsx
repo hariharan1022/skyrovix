@@ -26,6 +26,23 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
   const { startTracking } = useLoginTracker();
 
+  const checkRoleAndRedirect = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (data?.role === "admin") {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: redirect });
+      }
+    } catch (err) {
+      navigate({ to: redirect });
+    }
+  };
+
   useEffect(() => {
     // Scrub any sensitive params that leaked into the URL (e.g. from a
     // pre-hydration native form submit or password manager autofill).
@@ -37,21 +54,27 @@ function AuthPage() {
       }
       if (dirty) window.history.replaceState({}, "", url.pathname + (url.search ? url.search : "") + url.hash);
     }
-    supabase.auth.getSession().then(({ data }) => { if (data.session) navigate({ to: redirect }); });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        checkRoleAndRedirect(data.session.user.id);
+      }
+    });
   }, [navigate, redirect]);
 
   const signIn = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: String(fd.get("email")), password: String(fd.get("password")) });
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email: String(fd.get("email")), password: String(fd.get("password")) });
     setLoading(false);
     if (error) return toast.error(error.message);
     toast.success("Welcome back!");
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) startTracking(data.session.user.id);
-    });
-    navigate({ to: redirect });
+    if (authData.user) {
+      startTracking(authData.user.id);
+      await checkRoleAndRedirect(authData.user.id);
+    } else {
+      navigate({ to: redirect });
+    }
   };
 
   const signUp = async (e: React.FormEvent<HTMLFormElement>) => {

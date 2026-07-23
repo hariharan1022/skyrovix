@@ -15,7 +15,7 @@ import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { ArrowRight, ShieldCheck, Clock, Users, Eye, Sparkles, CheckCircle2, Loader2, Upload, Lock, ChevronRight } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
-import { FadeUp } from "@/components/motion";
+import { FadeUp, SlideLeft, SlideRight } from "@/components/motion";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { INDIA_STATES, STATE_DISTRICTS } from "@/lib/india-locations";
@@ -294,7 +294,7 @@ function DomainsPage() {
           <div className="grid lg:grid-cols-12 gap-8 items-start">
             
             {/* Left Column: Platform info & Live preview */}
-            <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
+            <SlideLeft delay={0.05} className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
               <div>
                 <Badge variant="outline" className="mb-3 border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 text-[#07284a] dark:text-[#60a5fa] px-3 py-1 font-semibold shadow-sm backdrop-blur">
                   <ShieldCheck className="mr-1.5 size-3.5" /> MSME Registered Platform
@@ -359,10 +359,10 @@ function DomainsPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </SlideLeft>
 
             {/* Right Column: Premium Form */}
-            <div className="lg:col-span-7">
+            <SlideRight delay={0.1} className="lg:col-span-7">
               <div className="rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl">
                 <form onSubmit={submitApplication} className="space-y-6">
                   
@@ -631,7 +631,7 @@ function DomainsPage() {
 
                 </form>
               </div>
-            </div>
+            </SlideRight>
 
           </div>
         </div>

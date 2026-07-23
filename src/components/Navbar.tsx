@@ -21,7 +21,6 @@ const DASHBOARD_ITEMS = [
   { to: "/dashboard", label: "Payment", icon: CreditCard, search: { tab: "payment" } },
   { to: "/dashboard", label: "Certificates", icon: Award, search: { tab: "certificates" } },
   { to: "/dashboard", label: "Profile", icon: User, search: { tab: "profile" } },
-  { to: "/dashboard", label: "Help", icon: HelpCircle, search: { tab: "help" } },
   { to: "/review", label: "Review", icon: MessageSquare },
 ] as const;
 
@@ -80,23 +79,19 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl transition-all duration-300 ${
-          scrolled ? "top-2" : ""
+        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 border-b ${
+          scrolled 
+            ? "bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-md border-gray-200/80 dark:border-slate-800/80 shadow-sm"
+            : "bg-white dark:bg-[#0f172a] border-gray-150 dark:border-slate-850"
         }`}
       >
-        <nav
-          className={`relative flex h-12 sm:h-14 items-center justify-between gap-2 rounded-2xl border px-3 sm:px-5 transition-all duration-300 ${
-            scrolled
-              ? "bg-white/80 dark:bg-[#0f172a]/80 backdrop-blur-xl border-[rgba(0,0,0,0.06)] dark:border-[rgba(255,255,255,0.06)] shadow-[0_8px_32px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.2)]"
-              : "bg-white/50 dark:bg-[#0f172a]/50 backdrop-blur-md border-transparent"
-          }`}
-        >
-          <Link to="/" className="shrink-0" onClick={() => setOpen(false)}>
-            <Logo />
+        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-20 items-center justify-between gap-4 w-full">
+          <Link to="/" className="shrink-0 animate-fade-in" onClick={() => setOpen(false)}>
+             <Logo />
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-0.5 min-w-0">
+          <div className="hidden xl:flex flex-1 items-stretch justify-center gap-4 xl:gap-6 min-w-0 h-full">
             {itemsToRender.map((n) => {
               const isActive = isDashboardPage
                 ? (n.search?.tab ? currentTab === n.search.tab : !currentTab)
@@ -108,29 +103,33 @@ export function Navbar() {
                   to={n.to}
                   search={"search" in n ? n.search : undefined}
                   activeOptions={{ exact: n.to === "/" }}
-                  className={`whitespace-nowrap rounded-xl px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                  className={`relative whitespace-nowrap px-1 text-xs xl:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 h-full ${
                     isActive
-                      ? "text-[#07284a] dark:text-white bg-[#07284a]/8 dark:bg-white/10 font-bold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
+                      ? "text-blue-600 dark:text-blue-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2.5px] after:bg-blue-600 dark:after:bg-blue-400 font-bold"
+                      : "text-gray-600 dark:text-slate-350 hover:text-blue-600 dark:hover:text-blue-400"
                   }`}
                 >
-                  <Icon className="inline size-3.5 mr-1 -mt-0.5" />{n.label}
+                  <Icon className="size-4 shrink-0 text-muted-foreground" />
+                  <span>{n.label}</span>
                 </Link>
               );
             })}
           </div>
 
           {/* Right side actions */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 xl:gap-3 shrink-0">
             {user ? (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl size-8 text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
-                  {dark ? <Sparkles className="size-3.5" /> : <Moon className="size-3.5" />}
+                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
                 </button>
                 {isAdmin && (
-                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-8 px-2.5 text-xs gap-1">
-                    <Link to="/admin"><Shield className="size-3.5" />Admin</Link>
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9 w-9 p-0 xl:w-auto xl:px-3 text-xs gap-1.5" title="Admin Panel">
+                    <Link to="/admin">
+                      <Shield className="size-4" />
+                      <span className="hidden xl:inline">Admin</span>
+                    </Link>
                   </Button>
                 )}
                 {/* Share with Friends */}
@@ -144,37 +143,39 @@ export function Navbar() {
                       toast.success("Link copied to clipboard!");
                     }
                   }}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 gap-1.5 transition-all"
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 xl:w-auto xl:px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 gap-1.5 transition-all"
+                  title="Share"
                 >
-                  <Share2 className="size-3.5 text-violet-500" />
-                  <span>Share</span>
+                  <Share2 className="size-4 text-violet-500" />
+                  <span className="hidden xl:inline">Share</span>
                 </button>
 
                 {/* Logout */}
                 <button
                   onClick={signOut}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl h-8 px-2.5 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1.5 transition-all"
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 xl:w-auto xl:px-3 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1.5 transition-all"
+                  title="Logout"
                 >
-                  <LogOut className="size-3.5" />
-                  <span>Logout</span>
+                  <LogOut className="size-4" />
+                  <span className="hidden xl:inline">Logout</span>
                 </button>
 
-                {/* User avatar — display only, no dropdown */}
-                <div className="hidden md:inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  <span className="flex items-center justify-center size-6 rounded-full bg-[#07284a]/10 dark:bg-white/10 text-[11px] font-bold text-[#07284a] dark:text-white shrink-0">
+                {/* User avatar */}
+                <div className="hidden md:inline-flex items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  <span className="flex items-center justify-center size-7 rounded-full bg-[#07284a]/10 dark:bg-white/10 text-xs font-bold text-[#07284a] dark:text-white shrink-0">
                     {user.email?.charAt(0).toUpperCase() || "U"}
                   </span>
-                  <span className="max-w-[80px] truncate">{user.email?.split("@")[0]}</span>
+                  <span className="max-w-[70px] truncate hidden 2xl:inline">{user.email?.split("@")[0]}</span>
                 </div>
               </>
             ) : (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl size-8 text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
-                  {dark ? <Sparkles className="size-3.5" /> : <Moon className="size-3.5" />}
+                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
                 </button>
-                <Button asChild size="sm" className="hidden md:inline-flex rounded-xl h-8 px-3 text-xs bg-[#07284a] hover:bg-[#07284a]/90 text-white shadow-sm shadow-[#07284a]/20">
-                  <Link to="/auth">Sign in</Link>
+                <Button asChild size="sm" className="rounded-xl h-10 px-5 text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+                  <Link to="/auth"><User className="size-4 shrink-0" />Login / Register</Link>
                 </Button>
               </>
             )}
@@ -183,11 +184,11 @@ export function Navbar() {
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="flex lg:hidden items-center justify-center size-8 rounded-xl border border-border hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all touch-target"
+              className="flex xl:hidden items-center justify-center size-9 rounded-xl border border-border hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all touch-target"
               aria-label="Toggle menu"
             >
               <span className={`transition-transform duration-300 ${open ? "rotate-90" : ""}`}>
-                {open ? <X className="size-3.5" /> : <Menu className="size-3.5" />}
+                {open ? <X className="size-4" /> : <Menu className="size-4" />}
               </span>
             </button>
           </div>
@@ -195,13 +196,13 @@ export function Navbar() {
       </header>
 
       {/* Mobile backdrop */}
-      {open && <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm lg:hidden" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)} />}
 
       {/* Mobile Menu */}
       {open && (
         <div
           ref={menuRef}
-          className="fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 mt-2 rounded-2xl border border-border/60 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl shadow-xl overflow-hidden lg:hidden"
+          className="fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 mt-2 rounded-2xl border border-border/60 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl shadow-xl overflow-hidden xl:hidden"
           style={{
             top: scrolled ? "calc(2.5rem + 6px)" : "calc(3.25rem + 6px)",
             animation: "fade-in-down 0.2s ease-out forwards",

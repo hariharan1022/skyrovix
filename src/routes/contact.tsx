@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/constants";
 import { Mail, MapPin, Globe, Sparkles } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
-import { FadeUp } from "@/components/motion";
+import { FadeUp, Reveal } from "@/components/motion";
 import { BreadcrumbJsonLd, WebPageJsonLd, LocalBusinessJsonLd } from "@/components/JsonLd";
 
 export const Route = createFileRoute("/contact")({
@@ -78,9 +78,8 @@ function ContactPage() {
         </section>
       </AuroraBackground>
       <main className="mx-auto max-w-5xl px-4 py-12 sm:pt-16 sm:pb-16">
-
         <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <div className="space-y-3">
+          <Reveal delay={0.1} className="space-y-3">
             {ITEMS.map((it) => (
               <div key={it.label} className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
                 <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
@@ -96,34 +95,36 @@ function ContactPage() {
                 </div>
               </div>
             ))}
-          </div>
+          </Reveal>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              const subject = encodeURIComponent(`Skyrovix inquiry from ${fd.get("name")}`);
-              const body = encodeURIComponent(`${fd.get("message")}\n\n— ${fd.get("name")} (${fd.get("email")})`);
-              window.location.href = `mailto:${COMPANY.email}?subject=${subject}&body=${body}`;
-            }}
-            className="space-y-4 rounded-2xl border border-border bg-card p-6"
-          >
-            <div>
-              <label className="text-sm font-medium">Name</label>
-              <input name="name" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Email</label>
-              <input name="email" type="email" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Message</label>
-              <textarea name="message" rows={5} required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-            </div>
-            <button type="submit" className="w-full rounded-md brand-gradient px-4 py-2.5 text-sm font-medium text-white">
-              Send message
-            </button>
-          </form>
+          <Reveal delay={0.2}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const subject = encodeURIComponent(`Skyrovix inquiry from ${fd.get("name")}`);
+                const body = encodeURIComponent(`${fd.get("message")}\n\n— ${fd.get("name")} (${fd.get("email")})`);
+                window.location.href = `mailto:${COMPANY.email}?subject=${subject}&body=${body}`;
+              }}
+              className="space-y-4 rounded-2xl border border-border bg-card p-6 h-full"
+            >
+              <div>
+                <label className="text-sm font-medium">Name</label>
+                <input name="name" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <input name="email" type="email" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Message</label>
+                <textarea name="message" rows={5} required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+              </div>
+              <button type="submit" className="w-full rounded-md brand-gradient px-4 py-2.5 text-sm font-medium text-white">
+                Send message
+              </button>
+            </form>
+          </Reveal>
         </div>
       </main>
       <Footer />

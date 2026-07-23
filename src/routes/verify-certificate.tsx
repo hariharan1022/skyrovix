@@ -141,54 +141,61 @@ function VerifyPage() {
         </section>
       </AuroraBackground>
       <main className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        <FadeUp delay={0.1}>
+          <form onSubmit={verify} className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2">
+            <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKX-2026-XXXX" className="w-full" />
+            <Button type="submit" className="w-full sm:w-auto brand-gradient text-white border-0"><Search className="size-4" /> Verify</Button>
+          </form>
+        </FadeUp>
 
-        <form onSubmit={verify} className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2">
-          <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKX-2026-XXXX" className="w-full" />
-          <Button type="submit" className="w-full sm:w-auto brand-gradient text-white border-0"><Search className="size-4" /> Verify</Button>
-        </form>
-
-        {result.state === "loading" && <p className="mt-6 text-muted-foreground">Checking…</p>}
+        {result.state === "loading" && (
+          <FadeUp y={10} duration={0.4} className="mt-6 text-muted-foreground">Checking…</FadeUp>
+        )}
 
         {result.state === "found" && result.type === "internship" && (() => {
           const d = result.data;
           const hasCert = !!d.cert_id;
           return (
-            <Card className={`mt-8 ${hasCert ? "border-primary/40" : "border-amber-400/40"}`}>
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  {hasCert ? <CheckCircle2 className="size-8 text-green-500" /> : <Clock className="size-8 text-amber-500" />}
-                  <div>
-                    <CardTitle>{hasCert ? "Verified ✓" : "Internship Found"}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {hasCert ? "This certificate is authentic." : "Certificate not yet issued."}
-                    </p>
+            <FadeUp y={10} duration={0.4}>
+              <Card className={`mt-8 ${hasCert ? "border-primary/40" : "border-amber-400/40"}`}>
+                <CardHeader>
+                  <div className="flex items-center gap-3">
+                    {hasCert ? <CheckCircle2 className="size-8 text-green-500" /> : <Clock className="size-8 text-amber-500" />}
+                    <div>
+                      <CardTitle>{hasCert ? "Verified ✓" : "Internship Found"}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {hasCert ? "This certificate is authentic." : "Certificate not yet issued."}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                <Row k="Name" v={d.full_name} />
-                <Row k="Domain" v={getDomain(d.domain)?.name ?? d.domain} />
-                <Row k="Intern ID" v={d.intern_id} />
-                <Row k="Status" v={<Badge variant={d.status === "approved" ? "default" : d.status === "rejected" ? "destructive" : "secondary"}>{d.status}</Badge>} />
-                {d.cert_id && <Row k="Certificate ID" v={d.cert_id} />}
-                {d.issued_at && <Row k="Issued" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                  <Row k="Name" v={d.full_name} />
+                  <Row k="Domain" v={getDomain(d.domain)?.name ?? d.domain} />
+                  <Row k="Intern ID" v={d.intern_id} />
+                  <Row k="Status" v={<Badge variant={d.status === "approved" ? "default" : d.status === "rejected" ? "destructive" : "secondary"}>{d.status}</Badge>} />
+                  {d.cert_id && <Row k="Certificate ID" v={d.cert_id} />}
+                  {d.issued_at && <Row k="Issued" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
+                </CardContent>
+              </Card>
+            </FadeUp>
           );
         })()}
 
         {result.state === "notfound" && (
-          <Card className="mt-8 border-destructive/60">
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <XCircle className="size-8 text-destructive" />
-                <div>
-                  <CardTitle>Not Found</CardTitle>
-                  <p className="text-sm text-muted-foreground">No certificate matches this ID.</p>
+          <FadeUp y={10} duration={0.4}>
+            <Card className="mt-8 border-destructive/60">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <XCircle className="size-8 text-destructive" />
+                  <div>
+                    <CardTitle>Not Found</CardTitle>
+                    <p className="text-sm text-muted-foreground">No certificate matches this ID.</p>
+                  </div>
                 </div>
-              </div>
-            </CardHeader>
-          </Card>
+              </CardHeader>
+            </Card>
+          </FadeUp>
         )}
       </main>
       <Footer />

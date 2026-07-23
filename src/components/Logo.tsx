@@ -1,8 +1,7 @@
-import logo from "@/assets/logo.png";
+import defaultLogo from "@/assets/top nav bar logo.png";
+import loginLogo from "@/assets/login page logo.png";
 
 export function Logo({
-  size = 36,
-  withText = true,
   variant = "default",
 }: {
   size?: number;
@@ -10,19 +9,17 @@ export function Logo({
   /** "default" uses the dark navy brand-text gradient; "white" renders plain white for use on dark/gradient backgrounds */
   variant?: "default" | "white";
 }) {
+  const isWhite = variant === "white";
+
   return (
-    <div className="flex items-center gap-2">
-      <img src={logo} alt="Skyrovix" style={{ height: size, width: size }} className="rounded-md object-cover" />
-      {withText && (
-        <span
-          className={
-            variant === "white"
-              ? "font-display text-lg font-bold tracking-tight text-white"
-              : "font-display text-lg font-bold tracking-tight brand-text"
-          }
-        >
-          SKYROVIX
-        </span>
+    <div className="flex items-center">
+      {isWhite ? (
+        <img src={loginLogo} alt="Skyrovix" className="h-14 w-auto object-contain" />
+      ) : (
+        <>
+          <img src={defaultLogo} alt="Skyrovix" className="h-14 w-auto object-contain dark:hidden" />
+          <img src={loginLogo} alt="Skyrovix" className="h-14 w-auto object-contain hidden dark:block" />
+        </>
       )}
     </div>
   );
