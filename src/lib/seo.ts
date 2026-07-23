@@ -2,7 +2,7 @@ import { COMPANY, DOMAINS } from "./constants";
 
 export const SITE_URL = "https://skyrovix.online";
 export const SITE_NAME = "Skyrovix";
-export const SITE_TITLE = "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix";
+export const SITE_TITLE = "Skyrovix | Virtual Internship with Certificate & Real Projects";
 export const SITE_DESCRIPTION =
   "Skyrovix is a virtual internship platform offering hands-on projects, offer letters, certificates, and mentor support in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more.";
 

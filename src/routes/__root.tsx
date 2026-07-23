@@ -38,7 +38,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   
-  // Automatically reload on dynamic import / chunk load failures
+  // Automatically reload on dynamic import / chunk load failures (rate-limited to prevent infinite loop)
   if (typeof window !== "undefined") {
     const isChunkError =
       error.message?.includes("Failed to fetch dynamically imported module") ||
@@ -48,9 +48,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       error.stack?.includes("Failed to fetch dynamically imported module");
       
     if (isChunkError) {
-      console.warn("Chunk load error detected, forcing automatic page reload...");
-      window.location.reload();
-      return null;
+      const now = Date.now();
+      const lastReload = sessionStorage.getItem("last_chunk_error_reload");
+      if (!lastReload || now - parseInt(lastReload) > 15000) {
+        sessionStorage.setItem("last_chunk_error_reload", now.toString());
+        console.warn("Chunk load error detected, forcing automatic page reload...");
+        window.location.reload();
+        return null;
+      } else {
+        console.error("Chunk load error persisted after reload, stopping loop.", error);
+      }
     }
   }
 

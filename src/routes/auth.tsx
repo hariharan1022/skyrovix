@@ -54,9 +54,9 @@ function AuthPage() {
       }
       if (dirty) window.history.replaceState({}, "", url.pathname + (url.search ? url.search : "") + url.hash);
     }
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) {
-        checkRoleAndRedirect(data.session.user.id);
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        checkRoleAndRedirect(data.user.id);
       }
     });
   }, [navigate, redirect]);
