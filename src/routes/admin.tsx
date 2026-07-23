@@ -218,7 +218,7 @@ function AdminPanel() {
             {SIDEBAR_GROUPS.map((group, gIdx) => (
               <div key={gIdx} className="space-y-1">
                 {sidebarOpen && (
-                  <span className="px-2 text-[10px] font-bold tracking-wider text-slate-400 dark:text-slate-500 block uppercase leading-none mb-1">
+                  <span className="px-2 text-xs font-bold tracking-wider text-slate-400 dark:text-slate-500 block uppercase leading-none mb-2">
                     {group.title}
                   </span>
                 )}
@@ -230,13 +230,13 @@ function AdminPanel() {
                       <li key={item.id}>
                         <button
                           onClick={() => { setActive(item.id as any); setMobileOpen(false); }}
-                          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-200 ${
+                          className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200 ${
                             isActive
                               ? "brand-gradient text-white shadow-md shadow-[#07284a]/15"
                               : "text-slate-600 hover:text-slate-900 hover:bg-[#07284a]/5 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/40"
                           }`}
                         >
-                          <Icon className="size-4 shrink-0" />
+                          <Icon className="size-[18px] shrink-0" />
                           {sidebarOpen && <span className="truncate">{item.label}</span>}
                         </button>
                       </li>
@@ -251,9 +251,9 @@ function AdminPanel() {
           <div className="border-t border-border/60 p-3 dark:border-white/5">
             <button
               onClick={signOut}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-medium text-slate-500 transition hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-950/20"
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-500 transition hover:text-red-600 hover:bg-red-50 dark:text-slate-400 dark:hover:text-red-400 dark:hover:bg-red-950/20"
             >
-              <LogOut className="size-4 shrink-0" />
+              <LogOut className="size-[18px] shrink-0" />
               {sidebarOpen && <span>Logout</span>}
             </button>
           </div>
