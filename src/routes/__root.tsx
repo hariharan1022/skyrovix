@@ -37,7 +37,23 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
-  const router = useRouter();
+  
+  // Automatically reload on dynamic import / chunk load failures
+  if (typeof window !== "undefined") {
+    const isChunkError =
+      error.message?.includes("Failed to fetch dynamically imported module") ||
+      error.message?.includes("ChunkLoadError") ||
+      error.name === "ChunkLoadError" ||
+      error.stack?.includes("ChunkLoadError") ||
+      error.stack?.includes("Failed to fetch dynamically imported module");
+      
+    if (isChunkError) {
+      console.warn("Chunk load error detected, forcing automatic page reload...");
+      window.location.reload();
+      return null;
+    }
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -47,8 +63,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         </p>
         <button
           onClick={() => {
-            router.invalidate();
-            reset();
+            window.location.reload();
           }}
           className="mt-6 rounded-md brand-gradient px-4 py-2 text-sm font-medium text-white"
         >
