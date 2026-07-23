@@ -23,6 +23,7 @@ import {
   Clock, MessageSquare, Briefcase, Laptop, Building2,
   Loader2,
 } from "lucide-react";
+import { MobileFloatingIcons } from "@/components/MobileFloatingIcons";
 import { FAQJsonLd, BreadcrumbJsonLd } from "@/components/JsonLd";
 import { FAQ_DATA } from "@/lib/seo";
 import founderPhoto from "@/assets/founder.jpeg";
@@ -83,6 +84,7 @@ function Landing() {
       {/* ─── HERO ─── */}
       <AuroraBackground>
         <section className="relative min-h-[90vh] sm:min-h-[92vh] pt-18 sm:pt-20 pb-44 sm:pb-48 md:pb-56">
+          <MobileFloatingIcons />
           <div className="mx-auto max-w-4xl px-4">
             <div className="flex flex-col items-center justify-center text-center">
               <FadeUp className="text-center flex flex-col items-center">
