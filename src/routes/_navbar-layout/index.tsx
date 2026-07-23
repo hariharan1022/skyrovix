@@ -83,61 +83,70 @@ function Landing() {
       <BreadcrumbJsonLd items={[{ name: "Home", url: "https://skyrovix.online/" }]} />
       {/* ─── HERO ─── */}
       <AuroraBackground>
-        <section className="relative min-h-[90vh] sm:min-h-[92vh] pt-18 sm:pt-20 pb-44 sm:pb-48 md:pb-56">
+        <section className="relative min-h-[92vh] pt-20 pb-44 sm:pb-48 md:pb-56 flex items-center justify-center">
           <MobileFloatingIcons />
-          <div className="mx-auto max-w-4xl px-4">
+          <div className="mx-auto max-w-4xl px-4 relative z-10">
             <div className="flex flex-col items-center justify-center text-center">
               <FadeUp className="text-center flex flex-col items-center">
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 px-3 sm:px-4 py-1.5 text-[11px] sm:text-xs font-medium text-[#07284a] dark:text-[#60a5fa] shadow-sm backdrop-blur">
-                  <ShieldCheck className="size-3 sm:size-3.5" />
-                  <span>MSME Registered · Skyrovix</span>
+                
+                {/* MSME Registered Badge */}
+                <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-blue-150 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-950/20 px-4 py-2 text-xs font-semibold text-blue-700 dark:text-blue-300 shadow-sm backdrop-blur-md">
+                  <ShieldCheck className="size-4 text-blue-600 dark:text-blue-400" />
+                  <span>MSME Registered Enterprise</span>
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
                 </div>
 
-                <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                  <span className="brand-text">Skyrovix</span> — Learn by building.<br />
-                  Get certified.
+                {/* Main Heading with dynamic Building gradient */}
+                <h1 className="font-display text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-[1.15] text-gray-900 dark:text-white">
+                  Learn by <span className="bg-gradient-to-r from-blue-600 via-[#07284a] to-blue-500 bg-clip-text text-transparent dark:from-blue-400 dark:via-blue-500 dark:to-cyan-400 font-extrabold">Building</span>.<br className="hidden sm:inline" />
+                  Get Certified.
                 </h1>
 
-                <div className="mt-4">
-                  <p className="text-sm sm:text-lg text-muted-foreground">
-                    Build in{" "}
-                    <TypingText texts={["Full Stack Development", "Data Science", "Cyber Security", "UI/UX Design"]} />
-                  </p>
+                {/* Sub-headline Build In: list */}
+                <div className="mt-6 flex items-center gap-2 rounded-xl bg-[#07284a]/5 dark:bg-[#1d4ed8]/10 px-4 py-2 text-sm font-semibold text-[#07284a] dark:text-[#60a5fa] border border-[#07284a]/10 dark:border-blue-500/20 shadow-inner">
+                  <span className="text-muted-foreground font-medium">Build in:</span>
+                  <TypingText texts={["Full Stack Development", "Data Science", "Cyber Security", "UI/UX Design"]} />
                 </div>
 
-                <p className="mt-5 max-w-2xl text-sm sm:text-base leading-relaxed text-muted-foreground mx-auto">
-                  Skyrovix is a task-based virtual internship platform — apply in minutes, get an
-                  instant offer letter and ID card, complete real-world projects, and earn a
+                {/* Landing page description paragraph */}
+                <p className="mt-6 max-w-2xl text-base sm:text-lg leading-relaxed text-muted-foreground mx-auto">
+                  Skyrovix is a task-based virtual internship platform. Apply in minutes, get an
+                  instant offer letter and digital ID card, complete real-world projects, and earn a
                   QR-verified certificate.
                 </p>
 
-                <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 w-full sm:w-auto">
+                {/* CTA Action Buttons */}
+                <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 w-full sm:w-auto">
                   <Link to="/auth" className="w-full sm:w-auto">
-                    <Button size="lg" className="w-full sm:w-auto rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-lg shadow-[#07284a]/25 hover:shadow-xl transition-all btn-premium hover:btn-premium-hover active:btn-premium-active">
+                    <Button size="lg" className="w-full sm:w-auto rounded-xl bg-[#07284a] hover:bg-[#07284a]/90 text-white border-0 px-8 py-6 text-base font-semibold shadow-lg shadow-[#07284a]/20 hover:shadow-xl hover:-translate-y-0.5 transition-all">
                       Start your internship <ArrowRight className="ml-2 size-4" />
                     </Button>
                   </Link>
                   <Link to="/domains" className="w-full sm:w-auto">
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl border-2 border-border px-7 py-5 sm:py-6 text-sm sm:text-base font-semibold shadow-sm transition-all hover:border-[#07284a]/30 hover:bg-[#07284a]/5 hover:shadow-md btn-premium active:btn-premium-active">
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl border-2 border-border px-8 py-6 text-base font-semibold shadow-sm hover:border-[#07284a]/30 hover:bg-[#07284a]/5 hover:shadow-md active:scale-95 transition-all">
                       Browse domains
                     </Button>
                   </Link>
                 </div>
 
-                <div className="mt-8 sm:mt-12 flex items-center justify-center gap-6 sm:gap-12">
-                  <div>
-                    <div className="text-xl sm:text-3xl font-bold brand-text">25+</div>
-                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Domains</div>
+                {/* Stats Glassmorphism Grid */}
+                <div className="mt-16 grid grid-cols-3 gap-4 sm:gap-8 rounded-2xl border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/5 p-6 sm:p-8 backdrop-blur-md shadow-xl shadow-blue-900/5 max-w-xl w-full mx-auto">
+                  <div className="text-center">
+                    <div className="text-2xl sm:text-4xl font-extrabold bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">25+</div>
+                    <div className="mt-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Domains</div>
                   </div>
-                  <div className="h-6 sm:h-10 w-px bg-border" />
-                  <div>
-                    <div className="text-xl sm:text-3xl font-bold brand-text">300+</div>
-                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Projects</div>
+                  <div className="h-10 w-px bg-border/60 self-center mx-auto" />
+                  <div className="text-center">
+                    <div className="text-2xl sm:text-4xl font-extrabold bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">300+</div>
+                    <div className="mt-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Projects</div>
                   </div>
-                  <div className="h-6 sm:h-10 w-px bg-border" />
-                  <div>
-                    <div className="text-xl sm:text-3xl font-bold brand-text">100%</div>
-                    <div className="mt-0.5 sm:mt-1 text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">Online</div>
+                  <div className="h-10 w-px bg-border/60 self-center mx-auto" />
+                  <div className="text-center">
+                    <div className="text-2xl sm:text-4xl font-extrabold bg-gradient-to-b from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">100%</div>
+                    <div className="mt-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted-foreground">Online</div>
                   </div>
                 </div>
 
