@@ -127,6 +127,10 @@ function AdminPanel() {
         qc.invalidateQueries({ queryKey: ["admin-student-sessions"] });
         qc.invalidateQueries({ queryKey: ["admin-login-history"] });
         qc.invalidateQueries({ queryKey: ["admin-online-count"] });
+        qc.invalidateQueries({ queryKey: ["admin-recent-subs-dashboard"] });
+        qc.invalidateQueries({ queryKey: ["admin-app-status-counts"] });
+        qc.invalidateQueries({ queryKey: ["admin-domain-counts"] });
+        qc.invalidateQueries({ queryKey: ["admin-payments-summary"] });
       });
     }
     // Subscribe to login_sessions for live online count + login notifications
