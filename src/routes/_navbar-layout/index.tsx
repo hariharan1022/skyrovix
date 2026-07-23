@@ -43,7 +43,7 @@ const COURSE_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 export const Route = createFileRoute("/_navbar-layout/")({
   head: () => ({
     meta: [
-      { title: "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix" },
+      { title: "Skyrovix | Virtual Internship with Certificate & Real Projects" },
       { name: "description", content: "Skyrovix is a virtual internship platform offering hands-on projects, offer letters, certificates, and mentor support in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more." },
       { name: "keywords", content: "Skyrovix Internship, Skyrovix Virtual Internship, Skyrovix IT Solutions Internship, online internship India, virtual internship with certificate, remote internship for students, project based internship, full stack development internship, Python internship, Java internship, AI internship, machine learning internship, data science internship, cyber security internship, cloud computing internship, React internship, MERN stack internship, UI UX internship, graphic design internship, internship with offer letter, internship with certificate, internship with real projects, internship for college students, engineering internship, computer science internship, free internship, work from home internship, summer internship 2026, internship program India, best virtual internship for engineering students, online internship with certificate and offer letter, internship with QR verified certificate, internship for CSE students, internship for IT students, web development internship India" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
@@ -93,10 +93,10 @@ function Landing() {
         <section className="relative min-h-[92vh] pt-16 pb-20 flex items-center justify-center overflow-hidden">
           <div className="mx-auto max-w-7xl px-4 relative z-10 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-              
+
               {/* Left Column: Hero Text Content */}
               <FadeUp y={20} duration={0.8} delay={0.1} className="lg:col-span-7 flex flex-col items-start text-left">
-                
+
                 {/* Internship Platform Badge */}
                 <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-950/20 px-4 py-2 text-xs font-bold text-blue-700 dark:text-blue-300 shadow-sm backdrop-blur-md">
                   <span>🎓 INDIA'S MOST PRACTICAL VIRTUAL INTERNSHIP PLATFORM</span>
@@ -162,7 +162,7 @@ function Landing() {
 
               {/* Right Column: Dynamic Graphic & Stats overlay */}
               <ScaleIn delay={0.2} className="lg:col-span-5 flex flex-col items-center relative w-full lg:mt-0 mt-16">
-                
+
                 {/* SVG Curve Background & Doodles */}
                 <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-visible">
                   <svg viewBox="0 0 500 400" className="absolute inset-0 w-full h-full text-blue-400/40 dark:text-blue-500/25" preserveAspectRatio="none">
@@ -201,12 +201,12 @@ function Landing() {
                     <path d="M72,42 L85,55 L90,40" fill="none" stroke="currentColor" strokeWidth="1.8" />
                   </svg>
                 </div>
-                
+
                 {/* Student team image - rendered directly as transparent PNG (Scaled up for larger presence) */}
-                <img 
-                  src={heroTeamImage} 
-                  alt="Skyrovix Interns" 
-                  className="relative z-10 w-[105%] max-w-[550px] lg:scale-110 lg:translate-y-4 h-auto object-contain select-none pointer-events-none" 
+                <img
+                  src={heroTeamImage}
+                  alt="Skyrovix Interns"
+                  className="relative z-10 w-[105%] max-w-[550px] lg:scale-110 lg:translate-y-4 h-auto object-contain select-none pointer-events-none"
                 />
 
                 {/* Floating Badge Cards */}
@@ -236,7 +236,7 @@ function Landing() {
 
                 {/* Overlaid Statistics Card (overlapping the bottom of the card) */}
                 <div className="relative z-20 w-full -mt-6 bg-white dark:bg-[#0f172a] rounded-[28px] border border-border/70 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08)] grid grid-cols-4 gap-2 max-w-2xl">
-                  
+
                   {/* Students Enrolled */}
                   <div className="text-center border-r border-slate-100 dark:border-slate-800/80 last:border-none px-1 sm:px-2 flex flex-col items-center justify-center">
                     <div className="size-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-2.5">
@@ -473,7 +473,7 @@ function Landing() {
               <p className="mt-3 text-sm sm:text-base text-muted-foreground font-medium">Select a track to launch your professional task-based curriculum.</p>
             </div>
           </Reveal>
-          
+
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
             {[
               { slug: "fullstack", name: "Full Stack Development", count: "12 Projects", icon: Code2, bg: "bg-violet-50 text-violet-600 dark:bg-violet-950/30 dark:text-violet-400" },
