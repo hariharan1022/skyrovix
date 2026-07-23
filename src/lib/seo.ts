@@ -2,9 +2,9 @@ import { COMPANY, DOMAINS } from "./constants";
 
 export const SITE_URL = "https://skyrovix.online";
 export const SITE_NAME = "Skyrovix";
-export const SITE_TITLE = "Skyrovix Internship | Virtual Internship with Certificate & Real Projects";
+export const SITE_TITLE = "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix";
 export const SITE_DESCRIPTION =
-  "Join Skyrovix Virtual Internship Program and gain hands-on experience through real-world projects. Get an Offer Letter, Internship Certificate, mentor support, and industry-ready skills in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more.";
+  "Skyrovix is a virtual internship platform offering hands-on projects, offer letters, certificates, and mentor support in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more.";
 
 // ─── Primary Keywords ───────────────────────────────────────────────────────
 export const PRIMARY_KEYWORDS = [
@@ -95,7 +95,7 @@ export const ROUTE_SEO: Record<
   "/about": {
     title: "About Skyrovix — MSME-Registered Virtual Internship Platform India",
     description:
-      "Learn about Skyrovix, an MSME-registered virtual internship and training platform helping college students, engineering students, CSE/IT students, and job seekers gain real-world skills through project-based internships.",
+      "Skyrovix is an MSME-registered virtual internship and training platform helping college students, engineering students, CSE/IT students, and job seekers gain real-world skills through project-based internships.",
     keywords: [
       "about skyrovix",
       "skyrovix internship platform",

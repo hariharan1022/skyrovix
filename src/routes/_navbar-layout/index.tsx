@@ -37,14 +37,14 @@ const COURSE_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 export const Route = createFileRoute("/_navbar-layout/")({
   head: () => ({
     meta: [
-      { title: "Skyrovix Internship | Virtual Internship with Certificate & Real Projects" },
-      { name: "description", content: "Join Skyrovix Virtual Internship Program and gain hands-on experience through real-world projects. Get an Offer Letter, Internship Certificate, mentor support, and industry-ready skills in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more." },
+      { title: "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix" },
+      { name: "description", content: "Skyrovix is a virtual internship platform offering hands-on projects, offer letters, certificates, and mentor support in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX, and more." },
       { name: "keywords", content: "Skyrovix Internship, Skyrovix Virtual Internship, Skyrovix IT Solutions Internship, online internship India, virtual internship with certificate, remote internship for students, project based internship, full stack development internship, Python internship, Java internship, AI internship, machine learning internship, data science internship, cyber security internship, cloud computing internship, React internship, MERN stack internship, UI UX internship, graphic design internship, internship with offer letter, internship with certificate, internship with real projects, internship for college students, engineering internship, computer science internship, free internship, work from home internship, summer internship 2026, internship program India, best virtual internship for engineering students, online internship with certificate and offer letter, internship with QR verified certificate, internship for CSE students, internship for IT students, web development internship India" },
       { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Skyrovix" },
-      { property: "og:title", content: "Skyrovix Internship | Virtual Internship with Certificate & Real Projects" },
-      { property: "og:description", content: "Join Skyrovix Virtual Internship Program and gain hands-on experience through real-world projects. Get an Offer Letter, Certificate, and industry-ready skills in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX." },
+      { property: "og:title", content: "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix" },
+      { property: "og:description", content: "Skyrovix is a virtual internship platform with hands-on projects, offer letters, and certificates in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX & more." },
       { property: "og:url", content: "https://skyrovix.online/" },
       { property: "og:image", content: "https://skyrovix.online/og-default.png" },
       { property: "og:image:width", content: "1200" },
@@ -53,8 +53,8 @@ export const Route = createFileRoute("/_navbar-layout/")({
       { property: "og:locale", content: "en_IN" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@skyrovix" },
-      { name: "twitter:title", content: "Skyrovix Internship | Virtual Internship with Certificate & Real Projects" },
-      { name: "twitter:description", content: "Join Skyrovix Virtual Internship Program. Get an Offer Letter, Certificate & real project experience in Full Stack, AI, Python, Data Science, Cyber Security, Cloud, UI/UX & more." },
+      { name: "twitter:title", content: "Skyrovix: Virtual Internship with Certificate & Real Projects | Skyrovix" },
+      { name: "twitter:description", content: "Skyrovix virtual internship platform — hands-on projects, offer letters, and certificates in Full Stack, AI, Python, Data Science, Cyber Security & more." },
       { name: "twitter:image", content: "https://skyrovix.online/og-default.png" },
       { name: "twitter:image:alt", content: "Skyrovix Virtual Internship with Certificate & Real Projects" },
       { rel: "canonical", href: "https://skyrovix.online/" },
@@ -96,8 +96,8 @@ function Landing() {
                 </div>
 
                 <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-                  Learn by building.<br />
-                  <span className="brand-text">Get certified.</span>
+                  <span className="brand-text">Skyrovix</span> — Learn by building.<br />
+                  Get certified.
                 </h1>
 
                 <div className="mt-4">
@@ -108,8 +108,9 @@ function Landing() {
                 </div>
 
                 <p className="mt-5 max-w-lg text-sm sm:text-base leading-relaxed text-muted-foreground mx-auto md:mx-0">
-                  Task-based virtual internships — apply in minutes, get an instant offer letter and
-                  ID card, complete real-world projects, and earn a QR-verified certificate.
+                  Skyrovix is a task-based virtual internship platform — apply in minutes, get an
+                  instant offer letter and ID card, complete real-world projects, and earn a
+                  QR-verified certificate.
                 </p>
 
                 <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-center md:justify-start gap-3">
@@ -165,7 +166,7 @@ function Landing() {
                     MSME-registered. <span className="brand-text">Student-built.</span>
                   </h2>
                   <p className="mt-3 text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    We run a task-based virtual internship program across 25+ domains. Apply free, get
+                    Skyrovix runs a task-based virtual internship program across 25+ domains. Apply free, get
                     an instant offer letter and ID card, complete 300+ real projects, earn a QR-verified
                     certificate.
                   </p>
