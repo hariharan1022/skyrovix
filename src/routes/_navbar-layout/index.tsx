@@ -131,7 +131,7 @@ function Landing() {
 
                 {/* Buttons Row */}
                 <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-                  <Link to="/auth" className="w-full sm:w-auto">
+                  <Link to="/auth" search={{ redirect: undefined }} className="w-full sm:w-auto">
                     <Button size="lg" className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-8 py-6 text-base font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 transition-all">
                       Explore Internships <ArrowRight className="ml-2 size-4" />
                     </Button>
@@ -225,13 +225,13 @@ function Landing() {
                 {/* Internship Completion Letter */}
                 <div className="absolute top-[22%] -right-12 sm:-right-20 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300">
                   <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><FileText className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Internship Completion Letter</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Internship Offer Letter</span>
                 </div>
 
                 {/* Mentor Support */}
                 <div className="absolute bottom-[28%] -right-12 sm:-right-20 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300">
                   <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><Users className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Mentor Support</span>
+                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">task-based internship</span>
                 </div>
 
                 {/* Overlaid Statistics Card (overlapping the bottom of the card) */}
@@ -251,7 +251,7 @@ function Landing() {
                     <div className="size-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-2.5">
                       <Briefcase className="size-5" />
                     </div>
-                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">30+</div>
+                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10+</div>
                     <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Internship Domains</div>
                   </div>
 
@@ -375,15 +375,15 @@ function Landing() {
                     MSME-registered. <span className="brand-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Student-built.</span>
                   </h2>
                   <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed font-medium">
-                    Skyrovix runs a task-based virtual internship program across 25+ domains. Apply free, get
-                    an instant offer letter and ID card, complete 300+ real projects, earn a QR-verified
+                    Skyrovix runs a task-based virtual internship program across 10+ domains. Apply free, get
+                    an instant offer letter and ID card, complete 120+ real projects, earn a QR-verified
                     certificate.
                   </p>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { value: "25+", label: "Domains", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50/50 dark:bg-violet-950/20" },
-                    { value: "300+", label: "Projects", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50/50 dark:bg-emerald-950/20" },
+                    { value: "10+", label: "Domains", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50/50 dark:bg-violet-950/20" },
+                    { value: "120+", label: "Projects", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50/50 dark:bg-emerald-950/20" },
                     { value: "100%", label: "Online", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50/50 dark:bg-blue-950/20" },
                     { value: "₹100", label: "Cert fee", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50/50 dark:bg-amber-950/20" },
                   ].map((s) => (
@@ -598,10 +598,10 @@ function Landing() {
                 <p className="mt-3 text-sm sm:text-base text-white/80 max-w-lg mx-auto">Get your offer letter in seconds. No application fee — pay only ₹100 at certification.</p>
                 <div className="mt-8 flex flex-wrap justify-center gap-3">
                   <Button asChild size="lg" className="rounded-xl bg-white text-[#07284a] hover:bg-white/90 border-0 shadow-lg font-semibold h-12 px-8 btn-premium hover:btn-premium-hover active:btn-premium-active">
-                    <Link to="/auth">Apply now <ArrowRight className="ml-1.5 size-4" /></Link>
+                    <Link to="/auth" search={{ redirect: undefined }}>Apply now <ArrowRight className="ml-1.5 size-4" /></Link>
                   </Button>
                   <Button asChild size="lg" variant="outline" className="rounded-xl bg-transparent border-2 border-white/30 text-white hover:bg-white/10 hover:text-white h-12 px-8 btn-premium active:btn-premium-active">
-                    <Link to="/courses">Explore courses</Link>
+                    <Link to="/domains" search={{ apply: undefined }}>Explore courses</Link>
                   </Button>
                 </div>
               </div>
