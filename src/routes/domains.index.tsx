@@ -47,7 +47,7 @@ export const Route = createFileRoute("/domains/")({
       { rel: "canonical", href: "https://skyrovix.online/domains" },
     ],
   }),
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { apply?: string } => ({
     apply: typeof search.apply === "string" ? search.apply : undefined,
   }),
   component: DomainsPage,

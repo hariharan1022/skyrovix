@@ -114,7 +114,7 @@ function DashboardHero({ badge, title, description, icon: Icon }: {
 }
 
 export const Route = createFileRoute("/_navbar-layout/_authenticated/dashboard")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { tab?: string } => ({
     tab: typeof search.tab === "string" ? search.tab : undefined,
   }),
   head: () => ({ meta: [{ title: "Dashboard — Skyrovix" }] }),

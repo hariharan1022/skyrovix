@@ -1,4 +1,14 @@
-import type { Project, Faq } from "./course-detail-content";
+export type Project = {
+  title: string;
+  description: string;
+  difficulty?: string;
+  tasks?: string[];
+};
+
+export type Faq = {
+  question: string;
+  answer: string;
+};
 
 export type InternshipDetail = {
   tagline: string;

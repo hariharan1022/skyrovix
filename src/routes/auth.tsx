@@ -12,7 +12,7 @@ import { GraduationCap, Sparkles, ArrowRight, Loader2 } from "lucide-react";
 import { useLoginTracker } from "@/lib/use-login-tracker";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { redirect?: string } => ({
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
   }),
   head: () => ({ meta: [{ title: "Sign in — Skyrovix Internship Portal" }, { name: "description", content: "Sign in or create your Skyrovix internship account." }] }),
