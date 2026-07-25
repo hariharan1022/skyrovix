@@ -14,11 +14,11 @@ export function Logo({
   return (
     <div className="flex items-center">
       {isWhite ? (
-        <img src={loginLogo} alt="Skyrovix" className="h-14 w-auto object-contain" />
+        <img src={loginLogo} alt="Skyrovix" className="h-10 sm:h-14 w-auto object-contain" />
       ) : (
         <>
-          <img src={defaultLogo} alt="Skyrovix" className="h-14 w-auto object-contain dark:hidden" />
-          <img src={loginLogo} alt="Skyrovix" className="h-14 w-auto object-contain hidden dark:block" />
+          <img src={defaultLogo} alt="Skyrovix" className="h-10 sm:h-14 w-auto object-contain dark:hidden" />
+          <img src={loginLogo} alt="Skyrovix" className="h-10 sm:h-14 w-auto object-contain hidden dark:block" />
         </>
       )}
     </div>

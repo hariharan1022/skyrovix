@@ -185,8 +185,8 @@ function AdminPanel() {
   });
 
   return (
-    <div className={`min-h-screen ${dark ? "dark" : ""}`}>
-      <div className="flex min-h-screen bg-[#F9FAFB] dark:bg-[#090D16] text-slate-900 dark:text-slate-100">
+    <div className={`h-dvh ${dark ? "dark" : ""}`}>
+      <div className="flex h-dvh bg-[#F9FAFB] dark:bg-[#090D16] text-slate-900 dark:text-slate-100">
         
         {/* ─── Mobile Overlay ─── */}
         {mobileOpen && (
@@ -326,7 +326,7 @@ function AdminPanel() {
           </header>
 
           {/* ─── Page Content ─── */}
-          <main className="min-h-0 flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+          <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
             {/* Search results */}
             {searchQuery && (
               <div className="mb-6 rounded-2xl border border-border/60 bg-white/60 p-4 backdrop-blur dark:bg-white/5">
@@ -516,8 +516,8 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
       {/* Top Greeting Row */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome back, Hariharan! 👋</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Here's what's happening with your internship platform today.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome back, Hariharan! 👋</h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Here's what's happening with your internship platform today.</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="font-mono text-xs text-slate-500 bg-white border border-slate-200 dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 rounded-xl flex items-center gap-1.5 font-medium shadow-sm">
@@ -527,68 +527,68 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
       </div>
 
       {/* 4 Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Students */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-slate-400">Total Students</span>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1 sm:space-y-1.5">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">Total Students</span>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.apps ?? 248}
             </p>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="size-3" /> 12.5% <span className="text-slate-400 font-normal">vs last month</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="size-2.5 sm:size-3" /> 12.5% <span className="text-slate-400 font-normal">vs last month</span>
             </div>
           </div>
-          <div className="grid size-12 place-items-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400">
-            <Users className="size-6" />
+          <div className="grid size-10 sm:size-12 place-items-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400">
+            <Users className="size-5 sm:size-6" />
           </div>
         </div>
 
         {/* Applications */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-slate-400">Applications</span>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1 sm:space-y-1.5">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">Applications</span>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.apps ?? 62}
             </p>
-            <span className="inline-block text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+            <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-blue-600 dark:text-blue-400">
               {pendingReview} Pending Review
             </span>
           </div>
-          <div className="grid size-12 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
-            <FileText className="size-6" />
+          <div className="grid size-10 sm:size-12 place-items-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
+            <FileText className="size-5 sm:size-6" />
           </div>
         </div>
 
         {/* Active Internships */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-slate-400">Active Internships</span>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1 sm:space-y-1.5">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">Active Internships</span>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {accepted}
             </p>
-            <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <TrendingUp className="size-3" /> 8.2% <span className="text-slate-400 font-normal">vs last month</span>
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <TrendingUp className="size-2.5 sm:size-3" /> 8.2% <span className="text-slate-400 font-normal">vs last month</span>
             </div>
           </div>
-          <div className="grid size-12 place-items-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400">
-            <Briefcase className="size-6" />
+          <div className="grid size-10 sm:size-12 place-items-center rounded-xl bg-green-50 text-green-600 dark:bg-green-950/20 dark:text-green-400">
+            <Briefcase className="size-5 sm:size-6" />
           </div>
         </div>
 
         {/* Certificates Issued */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
-          <div className="space-y-1.5">
-            <span className="text-xs font-semibold text-slate-400">Certificates Issued</span>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">
+        <div className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between transition hover:shadow-md">
+          <div className="space-y-1 sm:space-y-1.5">
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">Certificates Issued</span>
+            <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.certs ?? 568}
             </p>
-            <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 block">
+            <span className="text-[10px] sm:text-[11px] font-semibold text-amber-600 dark:text-amber-400 block">
               This month
             </span>
           </div>
-          <div className="grid size-12 place-items-center rounded-xl bg-amber-50 text-amber-600 dark:bg-[#07284a]/20 dark:text-amber-400">
-            <Award className="size-6" />
+          <div className="grid size-10 sm:size-12 place-items-center rounded-xl bg-amber-50 text-amber-600 dark:bg-[#07284a]/20 dark:text-amber-400">
+            <Award className="size-5 sm:size-6" />
           </div>
         </div>
       </div>
@@ -3261,7 +3261,7 @@ function DomainsSection() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+      <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900">
         <table className="w-full text-xs text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">
@@ -3563,7 +3563,7 @@ function TasksSection() {
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+          <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white/70 shadow-sm backdrop-blur dark:border-slate-800 dark:bg-slate-900">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-slate-500 font-semibold dark:border-slate-800 dark:bg-slate-800/30">

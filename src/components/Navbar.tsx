@@ -86,7 +86,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             : "bg-white dark:bg-[#0f172a] border-gray-150 dark:border-slate-850"
         }`}
       >
-        <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-20 items-center justify-between gap-4 w-full">
+        <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4 w-full">
           <Link to="/" className="shrink-0 animate-fade-in" onClick={() => setOpen(false)}>
              <Logo />
           </Link>
@@ -122,8 +122,8 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             {user ? (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
-                  {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
                 {isAdmin && (
                   <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9 w-9 p-0 xl:w-auto xl:px-3 text-xs gap-1.5" title="Admin Panel">
@@ -172,11 +172,11 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             ) : (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
-                  {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
-                <Button asChild size="sm" className="rounded-xl h-10 px-5 text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
-                  <Link to="/auth"><User className="size-4 shrink-0" />Login / Register</Link>
+                <Button asChild size="sm" className="rounded-xl h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+                  <Link to="/auth"><User className="size-3.5 sm:size-4 shrink-0" />Login / Register</Link>
                 </Button>
               </>
             )}
