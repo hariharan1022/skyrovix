@@ -197,37 +197,44 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
       </header>
 
       {/* Mobile backdrop */}
-      {open && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] xl:hidden" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)} />}
 
-      {/* Mobile Menu — clean top dropdown */}
+      {/* Mobile Menu — premium drawer */}
       {open && (
         <div
           ref={menuRef}
-          className="fixed left-0 right-0 z-50 xl:hidden bg-white dark:bg-slate-900 rounded-b-3xl shadow-2xl border-b border-slate-100 dark:border-slate-800 overflow-y-auto"
+          className="fixed left-0 right-0 z-50 xl:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-b-3xl shadow-2xl border-b border-slate-100 dark:border-slate-800 overflow-y-auto"
           style={{
             top: "64px",
             maxHeight: "calc(100dvh - 64px)",
             animation: "fade-in-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards",
           }}
         >
-          <div className="px-5 pt-4 pb-8 flex flex-col gap-3">
+          <div className="px-5 pt-4 pb-8 flex flex-col gap-2">
             {user ? (
               <>
                 {/* User Profile */}
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-1">
-                  <span className="flex items-center justify-center size-9 rounded-full bg-blue-600 text-white text-sm font-bold shadow">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 mb-2 border border-blue-100/50 dark:border-slate-700/50 shadow-sm">
+                  <span className="flex items-center justify-center size-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-bold shadow-md shadow-blue-500/20 shrink-0">
                     {user.email?.charAt(0).toUpperCase() || "U"}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user.email?.split("@")[0]}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
                   </div>
-                  <button onClick={() => setDark(!dark)} className="size-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                  <button onClick={() => setDark(!dark)} className="size-9 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-700 transition-all shrink-0">
                     {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
                   </button>
                 </div>
 
-                {/* Dashboard nav items */}
+                {/* Section label */}
+                <div className="flex items-center gap-2 px-1 py-1.5">
+                  <div className="h-px flex-1 bg-gradient-to-r from-blue-200/50 to-transparent dark:from-blue-800/30" />
+                  <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">{isDashboardPage ? "Dashboard" : "Navigation"}</span>
+                  <div className="h-px flex-1 bg-gradient-to-l from-blue-200/50 to-transparent dark:from-blue-800/30" />
+                </div>
+
+                {/* Nav items */}
                 <div className="grid grid-cols-2 gap-2">
                   {itemsToRender.map((item, i) => {
                     const Icon = item.icon;
@@ -238,15 +245,22 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                       <button
                         key={item.label}
                         onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
-                        className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 text-left transition-all border text-[13px] font-semibold ${
+                        className={`group relative flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-left transition-all duration-200 text-[13px] font-semibold active:scale-[0.97] ${
                           active
-                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 border-blue-100 dark:border-blue-900/40"
-                            : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent"
+                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm"
+                            : "bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80"
                         }`}
                         style={{ opacity: 0, animation: `fade-in-up 0.2s ease-out ${0.04 * i}s forwards` }}
                       >
-                        <div className={`size-7 shrink-0 rounded-xl flex items-center justify-center ${active ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600" : "bg-white dark:bg-slate-700 text-slate-500"}`}>
-                          <Icon className="size-3.5" />
+                        {active && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-500" />
+                        )}
+                        <div className={`size-8 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                          active
+                            ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/20"
+                            : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 group-hover:scale-105"
+                        }`}>
+                          <Icon className="size-4" />
                         </div>
                         <span className="truncate">{item.label}</span>
                       </button>
@@ -254,21 +268,43 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                   })}
                 </div>
 
-                <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
+                <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
+
+                {/* Section label */}
+                <div className="flex items-center gap-2 px-1 py-1.5">
+                  <div className="h-px flex-1 bg-gradient-to-r from-red-200/30 to-transparent dark:from-red-800/20" />
+                  <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">Account</span>
+                  <div className="h-px flex-1 bg-gradient-to-l from-red-200/30 to-transparent dark:from-red-800/20" />
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   {isAdmin && (
-                    <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-2xl px-3 py-3 text-[13px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
-                      <Shield className="size-4 text-slate-400 shrink-0" /><span>Admin</span>
+                    <Link to="/admin" onClick={() => setOpen(false)}
+                      className="group flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-[13px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.97]">
+                      <div className="size-8 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-slate-500 group-hover:scale-105 transition-all">
+                        <Shield className="size-4" />
+                      </div>
+                      <span>Admin Panel</span>
                     </Link>
                   )}
-                  <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-2 rounded-2xl px-3 py-3 text-[13px] font-semibold text-red-500 bg-red-50 dark:bg-red-950/20 col-span-1">
-                    <LogOut className="size-4 shrink-0" /><span>Sign Out</span>
+                  <button onClick={() => { signOut(); setOpen(false); }}
+                    className="group flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-[13px] font-semibold text-red-600 dark:text-red-400 bg-red-50/80 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 transition-all active:scale-[0.97]">
+                    <div className="size-8 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-red-500 group-hover:scale-105 transition-all">
+                      <LogOut className="size-4" />
+                    </div>
+                    <span>Sign Out</span>
                   </button>
                 </div>
               </>
             ) : (
               <>
+                {/* Section label */}
+                <div className="flex items-center gap-2 px-1 py-1.5">
+                  <div className="h-px flex-1 bg-gradient-to-r from-blue-200/50 to-transparent dark:from-blue-800/30" />
+                  <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">Menu</span>
+                  <div className="h-px flex-1 bg-gradient-to-l from-blue-200/50 to-transparent dark:from-blue-800/30" />
+                </div>
+
                 {/* Public Nav Items */}
                 <div className="grid grid-cols-2 gap-2">
                   {NAV.map((n, i) => {
@@ -278,15 +314,22 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                       <button
                         key={n.to}
                         onClick={() => goTo(n.to)}
-                        className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 text-left transition-all border text-[13px] font-semibold ${
+                        className={`group relative flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-left transition-all duration-200 text-[13px] font-semibold active:scale-[0.97] ${
                           active
-                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 border-blue-100 dark:border-blue-900/40"
-                            : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent"
+                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm"
+                            : "bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80"
                         }`}
                         style={{ opacity: 0, animation: `fade-in-up 0.2s ease-out ${0.04 * i}s forwards` }}
                       >
-                        <div className={`size-7 shrink-0 rounded-xl flex items-center justify-center ${active ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600" : "bg-white dark:bg-slate-700 text-slate-500"}`}>
-                          <Icon className="size-3.5" />
+                        {active && (
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-500" />
+                        )}
+                        <div className={`size-8 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                          active
+                            ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/20"
+                            : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 group-hover:scale-105"
+                        }`}>
+                          <Icon className="size-4" />
                         </div>
                         <span className="truncate">{n.label}</span>
                       </button>
@@ -297,15 +340,18 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                 <Link
                   to="/auth"
                   onClick={() => setOpen(false)}
-                  className="mt-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all w-full"
+                  className="mt-2 group relative flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-4 text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-[0.97] transition-all duration-200 overflow-hidden"
                 >
-                  <Rocket className="size-4" />
-                  <span>Get Started Now</span>
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
+                  <Rocket className="size-5 relative z-10" />
+                  <span className="relative z-10">Get Started Now</span>
                 </Link>
               </>
             )}
 
-            <p className="text-center text-[11px] text-slate-400 mt-2">© {new Date().getFullYear()} Skyrovix IT Solutions.</p>
+            <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-3 pt-2 border-t border-slate-100/50 dark:border-slate-800/50">
+              © {new Date().getFullYear()} Skyrovix IT Solutions.
+            </p>
           </div>
         </div>
       )}
