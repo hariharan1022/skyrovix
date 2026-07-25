@@ -2,10 +2,20 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { COMPANY } from "@/lib/constants";
-import { Mail, MapPin, Globe, Sparkles } from "lucide-react";
+import { Mail, MapPin, Globe, Sparkles, Clock, MessageSquare, Phone, HelpCircle, ChevronDown } from "lucide-react";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp, Reveal } from "@/components/motion";
 import { BreadcrumbJsonLd, WebPageJsonLd, LocalBusinessJsonLd } from "@/components/JsonLd";
+import { useState } from "react";
+
+const FAQS = [
+  { q: "How do I apply for an internship?", a: "Browse our domains, pick a track, fill the application form, and receive your offer letter instantly — no interview needed." },
+  { q: "Is there any application fee?", a: "No. Applications are completely free. The only charge is a ₹100 certification fee upon completion." },
+  { q: "How long does it take to get a certificate?", a: "Once you complete all tasks in your track, your certificate is issued within 24–48 hours after final review." },
+  { q: "Can I verify my certificate online?", a: "Yes. Every certificate has a unique QR code and ID. Use our Verify Certificate page to check authenticity instantly." },
+  { q: "What if I need help during my internship?", a: "You can reach us anytime via email or the contact form below. Our team responds within 1–2 business days." },
+  { q: "Do you offer internships for non-engineering students?", a: "Yes! Our tracks are open to all college students, graduates, and anyone looking to build real-world skills." },
+];
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -40,10 +50,12 @@ export const Route = createFileRoute("/contact")({
 const ITEMS = [
   { icon: Mail, label: "Email", value: COMPANY.email, href: `mailto:${COMPANY.email}` },
   { icon: Globe, label: "Website", value: COMPANY.website, href: `https://${COMPANY.website}` },
-  { icon: MapPin, label: "Location", value: "India", href: null },
+  { icon: MapPin, label: "Location", value: "India (Remote-First)", href: null },
+  { icon: Clock, label: "Response Time", value: "1–2 business days", href: null },
 ];
 
 function ContactPage() {
+  const [openIdx, setOpenIdx] = useState<number | null>(null);
   return (
     <div className="w-full">
       <LocalBusinessJsonLd />
@@ -78,23 +90,34 @@ function ContactPage() {
         </section>
       </AuroraBackground>
       <main className="mx-auto max-w-5xl px-4 py-12 sm:pt-16 sm:pb-16">
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <Reveal delay={0.1} className="space-y-3">
-            {ITEMS.map((it) => (
-              <div key={it.label} className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5">
-                <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
-                  <it.icon className="size-5" />
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Reveal delay={0.1} className="space-y-4">
+            <div className="space-y-3">
+              {ITEMS.map((it) => (
+                <div key={it.label} className="group flex items-start gap-4 rounded-2xl border border-border/50 bg-card p-5 transition-all hover:border-[#07284a]/20 hover:shadow-sm hover:bg-[#f8fafc]/50 dark:hover:bg-[#0f172a]/50">
+                  <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#07284a]/10 text-[#07284a] dark:bg-[#07284a]/20 dark:text-[#60a5fa] transition-all group-hover:bg-[#07284a] group-hover:text-white">
+                    <it.icon className="size-5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{it.label}</p>
+                    {it.href ? (
+                      <a href={it.href} className="truncate font-medium text-foreground hover:text-[#07284a] dark:hover:text-[#60a5fa] transition-colors">{it.value}</a>
+                    ) : (
+                      <p className="truncate font-medium">{it.value}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">{it.label}</p>
-                  {it.href ? (
-                    <a href={it.href} className="truncate font-medium text-foreground hover:text-primary">{it.value}</a>
-                  ) : (
-                    <p className="truncate font-medium">{it.value}</p>
-                  )}
+              ))}
+            </div>
+            <div className="rounded-2xl border border-border/50 bg-gradient-to-br from-[#f8fafc] to-white dark:from-[#0f172a] dark:to-[#0f172a] p-5">
+              <div className="flex items-start gap-3">
+                <MessageSquare className="size-5 text-[#07284a] dark:text-[#60a5fa] shrink-0 mt-0.5" />
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground">Prefer instant answers?</p>
+                  <p className="mt-1">Check our FAQ section below for quick answers to common questions.</p>
                 </div>
               </div>
-            ))}
+            </div>
           </Reveal>
 
           <Reveal delay={0.2}>
@@ -106,26 +129,60 @@ function ContactPage() {
                 const body = encodeURIComponent(`${fd.get("message")}\n\n— ${fd.get("name")} (${fd.get("email")})`);
                 window.location.href = `mailto:${COMPANY.email}?subject=${subject}&body=${body}`;
               }}
-              className="space-y-4 rounded-2xl border border-border bg-card p-6 h-full"
+              className="space-y-5 rounded-2xl border border-border/50 bg-card p-6 sm:p-8 h-full shadow-sm"
             >
               <div>
-                <label className="text-sm font-medium">Name</label>
-                <input name="name" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                <p className="text-base font-bold">Send us a message</p>
+                <p className="text-xs text-muted-foreground mt-0.5">We'll get back within 1–2 business days.</p>
               </div>
               <div>
-                <label className="text-sm font-medium">Email</label>
-                <input name="email" type="email" required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Your Name</label>
+                <input name="name" required placeholder="Hariharan S" className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-[#07284a] focus:ring-1 focus:ring-[#07284a]/20" />
               </div>
               <div>
-                <label className="text-sm font-medium">Message</label>
-                <textarea name="message" rows={5} required className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Email Address</label>
+                <input name="email" type="email" required placeholder="you@example.com" className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-[#07284a] focus:ring-1 focus:ring-[#07284a]/20" />
               </div>
-              <button type="submit" className="w-full rounded-md brand-gradient px-4 py-2.5 text-sm font-medium text-white">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Message</label>
+                <textarea name="message" rows={5} required placeholder="Tell us how we can help..." className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all focus:border-[#07284a] focus:ring-1 focus:ring-[#07284a]/20 resize-none" />
+              </div>
+              <button type="submit" className="w-full rounded-xl bg-[#07284a] px-4 py-3 text-sm font-semibold text-white hover:bg-[#0d3b66] transition-all active:scale-[0.98] shadow-md shadow-[#07284a]/20">
                 Send message
               </button>
             </form>
           </Reveal>
         </div>
+
+        {/* ─── FAQ ─── */}
+        <section className="mt-16 sm:mt-20">
+          <Reveal>
+            <div className="mx-auto max-w-3xl">
+              <div className="text-center mb-10">
+                <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 px-4 py-1.5 text-xs font-medium text-muted-foreground mb-4">
+                  <HelpCircle className="size-3.5" /> FAQ
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Frequently asked questions</h2>
+              </div>
+              <div className="space-y-3">
+                {FAQS.map((faq, i) => (
+                  <div key={i} className="rounded-2xl border border-border/50 bg-card overflow-hidden transition-all hover:border-[#07284a]/20">
+                    <button
+                      onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                      className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left text-sm font-semibold transition-colors hover:text-[#07284a] dark:hover:text-[#60a5fa]"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown className={`size-4 shrink-0 text-muted-foreground transition-transform duration-200 ${openIdx === i ? "rotate-180" : ""}`} />
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-200 ${openIdx === i ? "max-h-40" : "max-h-0"}`}>
+                      <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </section>
       </main>
       <Footer />
     </div>

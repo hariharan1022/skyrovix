@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { CheckCircle2, XCircle, Search, Clock, GraduationCap, Award, ShieldCheck } from "lucide-react";
+import { CheckCircle2, XCircle, Search, Clock, GraduationCap, Award, ShieldCheck, ScanLine, Sparkles, ArrowRight } from "lucide-react";
 import { getDomain } from "@/lib/constants";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp } from "@/components/motion";
@@ -142,14 +142,37 @@ function VerifyPage() {
       </AuroraBackground>
       <main className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
         <FadeUp delay={0.1}>
-          <form onSubmit={verify} className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-2">
-            <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKX-2026-XXXX" className="w-full" />
-            <Button type="submit" className="w-full sm:w-auto brand-gradient text-white border-0"><Search className="size-4" /> Verify</Button>
-          </form>
+          <div className="rounded-2xl border border-border/50 bg-card p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center gap-2.5 mb-1">
+              <ScanLine className="size-5 text-[#07284a] dark:text-[#60a5fa]" />
+              <p className="text-sm font-semibold">Enter Certificate ID or Intern ID</p>
+            </div>
+            <p className="text-xs text-muted-foreground mb-4">Example: <span className="font-mono font-medium text-foreground">SKX-2026-XXXX</span> or <span className="font-mono font-medium text-foreground">SKX-CERT-2026-XXXXX</span></p>
+            <form onSubmit={verify} className="flex flex-col sm:flex-row gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <Input value={id} onChange={(e) => setId(e.target.value)} placeholder="e.g. SKX-2026-XXXX" className="w-full pl-9" />
+              </div>
+              <Button type="submit" className="w-full sm:w-auto bg-[#07284a] text-white border-0 hover:bg-[#0d3b66]"><Search className="size-4" /> Verify</Button>
+            </form>
+          </div>
         </FadeUp>
 
         {result.state === "loading" && (
-          <FadeUp y={10} duration={0.4} className="mt-6 text-muted-foreground">Checking…</FadeUp>
+          <FadeUp y={10} duration={0.4}>
+            <div className="mt-6 rounded-2xl border border-border/50 bg-card p-6 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-xl bg-muted" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-4 w-1/3 rounded bg-muted" />
+                  <div className="h-3 w-1/2 rounded bg-muted" />
+                </div>
+              </div>
+              <div className="mt-4 space-y-2">
+                {[1,2,3,4].map(i => <div key={i} className="h-3 w-full rounded bg-muted" />)}
+              </div>
+            </div>
+          </FadeUp>
         )}
 
         {result.state === "found" && result.type === "internship" && (() => {
@@ -157,44 +180,76 @@ function VerifyPage() {
           const hasCert = !!d.cert_id;
           return (
             <FadeUp y={10} duration={0.4}>
-              <Card className={`mt-8 ${hasCert ? "border-primary/40" : "border-amber-400/40"}`}>
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    {hasCert ? <CheckCircle2 className="size-8 text-green-500" /> : <Clock className="size-8 text-amber-500" />}
-                    <div>
-                      <CardTitle>{hasCert ? "Verified ✓" : "Internship Found"}</CardTitle>
-                      <p className="text-sm text-muted-foreground">
-                        {hasCert ? "This certificate is authentic." : "Certificate not yet issued."}
-                      </p>
-                    </div>
+              <div className={`mt-6 rounded-2xl border bg-card p-6 sm:p-8 shadow-sm ${hasCert ? "border-green-200/60 dark:border-green-900/40" : "border-amber-200/60 dark:border-amber-900/40"}`}>
+                {/* Header */}
+                <div className="flex items-center gap-4 pb-5 border-b border-border/40">
+                  <div className={`grid size-14 shrink-0 place-items-center rounded-2xl ${hasCert ? "bg-green-50 dark:bg-green-950/30" : "bg-amber-50 dark:bg-amber-950/30"}`}>
+                    {hasCert ? <CheckCircle2 className="size-7 text-green-500" /> : <Clock className="size-7 text-amber-500" />}
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <Row k="Name" v={d.full_name} />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-bold">{hasCert ? "Verified ✓" : "Internship Found"}</h2>
+                      {hasCert && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950/30 px-2.5 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400 border border-green-200/60 dark:border-green-900/40">
+                          <ShieldCheck className="size-3" /> Authentic
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {hasCert ? "This certificate is authentic and issued by Skyrovix." : "This intern exists — certificate not yet issued."}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="mt-5 space-y-0 divide-y divide-border/40 text-sm">
+                  <Row k="Full Name" v={d.full_name} />
                   <Row k="Domain" v={getDomain(d.domain)?.name ?? d.domain} />
-                  <Row k="Intern ID" v={d.intern_id} />
-                  <Row k="Status" v={<Badge variant={d.status === "approved" ? "default" : d.status === "rejected" ? "destructive" : "secondary"}>{d.status}</Badge>} />
-                  {d.cert_id && <Row k="Certificate ID" v={d.cert_id} />}
-                  {d.issued_at && <Row k="Issued" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
-                </CardContent>
-              </Card>
+                  <Row k="Intern ID" v={<span className="font-mono">{d.intern_id}</span>} />
+                  <Row k="Status" v={
+                    <Badge variant={d.status === "approved" ? "default" : d.status === "rejected" ? "destructive" : "secondary"} className="capitalize">
+                      {d.status}
+                    </Badge>
+                  } />
+                  {d.cert_id && <Row k="Certificate ID" v={<span className="font-mono text-green-600 dark:text-green-400">{d.cert_id}</span>} />}
+                  {d.issued_at && <Row k="Issued On" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
+                </div>
+
+                {/* Footer trust badge */}
+                <div className="mt-5 flex items-center gap-2 rounded-xl bg-[#f8fafc] dark:bg-[#0f172a] px-4 py-3 text-xs text-muted-foreground">
+                  <Award className="size-4 text-[#07284a] dark:text-[#60a5fa]" />
+                  <span>Digitally verified by Skyrovix — MSME-registered IT company (UDYAM-TN-17-0076606)</span>
+                </div>
+              </div>
             </FadeUp>
           );
         })()}
 
         {result.state === "notfound" && (
           <FadeUp y={10} duration={0.4}>
-            <Card className="mt-8 border-destructive/60">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <XCircle className="size-8 text-destructive" />
-                  <div>
-                    <CardTitle>Not Found</CardTitle>
-                    <p className="text-sm text-muted-foreground">No certificate matches this ID.</p>
-                  </div>
+            <div className="mt-6 rounded-2xl border border-red-200/60 dark:border-red-900/40 bg-card p-6 sm:p-8 shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-red-50 dark:bg-red-950/30">
+                  <XCircle className="size-7 text-red-500" />
                 </div>
-              </CardHeader>
-            </Card>
+                <div>
+                  <h2 className="text-lg font-bold">Not Found</h2>
+                  <p className="text-sm text-muted-foreground">No certificate or intern matches this ID.</p>
+                </div>
+              </div>
+              <div className="mt-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40 p-4 text-sm text-muted-foreground">
+                <p className="font-semibold text-amber-800 dark:text-amber-300">Did you mean to?</p>
+                <ul className="mt-1.5 space-y-1 list-disc list-inside text-xs">
+                  <li>Check your Certificate ID or Intern ID for typos</li>
+                  <li>Try searching with just the number (e.g. <span className="font-mono">2026-XXXX</span>)</li>
+                  <li>Contact us at <a href="mailto:skyrovix@gmail.com" className="text-[#07284a] dark:text-[#60a5fa] underline">skyrovix@gmail.com</a> for assistance</li>
+                </ul>
+              </div>
+              <div className="mt-4 flex items-center gap-2 rounded-xl bg-[#f8fafc] dark:bg-[#0f172a] px-4 py-3 text-xs text-muted-foreground">
+                <ShieldCheck className="size-4 text-[#07284a] dark:text-[#60a5fa]" />
+                <span>All Skyrovix certificates are QR-verified and tamper-proof.</span>
+              </div>
+            </div>
           </FadeUp>
         )}
       </main>

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import { FadeUp, Reveal } from "@/components/motion";
 import { COMPANY } from "@/lib/constants";
-import { ShieldCheck, Target, Award, Sparkles, ArrowRight, CheckCircle2, Quote } from "lucide-react";
+import { ShieldCheck, Target, Award, Sparkles, ArrowRight, CheckCircle2, Quote, BadgeCheck, FileText, Search, Users, GraduationCap, Building2, ScrollText } from "lucide-react";
 import { BreadcrumbJsonLd, WebPageJsonLd } from "@/components/JsonLd";
 import founderPhoto from "@/assets/founder.jpeg";
 import cofounderPhoto from "@/assets/co founder.jpeg";
@@ -92,6 +92,7 @@ function AboutPage() {
                     "Instant offer letter & digital ID card",
                     "5 real-world projects per track",
                     "QR-verified certificate on completion",
+                    "MSME-registered — UDYAM-TN-17-0076606",
                   ].map((item) => (
                     <div key={item} className="flex items-center gap-2.5 text-sm text-muted-foreground">
                       <CheckCircle2 className="size-4 shrink-0 text-green-500" />
@@ -106,7 +107,7 @@ function AboutPage() {
                   { value: "25+", label: "Domains" },
                   { value: "300+", label: "Projects" },
                   { value: "100%", label: "Self-paced" },
-                  { value: "₹100", label: "Certification fee" },
+                  { value: "₹0", label: "Application fee" },
                 ].map((s, i) => (
                   <FadeUp key={s.label} delay={0.1 + i * 0.08}>
                     <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 text-center card-elevated hover:card-elevated-hover">
@@ -153,10 +154,10 @@ function AboutPage() {
           </Reveal>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              { icon: Target, title: "Real Skills", desc: "Every task mirrors real industry work — no toy projects." },
-              { icon: ShieldCheck, title: "Verifiable", desc: "Unique ID & QR on every certificate for instant verification." },
-              { icon: Award, title: "Student-First", desc: "Built for learners with mentor-style task reviews." },
-              { icon: Award, title: "Recognised", desc: "Issued by an MSME-registered IT company." },
+              { icon: Target, title: "Real Skills", desc: "Every task mirrors real industry work — no toy projects, no fillers." },
+              { icon: ShieldCheck, title: "Verifiable", desc: "Unique ID & QR on every certificate for instant verification by employers." },
+              { icon: Award, title: "Student-First", desc: "Built for learners with mentor-style task reviews and self-paced tracks." },
+              { icon: Building2, title: "MSME Registered", desc: "Registered under Govt. of India MSME (UDYAM-TN-17-0076606)." },
             ].map((v, i) => (
               <FadeUp key={v.title} delay={0.1 + i * 0.1}>
                 <div className="group rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 transition-all card-elevated hover:card-elevated-hover text-center sm:text-left">
@@ -172,9 +173,44 @@ function AboutPage() {
         </div>
       </section>
 
+      {/* ─── HOW IT WORKS ─── */}
+      <section className="border-y border-border/40 bg-[#f8fafc]/50 dark:bg-[#020617]/50 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <Reveal>
+            <div className="mx-auto mb-14 max-w-2xl text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white/50 dark:bg-[#0f172a]/50 px-4 py-1.5 text-xs font-medium text-muted-foreground mb-4">
+                <GraduationCap className="size-3.5" /> How It Works
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Your internship journey</h2>
+              <p className="mt-3 text-muted-foreground">From signup to certificate — four simple steps.</p>
+            </div>
+          </Reveal>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { step: "01", icon: FileText, title: "Apply & Get Offer", desc: "Pick a domain, fill your details, and receive your offer letter instantly — no interview needed." },
+              { step: "02", icon: Users, title: "Receive ID Card", desc: "Get your digital identity card with a unique intern ID. You're officially part of Skyrovix." },
+              { step: "03", icon: Search, title: "Complete Projects", desc: "Work through 5-12 real-world tasks per track. Each task is reviewed by mentors." },
+              { step: "04", icon: BadgeCheck, title: "Earn Certificate", desc: "Finish your track, get a QR-verified certificate. Share it on LinkedIn, resume, everywhere." },
+            ].map((s, i) => (
+              <FadeUp key={s.step} delay={0.1 + i * 0.1}>
+                <div className="group relative rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 transition-all card-elevated hover:card-elevated-hover">
+                  <div className="absolute -top-3 -right-3 flex size-8 items-center justify-center rounded-full bg-[#07284a] text-[10px] font-bold text-white shadow-sm">
+                    {s.step}
+                  </div>
+                  <div className="grid size-11 place-items-center rounded-xl bg-[#07284a]/10 dark:bg-[#07284a]/20 text-[#07284a] dark:text-[#60a5fa] transition-all group-hover:bg-[#07284a] group-hover:text-white">
+                    <s.icon className="size-5" />
+                  </div>
+                  <h3 className="mt-4 font-semibold">{s.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">{s.desc}</p>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ─── LEADERSHIP ─── */}
       <section className="relative border-y border-border/40 bg-[#f8fafc]/50 dark:bg-[#020617]/50 overflow-hidden">
-        {/* Section header */}
         <div className="mx-auto max-w-6xl px-4 pt-20 sm:pt-24 pb-14">
           <Reveal>
             <div className="text-center">
