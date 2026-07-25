@@ -1,7 +1,7 @@
 {
   "name": "Skyrovix — Virtual Internship Platform",
   "short_name": "Skyrovix",
-  "id": "https://skyrovix.online/",
+  "id": "/",
   "description": "Task-based virtual internships with certificates, offer letters, and digital ID cards.",
   "lang": "en-IN",
   "start_url": "/",

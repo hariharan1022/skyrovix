@@ -86,7 +86,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             : "bg-white dark:bg-[#0f172a] border-gray-150 dark:border-slate-850"
         }`}
       >
-        <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 flex h-16 sm:h-20 items-center justify-between gap-2 sm:gap-4 w-full">
+        <nav className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8 flex h-20 items-center justify-between gap-2 sm:gap-4 w-full">
           <Link to="/" className="shrink-0 animate-fade-in" onClick={() => setOpen(false)}>
              <Logo />
           </Link>
@@ -122,7 +122,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             {user ? (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  className="hidden xl:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                   {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
                 {isAdmin && (
@@ -172,12 +172,14 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             ) : (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  className="hidden xl:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                   {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
-                <Button asChild size="sm" className="rounded-xl h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
-                  <Link to="/auth"><User className="size-3.5 sm:size-4 shrink-0" />Login / Register</Link>
-                </Button>
+                <div className="hidden xl:inline-flex">
+                  <Button asChild size="sm" className="rounded-xl h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
+                    <Link to="/auth"><User className="size-3.5 sm:size-4 shrink-0" />Login / Register</Link>
+                  </Button>
+                </div>
               </>
             )}
 
@@ -337,15 +339,23 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                   })}
                 </div>
 
-                <Link
-                  to="/auth"
-                  onClick={() => setOpen(false)}
-                  className="mt-2 group relative flex items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-4 text-sm font-bold shadow-lg shadow-blue-500/25 active:scale-[0.97] transition-all duration-200 overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-all duration-300" />
-                  <Rocket className="size-5 relative z-10" />
-                  <span className="relative z-10">Get Started Now</span>
-                </Link>
+                {/* Mobile-only: theme toggle + auth */}
+                <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
+                <div className="flex items-center gap-2">
+                  <button onClick={() => setDark(!dark)}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98]">
+                    {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                    <span>{dark ? "Light Mode" : "Dark Mode"}</span>
+                  </button>
+                  <Link
+                    to="/auth"
+                    onClick={() => setOpen(false)}
+                    className="flex-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white py-3.5 text-sm font-bold shadow-md shadow-blue-500/20 active:scale-[0.97] transition-all"
+                  >
+                    <User className="size-4" />
+                    <span>Login / Register</span>
+                  </Link>
+                </div>
               </>
             )}
 

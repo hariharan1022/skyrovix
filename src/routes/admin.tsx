@@ -516,10 +516,10 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
       {/* Top Greeting Row */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome back, Hariharan! 👋</h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">Here's what's happening with your internship platform today.</p>
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Welcome back, Hariharan! 👋</h1>
+          <p className="hidden sm:block text-xs sm:text-sm text-slate-500 mt-0.5">Here's what's happening with your internship platform today.</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <span className="font-mono text-xs text-slate-500 bg-white border border-slate-200 dark:border-slate-800 dark:bg-slate-900 px-3 py-1.5 rounded-xl flex items-center gap-1.5 font-medium shadow-sm">
             <Calendar className="size-3.5 text-blue-500" /> 22 July 2026
           </span>
@@ -535,7 +535,7 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
             <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.apps ?? 248}
             </p>
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <div className="hidden sm:flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="size-2.5 sm:size-3" /> 12.5% <span className="text-slate-400 font-normal">vs last month</span>
             </div>
           </div>
@@ -551,7 +551,7 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
             <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.apps ?? 62}
             </p>
-            <span className="inline-block text-[10px] sm:text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+            <span className="hidden sm:inline-block text-[10px] sm:text-[11px] font-semibold text-blue-600 dark:text-blue-400">
               {pendingReview} Pending Review
             </span>
           </div>
@@ -567,7 +567,7 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
             <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {accepted}
             </p>
-            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+            <div className="hidden sm:flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="size-2.5 sm:size-3" /> 8.2% <span className="text-slate-400 font-normal">vs last month</span>
             </div>
           </div>
@@ -583,7 +583,7 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
             <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white font-display">
               {overview?.certs ?? 568}
             </p>
-            <span className="text-[10px] sm:text-[11px] font-semibold text-amber-600 dark:text-amber-400 block">
+            <span className="hidden sm:block text-[10px] sm:text-[11px] font-semibold text-amber-600 dark:text-amber-400">
               This month
             </span>
           </div>
@@ -594,7 +594,7 @@ function DashboardSection({ greeting, overview, onNavigate, onlineCount = 0, liv
       </div>
 
       {/* Main 2-Column Split */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="hidden sm:grid gap-6 lg:grid-cols-3">
         {/* Left Side (2 Columns width) */}
         <div className="lg:col-span-2 space-y-6">
           
