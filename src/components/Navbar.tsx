@@ -199,172 +199,113 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
       {/* Mobile backdrop */}
       {open && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] xl:hidden" onClick={() => setOpen(false)} />}
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — clean top dropdown */}
       {open && (
         <div
           ref={menuRef}
-          className="fixed left-0 right-0 z-50 w-full bg-white/98 dark:bg-[#0f172a]/98 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800/80 shadow-2xl overflow-y-auto xl:hidden"
+          className="fixed left-0 right-0 z-50 xl:hidden bg-white dark:bg-slate-900 rounded-b-3xl shadow-2xl border-b border-slate-100 dark:border-slate-800 overflow-y-auto"
           style={{
-            top: "80px", // align exactly with header height
-            height: "calc(100vh - 80px)",
+            top: "64px",
+            maxHeight: "calc(100dvh - 64px)",
             animation: "fade-in-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards",
           }}
         >
-          <div className="flex flex-col h-full justify-between p-6">
-            <div className="space-y-6">
-              {user ? (
-                <>
-                  {/* User Profile Card */}
-                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
-                    <span className="flex items-center justify-center size-10 rounded-full bg-blue-600 text-white text-sm font-bold shadow-md">
-                      {user.email?.charAt(0).toUpperCase() || "U"}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-slate-850 dark:text-slate-100 truncate">{user.email?.split("@")[0]}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
-                    </div>
-                    <button 
-                      onClick={() => setDark(!dark)}
-                      className="flex items-center justify-center size-8 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-blue-650"
-                    >
-                      {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
-                    </button>
+          <div className="px-5 pt-4 pb-8 flex flex-col gap-3">
+            {user ? (
+              <>
+                {/* User Profile */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 mb-1">
+                  <span className="flex items-center justify-center size-9 rounded-full bg-blue-600 text-white text-sm font-bold shadow">
+                    {user.email?.charAt(0).toUpperCase() || "U"}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user.email?.split("@")[0]}</p>
+                    <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
                   </div>
+                  <button onClick={() => setDark(!dark)} className="size-8 rounded-full border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
+                  </button>
+                </div>
 
-                  {/* Dashboard Items */}
-                  <div className="grid gap-2">
-                    {itemsToRender.map((item, i) => {
-                      const Icon = item.icon;
-                      const active = isDashboardPage
-                        ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
-                        : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
-                      const subtitles: Record<string, string> = {
-                        "My Tasks": "View and submit tasks",
-                        "My Internships": "Manage your active tracks",
-                        "Payment": "Invoices and subscription status",
-                        "Certificates": "Download verified credentials",
-                        "Profile": "Manage your account",
-                        "Review": "Share your program experience",
-                      };
-                      return (
-                        <button 
-                          key={item.label} 
-                          onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
-                          className={`flex items-center gap-4.5 rounded-2xl p-3.5 transition-all text-left border ${
-                            active
-                              ? "bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-450 border-blue-100 dark:border-blue-950/40 font-bold"
-                              : "text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-50 dark:hover:bg-slate-900"
-                          }`}
-                          style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
-                        >
-                          <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${active ? "bg-blue-100 dark:bg-blue-950" : "bg-slate-100/80 dark:bg-slate-800"}`}>
-                            <Icon className="size-4.5" />
-                          </div>
-                          <div>
-                            <p className="text-[13.5px] leading-none">{item.label}</p>
-                            <p className="text-[11px] text-slate-400 font-normal mt-1">{subtitles[item.label] ?? ""}</p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
-
-                  {/* Actions Area */}
-                  <div className="grid gap-2">
-                    {isAdmin && (
-                      <Link 
-                        to="/admin" 
-                        onClick={() => setOpen(false)} 
-                        className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                {/* Dashboard nav items */}
+                <div className="grid grid-cols-2 gap-2">
+                  {itemsToRender.map((item, i) => {
+                    const Icon = item.icon;
+                    const active = isDashboardPage
+                      ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
+                      : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
+                    return (
+                      <button
+                        key={item.label}
+                        onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
+                        className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 text-left transition-all border text-[13px] font-semibold ${
+                          active
+                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 border-blue-100 dark:border-blue-900/40"
+                            : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent"
+                        }`}
+                        style={{ opacity: 0, animation: `fade-in-up 0.2s ease-out ${0.04 * i}s forwards` }}
                       >
-                        <Shield className="size-4.5 text-slate-400" />
-                        <span>Admin Dashboard</span>
-                      </Link>
-                    )}
-                    <button
-                      onClick={() => {
-                        setOpen(false);
-                        const url = window.location.origin;
-                        if (navigator.share) {
-                          navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
-                        } else {
-                          navigator.clipboard.writeText(url);
-                          toast.success("Link copied to clipboard!");
-                        }
-                      }}
-                      className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all w-full text-left"
-                    >
-                      <Share2 className="size-4.5 text-violet-500" />
-                      <span>Share with Friends</span>
-                    </button>
-                    <button 
-                      onClick={() => { signOut(); setOpen(false); }} 
-                      className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all w-full text-left"
-                    >
-                      <LogOut className="size-4.5" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  {/* Public items */}
-                  <div className="grid gap-2">
-                    {NAV.map((n, i) => {
-                      const Icon = n.icon;
-                      const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
-                      const subtitles: Record<string, string> = {
-                        "Home": "Skyrovix main page",
-                        "Internship": "Tasks, projects and registration",
-                        "About": "Who we are and our goals",
-                        "Reviews": "Student testimonials and statistics",
-                        "Contact": "Customer support & assistance",
-                        "Verify": "Verify certificate credentials",
-                      };
-                      return (
-                        <button 
-                          key={n.to} 
-                          onClick={() => goTo(n.to)}
-                          className={`flex items-center gap-4.5 rounded-2xl p-3.5 transition-all text-left border ${
-                            active
-                              ? "bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-450 border-blue-100 dark:border-blue-950/40 font-bold"
-                              : "text-slate-655 dark:text-slate-300 border-transparent hover:bg-slate-50 dark:hover:bg-slate-900"
-                          }`}
-                          style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
-                        >
-                          <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${active ? "bg-blue-100 dark:bg-blue-950" : "bg-slate-100/80 dark:bg-slate-800"}`}>
-                            <Icon className="size-4.5" />
-                          </div>
-                          <div>
-                            <p className="text-[13.5px] leading-none">{n.label}</p>
-                            <p className="text-[11px] text-slate-400 font-normal mt-1">{subtitles[n.label] ?? ""}</p>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                        <div className={`size-7 shrink-0 rounded-xl flex items-center justify-center ${active ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600" : "bg-white dark:bg-slate-700 text-slate-500"}`}>
+                          <Icon className="size-3.5" />
+                        </div>
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-                  <div className="my-4 border-t border-slate-100 dark:border-slate-800" />
-                  
-                  {/* Main Call to Action */}
-                  <Link 
-                    to="/auth" 
-                    onClick={() => setOpen(false)} 
-                    className="flex items-center justify-center gap-2 mt-1 rounded-2xl bg-[#002244] hover:bg-[#003366] text-white py-4 text-center text-sm font-semibold shadow-md shadow-[#002244]/15 active:scale-98 transition-all w-full"
-                  >
-                    <Rocket className="size-4" />
-                    <span>Get Started Now</span>
-                  </Link>
-                </>
-              )}
-            </div>
-            
-            {/* Drawer footer details */}
-            <div className="mt-8 text-center text-[11px] text-slate-400">
-              <p>&copy; {new Date().getFullYear()} Skyrovix IT Solutions.</p>
-            </div>
+                <div className="border-t border-slate-100 dark:border-slate-800 my-1" />
+
+                <div className="grid grid-cols-2 gap-2">
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-2xl px-3 py-3 text-[13px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800">
+                      <Shield className="size-4 text-slate-400 shrink-0" /><span>Admin</span>
+                    </Link>
+                  )}
+                  <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-2 rounded-2xl px-3 py-3 text-[13px] font-semibold text-red-500 bg-red-50 dark:bg-red-950/20 col-span-1">
+                    <LogOut className="size-4 shrink-0" /><span>Sign Out</span>
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Public Nav Items */}
+                <div className="grid grid-cols-2 gap-2">
+                  {NAV.map((n, i) => {
+                    const Icon = n.icon;
+                    const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+                    return (
+                      <button
+                        key={n.to}
+                        onClick={() => goTo(n.to)}
+                        className={`flex items-center gap-2.5 rounded-2xl px-3 py-3 text-left transition-all border text-[13px] font-semibold ${
+                          active
+                            ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 border-blue-100 dark:border-blue-900/40"
+                            : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-transparent"
+                        }`}
+                        style={{ opacity: 0, animation: `fade-in-up 0.2s ease-out ${0.04 * i}s forwards` }}
+                      >
+                        <div className={`size-7 shrink-0 rounded-xl flex items-center justify-center ${active ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600" : "bg-white dark:bg-slate-700 text-slate-500"}`}>
+                          <Icon className="size-3.5" />
+                        </div>
+                        <span className="truncate">{n.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <Link
+                  to="/auth"
+                  onClick={() => setOpen(false)}
+                  className="mt-1 flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 text-sm font-bold shadow-lg shadow-blue-500/20 active:scale-95 transition-all w-full"
+                >
+                  <Rocket className="size-4" />
+                  <span>Get Started Now</span>
+                </Link>
+              </>
+            )}
+
+            <p className="text-center text-[11px] text-slate-400 mt-2">© {new Date().getFullYear()} Skyrovix IT Solutions.</p>
           </div>
         </div>
       )}

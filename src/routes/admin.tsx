@@ -264,7 +264,7 @@ function AdminPanel() {
         </aside>
 
         {/* ─── Main Area ─── */}
-        <div className={`flex-1 min-w-0 transition-all duration-300 ${sidebarOpen ? "lg:ml-64" : "lg:ml-16"}`}>
+        <div className={`w-full min-w-0 transition-all duration-300 ${sidebarOpen ? "lg:pl-64" : "lg:pl-16"}`}>
           {/* ─── Top Navbar ─── */}
           <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-100 bg-white/95 px-6 backdrop-blur-md dark:bg-[#0F172A]/90 dark:border-slate-800">
             <div className="flex items-center gap-3">
@@ -326,7 +326,7 @@ function AdminPanel() {
           </header>
 
           {/* ─── Page Content ─── */}
-          <main className="p-4 sm:p-6 lg:p-8 overflow-x-auto">
+          <main className="p-4 sm:p-6 lg:p-8">
             {/* Search results */}
             {searchQuery && (
               <div className="mb-6 rounded-2xl border border-border/60 bg-white/60 p-4 backdrop-blur dark:bg-white/5">
@@ -1995,7 +1995,7 @@ function StudentsSection() {
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <h2 className="text-2xl font-bold">Students</h2>
-        <Input placeholder="Search students..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-56 rounded-xl border-border/60" />
+        <Input placeholder="Search students..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-full sm:w-56 max-w-full rounded-xl border-border/60" />
       </div>
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
         <table className="w-full text-sm">
@@ -2689,9 +2689,9 @@ function LoginHistorySection() {
           <p className="text-sm text-muted-foreground">{raw?.length ?? 0} sessions recorded</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-36 rounded-xl border-border/60 text-xs" />
-          <span className="text-xs text-muted-foreground">to</span>
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-36 rounded-xl border-border/60 text-xs" />
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 w-full sm:w-36 max-w-full rounded-xl border-border/60 text-xs" />
+          <span className="hidden sm:inline text-xs text-muted-foreground">to</span>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 w-full sm:w-36 max-w-full rounded-xl border-border/60 text-xs" />
         </div>
       </div>
 
@@ -2709,7 +2709,7 @@ function LoginHistorySection() {
             </button>
           ))}
         </div>
-        <Input placeholder="Search by name, email, ID, IP, city..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-72 rounded-xl border-border/60" />
+        <Input placeholder="Search by name, email, ID, IP, city..." value={search} onChange={(e) => setSearch(e.target.value)} className="h-9 w-full sm:w-72 max-w-full rounded-xl border-border/60" />
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">

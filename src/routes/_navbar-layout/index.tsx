@@ -90,7 +90,7 @@ function Landing() {
       <BreadcrumbJsonLd items={[{ name: "Home", url: "https://skyrovix.online/" }]} />
       {/* ─── HERO ─── */}
       <AuroraBackground>
-        <section className="relative min-h-[85vh] lg:min-h-[88vh] pt-16 sm:pt-14 pb-12 sm:pb-16 flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[85vh] lg:min-h-[88vh] pt-16 sm:pt-14 pb-12 sm:pb-16 flex items-center justify-center overflow-x-hidden">
           {/* Floating programming language icons across entire hero */}
           <MobileFloatingIcons />
           <div className="mx-auto max-w-7xl px-4 relative z-10 w-full">
@@ -217,7 +217,7 @@ function Landing() {
                 {/* Floating Badge Cards — visible on all screens */}
 
                 {/* Real-world Projects — left side */}
-                <div className="absolute top-[30%] -left-2 sm:-left-10 lg:-left-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                <div className="absolute top-[30%] left-1 sm:-left-10 lg:-left-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
                   <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><Code2 className="size-3.5 sm:size-4.5" /></div>
                   <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Real-world Projects</span>
                 </div>
@@ -229,13 +229,13 @@ function Landing() {
                 </div>
 
                 {/* Internship Offer Letter — right side top */}
-                <div className="absolute top-[22%] -right-2 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                <div className="absolute top-[22%] right-1 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
                   <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><FileText className="size-3.5 sm:size-4.5" /></div>
                   <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Offer Letter</span>
                 </div>
 
                 {/* Task-based internship — right side bottom */}
-                <div className="absolute bottom-[30%] -right-2 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                <div className="absolute bottom-[30%] right-1 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
                   <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><Users className="size-3.5 sm:size-4.5" /></div>
                   <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Task-based</span>
                 </div>

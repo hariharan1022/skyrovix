@@ -177,7 +177,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <body className="min-h-screen bg-background font-sans antialiased">
         <OrganizationJsonLd />
         <WebsiteJsonLd />
-        <div className="w-full">
+        <div className="w-full overflow-x-hidden">
           {children}
         </div>
         <Scripts />

@@ -27,7 +27,7 @@ export function AuroraBackground({
   className?: string;
 }) {
   return (
-    <div className={`relative ${className}`} style={{ isolation: "isolate" }}>
+    <div className={`relative ${className}`} style={{ isolation: "isolate", overflowX: "clip" }}>
 
       {/* ── Base solid background (light/dark adaptive) ── */}
       <div
