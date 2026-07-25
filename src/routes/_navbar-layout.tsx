@@ -6,7 +6,7 @@ import { PromotionalPopup } from "@/components/PromotionalPopup";
 export const Route = createFileRoute("/_navbar-layout")({
   component: () => (
     <>
-      <div className="min-h-screen">
+      <div className="w-full">
         <Navbar />
         <main className="pt-20">
           <Outlet />

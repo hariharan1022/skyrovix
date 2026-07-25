@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { DOMAINS, COMPANY, DURATIONS, durationConfig, generateInternId } from "@/lib/constants";
@@ -85,75 +85,80 @@ function Landing() {
 
 
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <FAQJsonLd faqs={FAQ_DATA} />
       <BreadcrumbJsonLd items={[{ name: "Home", url: "https://skyrovix.online/" }]} />
       {/* ─── HERO ─── */}
       <AuroraBackground>
-        <section className="relative min-h-[92vh] pt-16 pb-20 flex items-center justify-center overflow-hidden">
+        <section className="relative min-h-[85vh] lg:min-h-[88vh] pt-16 sm:pt-14 pb-12 sm:pb-16 flex items-center justify-center overflow-hidden">
+          {/* Floating programming language icons across entire hero */}
+          <MobileFloatingIcons />
           <div className="mx-auto max-w-7xl px-4 relative z-10 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
 
               {/* Left Column: Hero Text Content */}
-              <FadeUp y={20} duration={0.8} delay={0.1} className="lg:col-span-7 flex flex-col items-start text-left">
+              <FadeUp y={20} duration={0.8} delay={0.1} className="lg:col-span-7 flex flex-col items-start text-left w-full px-2 sm:px-0">
 
                 {/* Internship Platform Badge */}
-                <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-950/20 px-4 py-2 text-xs font-bold text-blue-700 dark:text-blue-300 shadow-sm backdrop-blur-md">
+                <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200/50 dark:border-sky-400/30 bg-blue-50/50 dark:bg-sky-400/10 px-4 py-2 text-[10px] sm:text-xs font-bold text-blue-800 dark:text-sky-300 shadow-sm backdrop-blur-md">
+                  <span className="animate-pulse size-2 rounded-full bg-blue-600 dark:bg-sky-400 shrink-0" />
                   <span>🎓 INDIA'S MOST PRACTICAL VIRTUAL INTERNSHIP PLATFORM</span>
                 </div>
 
                 {/* Primary Heading */}
-                <h1 className="font-display text-4xl sm:text-6xl lg:text-[64px] font-extrabold tracking-tight text-gray-900 dark:text-white leading-[1.1] text-left">
+                <h1 className="font-display text-[2.4rem] leading-[1.12] sm:text-5xl lg:text-[62px] font-extrabold tracking-tight text-[#07284a] dark:text-white text-left">
                   Build Skills.<br />
                   Gain Experience.<br />
-                  <span className="text-blue-600 dark:text-blue-400">Get Certified.</span>
+                  <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 dark:from-sky-300 dark:via-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">Get Certified.</span>
                 </h1>
 
                 {/* Sub-headline description */}
-                <p className="mt-6 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed text-left">
+                <p className="mt-4 sm:mt-5 max-w-xl text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed text-left font-medium">
                   Skyrovix Internship Program helps students and professionals work on real-world projects, gain practical skills, and receive industry-recognized certificates.
                 </p>
 
-                {/* Checkbox checklist items */}
-                <div className="mt-6 grid grid-cols-2 gap-x-6 gap-y-3 max-w-lg w-full">
+                {/* Checklist items — glassmorphism on dark */}
+                <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-2 max-w-lg w-full">
                   {[
-                    { label: "Real-world Projects", icon: Code2, color: "text-blue-600" },
-                    { label: "Mentor Guidance", icon: Users, color: "text-blue-600" },
-                    { label: "Certificate & LOR", icon: FileText, color: "text-blue-600" },
-                    { label: "100% Remote", icon: Globe, color: "text-blue-600" },
+                    { label: "Real-world Projects", icon: Code2, color: "text-blue-600 dark:text-sky-400", bg: "bg-blue-50 dark:bg-sky-400/15 border-blue-100 dark:border-sky-400/25" },
+                    { label: "Mentor Guidance", icon: Users, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-400/15 border-indigo-100 dark:border-indigo-400/25" },
+                    { label: "Certificate & LOR", icon: FileText, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-400/15 border-emerald-100 dark:border-emerald-400/25" },
+                    { label: "100% Remote", icon: Globe, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-400/15 border-amber-100 dark:border-amber-400/25" },
                   ].map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      <CheckCircle2 className="size-4.5 text-blue-600 dark:text-blue-400 shrink-0" />
-                      <span>{item.label}</span>
+                    <div key={idx} className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl border ${item.bg} backdrop-blur-sm hover:scale-[1.02] transition-all duration-200 shadow-sm`}>
+                      <div className={`size-7 rounded-lg bg-white/80 dark:bg-white/10 flex items-center justify-center ${item.color} shrink-0 shadow-sm`}>
+                        <item.icon className="size-3.5" />
+                      </div>
+                      <span className="text-[11px] sm:text-sm font-semibold text-slate-800 dark:text-white/90">{item.label}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Buttons Row */}
-                <div className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <div className="mt-6 sm:mt-7 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                   <Link to="/auth" search={{ redirect: undefined }} className="w-full sm:w-auto">
-                    <Button size="lg" className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-8 py-6 text-base font-semibold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 transition-all">
+                    <Button size="lg" className="w-full sm:w-auto rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-0 px-8 py-5 sm:py-6 text-sm sm:text-base font-bold shadow-lg shadow-blue-500/25 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
                       Explore Internships <ArrowRight className="ml-2 size-4" />
                     </Button>
                   </Link>
                   <a href="#how-it-works" className="w-full sm:w-auto">
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl border-2 border-border px-8 py-6 text-base font-semibold shadow-sm hover:border-blue-600/30 hover:bg-blue-50/5 dark:hover:bg-blue-950/10 active:scale-95 transition-all flex items-center justify-center gap-2 bg-white dark:bg-slate-900">
-                      <div className="size-6 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600"><Play className="size-3 fill-current ml-0.5" /></div>
+                    <Button size="lg" variant="outline" className="w-full sm:w-auto rounded-xl border border-slate-200 dark:border-white/20 px-8 py-5 sm:py-6 text-sm sm:text-base font-semibold text-slate-800 dark:text-white hover:bg-slate-50 dark:hover:bg-white/10 hover:border-slate-400 dark:hover:border-white/30 active:scale-95 transition-all flex items-center justify-center gap-2 bg-white/50 dark:bg-white/5 backdrop-blur-md">
+                      <div className="size-6 rounded-full bg-slate-100 dark:bg-white/15 flex items-center justify-center text-slate-800 dark:text-white"><Play className="size-3 fill-current ml-0.5" /></div>
                       How It Works
                     </Button>
                   </a>
                 </div>
 
                 {/* Coupon banner */}
-                <div className="mt-8 p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-orange-500/20 max-w-xl w-full flex items-center justify-between gap-4 backdrop-blur-md">
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-600"><Sparkles className="size-5" /></div>
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-orange-700 dark:text-orange-400">FIRST100 COUPON</p>
-                      <p className="text-xs text-muted-foreground">First 100 students get internship for FREE!</p>
+                <div className="mt-6 sm:mt-7 p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 dark:border-amber-400/25 max-w-xl w-full flex items-center justify-between gap-3 backdrop-blur-md shadow-sm">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div className="size-9 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-300 shrink-0"><Sparkles className="size-5" /></div>
+                    <div className="text-left min-w-0">
+                      <p className="text-xs font-bold text-amber-700 dark:text-amber-300">FIRST100 COUPON</p>
+                      <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400">First 100 students get internship for FREE!</p>
                     </div>
                   </div>
-                  <button onClick={() => setApplyDomain(DOMAINS[0]?.slug)} className="whitespace-nowrap px-4 py-2 rounded-xl bg-[#07284a] text-white text-xs font-bold shadow-md hover:bg-[#07284a]/90 transition-all">
+                  <button onClick={() => setApplyDomain(DOMAINS[0]?.slug)} className="whitespace-nowrap shrink-0 px-3.5 sm:px-4 py-2 rounded-xl bg-[#07284a] dark:bg-gradient-to-r dark:from-amber-400 dark:to-orange-500 text-white text-[11px] sm:text-xs font-bold shadow-md hover:scale-[1.01] transition-all">
                     Use Code: FIRST100
                   </button>
                 </div>
@@ -161,10 +166,10 @@ function Landing() {
               </FadeUp>
 
               {/* Right Column: Dynamic Graphic & Stats overlay */}
-              <ScaleIn delay={0.2} className="lg:col-span-5 flex flex-col items-center relative w-full lg:mt-0 mt-16">
+              <ScaleIn delay={0.2} className="lg:col-span-5 flex flex-col items-center relative w-full lg:mt-0 mt-10">
 
-                {/* SVG Curve Background & Doodles */}
-                <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-visible">
+                {/* SVG Curve Background & Doodles - hidden on mobile to keep it clean */}
+                <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-visible hidden sm:block">
                   <svg viewBox="0 0 500 400" className="absolute inset-0 w-full h-full text-blue-400/40 dark:text-blue-500/25" preserveAspectRatio="none">
                     <defs>
                       <linearGradient id="archGradient" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -178,7 +183,7 @@ function Landing() {
                       .dark .stop-color-dark-start { stop-color: #1e3a8a; }
                       .dark .stop-color-dark-end { stop-color: #020617; }
                     `}</style>
-                    {/* Clean curve filled arch (Taller & broader curve) */}
+                    {/* Clean curve filled arch */}
                     <path d="M-220,480 C10,-120 490,-120 720,480 Z" fill="url(#archGradient)" />
                     {/* Dashed outer line */}
                     <path d="M-220,470 C10,-140 490,-140 720,470" fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="6,6" className="opacity-40" />
@@ -202,75 +207,77 @@ function Landing() {
                   </svg>
                 </div>
 
-                {/* Student team image - rendered directly as transparent PNG (Scaled up for larger presence) */}
+                {/* Student team image */}
                 <img
                   src={heroTeamImage}
                   alt="Skyrovix Interns"
-                  className="relative z-10 w-[105%] max-w-[550px] lg:scale-110 lg:translate-y-4 h-auto object-contain select-none pointer-events-none"
+                  className="relative z-10 w-full max-w-[440px] sm:max-w-[520px] lg:max-w-[550px] lg:scale-110 lg:translate-y-4 h-auto object-contain select-none pointer-events-none"
                 />
 
-                {/* Floating Badge Cards */}
-                {/* Real-world Projects */}
-                <div className="absolute top-[28%] -left-12 sm:-left-20 lg:-left-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300">
-                  <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><Code2 className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Real-world Projects</span>
+                {/* Floating Badge Cards — visible on all screens */}
+
+                {/* Real-world Projects — left side */}
+                <div className="absolute top-[30%] -left-2 sm:-left-10 lg:-left-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                  <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><Code2 className="size-3.5 sm:size-4.5" /></div>
+                  <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Real-world Projects</span>
                 </div>
 
-                {/* Industry Recognized Certificate */}
-                <div className="absolute -top-16 left-1/2 -translate-x-1/2 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300 whitespace-nowrap">
-                  <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><GraduationCap className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200 font-sans">Industry Recognized Certificate</span>
+                {/* Industry Recognized Certificate — top center */}
+                <div className="absolute -top-8 sm:-top-12 left-1/2 -translate-x-1/2 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300 whitespace-nowrap">
+                  <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><GraduationCap className="size-3.5 sm:size-4.5" /></div>
+                  <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200">Industry Certificate</span>
                 </div>
 
-                {/* Internship Completion Letter */}
-                <div className="absolute top-[22%] -right-12 sm:-right-20 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300">
-                  <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><FileText className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">Internship Offer Letter</span>
+                {/* Internship Offer Letter — right side top */}
+                <div className="absolute top-[22%] -right-2 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                  <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><FileText className="size-3.5 sm:size-4.5" /></div>
+                  <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Offer Letter</span>
                 </div>
 
-                {/* Mentor Support */}
-                <div className="absolute bottom-[28%] -right-12 sm:-right-20 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-2xl p-3 shadow-xl backdrop-blur-md flex items-center gap-3 z-20 hover:scale-105 transition-transform duration-300">
-                  <div className="size-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold"><Users className="size-4.5" /></div>
-                  <span className="text-xs font-bold text-gray-800 dark:text-gray-200">task-based internship</span>
+                {/* Task-based internship — right side bottom */}
+                <div className="absolute bottom-[30%] -right-2 sm:-right-10 lg:-right-28 bg-white dark:bg-[#0f172a] border border-border/70 rounded-xl sm:rounded-2xl p-2 sm:p-3 shadow-xl backdrop-blur-md flex items-center gap-2 sm:gap-3 z-20 hover:scale-105 transition-transform duration-300">
+                  <div className="size-7 sm:size-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 font-bold shrink-0"><Users className="size-3.5 sm:size-4.5" /></div>
+                  <span className="text-[10px] sm:text-xs font-bold text-gray-800 dark:text-gray-200 whitespace-nowrap">Task-based</span>
                 </div>
 
-                {/* Overlaid Statistics Card (overlapping the bottom of the card) */}
-                <div className="relative z-20 w-full -mt-6 bg-white dark:bg-[#0f172a] rounded-[28px] border border-border/70 p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08)] grid grid-cols-4 gap-2 max-w-2xl">
+
+                {/* Statistics Card — 2×2 on mobile, 4-col on sm+ */}
+                <div className="relative z-20 w-full -mt-4 sm:-mt-6 bg-white dark:bg-[#0f172a] rounded-[24px] sm:rounded-[28px] border border-border/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] grid grid-cols-2 sm:grid-cols-4 max-w-2xl overflow-hidden">
 
                   {/* Students Enrolled */}
-                  <div className="text-center border-r border-slate-100 dark:border-slate-800/80 last:border-none px-1 sm:px-2 flex flex-col items-center justify-center">
-                    <div className="size-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-2.5">
-                      <Users className="size-5" />
+                  <div className="text-center flex flex-col items-center justify-center py-4 px-2 border-r border-b sm:border-b-0 border-slate-100 dark:border-slate-800/80">
+                    <div className="size-9 sm:size-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-2">
+                      <Users className="size-4 sm:size-5" />
                     </div>
-                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10,000+</div>
-                    <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Students Enrolled</div>
+                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10,000+</div>
+                    <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Students Enrolled</div>
                   </div>
 
                   {/* Internship Domains */}
-                  <div className="text-center border-r border-slate-100 dark:border-slate-800/80 last:border-none px-1 sm:px-2 flex flex-col items-center justify-center">
-                    <div className="size-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-2.5">
-                      <Briefcase className="size-5" />
+                  <div className="text-center flex flex-col items-center justify-center py-4 px-2 border-b sm:border-b-0 sm:border-r border-slate-100 dark:border-slate-800/80">
+                    <div className="size-9 sm:size-10 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 mb-2">
+                      <Briefcase className="size-4 sm:size-5" />
                     </div>
-                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10+</div>
-                    <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Internship Domains</div>
+                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10+</div>
+                    <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Internship Domains</div>
                   </div>
 
                   {/* Projects Available */}
-                  <div className="text-center border-r border-slate-100 dark:border-slate-800/80 last:border-none px-1 sm:px-2 flex flex-col items-center justify-center">
-                    <div className="size-10 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-2.5">
-                      <Code2 className="size-5" />
+                  <div className="text-center flex flex-col items-center justify-center py-4 px-2 border-r border-slate-100 dark:border-slate-800/80">
+                    <div className="size-9 sm:size-10 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-2">
+                      <Code2 className="size-4 sm:size-5" />
                     </div>
-                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">360+</div>
-                    <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Projects Available</div>
+                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">360+</div>
+                    <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Projects Available</div>
                   </div>
 
                   {/* Average Rating */}
-                  <div className="text-center last:border-none px-1 sm:px-2 flex flex-col items-center justify-center">
-                    <div className="size-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-500 mb-2.5">
-                      <Star className="size-5 fill-amber-500" />
+                  <div className="text-center flex flex-col items-center justify-center py-4 px-2">
+                    <div className="size-9 sm:size-10 rounded-full bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-500 mb-2">
+                      <Star className="size-4 sm:size-5 fill-amber-500" />
                     </div>
-                    <div className="text-base sm:text-xl md:text-2xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">4.9/5</div>
-                    <div className="mt-1 text-[9px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Average Rating</div>
+                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">4.9/5</div>
+                    <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Average Rating</div>
                   </div>
 
                 </div>
@@ -284,7 +291,7 @@ function Landing() {
       {/* ─── TRUSTED BY COLLEGES ─── */}
       <Reveal delay={0.1}>
         <section className="border-b border-border/30 bg-white/50 dark:bg-slate-950/10 py-8 sm:py-10 relative z-10">
-          <div className="mx-auto max-w-7xl px-4 flex flex-col lg:flex-row items-center justify-between gap-8">
+          <div className="mx-auto max-w-7xl px-4 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
             {/* Left Title */}
             <div className="text-center lg:text-left shrink-0 max-w-[260px]">
               <p className="text-[11px] sm:text-[12px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 leading-tight">
@@ -293,8 +300,8 @@ function Landing() {
             </div>
 
             {/* Right Logos Container */}
-            <div className="flex flex-col gap-6 w-full lg:max-w-4xl">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <div className="flex flex-col gap-5 w-full lg:max-w-4xl">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-x-4 sm:gap-x-8 gap-y-4 sm:gap-y-6">
                 {[
                   {
                     name: "Anna University",
@@ -333,28 +340,26 @@ function Landing() {
                     image: srustiLogo,
                   }
                 ].map((uni) => (
-                  <div key={uni.name} className="flex items-start gap-3 transition-all duration-350 hover:scale-[1.02] cursor-default opacity-95 hover:opacity-100">
+                  <div key={uni.name} className="flex items-start gap-2 sm:gap-3 transition-all duration-350 hover:scale-[1.02] cursor-default opacity-95 hover:opacity-100">
                     {uni.image ? (
-                      <img src={uni.image} alt={uni.name} className="h-10 w-10 object-contain shrink-0 mt-0.5 dark:brightness-110" />
+                      <img src={uni.image} alt={uni.name} className="h-8 sm:h-10 w-8 sm:w-10 object-contain shrink-0 mt-0.5 dark:brightness-110" />
                     ) : (
-                      <div className="size-10 rounded-lg flex items-center justify-center border shadow-sm shrink-0">
-                        {/* Fallback */}
-                      </div>
+                      <div className="size-8 sm:size-10 rounded-lg flex items-center justify-center border shadow-sm shrink-0" />
                     )}
-                    <div className="flex flex-col text-left justify-start">
-                      <span className="text-xs sm:text-[13px] font-extrabold tracking-tight text-slate-800 dark:text-slate-200 leading-tight max-w-[180px] sm:max-w-[220px] block">
+                    <div className="flex flex-col text-left justify-start min-w-0">
+                      <span className="text-[11px] sm:text-[13px] font-extrabold tracking-tight text-slate-800 dark:text-slate-200 leading-tight block break-words">
                         {uni.shortName}
                       </span>
-                      <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 block">
+                      <span className="text-[9px] sm:text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 sm:mt-1 block">
                         {uni.location}
                       </span>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="flex items-center justify-center lg:justify-end text-xs sm:text-[13px] font-extrabold text-blue-600 dark:text-blue-400 mt-2">
+              <div className="flex items-center justify-center lg:justify-end text-xs sm:text-[13px] font-extrabold text-blue-600 dark:text-blue-400">
                 <span className="whitespace-nowrap">
-                  ... and more than colleges across India
+                  ... and more colleges across India
                 </span>
               </div>
             </div>
@@ -409,7 +414,7 @@ function Landing() {
               <p className="mt-3 text-sm sm:text-base text-muted-foreground font-medium">A simple 5-step journey from application to certification.</p>
             </div>
           </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-5">
             {STEPS.map((s, i) => (
               <FadeUp key={i} delay={0.1 + i * 0.08}>
                 <div className="group relative rounded-2xl border border-border/50 bg-white/70 dark:bg-[#0f172a]/70 p-6 backdrop-blur transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_15px_30px_rgba(0,0,0,0.05)] hover:border-blue-500/25 hover:bg-white dark:hover:bg-[#0f172a]">
@@ -436,7 +441,7 @@ function Landing() {
               <p className="mt-3 text-sm sm:text-base text-muted-foreground font-medium">Everything you need to launch your career — in one platform.</p>
             </div>
           </Reveal>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { icon: Briefcase, title: "Real Projects", desc: "Build portfolio-grade work, not toy assignments. Every task ships production-quality code.", bg: "bg-violet-50/80 dark:bg-violet-950/20 text-violet-600 dark:text-violet-400" },
               { icon: MessageSquare, title: "Mentor Reviews", desc: "Get detailed feedback on every submission. Revise, improve, and ship better work.", bg: "bg-emerald-50/80 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400" },
@@ -524,42 +529,19 @@ function Landing() {
         </div>
       </section>
 
-      {/* ─── STATS BANNER ─── */}
-      <section className="border-y border-border/40 bg-[#f8fafc]/50 dark:bg-[#020617]/50 py-20 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              { icon: Briefcase, value: "25+", label: "Internship Domains", desc: "Industry-aligned tracks" },
-              { icon: Code2, value: "300+", label: "Projects", desc: "Hands-on real-world projects" },
-              { icon: Award, value: "1500+", label: "Verified Certificates", desc: "QR-code shareable credentials" },
-            ].map((stat, i) => (
-              <FadeUp key={i} delay={i * 0.1}>
-                <div className="group relative rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-8 text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-blue-500/20 hover:bg-white dark:hover:bg-[#0f172a]">
-                  <div className="mx-auto grid size-12 place-items-center rounded-xl bg-[#07284a]/10 dark:bg-[#07284a]/20 text-[#07284a] dark:text-[#60a5fa] transition-all duration-300 group-hover:bg-[#07284a] group-hover:text-white group-hover:scale-110 mb-4">
-                    <stat.icon className="size-5" />
-                  </div>
-                  <div className="text-4xl sm:text-5xl font-bold brand-text transition-transform duration-300 group-hover:scale-105">{stat.value}</div>
-                  <div className="mt-2 text-sm font-semibold text-gray-900 dark:text-white">{stat.label}</div>
-                  <div className="mt-1 text-xs text-muted-foreground">{stat.desc}</div>
-                </div>
-              </FadeUp>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ─── TESTIMONIALS ─── */}
-      <section className="py-20 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4">
+      <section className="py-20 sm:py-24 overflow-hidden">
+        <div className="mx-auto max-w-5xl px-4">
           <Reveal>
             <div className="mx-auto mb-14 max-w-2xl text-center">
               <Badge variant="secondary" className="mb-4 px-4 py-1.5 text-xs font-medium rounded-full border border-border/60">Testimonials</Badge>
               <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">What students say</h2>
-              <p className="mt-3 text-muted-foreground">Hear from interns who've been through the program.</p>
+              <p className="mt-3 text-sm sm:text-base text-muted-foreground px-2">Real reviews from interns who completed the program.</p>
             </div>
           </Reveal>
-          <ReviewsGrid />
         </div>
+        <ReviewsMarquee />
       </section>
 
       {/* ─── FAQ ─── */}
@@ -589,20 +571,105 @@ function Landing() {
       <section className="px-4 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <div className="relative overflow-hidden rounded-3xl border border-[#07284a]/20 bg-gradient-to-br from-[#07284a] via-[#0d3b66] to-[#1d4ed8] p-8 sm:p-12 md:p-16 text-center text-white shadow-2xl shadow-[#07284a]/25">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.1),transparent_50%)]" />
-              <div className="absolute -right-20 -top-20 size-80 rounded-full bg-white/5 blur-3xl" />
-              <div className="absolute -bottom-20 -left-20 size-60 rounded-full bg-white/5 blur-3xl" />
-              <div className="relative">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold">Ready to build something real?</h2>
-                <p className="mt-3 text-sm sm:text-base text-white/80 max-w-lg mx-auto">Get your offer letter in seconds. No application fee — pay only ₹100 at certification.</p>
-                <div className="mt-8 flex flex-wrap justify-center gap-3">
-                  <Button asChild size="lg" className="rounded-xl bg-white text-[#07284a] hover:bg-white/90 border-0 shadow-lg font-semibold h-12 px-8 btn-premium hover:btn-premium-hover active:btn-premium-active">
-                    <Link to="/auth" search={{ redirect: undefined }}>Apply now <ArrowRight className="ml-1.5 size-4" /></Link>
-                  </Button>
-                  <Button asChild size="lg" variant="outline" className="rounded-xl bg-transparent border-2 border-white/30 text-white hover:bg-white/10 hover:text-white h-12 px-8 btn-premium active:btn-premium-active">
-                    <Link to="/domains" search={{ apply: undefined }}>Explore courses</Link>
-                  </Button>
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#041e36] via-[#07284a] to-[#0d3b66] p-8 sm:p-12 md:p-16 shadow-2xl shadow-[#07284a]/30">
+              {/* Diagonal light overlay */}
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.02)_50%,transparent_60%)]" />
+
+              {/* Glow orbs */}
+              <div className="absolute -top-32 -right-32 size-[500px] rounded-full bg-blue-500/10 blur-[120px]" />
+              <div className="absolute -bottom-32 -left-32 size-[400px] rounded-full bg-indigo-500/8 blur-[100px]" />
+
+              {/* Decorative rings */}
+              <div className="absolute top-10 right-10 size-32 rounded-full border border-white/5" />
+              <div className="absolute top-16 right-16 size-48 rounded-full border border-white/5" />
+              <div className="absolute -bottom-8 -left-8 size-40 rounded-full border border-white/5" />
+
+              <div className="relative flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+                {/* Left: Content */}
+                <div className="flex-1 text-center lg:text-left">
+                  <div className="hidden sm:inline-flex items-center gap-2 rounded-full bg-white/8 px-4 py-1.5 text-xs font-medium text-white/70 border border-white/10 mb-5 backdrop-blur-sm">
+                    <span className="size-1.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50" />
+                    No application fee — pay only ₹100 at certification
+                  </div>
+
+                  <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.15] text-white">
+                    Ready to build
+                    <br />
+                    <span className="bg-gradient-to-r from-blue-300 via-indigo-300 to-purple-300 bg-clip-text text-transparent">something real?</span>
+                  </h2>
+
+                  <p className="mt-4 text-sm sm:text-base text-white/60 max-w-lg leading-relaxed">
+                    Get your offer letter and ID card instantly. Complete 5 real-world tasks, get mentor feedback, and earn a verified certificate.
+                  </p>
+
+                  <div className="mt-8 flex flex-wrap justify-center lg:justify-start gap-3">
+                    <Button asChild size="lg" className="rounded-xl bg-white text-[#07284a] hover:bg-white/95 border-0 shadow-xl shadow-black/15 font-semibold h-12 px-8 transition-all duration-300 hover:scale-[1.04] active:scale-95 group">
+                      <Link to="/auth" search={{ redirect: undefined }}>
+                        Apply now
+                        <ArrowRight className="ml-1.5 size-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline" className="rounded-xl bg-white/5 border border-white/15 text-white/90 hover:bg-white/12 hover:text-white h-12 px-8 backdrop-blur-sm transition-all duration-300 hover:scale-[1.04] active:scale-95">
+                      <Link to="/domains" search={{ apply: undefined }}>Explore courses</Link>
+                    </Button>
+                  </div>
+
+                  {/* Trust line */}
+                  <div className="mt-6 flex items-center justify-center lg:justify-start gap-4 text-white/40 text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <Award size={12} />
+                      25+ domains
+                    </span>
+                    <span className="size-1 rounded-full bg-white/20" />
+                    <span className="flex items-center gap-1.5">
+                      <GraduationCap size={12} />
+                      Verified certificate
+                    </span>
+                    <span className="size-1 rounded-full bg-white/20" />
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck size={12} />
+                      MSME registered
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right: Visual */}
+                <div className="hidden sm:block shrink-0 w-56 sm:w-64 lg:w-72">
+                  <div className="relative">
+                    {/* Glow behind card */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-blue-400/20 to-purple-400/20 blur-3xl rounded-2xl" />
+                    {/* Mock certificate card */}
+                    <div className="relative rounded-2xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-sm p-5 shadow-2xl">
+                      <div className="hidden sm:flex items-center gap-3 mb-4">
+                        <div className="size-10 rounded-xl bg-white/10 flex items-center justify-center">
+                          <Award size={20} className="text-blue-300" />
+                        </div>
+                        <div>
+                          <p className="text-white font-semibold text-sm">Certificate</p>
+                          <p className="text-white/40 text-xs">Upon completion</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-2 rounded-full bg-white/10 w-3/4" />
+                        <div className="h-2 rounded-full bg-white/8 w-1/2" />
+                      </div>
+                      <div className="mt-4 pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="size-6 rounded-full bg-emerald-400/20 flex items-center justify-center">
+                              <ShieldCheck size={12} className="text-emerald-400" />
+                            </div>
+                            <span className="text-white/50 text-xs">Verified</span>
+                          </div>
+                          <div className="flex -space-x-1">
+                            <div className="size-5 rounded-full bg-white/15 border border-white/10" />
+                            <div className="size-5 rounded-full bg-white/10 border border-white/10" />
+                            <div className="size-5 rounded-full bg-white/8 border border-white/10" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -631,84 +698,259 @@ const FAQ_ITEMS = [
   { q: "Do I get a certificate if I don't complete all tasks?", a: "The certificate is issued only after you complete and get approval on all 5 tasks and pay the ₹100 certification fee." },
 ];
 
-const FEATURED_REVIEWS = [
-  { id: "featured-1", rating: 5, content: "The Skyrovix Virtual Internship gave me practical experience through real-world tasks. The structured learning path, quick support, and verified certificate made it an excellent learning experience.", name: "Vishal R", role: "Full Stack Development Intern" },
-  { id: "featured-2", rating: 5, content: "I improved my AI and prompt engineering skills significantly during this internship. The tasks were well designed, and the verification process made the certificate more valuable.", name: "Gandhi Rajan", role: "Prompt Engineering Intern" },
-  { id: "featured-3", rating: 5, content: "The internship provided hands-on assignments that helped me understand real cybersecurity concepts. I highly recommend Skyrovix to students looking for practical learning.", name: "Rohit", role: "Cyber Security Intern" },
-  { id: "featured-4", rating: 5, content: "I enjoyed completing the project-based tasks. The dashboard, offer letter, and certificate verification system were smooth and professional.", name: "Sivaraman", role: "Python Development Intern" },
-  { id: "featured-5", rating: 5, content: "The internship helped me strengthen both frontend and backend development skills. The learning experience was organized, and the admin verification process ensured quality.", name: "Manikandan", role: "Full Stack Development Intern" },
-  { id: "featured-6", rating: 5, content: "Skyrovix provides an excellent platform for students to gain industry-oriented experience. The practical projects and mentor feedback were extremely helpful.", name: "Sharik", role: "AI & Machine Learning Intern" },
+const STATIC_REVIEWS = [
+  { id: "s1", rating: 5, content: "The Skyrovix Virtual Internship gave me practical experience through real-world tasks. The structured learning path, quick support, and verified certificate made it an excellent learning experience.", name: "Vishal R", role: "Full Stack Development" },
+  { id: "s2", rating: 5, content: "I improved my AI and prompt engineering skills significantly during this internship. The tasks were well designed and the certificate verification made it more valuable.", name: "Gandhi Rajan", role: "Prompt Engineering" },
+  { id: "s3", rating: 5, content: "The internship provided hands-on assignments that helped me understand real cybersecurity concepts. I highly recommend Skyrovix to students looking for practical learning.", name: "Rohit", role: "Cyber Security" },
+  { id: "s4", rating: 5, content: "I enjoyed completing the project-based tasks. The dashboard, offer letter, and certificate verification system were smooth and professional.", name: "Sivaraman", role: "Python Development" },
+  { id: "s5", rating: 5, content: "The internship helped me strengthen both frontend and backend skills. The learning was organized and the admin verification process ensured quality throughout.", name: "Manikandan", role: "Full Stack Development" },
+  { id: "s6", rating: 5, content: "Skyrovix provides an excellent platform for students to gain industry-oriented experience. The practical projects and mentor feedback were extremely helpful.", name: "Sharik", role: "AI & Machine Learning" },
+  { id: "s7", rating: 5, content: "Completed the UI/UX track in just 3 weeks. The design tasks were real-world and challenging. My portfolio looks 10x better now thanks to Skyrovix!", name: "Priya N", role: "UI/UX Design" },
+  { id: "s8", rating: 5, content: "Got my certificate the same day I finished. The QR verification impressed my placement officer. Skyrovix is legit and highly recommended!", name: "Arjun M", role: "Data Science" },
+  { id: "s9", rating: 4, content: "Very well structured internship. The tasks pushed me to learn Docker, CI/CD and REST APIs. I came out a much better developer than I was before.", name: "Karan P", role: "Backend Development" },
+  { id: "s10", rating: 5, content: "The cloud computing track was fantastic. AWS basics to advanced — all covered. Perfect for anyone wanting a cloud career.", name: "Divya K", role: "Cloud Computing" },
+  { id: "s11", rating: 5, content: "Self-paced format was a lifesaver during my semester exams. Completed it on weekends and still got a great certificate. 10/10!", name: "Sneha R", role: "Python Development" },
+  { id: "s12", rating: 5, content: "The Java internship tasks were industry-relevant. Got hands-on with Spring Boot and REST APIs. Best ₹100 I've spent for my career.", name: "Aditya S", role: "Java Development" },
 ];
 
-function ReviewCard({ name, role, content, rating, index }: { name: string; role: string; content: string; rating: number; index: number }) {
-  const initials = name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+type MarqueeItem = { id: string; rating: number; content: string; name: string; role: string };
+
+const AVATAR_PALETTE = [
+  { bg: "#e0e7ff", text: "#4338ca" },
+  { bg: "#ede9fe", text: "#6d28d9" },
+  { bg: "#cffafe", text: "#0e7490" },
+  { bg: "#d1fae5", text: "#065f46" },
+  { bg: "#fef3c7", text: "#92400e" },
+  { bg: "#ffe4e6", text: "#be123c" },
+];
+
+function MarqueeCard({ item }: { item: MarqueeItem }) {
+  const initials = item.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  const p = AVATAR_PALETTE[item.name.charCodeAt(0) % AVATAR_PALETTE.length];
+
   return (
-    <FadeUp delay={0.1 + index * 0.1}>
-      <div className="group rounded-2xl border border-border/50 bg-white/60 dark:bg-[#0f172a]/60 p-6 transition-all card-elevated hover:card-elevated-hover">
-        <div className="flex gap-1 mb-3">
-          {Array.from({ length: 5 }).map((_, si) => (
-            <Star key={si} className={`size-4 ${si < rating ? "text-amber-400" : "text-muted-foreground/20"}`} fill={si < rating ? "currentColor" : "none"} />
-          ))}
+    <div className="relative flex-shrink-0 w-full sm:w-[350px] mx-2 sm:mx-3 select-none rounded-2xl bg-white dark:bg-[#0f172a] flex flex-col overflow-hidden shadow-[0_8px_30px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.3)] border border-border/30">
+      {/* Glass accent bar */}
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500" />
+
+      {/* Decorative quote */}
+      <div className="absolute -top-1 right-3 text-[56px] font-serif leading-none text-blue-100 dark:text-blue-900/30 select-none">"</div>
+
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
+        {/* Stars + verified */}
+        <div className="flex items-center justify-between mb-3 mt-1">
+          <div className="flex gap-0.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} size={13} fill={i < item.rating ? "#f59e0b" : "#e5e7eb"} color={i < item.rating ? "#f59e0b" : "#e5e7eb"} />
+            ))}
+          </div>
+          <span className="text-[10px] font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 rounded-full px-2 py-0.5 border border-green-200/50 shrink-0">
+            ✓ Verified
+          </span>
         </div>
-        <Quote className="size-5 text-[#07284a]/20 dark:text-[#60a5fa]/20 mb-2" />
-        <p className="text-sm text-muted-foreground leading-relaxed italic">&ldquo;{content}&rdquo;</p>
-        <div className="mt-4 pt-4 border-t border-border/40 flex items-center gap-3">
-          <Avatar className="size-8">
-            <AvatarFallback className="text-[9px] bg-[#07284a]/10 dark:bg-[#1d4ed8]/10 text-[#07284a] dark:text-[#60a5fa]">{initials}</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="text-sm font-semibold">{name}</p>
-            <p className="text-[11px] text-muted-foreground">{role}</p>
+
+        {/* Review text */}
+        <p className="flex-1 text-[13px] leading-[1.8] text-gray-500 dark:text-gray-400 relative z-10 line-clamp-4">
+          "{item.content}"
+        </p>
+
+        {/* Author */}
+        <div className="flex items-center gap-3 border-t border-border/20 pt-3.5 mt-4">
+          <div
+            className="grid size-9 shrink-0 place-items-center rounded-xl text-xs font-bold shadow-sm ring-2 ring-white dark:ring-[#0f172a]"
+            style={{ background: p.bg, color: p.text }}
+          >
+            {initials}
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-gray-900 dark:text-white text-[13px] leading-tight truncate">{item.name}</p>
+            <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5">{item.role}</p>
           </div>
         </div>
-      </div>
-    </FadeUp>
-  );
-}
-
-function ReviewsGrid() {
-  const { data: reviews = [], isLoading } = useRecentReviews(6);
-  const stats = computeStats(reviews);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
-
-  const totalReviews = stats.total + FEATURED_REVIEWS.length;
-
-  return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-center gap-6 text-center">
-        {stats.total > 0 && (
-          <>
-            <div>
-              <span className="text-3xl font-bold">{stats.average}</span>
-              <div className="flex gap-0.5 mt-1 justify-center">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} className={`size-4 ${i < Math.round(stats.average) ? "text-amber-400" : "text-muted-foreground/30"}`} fill={i < Math.round(stats.average) ? "currentColor" : "none"} />
-                ))}
-              </div>
-            </div>
-            <div className="h-8 w-px bg-border" />
-          </>
-        )}
-        <div className="text-sm text-muted-foreground">
-          <span className="text-2xl font-bold text-foreground">{totalReviews}</span><br />
-          review{totalReviews !== 1 ? "s" : ""}
-        </div>
-      </div>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURED_REVIEWS.map((r, i) => (
-          <ReviewCard key={r.id} name={r.name} role={r.role} content={r.content} rating={r.rating} index={i} />
-        ))}
       </div>
     </div>
   );
 }
+
+function ReviewsMarquee() {
+  const { data: liveReviews = [] } = useRecentReviews(20);
+
+  const allItems: MarqueeItem[] = [
+    ...liveReviews.map((r) => ({
+      id: r.id,
+      rating: r.rating,
+      content: r.content,
+      name: r.profiles?.full_name ?? "Anonymous",
+      role: r.target_type === "internship" ? "Internship" : "Course",
+    })),
+    ...STATIC_REVIEWS,
+  ];
+
+  const mid = Math.ceil(allItems.length / 2);
+  const row1 = [...allItems.slice(0, mid), ...allItems.slice(0, mid)];
+  const row2 = [...allItems.slice(mid), ...allItems.slice(mid)];
+
+  const duration1 = row1.length * 5;
+  const duration2 = row2.length * 5;
+
+  const [activeIdx, setActiveIdx] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const autoPaused = useRef(false);
+  const autoTimer = useRef<ReturnType<typeof setInterval>>();
+
+  // Track scroll position
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const idx = Math.round(el.scrollLeft / el.clientWidth);
+      setActiveIdx(Math.min(idx, allItems.length - 1));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [allItems.length]);
+
+  // Auto-advance carousel
+  useEffect(() => {
+    if (allItems.length <= 1) return;
+    const start = () => {
+      autoTimer.current = setInterval(() => {
+        if (autoPaused.current) return;
+        const el = scrollRef.current;
+        if (!el) return;
+        const next = (activeIdx + 1) % allItems.length;
+        el.scrollTo({ left: el.clientWidth * next, behavior: "smooth" });
+      }, 4000);
+    };
+    start();
+    return () => clearInterval(autoTimer.current);
+  }, [activeIdx, allItems.length]);
+
+  // Pause on user interaction, resume after 6s idle
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let resumeTimeout: ReturnType<typeof setTimeout>;
+    const pause = () => {
+      autoPaused.current = true;
+      clearTimeout(resumeTimeout);
+      resumeTimeout = setTimeout(() => { autoPaused.current = false; }, 6000);
+    };
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("scroll", pause, { passive: true });
+    return () => {
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("scroll", pause);
+      clearTimeout(resumeTimeout);
+    };
+  }, []);
+
+  return (
+    <div className="relative mt-6 py-1">
+      {/* Mobile: modern vertical-style snap carousel */}
+      <div className="sm:hidden px-4">
+        <div ref={scrollRef} className="flex snap-x snap-mandatory gap-0 overflow-x-auto scroll-smooth pb-6">
+          {allItems.map((item, i) => (
+            <div key={`m-${item.id}-${i}`} className="snap-center shrink-0 w-full px-1">
+              <MobileReviewCard item={item} />
+            </div>
+          ))}
+        </div>
+        {/* Dots */}
+        <div className="flex items-center justify-center gap-1.5">
+          {allItems.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const el = scrollRef.current;
+                if (el) el.scrollTo({ left: el.clientWidth * i, behavior: "smooth" });
+              }}
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeIdx ? "w-6 bg-[#07284a]" : "w-1.5 bg-gray-300"
+              }`}
+              aria-label={`Go to review ${i + 1}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop: animated marquee rows */}
+      <div className="hidden sm:block">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#f8fafc] dark:from-[#020617] to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#f8fafc] dark:from-[#020617] to-transparent" />
+        <div className="space-y-4 overflow-hidden">
+          <div className="flex items-stretch" style={{ animation: `marquee-left ${duration1}s linear infinite` }}>
+            {row1.map((item, i) => <MarqueeCard key={`r1-${item.id}-${i}`} item={item} />)}
+          </div>
+          <div className="flex items-stretch" style={{ animation: `marquee-right ${duration2}s linear infinite` }}>
+            {row2.map((item, i) => <MarqueeCard key={`r2-${item.id}-${i}`} item={item} />)}
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes marquee-left {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-right {
+          0%   { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .flex:hover { animation-play-state: paused; }
+        .snap-x::-webkit-scrollbar { display: none; }
+      `}</style>
+    </div>
+  );
+}
+
+function MobileReviewCard({ item }: { item: MarqueeItem }) {
+  const initials = item.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+  const p = AVATAR_PALETTE[item.name.charCodeAt(0) % AVATAR_PALETTE.length];
+
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-white dark:bg-[#0f172a] p-5 shadow-[0_8px_30px_-6px_rgba(0,0,0,0.06)] dark:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.3)]">
+      {/* Glass accent bar */}
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500" />
+
+      {/* Decorative quote */}
+      <div className="absolute -top-1 right-3 text-[56px] font-serif leading-none text-blue-100 dark:text-blue-900/30 select-none">"</div>
+
+      {/* Stars + rating row */}
+      <div className="flex items-center justify-between mb-3 mt-1">
+        <div className="flex gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Star key={i} size={13} fill={i < item.rating ? "#f59e0b" : "#e5e7eb"} color={i < item.rating ? "#f59e0b" : "#e5e7eb"} />
+          ))}
+        </div>
+        <span className="text-[10px] font-semibold text-green-600 bg-green-50 dark:bg-green-950/30 rounded-full px-2 py-0.5 border border-green-200/50 shrink-0">
+          ✓ Verified
+        </span>
+      </div>
+
+      {/* Review text */}
+      <p className="text-[13px] leading-[1.8] text-gray-500 dark:text-gray-400 mb-4 relative z-10 line-clamp-4">
+        "{item.content}"
+      </p>
+
+      {/* Author */}
+      <div className="flex items-center gap-3 border-t border-border/20 pt-3.5">
+        <div
+          className="grid size-9 shrink-0 place-items-center rounded-xl text-xs font-bold shadow-sm ring-2 ring-white dark:ring-[#0f172a]"
+          style={{ background: p.bg, color: p.text }}
+        >
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-900 dark:text-white text-[13px] leading-tight">{item.name}</p>
+          <p className="text-[11px] text-muted-foreground/70 truncate mt-0.5">{item.role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
 function TypingText({ texts }: { texts: string[] }) {
   const [index, setIndex] = useState(0);

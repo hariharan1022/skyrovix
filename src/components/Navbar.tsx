@@ -3,7 +3,7 @@ import { Logo } from "./Logo";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, Share2, HelpCircle, Package, CreditCard, MessageSquare } from "lucide-react";
+import { LogOut, LayoutDashboard, Shield, Menu, X, BookOpen, ListChecks, Award, User, Home, Briefcase, Mail, BadgeCheck, Info, Moon, Sparkles, Code2, Share2, HelpCircle, Package, CreditCard, MessageSquare, Rocket } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/domains", label: "Internship", icon: Briefcase },
   { to: "/about", label: "About", icon: Info },
+  { to: "/reviews", label: "Reviews", icon: MessageSquare },
   { to: "/contact", label: "Contact", icon: Mail },
   { to: "/verify-certificate", label: "Verify", icon: BadgeCheck },
 ] as const;
@@ -24,7 +25,7 @@ const DASHBOARD_ITEMS = [
   { to: "/review", label: "Review", icon: MessageSquare },
 ] as const;
 
-export function Navbar() {
+export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
   const { user, isAdmin } = useAuth();
   const navigate = useNavigate();
   const router = useRouterState();
@@ -47,7 +48,7 @@ export function Navbar() {
 
   const pathname = router.location.pathname;
   const currentTab = (router.location.search as Record<string, string | undefined>)?.tab;
-  const isDashboardPage = pathname === "/dashboard" || pathname.startsWith("/review");
+  const isDashboardPage = variant === "public" ? false : (pathname === "/dashboard" || pathname.startsWith("/review"));
   const itemsToRender = isDashboardPage ? DASHBOARD_ITEMS : NAV;
 
   const signOut = async () => {
@@ -196,98 +197,174 @@ export function Navbar() {
       </header>
 
       {/* Mobile backdrop */}
-      {open && <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm xl:hidden" onClick={() => setOpen(false)} />}
+      {open && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px] xl:hidden" onClick={() => setOpen(false)} />}
 
       {/* Mobile Menu */}
       {open && (
         <div
           ref={menuRef}
-          className="fixed left-1/2 z-50 w-[calc(100%-2rem)] max-w-7xl -translate-x-1/2 mt-2 rounded-2xl border border-border/60 bg-white/95 dark:bg-[#0f172a]/95 backdrop-blur-xl shadow-xl overflow-hidden xl:hidden"
+          className="fixed left-0 right-0 z-50 w-full bg-white/98 dark:bg-[#0f172a]/98 backdrop-blur-xl border-b border-slate-100 dark:border-slate-800/80 shadow-2xl overflow-y-auto xl:hidden"
           style={{
-            top: scrolled ? "calc(2.5rem + 6px)" : "calc(3.25rem + 6px)",
-            animation: "fade-in-down 0.2s ease-out forwards",
+            top: "80px", // align exactly with header height
+            height: "calc(100vh - 80px)",
+            animation: "fade-in-down 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards",
           }}
         >
-          <div className="flex flex-col gap-1 p-3">
-            {user ? (
-              <>
-                <div className="flex items-center justify-between px-4 py-2 border-b border-border/40 mb-2">
-                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">{user?.email}</span>
-                  <button onClick={() => setDark(!dark)}
-                    className="flex items-center justify-center size-8 rounded-lg hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all">
-                    {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
-                  </button>
-                </div>
-                {itemsToRender.map((item, i) => {
-                  const Icon = item.icon;
-                  const active = isDashboardPage
-                    ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
-                    : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
-                  return (
-                    <button key={item.label} onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
-                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all w-full text-left ${
-                        active
-                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white font-bold"
-                          : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
-                      }`}
-                      style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
+          <div className="flex flex-col h-full justify-between p-6">
+            <div className="space-y-6">
+              {user ? (
+                <>
+                  {/* User Profile Card */}
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                    <span className="flex items-center justify-center size-10 rounded-full bg-blue-600 text-white text-sm font-bold shadow-md">
+                      {user.email?.charAt(0).toUpperCase() || "U"}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-slate-850 dark:text-slate-100 truncate">{user.email?.split("@")[0]}</p>
+                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                    </div>
+                    <button 
+                      onClick={() => setDark(!dark)}
+                      className="flex items-center justify-center size-8 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-blue-650"
                     >
-                      <Icon className="size-4 shrink-0" />{item.label}
+                      {dark ? <Sparkles className="size-4" /> : <Moon className="size-4" />}
                     </button>
-                  );
-                })}
-                <div className="my-2 border-t border-border" style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.33}s forwards` }} />
-                {isAdmin && (
-                  <Link to="/admin" onClick={() => setOpen(false)} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all"
-                    style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.36s forwards` }}>
-                    <Shield className="size-4" /> Admin
+                  </div>
+
+                  {/* Dashboard Items */}
+                  <div className="grid gap-2">
+                    {itemsToRender.map((item, i) => {
+                      const Icon = item.icon;
+                      const active = isDashboardPage
+                        ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
+                        : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
+                      const subtitles: Record<string, string> = {
+                        "My Tasks": "View and submit tasks",
+                        "My Internships": "Manage your active tracks",
+                        "Payment": "Invoices and subscription status",
+                        "Certificates": "Download verified credentials",
+                        "Profile": "Manage your account",
+                        "Review": "Share your program experience",
+                      };
+                      return (
+                        <button 
+                          key={item.label} 
+                          onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
+                          className={`flex items-center gap-4.5 rounded-2xl p-3.5 transition-all text-left border ${
+                            active
+                              ? "bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-450 border-blue-100 dark:border-blue-950/40 font-bold"
+                              : "text-slate-600 dark:text-slate-300 border-transparent hover:bg-slate-50 dark:hover:bg-slate-900"
+                          }`}
+                          style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
+                        >
+                          <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${active ? "bg-blue-100 dark:bg-blue-950" : "bg-slate-100/80 dark:bg-slate-800"}`}>
+                            <Icon className="size-4.5" />
+                          </div>
+                          <div>
+                            <p className="text-[13.5px] leading-none">{item.label}</p>
+                            <p className="text-[11px] text-slate-400 font-normal mt-1">{subtitles[item.label] ?? ""}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="my-2 border-t border-slate-100 dark:border-slate-800" />
+
+                  {/* Actions Area */}
+                  <div className="grid gap-2">
+                    {isAdmin && (
+                      <Link 
+                        to="/admin" 
+                        onClick={() => setOpen(false)} 
+                        className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all"
+                      >
+                        <Shield className="size-4.5 text-slate-400" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        const url = window.location.origin;
+                        if (navigator.share) {
+                          navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
+                        } else {
+                          navigator.clipboard.writeText(url);
+                          toast.success("Link copied to clipboard!");
+                        }
+                      }}
+                      className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-slate-600 dark:text-slate-350 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all w-full text-left"
+                    >
+                      <Share2 className="size-4.5 text-violet-500" />
+                      <span>Share with Friends</span>
+                    </button>
+                    <button 
+                      onClick={() => { signOut(); setOpen(false); }} 
+                      className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[13.5px] font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all w-full text-left"
+                    >
+                      <LogOut className="size-4.5" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Public items */}
+                  <div className="grid gap-2">
+                    {NAV.map((n, i) => {
+                      const Icon = n.icon;
+                      const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+                      const subtitles: Record<string, string> = {
+                        "Home": "Skyrovix main page",
+                        "Internship": "Tasks, projects and registration",
+                        "About": "Who we are and our goals",
+                        "Reviews": "Student testimonials and statistics",
+                        "Contact": "Customer support & assistance",
+                        "Verify": "Verify certificate credentials",
+                      };
+                      return (
+                        <button 
+                          key={n.to} 
+                          onClick={() => goTo(n.to)}
+                          className={`flex items-center gap-4.5 rounded-2xl p-3.5 transition-all text-left border ${
+                            active
+                              ? "bg-blue-50/50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-450 border-blue-100 dark:border-blue-950/40 font-bold"
+                              : "text-slate-655 dark:text-slate-300 border-transparent hover:bg-slate-50 dark:hover:bg-slate-900"
+                          }`}
+                          style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
+                        >
+                          <div className={`grid size-9 shrink-0 place-items-center rounded-xl ${active ? "bg-blue-100 dark:bg-blue-950" : "bg-slate-100/80 dark:bg-slate-800"}`}>
+                            <Icon className="size-4.5" />
+                          </div>
+                          <div>
+                            <p className="text-[13.5px] leading-none">{n.label}</p>
+                            <p className="text-[11px] text-slate-400 font-normal mt-1">{subtitles[n.label] ?? ""}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="my-4 border-t border-slate-100 dark:border-slate-800" />
+                  
+                  {/* Main Call to Action */}
+                  <Link 
+                    to="/auth" 
+                    onClick={() => setOpen(false)} 
+                    className="flex items-center justify-center gap-2 mt-1 rounded-2xl bg-[#002244] hover:bg-[#003366] text-white py-4 text-center text-sm font-semibold shadow-md shadow-[#002244]/15 active:scale-98 transition-all w-full"
+                  >
+                    <Rocket className="size-4" />
+                    <span>Get Started Now</span>
                   </Link>
-                )}
-                <button
-                  onClick={() => {
-                    setOpen(false);
-                    const url = window.location.origin;
-                    if (navigator.share) {
-                      navigator.share({ title: "Skyrovix Internship", text: "Check out this internship platform!", url });
-                    } else {
-                      navigator.clipboard.writeText(url);
-                      toast.success("Link copied to clipboard!");
-                    }
-                  }}
-                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left"
-                  style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.36s forwards` }}
-                >
-                  <Share2 className="size-4 shrink-0 text-violet-500" /> Share with Friends
-                </button>
-                <button onClick={() => { signOut(); setOpen(false); }} className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 transition-all w-full text-left"
-                  style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out 0.39s forwards` }}>
-                  <LogOut className="size-4" /> Sign out
-                </button>
-              </>
-            ) : (
-              <>
-                {NAV.map((n, i) => {
-                  const Icon = n.icon;
-                  const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
-                  return (
-                    <button key={n.to} onClick={() => goTo(n.to)}
-                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all w-full text-left ${
-                        active
-                          ? "bg-[#07284a]/8 dark:bg-white/10 text-[#07284a] dark:text-white"
-                          : "text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5"
-                      }`}
-                      style={{ opacity: 0, animation: `fade-in-up 0.25s ease-out ${0.03 * i}s forwards` }}
-                    >
-                      <Icon className="size-4 shrink-0" />{n.label}
-                    </button>
-                  );
-                })}
-                <div className="my-2 border-t border-border" />
-                <Link to="/auth" onClick={() => setOpen(false)} className="mt-1 rounded-xl bg-[#07284a] px-4 py-3.5 text-center text-sm font-medium text-white">
-                  Sign in to get started
-                </Link>
-              </>
-            )}
+                </>
+              )}
+            </div>
+            
+            {/* Drawer footer details */}
+            <div className="mt-8 text-center text-[11px] text-slate-400">
+              <p>&copy; {new Date().getFullYear()} Skyrovix IT Solutions.</p>
+            </div>
           </div>
         </div>
       )}

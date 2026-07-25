@@ -191,7 +191,7 @@ function InternshipDetailsPage() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <CourseJsonLd
         name={`${domain.name} Internship`}
         description={detail.longDescription || domain.description || ""}

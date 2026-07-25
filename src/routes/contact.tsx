@@ -45,7 +45,7 @@ const ITEMS = [
 
 function ContactPage() {
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <LocalBusinessJsonLd />
       <BreadcrumbJsonLd
         items={[

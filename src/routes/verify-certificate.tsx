@@ -110,7 +110,7 @@ function VerifyPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: "https://skyrovix.online/" },

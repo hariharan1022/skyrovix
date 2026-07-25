@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VerifyCertificateRouteImport } from './routes/verify-certificate'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DomainsRouteImport } from './routes/domains'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -34,6 +35,11 @@ const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/reviews': typeof ReviewsRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/about': typeof NavbarLayoutAboutRoute
@@ -129,6 +136,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/contact': typeof ContactRoute
   '/privacy': typeof PrivacyRoute
+  '/reviews': typeof ReviewsRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/': typeof NavbarLayoutIndexRoute
@@ -147,6 +155,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/domains': typeof DomainsRouteWithChildren
   '/privacy': typeof PrivacyRoute
+  '/reviews': typeof ReviewsRoute
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/_navbar-layout/_authenticated': typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
@@ -167,6 +176,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/privacy'
+    | '/reviews'
     | '/terms'
     | '/verify-certificate'
     | '/about'
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/contact'
     | '/privacy'
+    | '/reviews'
     | '/terms'
     | '/verify-certificate'
     | '/'
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/domains'
     | '/privacy'
+    | '/reviews'
     | '/terms'
     | '/verify-certificate'
     | '/_navbar-layout/_authenticated'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DomainsRoute: typeof DomainsRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
+  ReviewsRoute: typeof ReviewsRoute
   TermsRoute: typeof TermsRoute
   VerifyCertificateRoute: typeof VerifyCertificateRoute
   ApiCronCleanupSessionsRoute: typeof ApiCronCleanupSessionsRoute
@@ -236,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -393,6 +413,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DomainsRoute: DomainsRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
+  ReviewsRoute: ReviewsRoute,
   TermsRoute: TermsRoute,
   VerifyCertificateRoute: VerifyCertificateRoute,
   ApiCronCleanupSessionsRoute: ApiCronCleanupSessionsRoute,

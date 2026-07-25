@@ -276,7 +276,7 @@ function DomainsPage() {
   const selectedDomainObj = DOMAINS.find(d => d.slug === applyDomain);
 
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <BreadcrumbJsonLd
         items={[
           { name: "Home", url: "https://skyrovix.online/" },
@@ -296,13 +296,13 @@ function DomainsPage() {
             {/* Left Column: Platform info & Live preview */}
             <SlideLeft delay={0.05} className="lg:col-span-5 space-y-6 lg:sticky lg:top-24">
               <div>
-                <Badge variant="outline" className="mb-3 border-[#07284a]/15 bg-white/60 dark:bg-[#0f172a]/60 text-[#07284a] dark:text-[#60a5fa] px-3 py-1 font-semibold shadow-sm backdrop-blur">
+                <Badge variant="outline" className="mb-3 border-slate-200 dark:border-[#07284a]/15 bg-white/65 dark:bg-[#0f172a]/60 text-[#07284a] dark:text-[#60a5fa] px-3 py-1 font-semibold shadow-sm backdrop-blur">
                   <ShieldCheck className="mr-1.5 size-3.5" /> MSME Registered Platform
                 </Badge>
                 <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-[#07284a] dark:text-white leading-[1.15]">
                   Start Your <span className="brand-text">Virtual Internship</span>
                 </h1>
-                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                   Join task-based remote internships designed to build real portfolio skills. Earn offer letters, digital ID cards, and QR-verified certificates.
                 </p>
               </div>
@@ -334,28 +334,28 @@ function DomainsPage() {
                   </div>
                 </div>
               ) : (
-                <div className="rounded-3xl border-2 border-dashed border-border/40 p-8 flex flex-col items-center justify-center text-center bg-[#07284a]/5 dark:bg-slate-900/10 min-h-[200px]">
+                <div className="rounded-3xl border border-slate-200 dark:border-border/40 p-8 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-slate-900/10 shadow-sm backdrop-blur-sm min-h-[200px]">
                   <Sparkles className="size-10 text-amber-500 mb-3 animate-bounce" />
-                  <h4 className="font-bold text-sm text-foreground">Select an Internship Domain</h4>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">Choose your preferred stream on the right to preview task scope, curriculum workloads, and verified certificates.</p>
+                  <h4 className="font-bold text-sm text-[#07284a] dark:text-white">Select an Internship Domain</h4>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-1.5 max-w-xs leading-relaxed font-medium">Choose your preferred stream on the right to preview task scope, curriculum workloads, and verified certificates.</p>
                 </div>
               )}
 
               {/* Core Features */}
               <div className="space-y-3.5 pt-2">
-                <h4 className="font-bold text-xs uppercase text-muted-foreground tracking-widest">Internship Inclusions</h4>
+                <h4 className="font-bold text-xs uppercase text-[#07284a] dark:text-slate-400 tracking-widest">Internship Inclusions</h4>
                 <div className="grid gap-3 text-xs">
                   <div className="flex items-start gap-2.5">
                     <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground"><strong className="text-foreground">Offer Letter:</strong> Dispatched to email instantly upon registration.</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-medium"><strong className="text-slate-800 dark:text-white font-bold">Offer Letter:</strong> Dispatched to email instantly upon registration.</span>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground"><strong className="text-foreground">Student ID Card:</strong> Issued digitally in your dashboard immediately.</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-medium"><strong className="text-slate-800 dark:text-white font-bold">Student ID Card:</strong> Issued digitally in your dashboard immediately.</span>
                   </div>
                   <div className="flex items-start gap-2.5">
                     <CheckCircle2 className="size-4.5 text-emerald-500 shrink-0 mt-0.5" />
-                    <span className="text-muted-foreground"><strong className="text-foreground">Verified Certificates:</strong> QR-linked and searchable credentials portal.</span>
+                    <span className="text-slate-600 dark:text-slate-300 font-medium"><strong className="text-slate-800 dark:text-white font-bold">Verified Certificates:</strong> QR-linked and searchable credentials portal.</span>
                   </div>
                 </div>
               </div>
@@ -363,7 +363,7 @@ function DomainsPage() {
 
             {/* Right Column: Premium Form */}
             <SlideRight delay={0.1} className="lg:col-span-7">
-              <div className="rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl">
+              <div className="rounded-3xl border border-border/40 bg-white/60 pt-9 pb-6 px-6 sm:pt-12 sm:pb-8 sm:px-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl">
                 <form onSubmit={submitApplication} className="space-y-6">
                   
                   {/* Select Domain Dropdown */}

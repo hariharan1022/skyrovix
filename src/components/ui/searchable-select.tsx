@@ -86,7 +86,7 @@ export function SearchableSelect({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-hidden rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-lg flex flex-col">
+        <div className="absolute z-[70] mt-1 max-h-60 w-full overflow-hidden rounded-xl border border-border/60 bg-popover text-popover-foreground shadow-lg flex flex-col">
           <div className="flex items-center border-b border-border/40 px-2 py-1 bg-background/20">
             <Search className="size-4 opacity-50 shrink-0 mr-1.5 ml-1 text-muted-foreground" />
             <input

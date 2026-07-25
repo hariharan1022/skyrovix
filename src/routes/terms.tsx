@@ -34,7 +34,7 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <WebPageJsonLd
         title="Terms of Service — Skyrovix Internship Platform"
         description="Skyrovix terms of service governing internship participation, certification, payment, and user conduct."

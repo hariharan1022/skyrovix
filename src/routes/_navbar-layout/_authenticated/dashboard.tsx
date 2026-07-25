@@ -23,10 +23,10 @@ import { toast } from "sonner";
 import { QRCodeSVG } from "qrcode.react";
 import { IDCard } from "@/components/IDCard";
 import { TasksSection } from "@/components/TasksSection";
-import { OfferLetterDoc, CertificateDoc, downloadPdf } from "@/components/pdf-docs";
+import { OfferLetterDoc, CertificateDoc, IDCardDoc, downloadIDCard, downloadPdf } from "@/components/pdf-docs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  Copy, Download, FileText, CheckCircle2, Clock, XCircle, Upload, Award,
+  Copy, Download, FileText, CheckCircle2, Clock, XCircle, X, Upload, Award,
   BookOpen, GraduationCap, ArrowRight, Sparkles, User, Mail, Building,
   Phone, Calendar, ChevronRight, ExternalLink, Shield, Bell, Trophy,
   Target, BarChart3, Layers, Brain, Linkedin, Play, ChevronLeft,
@@ -1030,16 +1030,124 @@ function Dashboard() {
 
     if (active === "internships") {
       const enrolledSlugsForNew = new Set(appsList?.filter(a => a.status === "ongoing" || a.status === "approved" || a.status === "pending").map(a => a.domain) ?? []);
+      const ongoingApps = appsList?.filter(a => a.status === "ongoing" || a.status === "approved" || a.status === "pending") ?? [];
+      const completedAppsList = appsList?.filter(a => a.status === "completed") ?? [];
+
+      // Check if an internship detail is selected
+      const selectedId = detailView?.type === "app" ? detailView.id : null;
+      const selectedApp = selectedId ? appsList?.find(a => a.id === selectedId) ?? null : null;
+
+      if (selectedApp) {
+        const da = selectedApp;
+        const dd = getDomain(da.domain);
+        const daSubs = allAppSubmissions?.filter((s: any) => s.application_id === da.id) ?? [];
+        const daApproved = daSubs.filter((s: any) => s.status === "approved").length;
+        const daTotal = allTasksByDomain?.[da.domain]?.length ?? 5;
+        const daCert = allAppCerts?.find((c: any) => c.application_id === da.id) ?? null;
+        const daPayment = allPayments?.find((p: any) => p.application_id === da.id) ?? null;
+        const daSubmissionStatus = da.submission_status ?? "in_progress";
+        const daSteps = [
+          { label: "Application Submitted", done: true },
+          { label: "Tasks Approved", done: daApproved >= daTotal },
+          { label: "Submitted for Verification", done: daSubmissionStatus === "submitted" || daSubmissionStatus === "approved" || daSubmissionStatus === "rejected" },
+          { label: "Admin Verified", done: daSubmissionStatus === "approved" || !!daCert },
+          { label: "Certificate Issued", done: !!daCert },
+        ];
+        const daCurrentStep = daSteps.findIndex((s) => !s.done);
+
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center">
+              <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground hover:text-foreground rounded-xl" onClick={() => setDetailView(null)}>
+                <ChevronLeft className="size-4" /> Back to Internships
+              </Button>
+            </div>
+            <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+              <div className="absolute -right-16 -top-16 size-48 rounded-full bg-[#07284a]/10 blur-[80px]" />
+              <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${dd?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md`}>
+                    <span className="text-2xl font-bold">{dd?.icon ?? "?"}</span>
+                  </div>
+                  <div>
+                    <h2 className="font-display text-2xl font-bold">{dd?.name ?? da.domain}</h2>
+                    <p className="text-xs text-muted-foreground mt-1">{da.intern_id} · {da.duration} Month{(da.duration ?? 1) > 1 ? "s" : ""}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className={`text-xs px-3 py-1.5 rounded-xl border-0 ${da.status === "completed" ? "bg-emerald-500 text-white" : da.status === "ongoing" ? "bg-blue-600 text-white" : da.status === "approved" ? "bg-amber-500 text-white" : "bg-gray-500 text-white"}`}>
+                    {da.status === "completed" ? "Completed" : da.status === "ongoing" ? "Ongoing" : da.status === "approved" ? "Approved" : da.status === "pending" ? "Pending Approval" : da.status}
+                  </Badge>
+                  <SubmissionStatusBadge status={daSubmissionStatus} />
+                </div>
+              </div>
+            </div>
+            <TimelineSection steps={daSteps} currentStep={daCurrentStep} />
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-6">
+                <IDCardSection app={da} />
+                <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+                  <h3 className="flex items-center gap-2 font-bold text-sm"><ScrollText className="size-4 text-primary" /> Application Details</h3>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">Start Date</p><p className="font-semibold mt-0.5">{new Date(da.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">End Date</p><p className="font-semibold mt-0.5">{da.completed_at ? new Date(da.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3"><p className="text-muted-foreground">Approved Tasks</p><p className="font-semibold mt-0.5">{daApproved} of {daTotal}</p></div>
+                    <div className="rounded-xl border border-border/30 bg-secondary/30 p-3">
+                      <p className="text-muted-foreground">Payment Details</p>
+                      {daPayment ? (
+                        <span className={`font-semibold mt-0.5 inline-flex items-center gap-1 ${daPayment.status === "verified" ? "text-emerald-600" : "text-amber-500"}`}>{daPayment.status === "verified" ? "Verified" : "Pending"}</span>
+                      ) : <p className="font-semibold mt-0.5 text-muted-foreground">—</p>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <UnlockedCertificateCard app={da} cert={daCert} domain={dd} />
+                <LockedCertificateCard
+                  app={da} internApproved={daApproved} internTotal={daTotal} payment={daPayment}
+                  couponResult={couponResult} validatingCoupon={validatingCoupon} couponCode={couponCode}
+                  setCouponCode={setCouponCode} handleApplyCoupon={handleApplyCoupon}
+                  handleRemoveCoupon={handleRemoveCoupon} utrNumber={utrNumber}
+                  setUtrNumber={setUtrNumber} paymentScreenshot={paymentScreenshot}
+                  setPaymentScreenshot={setPaymentScreenshot} submittingPayment={submittingPayment}
+                  handlePaymentSubmit={handlePaymentSubmit} certStatus={certStatus}
+                  doFreeCertificate={doFreeCertificate}
+                />
+              </div>
+            </div>
+            {daSubs.length > 0 && (
+              <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+                <h3 className="font-bold text-sm">Task Submissions Logs</h3>
+                <div className="divide-y divide-border/40 text-xs">
+                  {daSubs.map((sub: any) => (
+                    <div key={sub.id} className="py-2.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-foreground truncate">Task Reference {sub.task_id ? sub.task_id.slice(-6) : sub.id?.slice(-6) ?? "—"}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Submitted {new Date(sub.submitted_at ?? sub.created_at).toLocaleDateString("en-IN")}</p>
+                      </div>
+                      <Badge className={`text-[9px] font-bold ${sub.status === "approved" ? "bg-emerald-500/10 text-emerald-600/90 border-0" : "bg-amber-500/10 text-amber-500 border-0"}`}>{sub.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      }
+
       return (
         <div className="space-y-6">
           <DashboardHero badge="My Internships" title="My Internships" description="View all your enrolled internship domains, track progress, and apply for new internship streams." icon={Briefcase} />
 
-          {/* Enrolled Internships List */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Enrolled Streams</h4>
-            {appsList?.length ? (
-              <div className="space-y-4">
-                {appsList.map((a) => {
+          {/* Current Internships */}
+          {ongoingApps.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1 flex items-center gap-2">
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                Current Internships
+              </h4>
+              <div className="space-y-3">
+                {ongoingApps.map((a) => {
                   const d = getDomain(a.domain);
                   const aSubs = allAppSubmissions?.filter((s: any) => s.application_id === a.id) ?? [];
                   const aApproved = aSubs.filter((s: any) => s.status === "approved").length;
@@ -1047,7 +1155,7 @@ function Dashboard() {
                   const pct = aTotal > 0 ? Math.round((aApproved / aTotal) * 100) : 0;
                   const aCert = allAppCerts?.find((c: any) => c.application_id === a.id);
                   return (
-                    <div key={a.id} className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5">
+                    <button key={a.id} onClick={() => setDetailView({ type: "app", id: a.id })} className="w-full text-left rounded-3xl border border-emerald-200/60 bg-gradient-to-r from-emerald-50/50 to-white/60 p-5 backdrop-blur-xl dark:from-emerald-950/20 dark:to-slate-900/60 dark:border-emerald-800/30 shadow-sm hover:shadow-md hover:border-emerald-300/80 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group">
                       <div className="flex items-start gap-4">
                         <div className={`grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${d?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md text-2xl`}>
                           {d?.icon ?? "🎓"}
@@ -1055,7 +1163,7 @@ function Dashboard() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <h3 className="font-bold text-base text-foreground">{d?.name ?? a.domain}</h3>
-                            <Badge className={`text-[10px] px-2 py-0.5 rounded-lg border-0 ${a.status === "completed" ? "bg-emerald-500 text-white" : a.status === "ongoing" ? "bg-blue-600 text-white" : "bg-amber-500 text-white"}`}>{a.status}</Badge>
+                            <Badge className="text-[10px] px-2 py-0.5 rounded-lg border-0 bg-emerald-500 text-white">{a.status === "ongoing" ? "Active" : a.status}</Badge>
                             {aCert && <Badge className="text-[10px] px-2 py-0.5 rounded-lg border-0 bg-emerald-600 text-white">Certified</Badge>}
                           </div>
                           <p className="text-xs text-muted-foreground mb-3">ID: <span className="font-mono font-bold">{a.intern_id}</span> · {a.duration ?? 1} month{(a.duration ?? 1) > 1 ? "s" : ""} · Applied {new Date(a.created_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</p>
@@ -1066,19 +1174,54 @@ function Dashboard() {
                             <span className="text-xs font-bold text-foreground shrink-0">{aApproved}/{aTotal} tasks</span>
                           </div>
                         </div>
+                        <ChevronRight className="size-5 text-muted-foreground/40 group-hover:text-muted-foreground/80 group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
-            ) : (
-              <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-8 text-center backdrop-blur-xl dark:bg-slate-900/40">
-                <Briefcase className="size-12 mx-auto mb-4 text-muted-foreground/50" />
-                <h3 className="text-base font-bold">No Internships Yet</h3>
-                <p className="text-sm text-muted-foreground mt-1">Use the form below to apply for your first internship.</p>
+            </div>
+          )}
+
+          {/* Past Internships */}
+          {completedAppsList.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground px-1">Past Internships</h4>
+              <div className="space-y-3">
+                {completedAppsList.map((a) => {
+                  const d = getDomain(a.domain);
+                  const aCert = allAppCerts?.find((c: any) => c.application_id === a.id);
+                  return (
+                    <button key={a.id} onClick={() => setDetailView({ type: "app", id: a.id })} className="w-full text-left rounded-3xl border border-border/40 bg-white/50 p-5 backdrop-blur-xl dark:bg-slate-900/50 dark:border-white/5 shadow-sm hover:shadow-md hover:border-border/60 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 group">
+                      <div className="flex items-start gap-4">
+                        <div className={`grid size-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br ${d?.color ?? "from-[#07284a] to-blue-600"} text-white shadow-md text-2xl opacity-70`}>
+                          {d?.icon ?? "🎓"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-1">
+                            <h3 className="font-bold text-base text-foreground">{d?.name ?? a.domain}</h3>
+                            <Badge className="text-[10px] px-2 py-0.5 rounded-lg border-0 bg-slate-400 text-white">Completed</Badge>
+                            {aCert && <Badge className="text-[10px] px-2 py-0.5 rounded-lg border-0 bg-emerald-600 text-white">Certified</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground">ID: <span className="font-mono font-bold">{a.intern_id}</span> · {a.duration ?? 1} month{(a.duration ?? 1) > 1 ? "s" : ""} · {a.completed_at ? `Completed ${new Date(a.completed_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}` : ""}</p>
+                        </div>
+                        <ChevronRight className="size-5 text-muted-foreground/40 group-hover:text-muted-foreground/80 group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!appsList?.length && (
+            <div className="rounded-3xl border border-dashed border-border/50 bg-white/40 p-8 text-center backdrop-blur-xl dark:bg-slate-900/40">
+              <Briefcase className="size-12 mx-auto mb-4 text-muted-foreground/50" />
+              <h3 className="text-base font-bold">No Internships Yet</h3>
+              <p className="text-sm text-muted-foreground mt-1">Use the form below to apply for your first internship.</p>
+            </div>
+          )}
 
           {/* ─── Apply for New Internship Form ─── */}
           <div className="rounded-3xl border border-[#07284a]/20 bg-gradient-to-br from-[#07284a]/5 to-blue-400/5 backdrop-blur-xl p-6 sm:p-8 space-y-6">
@@ -1273,62 +1416,153 @@ function Dashboard() {
     }
 
     if (active === "payment") {
+      const isPaymentDone = payment?.status === "verified";
       return (
         <div className="space-y-6">
           <DashboardHero badge="Payment" title="Payment" description="View your payment status and submit payment proof for your certificate." icon={CreditCard} />
-          {payment ? (
-            <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-4">
+
+          {/* Status Banner */}
+          {isPaymentDone ? (
+            <div className="rounded-3xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50/80 to-white p-6 backdrop-blur-xl dark:from-emerald-950/20 dark:to-slate-900/60 dark:border-emerald-800/30">
               <div className="flex items-center gap-3">
-                <div className="grid size-12 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-emerald-500/10 text-emerald-600">
                   <CheckCircle2 className="size-6" />
                 </div>
                 <div>
-                  <p className="font-bold text-base">Payment Verified</p>
+                  <p className="font-bold text-base text-foreground">Payment Verified</p>
                   <p className="text-xs text-muted-foreground">Your payment has been received and verified.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs pt-2 border-t border-border/40">
-                <div><p className="text-muted-foreground">Status</p><p className="font-bold text-emerald-600 mt-0.5 capitalize">{payment.status}</p></div>
-                <div><p className="text-muted-foreground">UTR / Reference</p><p className="font-bold font-mono mt-0.5">{payment.utr_number || "—"}</p></div>
-                <div><p className="text-muted-foreground">Paid On</p><p className="font-bold mt-0.5">{payment.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs pt-4 mt-4 border-t border-emerald-200/40">
+                <div><p className="text-muted-foreground">Status</p><p className="font-bold text-emerald-600 mt-0.5 capitalize">{payment?.status}</p></div>
+                <div><p className="text-muted-foreground">UTR / Reference</p><p className="font-bold font-mono mt-0.5">{payment?.utr_number || "—"}</p></div>
+                <div><p className="text-muted-foreground">Verified On</p><p className="font-bold mt-0.5">{payment?.verified_at ? new Date(payment.verified_at).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}</p></div>
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              {internTotal > 0 && internApproved >= internTotal ? (
-                <LockedCertificateCard
-                  app={app}
-                  internApproved={internApproved}
-                  internTotal={internTotal}
-                  payment={payment}
-                  utrNumber={utrNumber}
-                  setUtrNumber={setUtrNumber}
-                  paymentScreenshot={paymentScreenshot}
-                  setPaymentScreenshot={setPaymentScreenshot}
-                  submittingPayment={submittingPayment}
-                  handlePaymentSubmit={handlePaymentSubmit}
-                />
-              ) : (
-                <div className="rounded-3xl border border-border/40 bg-white/60 p-6 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-5">
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-12 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
-                      <CreditCard className="size-6" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-base">Payment Pending</p>
-                      <p className="text-xs text-muted-foreground">Practical tasks are ongoing. You can submit your payment once all tasks are completed.</p>
-                    </div>
-                  </div>
-                  <div className="rounded-2xl bg-gradient-to-br from-[#051c36] to-[#072d54] p-5 text-white space-y-2 shadow-lg">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-blue-200">Pay via GPay / PhonePe / UPI</p>
-                    <p className="text-2xl font-mono font-extrabold tracking-tight">{PAYMENT.upiId}</p>
-                    <p className="text-sm text-blue-100">Payee: <span className="font-bold text-white">{PAYMENT.payeeName}</span></p>
-                    <p className="text-sm text-blue-100">Certification Fee: <span className="font-bold text-white">₹{PAYMENT.amount}</span></p>
-                  </div>
+            <div className="rounded-3xl border border-amber-200/60 bg-gradient-to-br from-amber-50/80 to-white p-6 backdrop-blur-xl dark:from-amber-950/20 dark:to-slate-900/60 dark:border-amber-800/30">
+              <div className="flex items-center gap-3">
+                <div className="grid size-12 shrink-0 place-items-center rounded-2xl bg-amber-500/10 text-amber-600">
+                  <Clock className="size-6" />
                 </div>
-              )}
+                <div>
+                  <p className="font-bold text-base text-foreground">Payment Pending</p>
+                  <p className="text-xs text-muted-foreground">Complete your certification fee payment to proceed with verification.</p>
+                </div>
+              </div>
             </div>
           )}
+
+          {/* QR Code & Payment Form — always visible */}
+          <div className="rounded-3xl border border-border/40 bg-white/60 p-6 sm:p-8 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 space-y-6">
+            <div>
+              <h3 className="flex items-center gap-2 font-bold text-base text-foreground"><CreditCard className="size-5 text-primary" /> Certificate Fee Payment</h3>
+              <p className="text-xs text-muted-foreground mt-1">Scan the QR code or use the UPI ID below to pay the certification fee.</p>
+            </div>
+
+            <div className="grid md:grid-cols-12 gap-8 items-start">
+              {/* QR Code Section */}
+              <div className="md:col-span-5 rounded-2xl border border-border/30 bg-gradient-to-br from-slate-50/50 to-white p-6 flex flex-col items-center text-center gap-4 relative overflow-hidden shadow-sm dark:from-slate-800/30 dark:to-slate-900/30">
+                <style>{`
+                  @keyframes scanner-laser {
+                    0%, 100% { top: 0%; opacity: 0.3; }
+                    50% { top: 100%; opacity: 1; }
+                  }
+                `}</style>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Scan QR Code via GPay or any UPI App</span>
+
+                <div className="relative p-4 bg-white dark:bg-white rounded-2xl shadow-lg border border-border/10 overflow-hidden group max-w-[135px] sm:max-w-none mx-auto sm:mx-0">
+                  <div className="absolute left-0 right-0 h-[2.5px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent shadow-[0_0_8px_rgba(16,185,129,0.8)] z-10 pointer-events-none animate-[scanner-laser_2.5s_infinite_ease-in-out]" />
+                  <QRCodeSVG value={`upi://pay?pa=${PAYMENT.upiId}&pn=${encodeURIComponent(PAYMENT.payeeName)}&am=${PAYMENT.amount}&cu=${PAYMENT.currency}`} size={180} style={{ maxWidth: "100%", height: "auto" }} className="w-36 sm:w-[180px]" />
+                </div>
+
+                <div className="flex flex-col items-center gap-1.5 w-full pt-1 border-t border-border/10">
+                  <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Supported Payment Apps</span>
+                  <div className="flex gap-1.5 text-[10px] font-bold flex-wrap justify-center">
+                    <span className="bg-blue-600/10 text-blue-600 px-2.5 py-1 rounded-md border border-blue-600/10">GPay</span>
+                    <span className="bg-purple-600/10 text-purple-600 px-2.5 py-1 rounded-md border border-purple-600/10">PhonePe</span>
+                    <span className="bg-sky-600/10 text-sky-600 px-2.5 py-1 rounded-md border border-sky-600/10">Paytm</span>
+                    <span className="bg-emerald-600/10 text-emerald-600 px-2.5 py-1 rounded-md border border-emerald-600/10">UPI</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 w-full pt-2 border-t border-border/10">
+                  <p className="text-[10px] text-muted-foreground">UPI ID</p>
+                  <p className="font-mono font-bold text-sm text-foreground bg-secondary/30 px-3 py-1.5 rounded-lg">{PAYMENT.upiId}</p>
+                  <p className="text-[11px] text-muted-foreground">Payee: <span className="font-semibold text-foreground">{PAYMENT.payeeName}</span></p>
+                </div>
+
+                <Button size="sm" variant="outline" className="rounded-xl h-8 text-[11px] border-border/50 gap-1.5 shadow-sm bg-white w-full max-w-[200px]"
+                  onClick={() => {
+                    navigator.clipboard.writeText(PAYMENT.upiId);
+                    toast.success("UPI ID copied to clipboard!");
+                  }}>
+                  <Copy className="size-3.5" /> Copy UPI ID
+                </Button>
+              </div>
+
+              {/* Payment Form */}
+              <div className="md:col-span-7 space-y-5">
+                {/* Fee Summary */}
+                <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-slate-50/50 to-white p-5 shadow-sm dark:from-slate-800/30 dark:to-slate-900/30">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-[10px] uppercase font-bold tracking-wider">Certification Fee</p>
+                      <p className="font-extrabold text-3xl mt-1 text-emerald-600 dark:text-emerald-400">₹{PAYMENT.amount}</p>
+                    </div>
+                  </div>
+                  {isPaymentDone && (
+                    <div className="mt-4 pt-4 border-t border-border/30 flex items-center gap-2 text-emerald-600">
+                      <CheckCircle2 className="size-4" />
+                      <span className="text-xs font-bold">Payment already completed and verified</span>
+                    </div>
+                  )}
+                </div>
+
+                {!isPaymentDone && (
+                  <>
+                    {/* UTR Number Input */}
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">UPI Transaction UTR / Reference Number *</Label>
+                      <Input
+                        value={utrNumber}
+                        onChange={(e) => setUtrNumber(e.target.value)}
+                        placeholder="Enter the 12-digit UTR number from your payment"
+                        className="h-12 rounded-xl bg-background/50 border-border/60 text-sm font-mono"
+                      />
+                      <p className="text-[10px] text-muted-foreground">You can find this in your UPI app payment history</p>
+                    </div>
+
+                    {/* Payment Screenshot Upload */}
+                    <div className="space-y-2">
+                      <Label className="text-xs sm:text-sm font-bold text-foreground">Payment Screenshot (Optional)</Label>
+                      <div className="border-2 border-dashed border-border/40 rounded-2xl p-5 text-center hover:border-border/60 transition-colors bg-background/30">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                          onChange={e => setPaymentScreenshot(e.target.files?.[0] ?? null)}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      className="w-full h-12 rounded-2xl font-bold text-sm gap-2 brand-gradient text-white border-0 shadow-lg"
+                      disabled={!utrNumber.trim() || submittingPayment}
+                      onClick={handlePaymentSubmit}
+                    >
+                      {submittingPayment ? (
+                        <><Loader2 className="size-4 animate-spin" /> Submitting payment details...</>
+                      ) : (
+                        <><CreditCard className="size-4" /> Pay Fee ₹{PAYMENT.amount} & Verify</>
+                      )}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       );
     }
@@ -1627,7 +1861,7 @@ function HeroSection({ app, internApproved, durationLimit, cert }: { app: any; i
               <Clock className="size-3.5 text-blue-300" />
               <span>Duration: {app.duration ?? 1} Month{(app.duration ?? 1) > 1 ? "s" : ""}</span>
             </span>
-            <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 backdrop-blur-md shadow-sm">
+            <span className="hidden sm:flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5 backdrop-blur-md shadow-sm">
               <ListChecks className="size-3.5 text-blue-300" />
               <span>Tasks: {internApproved} / {durationLimit} Approved</span>
             </span>
@@ -1644,10 +1878,9 @@ function HeroSection({ app, internApproved, durationLimit, cert }: { app: any; i
             </Button>
 
             <Button size="sm" variant="ghost" className="rounded-2xl h-10 text-xs font-bold bg-white/10 hover:!bg-white/20 border border-white/10 hover:border-white/20 text-white hover:!text-white gap-2 transition-all hover:scale-105 active:scale-95 shadow-black/10 hover:shadow-lg hover:-translate-y-0.5"
-              onClick={() => downloadPdf(
-                <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
-                `IDCard_${app.intern_id}.pdf`
-              )}>
+              onClick={() => downloadIDCard({
+                fullName: app.full_name, internId: app.intern_id, domain: domain?.name ?? app.domain, issuedAt: app.offer_issued_at, photoUrl: app.photo_url
+              })}>
                 <Download className="size-4 text-emerald-300" /> Download ID Card
             </Button>
 
@@ -1813,60 +2046,95 @@ function ProfilePanel({ app, onChange }: { app: Application; onChange: () => voi
   const domain = getDomain(app.domain);
 
   if (editing) return (
-    <Card className="overflow-hidden rounded-3xl border-border/40 bg-white/60 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-2xl transition-all duration-300">
-      <div className="relative bg-gradient-to-br from-[#07284a] via-[#093a6c] to-[#0a4c8f] px-6 py-8 text-white">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
-        <h3 className="text-xl font-extrabold font-display">Edit Profile Information</h3>
-        <p className="text-xs text-blue-200 mt-1">Make sure all details are accurate to ensure clean certificate generation.</p>
-      </div>
-      <CardContent className="p-6">
-        <form onSubmit={save} className="grid gap-6 md:grid-cols-2">
-          {/* Avatar Upload Preview */}
-          <div className="md:col-span-2 flex flex-col items-center justify-center border border-dashed border-border/65 rounded-2xl p-6 bg-slate-50/50 dark:bg-slate-950/20">
-            <div className="relative mb-3 group">
-              {(photoPreview || app.photo_url) ? (
-                <img src={photoPreview || app.photo_url || ""} alt="" className="size-24 rounded-3xl object-cover border-4 border-white dark:border-slate-800 shadow-md transition-all group-hover:scale-105" />
-              ) : (
-                <div className="grid size-24 place-items-center rounded-3xl border-4 border-white dark:border-slate-800 brand-gradient text-3xl font-extrabold text-white shadow-md">
-                  {app.full_name.charAt(0).toUpperCase()}
-                </div>
-              )}
+    <div className="space-y-6">
+      <Card className="overflow-hidden rounded-3xl border-border/40 bg-white/60 backdrop-blur-xl dark:bg-slate-900/60 dark:border-white/5 shadow-xl transition-all duration-300">
+        <div className="relative bg-gradient-to-br from-[#07284a] via-[#0a3d6b] to-[#0d5a9e] px-6 py-8 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_60%)] pointer-events-none" />
+          <div className="absolute -right-12 -top-12 size-40 rounded-full bg-white/5 blur-2xl" />
+          <div className="absolute -bottom-12 -left-12 size-40 rounded-full bg-blue-400/5 blur-2xl" />
+          <div className="relative z-10">
+            <h3 className="text-xl font-extrabold font-display">Edit Profile Information</h3>
+            <p className="text-xs text-blue-200 mt-1">Make sure all details are accurate to ensure clean certificate generation.</p>
+          </div>
+        </div>
+        <CardContent className="p-6 sm:p-8">
+          <form onSubmit={save} className="space-y-6">
+            {/* Avatar Upload */}
+            <div className="flex flex-col sm:flex-row items-center gap-6 rounded-2xl border border-dashed border-border/60 bg-gradient-to-br from-slate-50/50 to-white p-6 dark:from-slate-800/20 dark:to-slate-900/20">
+              <div className="relative group shrink-0">
+                <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-[#07284a] to-blue-500 opacity-30 blur-sm group-hover:opacity-50 transition-opacity" />
+                {(photoPreview || app.photo_url) ? (
+                  <img src={photoPreview || app.photo_url || ""} alt="" className="relative size-24 rounded-2xl object-cover border-4 border-white dark:border-slate-800 shadow-md transition-all group-hover:scale-105" />
+                ) : (
+                  <div className="relative grid size-24 place-items-center rounded-2xl border-4 border-white dark:border-slate-800 brand-gradient text-3xl font-extrabold text-white shadow-md transition-all group-hover:scale-105">
+                    {app.full_name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="text-sm font-bold text-foreground">Profile Photo</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5 mb-3">Upload a clear, professional photo for your ID card and certificate.</p>
+                <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="h-10 file:text-xs rounded-xl border-border/60 bg-white max-w-xs cursor-pointer" />
+              </div>
             </div>
-            <Label className="text-xs font-semibold text-foreground mb-2">Change Profile Photo</Label>
-            <Input type="file" accept="image/*" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} className="h-10 file:text-xs rounded-xl border-border/60 bg-white max-w-xs text-center cursor-pointer" />
-          </div>
 
-          <div className="md:col-span-2">
-            <Label className="text-xs font-semibold text-foreground">Full Name *</Label>
-            <Input name="full_name" defaultValue={app.full_name} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground">Phone Number *</Label>
-            <Input name="phone" type="tel" defaultValue={app.phone ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground">Year of Study *</Label>
-            <Input name="year" defaultValue={app.year ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground">College / Institution *</Label>
-            <Input name="college" defaultValue={app.college ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground">Course / Branch *</Label>
-            <Input name="course" defaultValue={app.course ?? ""} required className="mt-1.5 h-11 rounded-xl border-border/60 bg-white text-sm" />
-          </div>
-          <div className="md:col-span-2 flex gap-3 mt-2">
-            <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 rounded-xl px-6 h-11 font-bold shadow-lg shadow-[#07284a]/15">
-              {saving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving Details…</> : "Save Changes"}
-            </Button>
-            <Button type="button" variant="outline" className="rounded-xl px-6 h-11 font-bold border-border/60" onClick={() => { setEditing(false); setPhotoFile(null); }}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            {/* Personal Information */}
+            <div className="space-y-4">
+              <h4 className="flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-400 tracking-wider uppercase border-b border-border/20 pb-2">
+                <User className="size-3.5" /> Personal Information
+              </h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2 space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">Full Name *</Label>
+                  <div className="relative">
+                    <User className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input name="full_name" defaultValue={app.full_name} required className="h-12 rounded-xl border-border/60 bg-white text-sm pl-10" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">Phone Number *</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input name="phone" type="tel" defaultValue={app.phone ?? ""} required className="h-12 rounded-xl border-border/60 bg-white text-sm pl-10" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">Year of Study *</Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input name="year" defaultValue={app.year ?? ""} required placeholder="e.g. 3rd Year" className="h-12 rounded-xl border-border/60 bg-white text-sm pl-10" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">College / Institution *</Label>
+                  <div className="relative">
+                    <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input name="college" defaultValue={app.college ?? ""} required className="h-12 rounded-xl border-border/60 bg-white text-sm pl-10" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground">Course / Branch *</Label>
+                  <div className="relative">
+                    <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                    <Input name="course" defaultValue={app.course ?? ""} required className="h-12 rounded-xl border-border/60 bg-white text-sm pl-10" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 border-t border-border/20">
+              <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 rounded-xl px-8 h-12 font-bold shadow-lg shadow-[#07284a]/15 gap-2 hover:-translate-y-0.5 active:translate-y-0 transition-all">
+                {saving ? <><Loader2 className="size-4 animate-spin" /> Saving Details…</> : <><CheckCircle2 className="size-4" /> Save Changes</>}
+              </Button>
+              <Button type="button" variant="outline" className="rounded-xl px-8 h-12 font-bold border-border/60 gap-2 hover:-translate-y-0.5 active:translate-y-0 transition-all" onClick={() => { setEditing(false); setPhotoFile(null); }}>
+                <X className="size-4" /> Cancel
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 
   return (
@@ -2310,10 +2578,9 @@ function IDCardSection({ app }: { app: Application | null }) {
             <FileText className="mr-1 size-3" /> Offer Letter
           </Button>
           <Button size="sm" className="brand-gradient text-white border-0 rounded-xl h-8 text-xs font-semibold"
-            onClick={() => downloadPdf(
-              <OfferLetterDoc fullName={app.full_name} internId={app.intern_id} domain={domain?.name ?? app.domain} issuedAt={app.offer_issued_at} duration={app.duration ?? 1} />,
-              `IDCard_${app.intern_id}.pdf`
-            )}>
+            onClick={() => downloadIDCard({
+              fullName: app.full_name, internId: app.intern_id, domain: domain?.name ?? app.domain, issuedAt: app.offer_issued_at, photoUrl: app.photo_url
+            })}>
             <Download className="mr-1 size-3" /> Download ID
           </Button>
         </div>

@@ -156,7 +156,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" dir="ltr">
+    <html lang="en" dir="ltr" className="bg-[#f8fafc] dark:bg-[#070b19]">
       <head>
         <HeadContent />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-FD15M64DX5" />
@@ -177,7 +177,9 @@ function RootShell({ children }: { children: ReactNode }) {
       <body className="min-h-screen bg-background font-sans antialiased">
         <OrganizationJsonLd />
         <WebsiteJsonLd />
-        {children}
+        <div className="w-full">
+          {children}
+        </div>
         <Scripts />
       </body>
     </html>

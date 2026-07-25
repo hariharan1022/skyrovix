@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image, pdf, type DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
+import QRCode from "qrcode";
 import logo from "@/assets/logo.png";
 import seal from "@/assets/seal.jpg";
 import msme from "@/assets/msme.png";
@@ -430,6 +431,93 @@ export function CourseCertificateDoc({ fullName, courseName, score, total, certI
         </View>
       </Page>
     </Document>
+  );
+}
+
+// ─── ID CARD PDF ───
+
+const idCardS = StyleSheet.create({
+  page: { padding: 10, fontSize: 9, fontFamily: "Helvetica", backgroundColor: "#07284a" },
+  bgCircle1: { position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: 40, backgroundColor: "#1a4a7a" },
+  bgCircle2: { position: "absolute", bottom: -20, left: -20, width: 80, height: 80, borderRadius: 40, backgroundColor: "#0d4f7a" },
+  header: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingBottom: 6, borderBottomWidth: 0.5, borderBottomColor: "#3a6a9a" },
+  logoRow: { flexDirection: "row", alignItems: "center" },
+  logo: { width: 22, height: 22, marginRight: 6 },
+  brandBlock: {},
+  brandText: { fontSize: 7, color: "#8ab4d8", letterSpacing: 2, textTransform: "uppercase" },
+  cardTitle: { fontSize: 9, fontWeight: 700, color: "#ffffff", marginTop: 1 },
+  yearBadge: { fontSize: 7, color: "#c8dce8", backgroundColor: "#1a4a7a", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  body: { flexDirection: "row", marginTop: 10, marginBottom: 10 },
+  photoBox: { width: 52, height: 52, borderRadius: 6, borderWidth: 2, borderColor: "#5a8ab0", backgroundColor: "#1a4a7a", justifyContent: "center", alignItems: "center", marginRight: 10 },
+  photoInitial: { fontSize: 22, fontWeight: 700, color: "#ffffff" },
+  info: { flex: 1, justifyContent: "center" },
+  label: { fontSize: 6, color: "#8ab4d8", marginBottom: 1, textTransform: "uppercase", letterSpacing: 1 },
+  name: { fontSize: 14, fontWeight: 700, color: "#ffffff", marginBottom: 3 },
+  domain: { fontSize: 9, fontWeight: 500, color: "#c8dce8" },
+  footer: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", paddingTop: 6, borderTopWidth: 0.5, borderTopColor: "#3a6a9a" },
+  idLabel: { fontSize: 6, color: "#8ab4d8", textTransform: "uppercase", letterSpacing: 1, marginBottom: 1 },
+  idValue: { fontSize: 9, fontWeight: 700, color: "#ffffff", fontFamily: "Courier" },
+  issueDate: { fontSize: 7, color: "#7a9ab8", marginTop: 2 },
+  qrBox: { padding: 5, backgroundColor: "#ffffff", borderRadius: 4 },
+  qrPlaceholder: { width: 40, height: 40 },
+});
+
+export function IDCardDoc({ fullName, internId, domain, issuedAt, photoUrl, qrCodeDataUri }: {
+  fullName: string; internId: string; domain: string; issuedAt: string; photoUrl?: string | null; qrCodeDataUri?: string;
+}) {
+  const domainName = domain.charAt(0).toUpperCase() + domain.slice(1);
+  return (
+    <Document>
+      <Page size={[360, 230]} style={idCardS.page}>
+        <View style={idCardS.bgCircle1} />
+        <View style={idCardS.bgCircle2} />
+        <View style={idCardS.header}>
+          <View style={idCardS.logoRow}>
+            <Image style={idCardS.logo} src={logo} />
+            <View style={idCardS.brandBlock}>
+              <Text style={idCardS.brandText}>SKYROVIX</Text>
+              <Text style={idCardS.cardTitle}>Intern ID Card</Text>
+            </View>
+          </View>
+          <Text style={idCardS.yearBadge}>{new Date(issuedAt).getFullYear()}</Text>
+        </View>
+        <View style={idCardS.body}>
+          <View style={idCardS.photoBox}>
+            {photoUrl ? <Image style={{ width: 52, height: 52, borderRadius: 6 }} src={photoUrl} /> : <Text style={idCardS.photoInitial}>{fullName.charAt(0).toUpperCase()}</Text>}
+          </View>
+          <View style={idCardS.info}>
+            <Text style={idCardS.label}>Name</Text>
+            <Text style={idCardS.name}>{fullName}</Text>
+            <Text style={idCardS.label}>Domain</Text>
+            <Text style={idCardS.domain}>{domainName}</Text>
+          </View>
+        </View>
+        <View style={idCardS.footer}>
+          <View>
+            <Text style={idCardS.idLabel}>Intern ID</Text>
+            <Text style={idCardS.idValue}>{internId}</Text>
+            <Text style={idCardS.issueDate}>Issued {new Date(issuedAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}</Text>
+          </View>
+          <View style={idCardS.qrBox}>
+            {qrCodeDataUri ? <Image style={idCardS.qrPlaceholder} src={qrCodeDataUri} /> : <View style={idCardS.qrPlaceholder} />}
+          </View>
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+export async function downloadIDCard(params: {
+  fullName: string; internId: string; domain: string; issuedAt: string; photoUrl?: string | null;
+}) {
+  const verifyUrl = typeof window !== "undefined" ? `${window.location.origin}/verify-certificate?intern=${params.internId}` : "";
+  let qrDataUri: string | undefined;
+  try {
+    qrDataUri = await QRCode.toDataURL(verifyUrl, { width: 160, margin: 1 });
+  } catch { /* QR generation failed, proceed without */ }
+  await downloadPdf(
+    <IDCardDoc {...params} qrCodeDataUri={qrDataUri} />,
+    `IDCard_${params.internId}.pdf`
   );
 }
 

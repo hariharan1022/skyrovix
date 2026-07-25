@@ -34,7 +34,7 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <div className="min-h-screen">
+    <div className="w-full">
       <WebPageJsonLd
         title="Privacy Policy — Skyrovix"
         description="Skyrovix privacy policy. Learn how we collect, use, and protect your personal information."

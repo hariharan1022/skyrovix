@@ -1,31 +1,27 @@
 const LOGOS = [
-  { top: "2%",  left: "3%",  delay: "0s",    size: 44, src: "https://cdn.simpleicons.org/html5/E34F26" },
-  { top: "2%",  left: "50%", delay: "0.5s",  size: 44, src: "https://cdn.simpleicons.org/css/264DE4" },
-  { top: "2%",  left: "85%", delay: "1s",    size: 44, src: "https://cdn.simpleicons.org/javascript/F7DF1E" },
+  // Scattered across hero — mobile-safe positions (left max 85%)
+  { top: "4%",   left: "5%",   delay: "0s",    sizeMd: 48, sizeSm: 32, src: "https://cdn.simpleicons.org/html5/E34F26",             label: "HTML5" },
+  { top: "4%",   left: "60%",  delay: "0.8s",  sizeMd: 44, sizeSm: 30, src: "https://cdn.simpleicons.org/javascript/F7DF1E",         label: "JS" },
+  { top: "4%",   left: "82%",  delay: "1.4s",  sizeMd: 44, sizeSm: 30, src: "https://cdn.simpleicons.org/typescript/3178C6",         label: "TS" },
 
-  { top: "16%", left: "6%",  delay: "0.3s",  size: 42, src: "https://cdn.simpleicons.org/react/61DAFB" },
-  { top: "14%", left: "40%", delay: "0.9s",  size: 40, src: "https://cdn.simpleicons.org/nextdotjs/000000" },
-  { top: "16%", left: "82%", delay: "1.7s",  size: 42, src: "https://cdn.simpleicons.org/typescript/3178C6" },
+  { top: "18%",  left: "3%",   delay: "0.5s",  sizeMd: 50, sizeSm: 34, src: "https://cdn.simpleicons.org/python/3776AB",             label: "Python" },
+  { top: "16%",  left: "45%",  delay: "1.2s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/react/61DAFB",              label: "React" },
+  { top: "18%",  left: "80%",  delay: "0.3s",  sizeMd: 46, sizeSm: 30, src: "https://cdn.simpleicons.org/nextdotjs/000000",          label: "Next" },
 
-  { top: "30%", left: "3%",  delay: "0.6s",  size: 46, src: "https://cdn.simpleicons.org/python/3776AB" },
-  { top: "28%", left: "35%", delay: "1.4s",  size: 38, src: "https://cdn.simpleicons.org/openjdk/ED8B00" },
-  { top: "30%", left: "78%", delay: "0.2s",  size: 46, src: "https://cdn.simpleicons.org/tailwindcss/06B6D4" },
+  { top: "34%",  left: "6%",   delay: "1.6s",  sizeMd: 46, sizeSm: 30, src: "https://cdn.simpleicons.org/nodedotjs/339933",          label: "Node" },
+  { top: "32%",  left: "82%",  delay: "0.9s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/tailwindcss/06B6D4",        label: "Tailwind" },
 
-  { top: "44%", left: "8%",  delay: "1.8s",  size: 40, src: "https://cdn.simpleicons.org/express/000000" },
-  { top: "42%", left: "55%", delay: "0.7s",  size: 42, src: "https://cdn.simpleicons.org/flutter/02569B" },
-  { top: "44%", left: "88%", delay: "1.2s",  size: 40, src: "https://cdn.simpleicons.org/php/777BB4" },
+  { top: "50%",  left: "3%",   delay: "0.4s",  sizeMd: 44, sizeSm: 30, src: "https://cdn.simpleicons.org/mongodb/47A248",            label: "Mongo" },
+  { top: "48%",  left: "38%",  delay: "1.9s",  sizeMd: 40, sizeSm: 26, src: "https://cdn.simpleicons.org/mysql/4479A1",              label: "MySQL" },
+  { top: "50%",  left: "78%",  delay: "0.7s",  sizeMd: 46, sizeSm: 30, src: "https://cdn.simpleicons.org/docker/2496ED",             label: "Docker" },
 
-  { top: "58%", left: "4%",  delay: "2s",    size: 44, src: "https://cdn.simpleicons.org/mysql/4479A1" },
-  { top: "56%", left: "45%", delay: "0.4s",  size: 40, src: "https://cdn.simpleicons.org/amazonwebservices/FF9900" },
-  { top: "58%", left: "85%", delay: "1.5s",  size: 44, src: "https://cdn.simpleicons.org/docker/2496ED" },
+  { top: "65%",  left: "5%",   delay: "1.1s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/amazonwebservices/FF9900",  label: "AWS" },
+  { top: "63%",  left: "50%",  delay: "0.2s",  sizeMd: 42, sizeSm: 28, src: "https://cdn.simpleicons.org/git/F05032",                label: "Git" },
+  { top: "65%",  left: "82%",  delay: "1.5s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/firebase/FFCA28",           label: "Firebase" },
 
-  { top: "72%", left: "6%",  delay: "0.8s",  size: 42, src: "https://cdn.simpleicons.org/firebase/FFCA28" },
-  { top: "70%", left: "38%", delay: "2.1s",  size: 38, src: "https://cdn.simpleicons.org/mongodb/47A248" },
-  { top: "72%", left: "82%", delay: "1.3s",  size: 42, src: "https://cdn.simpleicons.org/linux/FCC624" },
-
-  { top: "86%", left: "10%", delay: "1.6s",  size: 40, src: "https://cdn.simpleicons.org/redux/764ABC" },
-  { top: "84%", left: "50%", delay: "0.1s",  size: 40, src: "https://cdn.simpleicons.org/git/F05032" },
-  { top: "86%", left: "85%", delay: "1.9s",  size: 40, src: "https://cdn.simpleicons.org/cplusplus/00599C" },
+  { top: "80%",  left: "3%",   delay: "0.6s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/flutter/02569B",            label: "Flutter" },
+  { top: "78%",  left: "42%",  delay: "1.3s",  sizeMd: 42, sizeSm: 26, src: "https://cdn.simpleicons.org/cplusplus/00599C",          label: "C++" },
+  { top: "80%",  left: "80%",  delay: "2.0s",  sizeMd: 44, sizeSm: 28, src: "https://cdn.simpleicons.org/linux/FCC624",              label: "Linux" },
 ];
 
 export function MobileFloatingIcons() {
@@ -34,17 +30,43 @@ export function MobileFloatingIcons() {
       {LOGOS.map((l, i) => (
         <div
           key={i}
-          className="absolute z-0 opacity-[0.25]"
+          className="absolute"
           style={{
             top: l.top,
             left: l.left,
-            width: l.size,
-            height: l.size,
             willChange: "transform",
-            animation: `float ${3 + (i % 3) * 0.5}s ease-in-out ${l.delay} infinite alternate`,
+            animation: `float ${3.5 + (i % 4) * 0.6}s ease-in-out ${l.delay} infinite alternate`,
+            zIndex: 1,
           }}
         >
-          <img src={l.src} alt="" className="w-full h-full drop-shadow-lg" loading="lazy" />
+          {/* Mobile size */}
+          <img
+            src={l.src}
+            alt={l.label}
+            title={l.label}
+            loading="lazy"
+            className="block sm:hidden"
+            style={{
+              width: l.sizeSm,
+              height: l.sizeSm,
+              opacity: 0.12,
+              filter: "drop-shadow(0 1px 4px rgba(0,0,0,0.10))",
+            }}
+          />
+          {/* Desktop size */}
+          <img
+            src={l.src}
+            alt={l.label}
+            title={l.label}
+            loading="lazy"
+            className="hidden sm:block"
+            style={{
+              width: l.sizeMd,
+              height: l.sizeMd,
+              opacity: 0.18,
+              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.12))",
+            }}
+          />
         </div>
       ))}
     </div>
