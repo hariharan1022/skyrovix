@@ -235,7 +235,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                 </div>
 
                 {/* Nav items */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
                   {itemsToRender.map((item, i) => {
                     const Icon = item.icon;
                     const active = isDashboardPage
@@ -245,7 +245,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                       <button
                         key={item.label}
                         onClick={() => goTo(item.to, "search" in item ? item.search : undefined)}
-                        className={`group relative flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-left transition-all duration-200 text-[13px] font-semibold active:scale-[0.97] ${
+                        className={`group relative flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-200 text-sm font-semibold active:scale-[0.98] ${
                           active
                             ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm"
                             : "bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80"
@@ -255,7 +255,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                         {active && (
                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-500" />
                         )}
-                        <div className={`size-8 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                        <div className={`size-9 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
                           active
                             ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/20"
                             : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 group-hover:scale-105"
@@ -277,19 +277,19 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                   <div className="h-px flex-1 bg-gradient-to-l from-red-200/30 to-transparent dark:from-red-800/20" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
                   {isAdmin && (
                     <Link to="/admin" onClick={() => setOpen(false)}
-                      className="group flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-[13px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.97]">
-                      <div className="size-8 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-slate-500 group-hover:scale-105 transition-all">
+                      className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98]">
+                      <div className="size-9 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-slate-500 group-hover:scale-105 transition-all">
                         <Shield className="size-4" />
                       </div>
                       <span>Admin Panel</span>
                     </Link>
                   )}
                   <button onClick={() => { signOut(); setOpen(false); }}
-                    className="group flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-[13px] font-semibold text-red-600 dark:text-red-400 bg-red-50/80 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 transition-all active:scale-[0.97]">
-                    <div className="size-8 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-red-500 group-hover:scale-105 transition-all">
+                    className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-red-600 dark:text-red-400 bg-red-50/80 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 transition-all active:scale-[0.98]">
+                    <div className="size-9 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-red-500 group-hover:scale-105 transition-all">
                       <LogOut className="size-4" />
                     </div>
                     <span>Sign Out</span>
@@ -306,7 +306,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                 </div>
 
                 {/* Public Nav Items */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-1">
                   {NAV.map((n, i) => {
                     const Icon = n.icon;
                     const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
@@ -314,7 +314,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                       <button
                         key={n.to}
                         onClick={() => goTo(n.to)}
-                        className={`group relative flex items-center gap-2.5 rounded-2xl px-3 py-3.5 text-left transition-all duration-200 text-[13px] font-semibold active:scale-[0.97] ${
+                        className={`group relative flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left transition-all duration-200 text-sm font-semibold active:scale-[0.98] ${
                           active
                             ? "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 shadow-sm"
                             : "bg-slate-50/80 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/80"
@@ -324,7 +324,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                         {active && (
                           <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-500" />
                         )}
-                        <div className={`size-8 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                        <div className={`size-9 shrink-0 rounded-xl flex items-center justify-center transition-all duration-200 ${
                           active
                             ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-sm shadow-blue-500/20"
                             : "bg-white dark:bg-slate-700 text-slate-500 dark:text-slate-400 group-hover:scale-105"
