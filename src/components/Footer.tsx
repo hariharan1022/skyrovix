@@ -221,9 +221,9 @@ export function Footer() {
         <div className="hidden md:block mb-8 sm:mb-10 rounded-2xl border border-slate-100 bg-[#f8fafc]/80 p-4 sm:p-6 shadow-sm">
           <div className="grid grid-cols-5 gap-4 items-center justify-center">
             {[
-              { title: "10,000+", subtitle: "Students", icon: Users, colorClass: "bg-blue-50 text-blue-500" },
-              { title: "500+", subtitle: "Colleges", icon: Building2, colorClass: "bg-purple-50 text-purple-500" },
-              { title: "30+", subtitle: "Domains", icon: Database, colorClass: "bg-emerald-50 text-emerald-500" },
+              { title: "Growing Every Day", subtitle: "Students Enrolled", icon: Users, colorClass: "bg-blue-50 text-blue-500" },
+              { title: "more colleges across India", subtitle: "Colleges", icon: Building2, colorClass: "bg-purple-50 text-purple-500" },
+              { title: "10+", subtitle: "Domains", icon: Database, colorClass: "bg-emerald-50 text-emerald-500" },
               { title: "95%", subtitle: "Completion", icon: Clock, colorClass: "bg-orange-50 text-orange-500" },
               { title: "Verified", subtitle: "Certificates", icon: Award, colorClass: "bg-blue-50 text-blue-500" },
             ].map((stat, idx) => (

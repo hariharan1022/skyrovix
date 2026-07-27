@@ -249,7 +249,7 @@ function Landing() {
                     <div className="size-9 sm:size-10 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 mb-2">
                       <Users className="size-4 sm:size-5" />
                     </div>
-                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">10,000+</div>
+                    <div className="text-base sm:text-lg font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">Growing Every Day</div>
                     <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Students Enrolled</div>
                   </div>
 
@@ -267,7 +267,7 @@ function Landing() {
                     <div className="size-9 sm:size-10 rounded-full bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 mb-2">
                       <Code2 className="size-4 sm:size-5" />
                     </div>
-                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">360+</div>
+                    <div className="text-base sm:text-xl font-extrabold text-[#07284a] dark:text-slate-100 leading-tight tracking-tight">120+</div>
                     <div className="mt-1 text-[10px] sm:text-[11px] text-muted-foreground font-bold leading-tight">Projects Available</div>
                   </div>
 
