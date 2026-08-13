@@ -407,7 +407,7 @@ function CourseQuizPage() {
     );
   }
 
-  const maxAttempts = 3;
+  const maxAttempts = 999;
   const attemptsLeft = maxAttempts - attempts.length;
 
   return (
@@ -431,16 +431,16 @@ function CourseQuizPage() {
                 <div className="grid grid-cols-3 gap-3 text-center border-y border-border/30 py-4 text-xs font-semibold text-muted-foreground">
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-500 uppercase tracking-wide">Questions</p>
-                    <p className="text-foreground font-bold">5 MCQs</p>
+                    <p className="text-foreground font-bold">20 MCQs</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] text-slate-500 uppercase tracking-wide">Pass Mark</p>
                     <p className="text-foreground font-bold">{course.pass_marks}%</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wide">Attempts Left</p>
-                    <p className={`font-bold ${attemptsLeft <= 1 ? "text-rose-500" : "text-foreground"}`}>
-                      {attemptsLeft} / {maxAttempts}
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wide">Attempts</p>
+                    <p className="text-foreground font-bold">
+                      {attempts.length} Taken
                     </p>
                   </div>
                 </div>
