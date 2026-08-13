@@ -72,8 +72,19 @@ export const Route = createFileRoute("/_navbar-layout/courses/$slug_/quiz")({
     const name = slug.charAt(0).toUpperCase() + slug.slice(1);
     return {
       meta: [
-        { title: `${name} Final Quiz Assessment | Skyrovix` },
-        { name: "description", content: `Take the final timed quiz for ${name} course to claim your verified certificate.` },
+        { title: `${name} Course Final Quiz Assessment | Skyrovix` },
+        { name: "description", content: `Take the final timed quiz for the ${name} course. Achieve 60% or higher to instantly receive your verified certificate.` },
+        { name: "keywords", content: `${slug} final quiz, ${slug} certification exam, ${slug} test, skyrovix ${slug} quiz` },
+        { name: "robots", content: "index, follow" },
+        { property: "og:type", content: "website" },
+        { property: "og:title", content: `${name} Course Final Quiz Assessment | Skyrovix` },
+        { property: "og:description", content: `Take the final timed quiz for the ${name} course. Achieve 60% or higher to instantly receive your verified certificate.` },
+        { property: "og:url", content: `https://skyrovix.online/courses/${slug}/quiz` },
+        { property: "og:image", content: `https://skyrovix.online/og-default.png` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${name} Course Final Quiz Assessment | Skyrovix` },
+        { name: "twitter:description", content: `Take the final timed quiz for the ${name} course. Achieve 60% or higher to instantly receive your verified certificate.` },
+        { rel: "canonical", href: `https://skyrovix.online/courses/${slug}/quiz` },
       ],
     };
   },

@@ -30,8 +30,19 @@ export const Route = createFileRoute("/_navbar-layout/courses/$slug")({
     const name = slug.charAt(0).toUpperCase() + slug.slice(1);
     return {
       meta: [
-        { title: `Learn ${name} | Interactive Curriculum | Skyrovix` },
-        { name: "description", content: `Study ${name} with step-by-step interactive lessons, inline sandbox editors, and progress tracking.` },
+        { title: `Learn ${name} Online | Interactive Coding Sandbox | Skyrovix` },
+        { name: "description", content: `Master ${name} with step-by-step interactive lessons, inline sandbox editors, compiler tasks, and sequential progress tracking.` },
+        { name: "keywords", content: `learn ${slug}, ${slug} course, ${slug} interactive editor, online ${slug} training, ${slug} certificate, skyrovix ${slug}` },
+        { name: "robots", content: "index, follow" },
+        { property: "og:type", content: "website" },
+        { property: "og:title", content: `Learn ${name} Online | Interactive Coding Sandbox` },
+        { property: "og:description", content: `Master ${name} with step-by-step interactive lessons, inline sandbox editors, compiler tasks, and sequential progress tracking.` },
+        { property: "og:url", content: `https://skyrovix.online/courses/${slug}` },
+        { property: "og:image", content: `https://skyrovix.online/og-default.png` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `Learn ${name} Online | Interactive Coding Sandbox` },
+        { name: "twitter:description", content: `Master ${name} with step-by-step interactive lessons, inline sandbox editors, compiler tasks, and sequential progress tracking.` },
+        { rel: "canonical", href: `https://skyrovix.online/courses/${slug}` },
       ],
     };
   },

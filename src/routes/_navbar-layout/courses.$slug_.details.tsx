@@ -151,8 +151,19 @@ export const Route = createFileRoute("/_navbar-layout/courses/$slug_/details")({
     const name = slug.charAt(0).toUpperCase() + slug.slice(1);
     return {
       meta: [
-        { title: `${name} Course Details & Curriculum | Skyrovix` },
-        { name: "description", content: `Learn ${name} online. View course modules, requirements, prerequisites, projects, and start learning with our in-browser coding interface.` },
+        { title: `${name} Course Details, Curriculum & Syllabus | Skyrovix` },
+        { name: "description", content: `Learn ${name} online. View course modules, syllabus requirements, prerequisites, hands-on tasks, and projects. Start learning with our inline code sandbox.` },
+        { name: "keywords", content: `${slug} course details, ${slug} syllabus, ${slug} learning curriculum, skyrovix ${slug} training, ${slug} prerequisites` },
+        { name: "robots", content: "index, follow" },
+        { property: "og:type", content: "website" },
+        { property: "og:title", content: `${name} Course Details & Curriculum | Skyrovix` },
+        { property: "og:description", content: `Learn ${name} online. View course modules, syllabus requirements, prerequisites, hands-on tasks, and projects.` },
+        { property: "og:url", content: `https://skyrovix.online/courses/${slug}/details` },
+        { property: "og:image", content: `https://skyrovix.online/og-default.png` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${name} Course Details & Curriculum | Skyrovix` },
+        { name: "twitter:description", content: `Learn ${name} online. View course modules, syllabus requirements, prerequisites, hands-on tasks, and projects.` },
+        { rel: "canonical", href: `https://skyrovix.online/courses/${slug}/details` },
       ],
     };
   },
