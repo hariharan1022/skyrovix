@@ -1,7 +1,21 @@
 const { createClient } = require('@supabase/supabase-js');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
+
+const envPath = path.resolve(__dirname, '..', '.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  for (const line of envContent.split('\n')) {
+    const match = line.match(/^\s*([\w.-]+)\s*=\s*(.*)\s*$/);
+    if (match) {
+      const key = match[1];
+      let value = match[2].trim();
+      if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+      if (value.startsWith("'") && value.endsWith("'")) value = value.slice(1, -1);
+      process.env[key] = value;
+    }
+  }
+}
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -159,7 +173,7 @@ async function importCourse(dirName, slug) {
   }
 
   console.log('\n=== VERIFICATION ===');
-  const { data: courses } = await supabase.from('courses').select('slug, name, total_topics').order('slug');
+  const { data: courses } = await supabase.from('courses').select('id, slug, name, total_topics').order('slug');
   for (const c of courses) {
     const { count } = await supabase.from('course_topics').select('*', { count: 'exact', head: true }).eq('course_id', c.id);
     console.log(`  ${c.slug}: ${c.total_topics} declared, ${count} actual topics in DB`);

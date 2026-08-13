@@ -14,6 +14,8 @@ import { useAuth } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { PromotionsSection } from "@/components/admin/PromotionsSection";
 import { PromoPopupSection } from "@/components/admin/PromoPopupSection";
+import { BackupSection } from "@/components/admin/BackupSection";
+import { ProjectSubmissionsSection } from "@/components/admin/ProjectSubmissionsSection";
 import { OfferLetterDoc, CertificateDoc, downloadPdf, downloadPdfBlob } from "@/components/pdf-docs";
 import {
   LayoutDashboard, GraduationCap, BookOpen, FileText, ListChecks,
@@ -23,9 +25,10 @@ import {
   ChevronRight, ChevronLeft, Clock, TrendingUp, UserPlus, Wallet,
   ExternalLink, RefreshCw, Trash2, Edit, ArrowUpRight, Filter,
   AlertTriangle, HelpCircle, Home, MessageSquare, PanelRightClose,
-  PanelRightOpen, FolderTree, FileQuestion, PieChart, Percent, Briefcase,
+  PanelRightOpen, FolderTree,   FileQuestion, PieChart, Percent, Briefcase,
   Loader2, Activity, Wifi, WifiOff, LogIn, Monitor, Smartphone, Tablet,
   Calendar, Zap, Megaphone, Layers, Globe, Ticket, Rocket,
+  HardDrive,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -47,6 +50,7 @@ const SIDEBAR_GROUPS = [
       { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
       { id: "applications", label: "Internship Applications", icon: Users },
       { id: "submissions", label: "Task Submissions", icon: ClipboardCheck },
+      { id: "project-submissions", label: "Project Submissions", icon: ClipboardList },
       { id: "verification", label: "Verification Queue", icon: Shield },
       { id: "students", label: "Students", icon: GraduationCap },
       { id: "certificates", label: "Certificates", icon: Award },
@@ -74,12 +78,13 @@ const SIDEBAR_GROUPS = [
     title: "SYSTEM",
     items: [
       { id: "settings", label: "Settings", icon: Settings },
+      { id: "backup", label: "Backup & Restore", icon: HardDrive },
       { id: "login-history", label: "Audit Logs", icon: Activity },
     ]
   }
 ] as const;
 
-type SectionId = "dashboard" | "applications" | "submissions" | "verification" | "payments" | "promotions" | "popup" | "certificates" | "students" | "login-history" | "email-logs" | "analytics" | "login-analytics" | "settings" | "domains" | "tasks";
+type SectionId = "dashboard" | "applications" | "submissions" | "project-submissions" | "verification" | "payments" | "promotions" | "popup" | "certificates" | "students" | "login-history" | "email-logs" | "analytics" | "login-analytics" | "settings" | "domains" | "tasks" | "backup";
 
 function AdminPanel() {
   const { user, isAdmin } = useAuth();
@@ -143,13 +148,13 @@ function AdminPanel() {
         setLiveNotifs((prev) => [notif, ...prev].slice(0, 20));
         toast.success(`${name} logged in`, { description: "New student login", duration: 4000 });
       }
-      const { count } = await supabase.from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
+      const { count } = await (supabase as any).from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
       setOnlineCount(count ?? 0);
       qc.invalidateQueries({ queryKey: ["admin-login-history"] });
       qc.invalidateQueries({ queryKey: ["admin-online-count"] });
     });
     channel.on("postgres_changes" as any, { event: "UPDATE", schema: "public", table: "login_sessions" }, async () => {
-      const { count } = await supabase.from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
+      const { count } = await (supabase as any).from("login_sessions").select("id", { count: "exact", head: true }).eq("status", "online");
       setOnlineCount(count ?? 0);
       qc.invalidateQueries({ queryKey: ["admin-login-history"] });
       qc.invalidateQueries({ queryKey: ["admin-online-count"] });
@@ -337,6 +342,7 @@ function AdminPanel() {
             {active === "dashboard" && <DashboardSection greeting={greeting} overview={overview} onNavigate={setActive} onlineCount={onlineCount} liveNotifs={liveNotifs} />}
             {active === "applications" && <ApplicationsSection />}
             {active === "submissions" && <SubmissionsSection />}
+            {active === "project-submissions" && <ProjectSubmissionsSection />}
             {active === "verification" && <VerificationSection />}
             {active === "payments" && <PaymentsSection />}
             {active === "promotions" && <PromotionsSection />}
@@ -348,6 +354,7 @@ function AdminPanel() {
             {active === "analytics" && <AnalyticsSection />}
             {active === "login-analytics" && <LoginAnalyticsSection />}
             {active === "settings" && <SettingsSection />}
+            {active === "backup" && <BackupSection />}
             {active === "domains" && <DomainsSection />}
             {active === "tasks" && <TasksSection />}
           </main>
@@ -1958,7 +1965,7 @@ function StudentsSection() {
     queryKey: ["admin-student-sessions"],
     refetchInterval: 30_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("login_sessions")
         .select("student_id, status, last_active, device, browser")
         .order("last_active", { ascending: false });
@@ -2625,7 +2632,7 @@ function LoginHistorySection() {
     queryKey: ["admin-login-history"],
     refetchInterval: 15_000,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("login_sessions")
         .select("id, student_id, status, ip_address, city, state, country, device, browser, os, last_active, login_time, logout_time")
         .order("last_active", { ascending: false })
@@ -2819,7 +2826,7 @@ function StudentDetailModal({ student, onClose }: { student: any; onClose: () =>
     queryKey: ["admin-student-login-sessions", student.user_id],
     enabled: tab === "login-history",
     queryFn: async () => {
-      const { data } = await supabase.from("login_sessions").select("*").eq("student_id", student.user_id).order("last_active", { ascending: false });
+      const { data } = await (supabase as any).from("login_sessions").select("*").eq("student_id", student.user_id).order("last_active", { ascending: false });
       return data ?? [];
     },
   });
@@ -3036,7 +3043,7 @@ function LoginAnalyticsSection() {
     queryFn: async () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("login_sessions")
         .select("student_id, status, login_time, logout_time, last_active")
         .gte("login_time", thirtyDaysAgo.toISOString())
@@ -3190,7 +3197,7 @@ function DomainsSection() {
       return;
     }
     setSaving(true);
-    const payload = {
+    const payload: any = {
       name,
       domain: domainCode,
       slug,
@@ -3208,10 +3215,10 @@ function DomainsSection() {
 
     let error;
     if (editingDomain) {
-      const { error: err } = await supabase.from("courses").update(payload).eq("id", editingDomain.id);
+      const { error: err } = await supabase.from("courses").update(payload as any).eq("id", editingDomain.id);
       error = err;
     } else {
-      const { error: err } = await supabase.from("courses").insert(payload);
+      const { error: err } = await supabase.from("courses").insert(payload as any);
       error = err;
     }
 

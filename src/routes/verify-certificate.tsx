@@ -69,6 +69,7 @@ function VerifyPage() {
 
     const trimmed = id.trim();
 
+    // 1. Try internship certificate lookup
     const { data: cert, error: oldCertErr } = await supabase
       .from("certificates")
       .select("certificate_id, issued_at, application_id")
@@ -91,7 +92,75 @@ function VerifyPage() {
       }
     }
 
-    // 3. Try intern ID lookup (old system)
+    // 2. Try course certificate lookup
+    const { data: courseCert, error: courseCertErr } = await supabase
+      .from("course_certificates")
+      .select("certificate_id, score, issued_at, enrollment_id")
+      .eq("certificate_id", trimmed)
+      .maybeSingle();
+
+    if (courseCert && !courseCertErr) {
+      const { data: enroll } = await supabase
+        .from("enrollments")
+        .select("user_id, course_id")
+        .eq("id", courseCert.enrollment_id)
+        .maybeSingle();
+
+      if (enroll) {
+        const { data: course } = await supabase
+          .from("courses")
+          .select("name, domain")
+          .eq("id", enroll.course_id)
+          .maybeSingle();
+        
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", enroll.user_id)
+          .maybeSingle();
+
+        if (course && prof) {
+          return setResult({
+            state: "found",
+            type: "course",
+            data: {
+              full_name: prof.full_name ?? "Student",
+              domain: course.domain,
+              course_name: course.name,
+              score: courseCert.score,
+              cert_id: courseCert.certificate_id,
+              issued_at: courseCert.issued_at,
+              status: "completed"
+            }
+          });
+        }
+      }
+    }
+
+    // 3. Try project certificate lookup
+    const { data: projCert, error: projCertErr } = await (supabase as any)
+      .from("project_certificates")
+      .select("cert_id, participant_name, project_title, industry, final_score, issued_at")
+      .eq("cert_id", trimmed)
+      .maybeSingle();
+
+    if (projCert && !projCertErr) {
+      return setResult({
+        state: "found",
+        type: "project",
+        data: {
+          full_name: projCert.participant_name,
+          domain: projCert.industry,
+          project_title: projCert.project_title,
+          score: Number(projCert.final_score),
+          cert_id: projCert.cert_id,
+          issued_at: projCert.issued_at,
+          status: "approved"
+        }
+      });
+    }
+
+    // 4. Try intern ID lookup (old system)
     const { data: app, error: appErr } = await supabase
       .from("applications")
       .select("full_name, domain, intern_id, status")
@@ -212,6 +281,91 @@ function VerifyPage() {
                     </Badge>
                   } />
                   {d.cert_id && <Row k="Certificate ID" v={<span className="font-mono text-green-600 dark:text-green-400">{d.cert_id}</span>} />}
+                  {d.issued_at && <Row k="Issued On" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
+                </div>
+
+                {/* Footer trust badge */}
+                <div className="mt-5 flex items-center gap-2 rounded-xl bg-[#f8fafc] dark:bg-[#0f172a] px-4 py-3 text-xs text-muted-foreground">
+                  <Award className="size-4 text-[#07284a] dark:text-[#60a5fa]" />
+                  <span>Digitally verified by Skyrovix — MSME-registered IT company (UDYAM-TN-17-0076606)</span>
+                </div>
+              </div>
+            </FadeUp>
+          );
+        })()}
+
+        {result.state === "found" && result.type === "course" && (() => {
+          const d = result.data;
+          return (
+            <FadeUp y={10} duration={0.4}>
+              <div className="mt-6 rounded-2xl border border-green-200/60 dark:border-green-900/40 bg-card p-6 sm:p-8 shadow-sm">
+                {/* Header */}
+                <div className="flex items-center gap-4 pb-5 border-b border-border/40">
+                  <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-green-50 dark:bg-green-950/30">
+                    <CheckCircle2 className="size-7 text-green-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-bold">Verified ✓</h2>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950/30 px-2.5 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400 border border-green-200/60 dark:border-green-900/40">
+                        <ShieldCheck className="size-3" /> Authentic
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      This course completion certificate is authentic and issued by Skyrovix.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="mt-5 space-y-0 divide-y divide-border/40 text-sm">
+                  <Row k="Student Name" v={d.full_name} />
+                  <Row k="Course Completed" v={d.course_name} />
+                  <Row k="Final Exam Score" v={d.score !== undefined ? `${d.score}%` : "Passed"} />
+                  <Row k="Certificate ID" v={<span className="font-mono text-green-600 dark:text-green-400">{d.cert_id}</span>} />
+                  {d.issued_at && <Row k="Issued On" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
+                </div>
+
+                {/* Footer trust badge */}
+                <div className="mt-5 flex items-center gap-2 rounded-xl bg-[#f8fafc] dark:bg-[#0f172a] px-4 py-3 text-xs text-muted-foreground">
+                  <Award className="size-4 text-[#07284a] dark:text-[#60a5fa]" />
+                  <span>Digitally verified by Skyrovix — MSME-registered IT company (UDYAM-TN-17-0076606)</span>
+                </div>
+              </div>
+            </FadeUp>
+          );
+        })()}
+
+        {result.state === "found" && result.type === "project" && (() => {
+          const d = result.data;
+          return (
+            <FadeUp y={10} duration={0.4}>
+              <div className="mt-6 rounded-2xl border border-green-200/60 dark:border-green-900/40 bg-card p-6 sm:p-8 shadow-sm">
+                {/* Header */}
+                <div className="flex items-center gap-4 pb-5 border-b border-border/40">
+                  <div className="grid size-14 shrink-0 place-items-center rounded-2xl bg-green-50 dark:bg-green-950/30">
+                    <CheckCircle2 className="size-7 text-green-500" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-bold">Verified ✓</h2>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-950/30 px-2.5 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-400 border border-green-200/60 dark:border-green-900/40">
+                        <ShieldCheck className="size-3" /> Authentic
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      This real-world project challenge certificate is authentic and issued by Skyrovix.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Details */}
+                <div className="mt-5 space-y-0 divide-y divide-border/40 text-sm">
+                  <Row k="Participant Name" v={d.full_name} />
+                  <Row k="Project Completed" v={d.project_title} />
+                  <Row k="Industry Track" v={d.domain} />
+                  <Row k="Evaluation Score" v={d.score !== undefined ? `${d.score}/100` : "Passed"} />
+                  <Row k="Certificate ID" v={<span className="font-mono text-green-600 dark:text-green-400">{d.cert_id}</span>} />
                   {d.issued_at && <Row k="Issued On" v={new Date(d.issued_at).toLocaleDateString("en-IN", { day: "2-digit", month: "long", year: "numeric" })} />}
                 </div>
 

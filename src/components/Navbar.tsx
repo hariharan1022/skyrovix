@@ -10,6 +10,8 @@ import { toast } from "sonner";
 const NAV = [
   { to: "/", label: "Home", icon: Home },
   { to: "/domains", label: "Internship", icon: Briefcase },
+  { to: "/courses", label: "Courses", icon: BookOpen },
+  { to: "/projects", label: "Projects", icon: Rocket },
   { to: "/about", label: "About", icon: Info },
   { to: "/reviews", label: "Reviews", icon: MessageSquare },
   { to: "/contact", label: "Contact", icon: Mail },
@@ -17,6 +19,7 @@ const NAV = [
 ] as const;
 
 const DASHBOARD_ITEMS = [
+  { to: "/", label: "Home", icon: Home },
   { to: "/dashboard", label: "My Tasks", icon: ListChecks, search: { tab: "tasks" } },
   { to: "/dashboard", label: "My Internships", icon: Briefcase, search: { tab: "internships" } },
   { to: "/dashboard", label: "Payment", icon: CreditCard, search: { tab: "payment" } },
@@ -92,10 +95,10 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden xl:flex flex-1 items-stretch justify-center gap-4 xl:gap-6 min-w-0 h-full">
+          <div className="hidden xl:flex flex-1 items-stretch justify-center gap-2 2xl:gap-5 min-w-0 h-full">
             {itemsToRender.map((n) => {
               const isActive = isDashboardPage
-                ? (n.search?.tab ? currentTab === n.search.tab : !currentTab)
+                ? (n.to === "/" ? false : (n.search?.tab ? currentTab === n.search.tab : !currentTab))
                 : (n.to === "/" ? pathname === "/" : pathname.startsWith(n.to));
               const Icon = n.icon;
               return (
@@ -104,13 +107,13 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                   to={n.to}
                   search={"search" in n ? n.search : undefined}
                   activeOptions={{ exact: n.to === "/" }}
-                  className={`relative whitespace-nowrap px-1 text-xs xl:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 h-full ${
+                  className={`relative whitespace-nowrap px-0.5 text-xs 2xl:text-sm font-semibold transition-all duration-200 flex items-center gap-1 2xl:gap-1.5 h-full ${
                     isActive
                       ? "text-blue-600 dark:text-blue-400 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2.5px] after:bg-blue-600 dark:after:bg-blue-400 font-bold"
                       : "text-gray-600 dark:text-slate-350 hover:text-blue-600 dark:hover:text-blue-400"
                   }`}
                 >
-                  <Icon className="size-4 shrink-0 text-muted-foreground" />
+                  <Icon className="size-3.5 2xl:size-4 shrink-0 text-muted-foreground" />
                   <span>{n.label}</span>
                 </Link>
               );
@@ -122,14 +125,22 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             {user ? (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="hidden xl:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  className="hidden md:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                   {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
+                {user && !isDashboardPage && (
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9 w-9 p-0 2xl:w-auto 2xl:px-3 text-xs gap-1.5" title="Dashboard">
+                    <Link to="/dashboard">
+                      <LayoutDashboard className="size-4" />
+                      <span className="hidden 2xl:inline">Dashboard</span>
+                    </Link>
+                  </Button>
+                )}
                 {isAdmin && (
-                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9 w-9 p-0 xl:w-auto xl:px-3 text-xs gap-1.5" title="Admin Panel">
+                  <Button asChild variant="ghost" size="sm" className="hidden md:inline-flex text-muted-foreground hover:text-foreground rounded-xl h-9 w-9 p-0 2xl:w-auto 2xl:px-3 text-xs gap-1.5" title="Admin Panel">
                     <Link to="/admin">
                       <Shield className="size-4" />
-                      <span className="hidden xl:inline">Admin</span>
+                      <span className="hidden 2xl:inline">Admin</span>
                     </Link>
                   </Button>
                 )}
@@ -144,21 +155,21 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                       toast.success("Link copied to clipboard!");
                     }
                   }}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 xl:w-auto xl:px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 gap-1.5 transition-all"
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 2xl:w-auto 2xl:px-3 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-[#07284a]/5 dark:hover:bg-white/5 gap-1.5 transition-all"
                   title="Share"
                 >
                   <Share2 className="size-4 text-violet-500" />
-                  <span className="hidden xl:inline">Share</span>
+                  <span className="hidden 2xl:inline">Share</span>
                 </button>
 
                 {/* Logout */}
                 <button
                   onClick={signOut}
-                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 xl:w-auto xl:px-3 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1.5 transition-all"
+                  className="hidden md:inline-flex items-center justify-center rounded-xl h-9 w-9 2xl:w-auto 2xl:px-3 text-xs font-semibold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 gap-1.5 transition-all"
                   title="Logout"
                 >
                   <LogOut className="size-4" />
-                  <span className="hidden xl:inline">Logout</span>
+                  <span className="hidden 2xl:inline">Logout</span>
                 </button>
 
                 {/* User avatar */}
@@ -172,10 +183,10 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
             ) : (
               <>
                 <button onClick={() => setDark(!dark)}
-                  className="hidden xl:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
+                  className="hidden md:inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 size-8 sm:size-9 text-gray-700 dark:text-slate-350 hover:text-blue-600 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all">
                   {dark ? <Sparkles className="size-3.5 sm:size-4" /> : <Moon className="size-3.5 sm:size-4" />}
                 </button>
-                <div className="hidden xl:inline-flex">
+                <div className="hidden md:inline-flex">
                   <Button asChild size="sm" className="rounded-xl h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-semibold bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white shadow-md shadow-blue-500/10 flex items-center gap-1.5">
                     <Link to="/auth"><User className="size-3.5 sm:size-4 shrink-0" />Login / Register</Link>
                   </Button>
@@ -241,7 +252,7 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                   {itemsToRender.map((item, i) => {
                     const Icon = item.icon;
                     const active = isDashboardPage
-                      ? (item.search?.tab ? currentTab === item.search.tab : !currentTab)
+                      ? (item.to === "/" ? false : (item.search?.tab ? currentTab === item.search.tab : !currentTab))
                       : (item.to === "/" ? pathname === "/" : pathname.startsWith(item.to));
                     return (
                       <button
@@ -280,6 +291,15 @@ export function Navbar({ variant }: { variant?: "public" | "auto" } = {}) {
                 </div>
 
                 <div className="flex flex-col gap-1">
+                  {user && !isDashboardPage && (
+                    <Link to="/dashboard" onClick={() => setOpen(false)}
+                      className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-600 dark:text-slate-350 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98]">
+                      <div className="size-9 shrink-0 rounded-xl flex items-center justify-center bg-white dark:bg-slate-700 text-slate-500 group-hover:scale-105 transition-all">
+                        <LayoutDashboard className="size-4" />
+                      </div>
+                      <span>Dashboard</span>
+                    </Link>
+                  )}
                   {isAdmin && (
                     <Link to="/admin" onClick={() => setOpen(false)}
                       className="group flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold text-slate-600 dark:text-slate-300 bg-slate-50/80 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-700/80 transition-all active:scale-[0.98]">

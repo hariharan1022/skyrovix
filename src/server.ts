@@ -10,7 +10,7 @@ if (typeof setInterval !== "undefined") {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const cutoff = new Date(Date.now() - STALE_TIMEOUT).toISOString();
-      await supabaseAdmin
+      await (supabaseAdmin as any)
         .from("login_sessions")
         .update({ status: "offline" })
         .eq("status", "online")

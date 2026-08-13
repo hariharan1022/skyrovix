@@ -23,9 +23,16 @@ import { Route as NavbarLayoutIndexRouteImport } from './routes/_navbar-layout/i
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
 import { Route as NavbarLayoutAboutRouteImport } from './routes/_navbar-layout/about'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
+import { Route as NavbarLayoutProjectsIndexRouteImport } from './routes/_navbar-layout/projects.index'
+import { Route as NavbarLayoutCoursesIndexRouteImport } from './routes/_navbar-layout/courses.index'
 import { Route as ApiCronCleanupSessionsRouteImport } from './routes/api.cron.cleanup-sessions'
+import { Route as NavbarLayoutProjectsIdRouteImport } from './routes/_navbar-layout/projects.$id'
+import { Route as NavbarLayoutCoursesSlugRouteImport } from './routes/_navbar-layout/courses.$slug'
 import { Route as NavbarLayoutAuthenticatedReviewRouteImport } from './routes/_navbar-layout/_authenticated/review'
 import { Route as NavbarLayoutAuthenticatedDashboardRouteImport } from './routes/_navbar-layout/_authenticated/dashboard'
+import { Route as NavbarLayoutProjectsIdSubmitRouteImport } from './routes/_navbar-layout/projects.$id_.submit'
+import { Route as NavbarLayoutCoursesSlugQuizRouteImport } from './routes/_navbar-layout/courses.$slug_.quiz'
+import { Route as NavbarLayoutCoursesSlugDetailsRouteImport } from './routes/_navbar-layout/courses.$slug_.details'
 
 const VerifyCertificateRoute = VerifyCertificateRouteImport.update({
   id: '/verify-certificate',
@@ -96,10 +103,32 @@ const NavbarLayoutAuthenticatedRouteRoute =
     id: '/_authenticated',
     getParentRoute: () => NavbarLayoutRoute,
   } as any)
+const NavbarLayoutProjectsIndexRoute =
+  NavbarLayoutProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => NavbarLayoutRoute,
+  } as any)
+const NavbarLayoutCoursesIndexRoute =
+  NavbarLayoutCoursesIndexRouteImport.update({
+    id: '/courses/',
+    path: '/courses/',
+    getParentRoute: () => NavbarLayoutRoute,
+  } as any)
 const ApiCronCleanupSessionsRoute = ApiCronCleanupSessionsRouteImport.update({
   id: '/api/cron/cleanup-sessions',
   path: '/api/cron/cleanup-sessions',
   getParentRoute: () => rootRouteImport,
+} as any)
+const NavbarLayoutProjectsIdRoute = NavbarLayoutProjectsIdRouteImport.update({
+  id: '/projects/$id',
+  path: '/projects/$id',
+  getParentRoute: () => NavbarLayoutRoute,
+} as any)
+const NavbarLayoutCoursesSlugRoute = NavbarLayoutCoursesSlugRouteImport.update({
+  id: '/courses/$slug',
+  path: '/courses/$slug',
+  getParentRoute: () => NavbarLayoutRoute,
 } as any)
 const NavbarLayoutAuthenticatedReviewRoute =
   NavbarLayoutAuthenticatedReviewRouteImport.update({
@@ -112,6 +141,24 @@ const NavbarLayoutAuthenticatedDashboardRoute =
     id: '/dashboard',
     path: '/dashboard',
     getParentRoute: () => NavbarLayoutAuthenticatedRouteRoute,
+  } as any)
+const NavbarLayoutProjectsIdSubmitRoute =
+  NavbarLayoutProjectsIdSubmitRouteImport.update({
+    id: '/projects/$id_/submit',
+    path: '/projects/$id/submit',
+    getParentRoute: () => NavbarLayoutRoute,
+  } as any)
+const NavbarLayoutCoursesSlugQuizRoute =
+  NavbarLayoutCoursesSlugQuizRouteImport.update({
+    id: '/courses/$slug_/quiz',
+    path: '/courses/$slug/quiz',
+    getParentRoute: () => NavbarLayoutRoute,
+  } as any)
+const NavbarLayoutCoursesSlugDetailsRoute =
+  NavbarLayoutCoursesSlugDetailsRouteImport.update({
+    id: '/courses/$slug_/details',
+    path: '/courses/$slug/details',
+    getParentRoute: () => NavbarLayoutRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -129,7 +176,14 @@ export interface FileRoutesByFullPath {
   '/domains/': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
   '/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/courses/$slug': typeof NavbarLayoutCoursesSlugRoute
+  '/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
+  '/courses/': typeof NavbarLayoutCoursesIndexRoute
+  '/projects/': typeof NavbarLayoutProjectsIndexRoute
+  '/courses/$slug/details': typeof NavbarLayoutCoursesSlugDetailsRoute
+  '/courses/$slug/quiz': typeof NavbarLayoutCoursesSlugQuizRoute
+  '/projects/$id/submit': typeof NavbarLayoutProjectsIdSubmitRoute
 }
 export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
@@ -145,7 +199,14 @@ export interface FileRoutesByTo {
   '/domains': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
   '/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/courses/$slug': typeof NavbarLayoutCoursesSlugRoute
+  '/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
+  '/courses': typeof NavbarLayoutCoursesIndexRoute
+  '/projects': typeof NavbarLayoutProjectsIndexRoute
+  '/courses/$slug/details': typeof NavbarLayoutCoursesSlugDetailsRoute
+  '/courses/$slug/quiz': typeof NavbarLayoutCoursesSlugQuizRoute
+  '/projects/$id/submit': typeof NavbarLayoutProjectsIdSubmitRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -165,7 +226,14 @@ export interface FileRoutesById {
   '/domains/': typeof DomainsIndexRoute
   '/_navbar-layout/_authenticated/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
   '/_navbar-layout/_authenticated/review': typeof NavbarLayoutAuthenticatedReviewRoute
+  '/_navbar-layout/courses/$slug': typeof NavbarLayoutCoursesSlugRoute
+  '/_navbar-layout/projects/$id': typeof NavbarLayoutProjectsIdRoute
   '/api/cron/cleanup-sessions': typeof ApiCronCleanupSessionsRoute
+  '/_navbar-layout/courses/': typeof NavbarLayoutCoursesIndexRoute
+  '/_navbar-layout/projects/': typeof NavbarLayoutProjectsIndexRoute
+  '/_navbar-layout/courses/$slug_/details': typeof NavbarLayoutCoursesSlugDetailsRoute
+  '/_navbar-layout/courses/$slug_/quiz': typeof NavbarLayoutCoursesSlugQuizRoute
+  '/_navbar-layout/projects/$id_/submit': typeof NavbarLayoutProjectsIdSubmitRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,7 +252,14 @@ export interface FileRouteTypes {
     | '/domains/'
     | '/dashboard'
     | '/review'
+    | '/courses/$slug'
+    | '/projects/$id'
     | '/api/cron/cleanup-sessions'
+    | '/courses/'
+    | '/projects/'
+    | '/courses/$slug/details'
+    | '/courses/$slug/quiz'
+    | '/projects/$id/submit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin'
@@ -200,7 +275,14 @@ export interface FileRouteTypes {
     | '/domains'
     | '/dashboard'
     | '/review'
+    | '/courses/$slug'
+    | '/projects/$id'
     | '/api/cron/cleanup-sessions'
+    | '/courses'
+    | '/projects'
+    | '/courses/$slug/details'
+    | '/courses/$slug/quiz'
+    | '/projects/$id/submit'
   id:
     | '__root__'
     | '/_navbar-layout'
@@ -219,7 +301,14 @@ export interface FileRouteTypes {
     | '/domains/'
     | '/_navbar-layout/_authenticated/dashboard'
     | '/_navbar-layout/_authenticated/review'
+    | '/_navbar-layout/courses/$slug'
+    | '/_navbar-layout/projects/$id'
     | '/api/cron/cleanup-sessions'
+    | '/_navbar-layout/courses/'
+    | '/_navbar-layout/projects/'
+    | '/_navbar-layout/courses/$slug_/details'
+    | '/_navbar-layout/courses/$slug_/quiz'
+    | '/_navbar-layout/projects/$id_/submit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -335,12 +424,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NavbarLayoutAuthenticatedRouteRouteImport
       parentRoute: typeof NavbarLayoutRoute
     }
+    '/_navbar-layout/projects/': {
+      id: '/_navbar-layout/projects/'
+      path: '/projects'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof NavbarLayoutProjectsIndexRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
+    '/_navbar-layout/courses/': {
+      id: '/_navbar-layout/courses/'
+      path: '/courses'
+      fullPath: '/courses/'
+      preLoaderRoute: typeof NavbarLayoutCoursesIndexRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
     '/api/cron/cleanup-sessions': {
       id: '/api/cron/cleanup-sessions'
       path: '/api/cron/cleanup-sessions'
       fullPath: '/api/cron/cleanup-sessions'
       preLoaderRoute: typeof ApiCronCleanupSessionsRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_navbar-layout/projects/$id': {
+      id: '/_navbar-layout/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/projects/$id'
+      preLoaderRoute: typeof NavbarLayoutProjectsIdRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
+    '/_navbar-layout/courses/$slug': {
+      id: '/_navbar-layout/courses/$slug'
+      path: '/courses/$slug'
+      fullPath: '/courses/$slug'
+      preLoaderRoute: typeof NavbarLayoutCoursesSlugRouteImport
+      parentRoute: typeof NavbarLayoutRoute
     }
     '/_navbar-layout/_authenticated/review': {
       id: '/_navbar-layout/_authenticated/review'
@@ -355,6 +472,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof NavbarLayoutAuthenticatedDashboardRouteImport
       parentRoute: typeof NavbarLayoutAuthenticatedRouteRoute
+    }
+    '/_navbar-layout/projects/$id_/submit': {
+      id: '/_navbar-layout/projects/$id_/submit'
+      path: '/projects/$id/submit'
+      fullPath: '/projects/$id/submit'
+      preLoaderRoute: typeof NavbarLayoutProjectsIdSubmitRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
+    '/_navbar-layout/courses/$slug_/quiz': {
+      id: '/_navbar-layout/courses/$slug_/quiz'
+      path: '/courses/$slug/quiz'
+      fullPath: '/courses/$slug/quiz'
+      preLoaderRoute: typeof NavbarLayoutCoursesSlugQuizRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
+    '/_navbar-layout/courses/$slug_/details': {
+      id: '/_navbar-layout/courses/$slug_/details'
+      path: '/courses/$slug/details'
+      fullPath: '/courses/$slug/details'
+      preLoaderRoute: typeof NavbarLayoutCoursesSlugDetailsRouteImport
+      parentRoute: typeof NavbarLayoutRoute
     }
   }
 }
@@ -380,6 +518,13 @@ interface NavbarLayoutRouteChildren {
   NavbarLayoutAuthenticatedRouteRoute: typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
   NavbarLayoutAboutRoute: typeof NavbarLayoutAboutRoute
   NavbarLayoutIndexRoute: typeof NavbarLayoutIndexRoute
+  NavbarLayoutCoursesSlugRoute: typeof NavbarLayoutCoursesSlugRoute
+  NavbarLayoutProjectsIdRoute: typeof NavbarLayoutProjectsIdRoute
+  NavbarLayoutCoursesIndexRoute: typeof NavbarLayoutCoursesIndexRoute
+  NavbarLayoutProjectsIndexRoute: typeof NavbarLayoutProjectsIndexRoute
+  NavbarLayoutCoursesSlugDetailsRoute: typeof NavbarLayoutCoursesSlugDetailsRoute
+  NavbarLayoutCoursesSlugQuizRoute: typeof NavbarLayoutCoursesSlugQuizRoute
+  NavbarLayoutProjectsIdSubmitRoute: typeof NavbarLayoutProjectsIdSubmitRoute
 }
 
 const NavbarLayoutRouteChildren: NavbarLayoutRouteChildren = {
@@ -387,6 +532,13 @@ const NavbarLayoutRouteChildren: NavbarLayoutRouteChildren = {
     NavbarLayoutAuthenticatedRouteRouteWithChildren,
   NavbarLayoutAboutRoute: NavbarLayoutAboutRoute,
   NavbarLayoutIndexRoute: NavbarLayoutIndexRoute,
+  NavbarLayoutCoursesSlugRoute: NavbarLayoutCoursesSlugRoute,
+  NavbarLayoutProjectsIdRoute: NavbarLayoutProjectsIdRoute,
+  NavbarLayoutCoursesIndexRoute: NavbarLayoutCoursesIndexRoute,
+  NavbarLayoutProjectsIndexRoute: NavbarLayoutProjectsIndexRoute,
+  NavbarLayoutCoursesSlugDetailsRoute: NavbarLayoutCoursesSlugDetailsRoute,
+  NavbarLayoutCoursesSlugQuizRoute: NavbarLayoutCoursesSlugQuizRoute,
+  NavbarLayoutProjectsIdSubmitRoute: NavbarLayoutProjectsIdSubmitRoute,
 }
 
 const NavbarLayoutRouteWithChildren = NavbarLayoutRoute._addFileChildren(
