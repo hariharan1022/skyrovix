@@ -27,5 +27,17 @@
       "path": "/api/cron/cleanup-sessions",
       "schedule": "0 6 * * *"
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "founder.skyrovix.online"
+        }
+      ],
+      "destination": "/founder"
+    }
   ]
 }

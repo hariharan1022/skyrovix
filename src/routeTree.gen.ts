@@ -21,6 +21,7 @@ import { Route as NavbarLayoutRouteImport } from './routes/_navbar-layout'
 import { Route as DomainsIndexRouteImport } from './routes/domains.index'
 import { Route as NavbarLayoutIndexRouteImport } from './routes/_navbar-layout/index'
 import { Route as DomainsSlugRouteImport } from './routes/domains.$slug'
+import { Route as NavbarLayoutFounderRouteImport } from './routes/_navbar-layout/founder'
 import { Route as NavbarLayoutAboutRouteImport } from './routes/_navbar-layout/about'
 import { Route as NavbarLayoutAuthenticatedRouteRouteImport } from './routes/_navbar-layout/_authenticated/route'
 import { Route as NavbarLayoutProjectsIndexRouteImport } from './routes/_navbar-layout/projects.index'
@@ -92,6 +93,11 @@ const DomainsSlugRoute = DomainsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => DomainsRoute,
+} as any)
+const NavbarLayoutFounderRoute = NavbarLayoutFounderRouteImport.update({
+  id: '/founder',
+  path: '/founder',
+  getParentRoute: () => NavbarLayoutRoute,
 } as any)
 const NavbarLayoutAboutRoute = NavbarLayoutAboutRouteImport.update({
   id: '/about',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/verify-certificate': typeof VerifyCertificateRoute
   '/about': typeof NavbarLayoutAboutRoute
+  '/founder': typeof NavbarLayoutFounderRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/domains/': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   '/verify-certificate': typeof VerifyCertificateRoute
   '/': typeof NavbarLayoutIndexRoute
   '/about': typeof NavbarLayoutAboutRoute
+  '/founder': typeof NavbarLayoutFounderRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/domains': typeof DomainsIndexRoute
   '/dashboard': typeof NavbarLayoutAuthenticatedDashboardRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/verify-certificate': typeof VerifyCertificateRoute
   '/_navbar-layout/_authenticated': typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
   '/_navbar-layout/about': typeof NavbarLayoutAboutRoute
+  '/_navbar-layout/founder': typeof NavbarLayoutFounderRoute
   '/domains/$slug': typeof DomainsSlugRoute
   '/_navbar-layout/': typeof NavbarLayoutIndexRoute
   '/domains/': typeof DomainsIndexRoute
@@ -248,6 +257,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/verify-certificate'
     | '/about'
+    | '/founder'
     | '/domains/$slug'
     | '/domains/'
     | '/dashboard'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/verify-certificate'
     | '/'
     | '/about'
+    | '/founder'
     | '/domains/$slug'
     | '/domains'
     | '/dashboard'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/verify-certificate'
     | '/_navbar-layout/_authenticated'
     | '/_navbar-layout/about'
+    | '/_navbar-layout/founder'
     | '/domains/$slug'
     | '/_navbar-layout/'
     | '/domains/'
@@ -410,6 +422,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DomainsSlugRouteImport
       parentRoute: typeof DomainsRoute
     }
+    '/_navbar-layout/founder': {
+      id: '/_navbar-layout/founder'
+      path: '/founder'
+      fullPath: '/founder'
+      preLoaderRoute: typeof NavbarLayoutFounderRouteImport
+      parentRoute: typeof NavbarLayoutRoute
+    }
     '/_navbar-layout/about': {
       id: '/_navbar-layout/about'
       path: '/about'
@@ -517,6 +536,7 @@ const NavbarLayoutAuthenticatedRouteRouteWithChildren =
 interface NavbarLayoutRouteChildren {
   NavbarLayoutAuthenticatedRouteRoute: typeof NavbarLayoutAuthenticatedRouteRouteWithChildren
   NavbarLayoutAboutRoute: typeof NavbarLayoutAboutRoute
+  NavbarLayoutFounderRoute: typeof NavbarLayoutFounderRoute
   NavbarLayoutIndexRoute: typeof NavbarLayoutIndexRoute
   NavbarLayoutCoursesSlugRoute: typeof NavbarLayoutCoursesSlugRoute
   NavbarLayoutProjectsIdRoute: typeof NavbarLayoutProjectsIdRoute
@@ -531,6 +551,7 @@ const NavbarLayoutRouteChildren: NavbarLayoutRouteChildren = {
   NavbarLayoutAuthenticatedRouteRoute:
     NavbarLayoutAuthenticatedRouteRouteWithChildren,
   NavbarLayoutAboutRoute: NavbarLayoutAboutRoute,
+  NavbarLayoutFounderRoute: NavbarLayoutFounderRoute,
   NavbarLayoutIndexRoute: NavbarLayoutIndexRoute,
   NavbarLayoutCoursesSlugRoute: NavbarLayoutCoursesSlugRoute,
   NavbarLayoutProjectsIdRoute: NavbarLayoutProjectsIdRoute,
