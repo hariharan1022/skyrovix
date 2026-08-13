@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   Award, BookOpen, Clock, Heart, Users, Target, ShieldCheck, Mail, Globe,
   MessageSquare, Briefcase, GraduationCap, ChevronRight, Send, ArrowRight,
-  Linkedin, Github, Twitter, ExternalLink, Calendar, Code
+  Linkedin, Github, Twitter, ExternalLink, Calendar, Code, Sparkles
 } from "lucide-react";
 import { FadeUp, Reveal, ScaleIn } from "@/components/motion";
 import founderPhoto from "@/assets/founder.jpeg";
@@ -122,19 +122,22 @@ export function FounderProfileView() {
       <section className="py-12 border-b border-slate-900 bg-slate-950">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((s, idx) => (
-              <ScaleIn key={idx} delay={idx * 100}>
-                <Card className="border border-slate-900 bg-slate-900/40 backdrop-blur rounded-2xl">
-                  <CardContent className="p-6 text-center space-y-2">
-                    <div className={`size-10 rounded-xl flex items-center justify-center mx-auto ${s.color}`}>
-                      <s.icon className="size-5" />
-                    </div>
-                    <p className="text-2xl font-black text-white">{s.value}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400 font-medium">{s.label}</p>
-                  </CardContent>
-                </Card>
-              </ScaleIn>
-            ))}
+            {stats.map((s, idx) => {
+              const Icon = s.icon;
+              return (
+                <ScaleIn key={idx} delay={idx * 100}>
+                  <Card className="border border-slate-900 bg-slate-900/40 backdrop-blur rounded-2xl">
+                    <CardContent className="p-6 text-center space-y-2">
+                      <div className={`size-10 rounded-xl flex items-center justify-center mx-auto ${s.color}`}>
+                        <Icon className="size-5" />
+                      </div>
+                      <p className="text-2xl font-black text-white">{s.value}</p>
+                      <p className="text-[10px] sm:text-xs text-slate-400 font-medium">{s.label}</p>
+                    </CardContent>
+                  </Card>
+                </ScaleIn>
+              );
+            })}
           </div>
         </div>
       </section>
