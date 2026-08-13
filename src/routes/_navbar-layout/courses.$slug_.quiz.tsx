@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Award, Clock, ArrowLeft, ArrowRight, BookOpen, AlertTriangle, CheckCircle2, XCircle, RotateCcw, Download, HelpCircle, ShieldAlert, Loader2, Star } from "lucide-react";
 import { CourseCertificateDoc, downloadPdf } from "@/components/pdf-docs";
 import { FadeUp } from "@/components/motion";
+import { getLocalQuizQuestions } from "@/lib/quiz-content.generated";
 
 // Local fallback questions for final quizzes if database questions are empty
 const MOCK_QUIZ_QUESTIONS: Record<string, any[]> = {
@@ -260,7 +261,19 @@ function CourseQuizPage() {
 
   // Start the Timed Quiz
   const startQuiz = () => {
-    const list = dbQuestions.length > 0 ? dbQuestions : (MOCK_QUIZ_QUESTIONS[course!.slug] || MOCK_QUIZ_QUESTIONS.python);
+    let list = dbQuestions.length > 0 ? dbQuestions : [];
+
+    if (list.length === 0) {
+      const localQs = getLocalQuizQuestions(course!.slug);
+      if (localQs && localQs.length > 0) {
+        // Take a random sample of 20 questions
+        const sampled = [...localQs].sort(() => Math.random() - 0.5).slice(0, 20);
+        // Map marks to 5 each so total score is 100
+        list = sampled.map(q => ({ ...q, marks: 5 }));
+      } else {
+        list = MOCK_QUIZ_QUESTIONS[course!.slug] || MOCK_QUIZ_QUESTIONS.python;
+      }
+    }
     
     // Shuffle questions
     const shuffled = [...list].sort(() => Math.random() - 0.5);
