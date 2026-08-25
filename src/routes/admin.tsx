@@ -1,5 +1,6 @@
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1206,6 +1207,15 @@ function SubmissionsSection() {
   const [showHistory, setShowHistory] = useState<string | null>(null);
   const [historyData, setHistoryData] = useState<any[]>([]);
 
+  useEffect(() => {
+    if (confirmAction) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [confirmAction]);
+
   const tableName = "submissions";
   const queryKey = ["admin-subs"];
 
@@ -1282,9 +1292,17 @@ function SubmissionsSection() {
       {!data?.length && <p className="text-center text-muted-foreground py-12">No submissions yet.</p>}
 
       {/* Confirmation Dialog */}
-      {confirmAction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setConfirmAction(null)}>
-          <div className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+      {confirmAction && createPortal(
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setConfirmAction(null)}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h3 className="text-lg font-bold">Confirm Action</h3>
             <p className="mt-2 text-sm text-muted-foreground">Are you sure you want to <span className="font-semibold text-foreground">{confirmAction.label}</span> this submission?</p>
             {confirmAction.status === "rejected" && (
@@ -1308,7 +1326,8 @@ function SubmissionsSection() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

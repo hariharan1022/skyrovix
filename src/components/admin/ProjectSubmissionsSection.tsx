@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -621,9 +622,14 @@ export function ProjectSubmissionsSection() {
       )}
 
       {/* ─── Rejection Modal ─── */}
-      {rejectingSub && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-border/40 bg-white dark:bg-[#0F172A] p-5 shadow-2xl animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
+      {rejectingSub && createPortal(
+        <div
+          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setRejectingSub(null)}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
+          <div className="w-full max-w-md rounded-2xl border border-border/40 bg-white dark:bg-[#0F172A] p-5 shadow-2xl animate-in zoom-in-95 my-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-bold">Reject Solution Submission</h3>
             <p className="text-xs text-muted-foreground mt-1">Specify why the solution is rejected (e.g. invalid repo, failed build, plagiarised code). This will allow them to submit again.</p>
 
@@ -645,7 +651,8 @@ export function ProjectSubmissionsSection() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ─── Award Certificate Issuing Modal ─── */}
