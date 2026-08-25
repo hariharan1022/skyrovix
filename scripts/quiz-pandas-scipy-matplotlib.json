@@ -1,0 +1,3902 @@
+[
+  {
+    "id": "pandas-1",
+    "question": "What is a pandas DataFrame?",
+    "options": [
+      "A 2D labeled data structure with columns of potentially different types",
+      "A 1D labeled array",
+      "A NumPy array wrapper",
+      "A Python dictionary"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "A DataFrame is a 2D labeled structure similar to a spreadsheet or SQL table, capable of holding columns of different types."
+  },
+  {
+    "id": "pandas-2",
+    "question": "What is the conventional import alias for pandas?",
+    "options": [
+      "import pandas as pd",
+      "import pandas as pa",
+      "import pandas as pn",
+      "import pandas as ps"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "By convention, pandas is imported as `import pandas as pd` throughout the data science community."
+  },
+  {
+    "id": "pandas-3",
+    "question": "What does df.info() display?",
+    "options": [
+      "Column names, non-null counts, dtypes, and memory usage",
+      "Only column names and dtypes",
+      "Statistical summary of numeric columns",
+      "The first 5 rows of the DataFrame"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.info() shows the index dtype, column names, non-null counts per column, column dtypes, and total memory usage."
+  },
+  {
+    "id": "pandas-4",
+    "question": "Which method provides a statistical summary (count, mean, std, min, quartiles, max) for numeric columns?",
+    "options": [
+      "df.describe()",
+      "df.info()",
+      "df.summary()",
+      "df.stats()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.describe() automatically computes count, mean, standard deviation, minimum, 25th/50th/75th percentiles, and maximum for numeric columns."
+  },
+  {
+    "id": "pandas-5",
+    "question": "Created by Wes McKinney in 2008, pandas is built on top of which library?",
+    "options": [
+      "NumPy",
+      "Matplotlib",
+      "SciPy",
+      "Scikit-learn"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pandas is built on top of NumPy and is a cornerstone of the Python data science ecosystem, created by Wes McKinney in 2008."
+  },
+  {
+    "id": "pandas-6",
+    "question": "How do you read a JSON file into a DataFrame?",
+    "options": [
+      "pd.read_json('file.json')",
+      "pd.read('file.json')",
+      "pd.load_json('file.json')",
+      "pd.from_json('file.json')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pd.read_json() loads JSON data into a DataFrame. For nested JSON, pd.json_normalize() can flatten the structure."
+  },
+  {
+    "id": "pandas-7",
+    "question": "How do you access a single column as a Series from a DataFrame df?",
+    "options": [
+      "df['col'] or df.col",
+      "df.get('col')",
+      "df['col'] only",
+      "df.col()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "You can access a column using bracket notation `df['col']` or dot notation `df.col` if the column name is a valid identifier."
+  },
+  {
+    "id": "pandas-8",
+    "question": "What is the difference between df['col'] and df[['col']]?",
+    "options": [
+      "df['col'] returns a Series; df[['col']] returns a DataFrame",
+      "df['col'] returns a DataFrame; df[['col']] returns a Series",
+      "Both return a Series",
+      "Both return a DataFrame"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df['col'] returns a 1D Series, while df[['col']] returns a 2D DataFrame with a single column."
+  },
+  {
+    "id": "pandas-9",
+    "question": "What does the shape attribute of a DataFrame return?",
+    "options": [
+      "A tuple of (rows, columns)",
+      "A tuple of (columns, rows)",
+      "An integer of row count",
+      "A list of column names"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.shape returns a tuple (rows, columns), always with the row count first."
+  },
+  {
+    "id": "pandas-10",
+    "question": "Which method is used to create a pandas Series?",
+    "options": [
+      "pd.Series()",
+      "pd.SeriesList()",
+      "pd.SeriesArray()",
+      "pd.CreateSeries()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pd.Series() creates a one-dimensional labeled array that can hold any data type, from lists, dicts, or scalars."
+  },
+  {
+    "id": "pandas-11",
+    "question": "What does df.dtypes return?",
+    "options": [
+      "A Series with column names as index and dtype as values",
+      "A list of column names",
+      "A tuple of dtypes",
+      "A DataFrame of dtypes"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.dtypes returns a Series where the index contains column names and the values are their corresponding data types."
+  },
+  {
+    "id": "pandas-12",
+    "question": "What happens if you omit the index parameter when creating a DataFrame?",
+    "options": [
+      "A default RangeIndex (0, 1, 2, ...) is used",
+      "An error is raised",
+      "The DataFrame is not created",
+      "NaN is used as the index"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "If no index parameter is provided, pandas assigns a default RangeIndex starting from 0."
+  },
+  {
+    "id": "pandas-13",
+    "question": "How does loc slicing differ from iloc slicing in pandas?",
+    "options": [
+      "loc is label-based and inclusive on slices; iloc is position-based and exclusive on the right",
+      "loc is position-based; iloc is label-based",
+      "Both are identical",
+      "loc is exclusive; iloc is inclusive"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "loc uses label-based indexing with inclusive end labels in slices, while iloc uses integer position-based indexing with exclusive right endpoints."
+  },
+  {
+    "id": "pandas-14",
+    "question": "What does the value_counts() method return?",
+    "options": [
+      "A Series with unique values as index and their frequencies as values, sorted descending",
+      "A list of unique values",
+      "A DataFrame with frequencies",
+      "A NumPy array of counts"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "value_counts() returns a Series where unique values are the index and their frequencies are the values, sorted in descending order by default."
+  },
+  {
+    "id": "pandas-15",
+    "question": "What does the unique() method on a Series return?",
+    "options": [
+      "A NumPy array of distinct values",
+      "A Series of distinct values",
+      "A list of distinct values",
+      "A DataFrame of distinct values"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "unique() returns a NumPy array containing the distinct values of the Series."
+  },
+  {
+    "id": "pandas-16",
+    "question": "Which method on a Series can apply a function element-wise?",
+    "options": [
+      "apply()",
+      "map()",
+      "transform()",
+      "All of the above"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "On a Series, both apply() and map() can be used for element-wise transformation."
+  },
+  {
+    "id": "pandas-17",
+    "question": "What is the purpose of the name attribute of a Series?",
+    "options": [
+      "It gives the Series a label that becomes the column header when part of a DataFrame",
+      "It names the index",
+      "It is used for display only",
+      "It is ignored by pandas"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The name attribute labels the Series. When the Series is used as a DataFrame column, the name becomes the column header."
+  },
+  {
+    "id": "pandas-18",
+    "question": "What does s[s > 10] do in pandas?",
+    "options": [
+      "Returns a new Series with only elements where the value exceeds 10",
+      "Modifies the original Series",
+      "Raises an error",
+      "Returns a boolean Series"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "s[s > 10] uses boolean indexing: the condition s > 10 produces a boolean Series, which is then used as a filter."
+  },
+  {
+    "id": "pandas-19",
+    "question": "What is returned by nunique() on a Series?",
+    "options": [
+      "The count of distinct values (excluding NaN by default)",
+      "An array of unique values",
+      "A DataFrame of unique counts",
+      "The total number of elements"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "nunique() returns the integer count of distinct values in the Series, excluding NaN by default."
+  },
+  {
+    "id": "pandas-20",
+    "question": "How do you rename a column in a DataFrame?",
+    "options": [
+      "df.rename(columns={'old_name': 'new_name'})",
+      "df.rename_column('old', 'new')",
+      "df.set_column_name('old', 'new')",
+      "df.col_name = 'new'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use df.rename(columns={'old_name': 'new_name'}) to rename columns. You must reassign the result or use inplace=True."
+  },
+  {
+    "id": "pandas-21",
+    "question": "What does .T do on a DataFrame?",
+    "options": [
+      "Transposes rows and columns",
+      "Converts to a NumPy array",
+      "Returns the top 5 rows",
+      "Truncates the DataFrame"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ".T transposes the DataFrame, swapping rows and columns. All columns become rows and vice versa."
+  },
+  {
+    "id": "pandas-22",
+    "question": "How do you create a multi-index DataFrame?",
+    "options": [
+      "Create a MultiIndex and pass it as the index parameter to pd.DataFrame()",
+      "Use df.set_multi_index()",
+      "Use pd.MultiDataFrame()",
+      "Create nested columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Create a MultiIndex using from_arrays(), from_tuples(), or from_product(), then pass it as the index parameter."
+  },
+  {
+    "id": "pandas-23",
+    "question": "What does df.xs('Q1', level='Quarter') do?",
+    "options": [
+      "Selects all rows where 'Quarter' level equals 'Q1' regardless of outer index",
+      "Selects only Q1 of the first region",
+      "Drops the Quarter level",
+      "Filters columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "xs() with level parameter slices across all outer groups at the specified inner level, returning a sub-DataFrame."
+  },
+  {
+    "id": "pandas-24",
+    "question": "Which method adds a column at a specific position in a DataFrame?",
+    "options": [
+      "df.insert(pos, name, values)",
+      "df.add_column(pos, name, values)",
+      "df['new'] = values",
+      "df.set_column(pos, name)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.insert(loc, column, value) adds a column at the specified integer position in the DataFrame."
+  },
+  {
+    "id": "pandas-25",
+    "question": "What does df.loc['North'] return for a multi-index DataFrame?",
+    "options": [
+      "A sub-DataFrame for all rows with 'North' at the outer level",
+      "A single row",
+      "A Series",
+      "An error"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "For a multi-index DataFrame, df.loc['North'] returns a sub-DataFrame containing all rows matching 'North'."
+  },
+  {
+    "id": "pandas-26",
+    "question": "How can you add a new row to a DataFrame?",
+    "options": [
+      "Using pd.concat() or df.loc[len(df)] = values",
+      "Using df.append() (deprecated)",
+      "Using df.insert_row()",
+      "Either A or B"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "pd.concat() is the recommended approach. df.loc[len(df)] = values also works but pd.concat() is preferred."
+  },
+  {
+    "id": "pandas-27",
+    "question": "Which parameter in pd.read_csv() allows you to load only specific columns?",
+    "options": [
+      "usecols",
+      "columns",
+      "include",
+      "select"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "usecols accepts column names or indices to load only a subset of columns, reducing memory usage."
+  },
+  {
+    "id": "pandas-28",
+    "question": "How do you handle CSV files that don't have a header row?",
+    "options": [
+      "Use header=None and optionally provide column names via names",
+      "Use no_header=True",
+      "Skip the first row with skiprows=1",
+      "Use header=False"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Set header=None to indicate no header row. Provide custom column names using the names parameter."
+  },
+  {
+    "id": "pandas-29",
+    "question": "What does chunksize do in pd.read_csv()?",
+    "options": [
+      "Returns an iterator of DataFrames for processing large files in pieces",
+      "Limits the number of columns read",
+      "Sets the size of string columns",
+      "Controls memory cache size"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "chunksize returns an iterator of DataFrames each with chunksize rows, allowing processing of files larger than RAM."
+  },
+  {
+    "id": "pandas-30",
+    "question": "How do you handle encoding errors when reading a CSV file?",
+    "options": [
+      "Specify the encoding parameter (e.g., encoding='latin1')",
+      "Use fix_encoding=True",
+      "The error is automatically fixed",
+      "Use pd.read_csv with engine='python'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use the encoding parameter to match the file's encoding and avoid UnicodeDecodeError."
+  },
+  {
+    "id": "pandas-31",
+    "question": "What does the na_values parameter do in pd.read_csv()?",
+    "options": [
+      "Specifies additional strings to treat as NaN",
+      "Replaces all NaN values",
+      "Shows only non-null values",
+      "Sets the default NA value"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "na_values specifies additional strings beyond the defaults that should be recognized as NaN values when parsing."
+  },
+  {
+    "id": "pandas-32",
+    "question": "What is the default separator in pd.read_csv()?",
+    "options": [
+      ", (comma)",
+      "\\t (tab)",
+      "; (semicolon)",
+      "| (pipe)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The default separator in pd.read_csv() is the comma (,). For tab-separated files, use sep='\\t'."
+  },
+  {
+    "id": "pandas-33",
+    "question": "How do you force a column to a specific data type when reading a CSV?",
+    "options": [
+      "Use the dtype parameter with a dict mapping column names to types",
+      "Use the types parameter",
+      "Pandas infers automatically and cannot be overridden",
+      "Use the cast parameter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The dtype parameter accepts a dict like {'age': int, 'price': float} to enforce specific data types during CSV reading."
+  },
+  {
+    "id": "pandas-34",
+    "question": "What information does df.info() NOT provide?",
+    "options": [
+      "Correlation between columns",
+      "Column names and dtypes",
+      "Non-null counts per column",
+      "Memory usage"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.info() shows column names, dtypes, non-null counts, and memory usage, but not correlations."
+  },
+  {
+    "id": "pandas-35",
+    "question": "What does value_counts(normalize=True) return?",
+    "options": [
+      "Relative frequencies (proportions) instead of counts",
+      "Normalized values to z-scores",
+      "A boolean Series",
+      "Only the top 5 values"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "With normalize=True, value_counts() returns proportions instead of absolute counts, summing to 1.0."
+  },
+  {
+    "id": "pandas-36",
+    "question": "What is the default correlation method used by df.corr()?",
+    "options": [
+      "Pearson",
+      "Spearman",
+      "Kendall",
+      "Point-biserial"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.corr() defaults to Pearson correlation coefficient, measuring linear relationships between numeric columns."
+  },
+  {
+    "id": "pandas-37",
+    "question": "What does df.describe(include='object') do?",
+    "options": [
+      "Provides count, unique, top, and freq for object/string columns",
+      "Returns an error",
+      "Describes only numeric columns",
+      "Converts objects to numeric"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "describe(include='object') shows count, unique, top, and freq for categorical columns."
+  },
+  {
+    "id": "pandas-38",
+    "question": "How do you check for duplicate rows in a DataFrame?",
+    "options": [
+      "df.duplicated() returns a boolean Series; df.duplicated().sum() gives the count",
+      "df.duplicates() returns the duplicate rows",
+      "df.check_duplicates() returns a count",
+      "df.find_duplicates() lists duplicates"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.duplicated() returns a boolean Series where True indicates a duplicate row."
+  },
+  {
+    "id": "pandas-39",
+    "question": "Which method computes the number of unique values in a column?",
+    "options": [
+      "nunique()",
+      "unique()",
+      "count_unique()",
+      "distinct()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "nunique() returns the integer count of distinct values, while unique() returns the array of distinct values."
+  },
+  {
+    "id": "pandas-40",
+    "question": "What does a correlation of -0.5 between two variables indicate?",
+    "options": [
+      "A moderate negative linear relationship",
+      "A strong positive linear relationship",
+      "No relationship",
+      "A perfect negative relationship"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "A correlation of -0.5 indicates a moderate negative linear relationship."
+  },
+  {
+    "id": "pandas-41",
+    "question": "What is the difference between dropna() and fillna()?",
+    "options": [
+      "dropna() removes rows/columns with NaN; fillna() replaces NaN with specified values",
+      "dropna() replaces NaN; fillna() removes NaN",
+      "Both do the same thing",
+      "dropna() only works on columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "dropna() removes rows or columns containing missing values, while fillna() replaces NaN with a value."
+  },
+  {
+    "id": "pandas-42",
+    "question": "How do you forward-fill missing values in a DataFrame?",
+    "options": [
+      "df.fillna(method='ffill') or df.ffill()",
+      "df.fillna(method='forward')",
+      "df.fill_forward()",
+      "df.forward_fill()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ffill (forward fill) carries the last valid observation forward to fill missing values."
+  },
+  {
+    "id": "pandas-43",
+    "question": "What does df.drop_duplicates(subset=['col1'], keep='last') do?",
+    "options": [
+      "Removes duplicate rows based on 'col1', keeping the last occurrence",
+      "Removes all rows with duplicates in 'col1'",
+      "Keeps the first occurrence only",
+      "Drops the 'col1' column"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "It removes rows with duplicate values in 'col1', retaining only the last occurrence of each duplicate set."
+  },
+  {
+    "id": "pandas-44",
+    "question": "Which method would you use to clean whitespace from string columns?",
+    "options": [
+      "df['col'].str.strip()",
+      "df['col'].strip()",
+      "df.strip('col')",
+      "df['col'].clean()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The .str accessor provides string methods. str.strip() removes leading/trailing whitespace."
+  },
+  {
+    "id": "pandas-45",
+    "question": "What does the IQR method for outlier detection use?",
+    "options": [
+      "Q1 - 1.5*IQR and Q3 + 1.5*IQR as thresholds",
+      "Mean +/- 3*Std as thresholds",
+      "The max and min values",
+      "Percentile-based thresholds"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The IQR method defines outliers as values below Q1 - 1.5*IQR or above Q3 + 1.5*IQR."
+  },
+  {
+    "id": "pandas-46",
+    "question": "What is commonly used to fill NaN in a column?",
+    "options": [
+      "mean() or median()",
+      "sum()",
+      "max()",
+      "first()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Common strategies are filling with the mean or median, which are central tendency measures."
+  },
+  {
+    "id": "pandas-47",
+    "question": "How do you apply multiple fill strategies to different columns?",
+    "options": [
+      "df.fillna({'col1': 0, 'col2': 'missing'})",
+      "df.fillna(0) for all columns",
+      "Use a loop over columns",
+      "df.fillna(method='ffill')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pass a dict to fillna() with column names as keys and fill values as values."
+  },
+  {
+    "id": "pandas-48",
+    "question": "How do you combine multiple filter conditions?",
+    "options": [
+      "Use & (AND), | (OR), ~ (NOT) with parentheses around each condition",
+      "Use and, or, not keywords",
+      "Chain multiple df[conditions]",
+      "Use the filter() method"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use & for AND, | for OR, and ~ for NOT, wrapping each condition in parentheses."
+  },
+  {
+    "id": "pandas-49",
+    "question": "What is the purpose of df['col'].isin(values)?",
+    "options": [
+      "Filters rows where the column value is in the given list",
+      "Checks if the column exists in the DataFrame",
+      "Checks if values are in the index",
+      "Returns the index of matching values"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "isin() filters rows where the column value belongs to a specified list."
+  },
+  {
+    "id": "pandas-50",
+    "question": "What does df['col'].between(25, 35) do?",
+    "options": [
+      "Returns a boolean Series True for values between 25 and 35 inclusive",
+      "Checks if values are between 25 and 35 exclusive",
+      "Returns the values between those positions",
+      "Filters columns within a range"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "between() returns a boolean Series where True indicates values in the inclusive range."
+  },
+  {
+    "id": "pandas-51",
+    "question": "Which method allows writing filter conditions as a string expression?",
+    "options": [
+      "df.query()",
+      "df.filter()",
+      "df.where()",
+      "df.lookup()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.query() allows expressing filter conditions as a string, making complex conditions more readable."
+  },
+  {
+    "id": "pandas-52",
+    "question": "What does str.contains(na=False) do when filtering?",
+    "options": [
+      "Checks if string pattern is found; na=False treats NaN as False",
+      "Checks if a column contains any value",
+      "Checks if the DataFrame contains a column",
+      "Returns True if any string matches"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "str.contains() returns a boolean Series for pattern matching. na=False treats NaN as False instead of propagating it."
+  },
+  {
+    "id": "pandas-53",
+    "question": "How do you select specific columns from filtered rows?",
+    "options": [
+      "df.loc[condition, ['col1', 'col2']]",
+      "df[condition][['col1', 'col2']]",
+      "df[['col1', 'col2']][condition]",
+      "All of the above work"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "All three work, but df.loc[condition, columns] is the most efficient and avoids chained indexing."
+  },
+  {
+    "id": "pandas-54",
+    "question": "What does df.filter() do in pandas?",
+    "options": [
+      "Selects columns by name, like, or regex",
+      "Filters rows by condition",
+      "Filters by index value",
+      "Drops columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.filter() selects columns based on label names, supporting items, like (substring), and regex parameters."
+  },
+  {
+    "id": "pandas-55",
+    "question": "How do you sort a DataFrame by multiple columns with different directions?",
+    "options": [
+      "df.sort_values(['col1', 'col2'], ascending=[True, False])",
+      "df.sort(['col1', 'col2'], order=['asc', 'desc'])",
+      "df.order_by(['col1 ASC', 'col2 DESC'])",
+      "df.sort_values('col1', 'col2', ascending=True, False)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pass a list of column names and a corresponding list of booleans to ascending for multi-column sorting."
+  },
+  {
+    "id": "pandas-56",
+    "question": "What does na_position control in sort_values()?",
+    "options": [
+      "Where NaN values appear: 'first' or 'last'",
+      "Whether NaN is allowed in sorting",
+      "The position of the sorting column",
+      "Whether to sort by index"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "na_position determines whether NaN values appear at the beginning ('first') or end ('last') of the sorted result."
+  },
+  {
+    "id": "pandas-57",
+    "question": "How does sort_values() differ from sort_index()?",
+    "options": [
+      "sort_values() sorts by column data; sort_index() sorts by row labels",
+      "sort_values() sorts rows; sort_index() sorts columns",
+      "Both are identical",
+      "sort_values() is for Series only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "sort_values() sorts by column values, while sort_index() sorts by the row index labels."
+  },
+  {
+    "id": "pandas-58",
+    "question": "How do you perform a case-insensitive sort on a string column?",
+    "options": [
+      "Use the key parameter with str.lower: df.sort_values('Name', key=lambda x: x.str.lower())",
+      "Use case_insensitive=True",
+      "Convert to lowercase first",
+      "Use sort_values with ignore_case=True"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The key parameter accepts a function applied before comparison. str.lower() makes the sort case-insensitive."
+  },
+  {
+    "id": "pandas-59",
+    "question": "What is the difference between sort_values() and nlargest()?",
+    "options": [
+      "sort_values() returns entire sorted DataFrame; nlargest(n) returns only the top n rows",
+      "sort_values() is faster",
+      "nlargest() sorts descending only",
+      "There is no difference"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "nlargest(n, 'col') efficiently returns only the top n rows without fully sorting the entire DataFrame."
+  },
+  {
+    "id": "pandas-60",
+    "question": "What does sort_values() return by default?",
+    "options": [
+      "A new sorted DataFrame (original unchanged)",
+      "The original DataFrame sorted in-place",
+      "None",
+      "A NumPy array"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "sort_values() returns a new DataFrame. To modify in-place, use inplace=True or reassign."
+  },
+  {
+    "id": "pandas-61",
+    "question": "What is the split-apply-combine pattern?",
+    "options": [
+      "Split data into groups, apply a function to each, combine results",
+      "Split data into train/test, apply model, combine predictions",
+      "Split columns, apply cleaning, combine datasets",
+      "Split index, apply rename, combine columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The split-apply-combine pattern splits data by group keys, applies a function per group, and combines results."
+  },
+  {
+    "id": "pandas-62",
+    "question": "How does transform() differ from agg() in groupby?",
+    "options": [
+      "agg() returns reduced results (one per group); transform() returns same-sized results aligned with original",
+      "transform() is faster than agg()",
+      "Both return the same result",
+      "agg() works on DataFrames only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "agg() reduces each group to a single row, while transform() broadcasts the result back to the original shape."
+  },
+  {
+    "id": "pandas-63",
+    "question": "What does as_index=False do in groupby()?",
+    "options": [
+      "Group keys remain as regular columns instead of becoming the index",
+      "Disables the index entirely",
+      "Returns a list instead of a DataFrame",
+      "Prevents grouping by index"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "as_index=False keeps group keys as regular columns in the result instead of setting them as the row index."
+  },
+  {
+    "id": "pandas-64",
+    "question": "How do you apply different aggregation functions to different columns?",
+    "options": [
+      "Using agg({'col1': 'sum', 'col2': ['mean', 'std']}) or named aggregation",
+      "Use apply() with a function",
+      "Use separate groupby calls",
+      "Use a for loop"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pass a dict to agg() mapping column names to functions, or use named aggregation syntax."
+  },
+  {
+    "id": "pandas-65",
+    "question": "What does groupby().filter(lambda x: condition) do?",
+    "options": [
+      "Removes entire groups based on a group-level condition",
+      "Filters individual rows within groups",
+      "Filters the columns after groupby",
+      "Returns only the first row of each group"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "filter() evaluates the condition on the entire group and keeps or removes the whole group accordingly."
+  },
+  {
+    "id": "pandas-66",
+    "question": "What does pd.pivot_table() offer beyond groupby?",
+    "options": [
+      "Multi-dimensional grouping with row and column keys",
+      "Faster computation",
+      "Better visualization",
+      "It only works with Excel data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pivot_table() creates a spreadsheet-style pivot table with row and column keys and an aggregation function."
+  },
+  {
+    "id": "pandas-67",
+    "question": "What is the purpose of groupby().size()?",
+    "options": [
+      "Returns the group sizes (count of rows per group)",
+      "Returns the number of groups",
+      "Returns the size of each group in bytes",
+      "Returns the shape of each group"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "size() returns the number of rows in each group, similar to count() but including NaN values."
+  },
+  {
+    "id": "pandas-68",
+    "question": "What are the four main join types in pd.merge()?",
+    "options": [
+      "inner, left, right, outer",
+      "inner, outer, cross, full",
+      "left, right, full, cross",
+      "join, merge, concat, append"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The four join types are inner (matching only), left (all left), right (all right), and outer (all rows)."
+  },
+  {
+    "id": "pandas-69",
+    "question": "How do you merge on columns with different names?",
+    "options": [
+      "Use left_on and right_on parameters",
+      "Use on with different column names",
+      "Use left_index and right_index",
+      "Use the by parameter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "left_on specifies the key in the left DataFrame and right_on specifies the key in the right DataFrame."
+  },
+  {
+    "id": "pandas-70",
+    "question": "What does pd.concat([df1, df2], axis=1) do?",
+    "options": [
+      "Combines DataFrames side-by-side (column-wise), aligning by index",
+      "Stacks rows vertically",
+      "Concatenates along rows",
+      "Merges on a common column"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "axis=1 in pd.concat() combines DataFrames horizontally, aligning rows by their index labels."
+  },
+  {
+    "id": "pandas-71",
+    "question": "How does df.join() differ from pd.merge()?",
+    "options": [
+      "df.join() joins on the index by default, while pd.merge() joins on columns",
+      "df.join() is only for left joins",
+      "pd.merge() is deprecated",
+      "df.join() cannot handle multiple DataFrames"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.join() is a convenience method for index-based joins, while pd.merge() is more flexible."
+  },
+  {
+    "id": "pandas-72",
+    "question": "What happens when merge keys have duplicates?",
+    "options": [
+      "A Cartesian product is produced",
+      "An error is raised",
+      "Duplicates are automatically dropped",
+      "Only the first match is kept"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Duplicate keys produce all combinations of matching rows, potentially increasing row count significantly."
+  },
+  {
+    "id": "pandas-73",
+    "question": "What does the suffixes parameter in pd.merge() do?",
+    "options": [
+      "Controls how overlapping column names are distinguished (default '_x' and '_y')",
+      "Sets the index suffix",
+      "Adds suffixes to row labels",
+      "Controls decimal suffixes"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "suffixes appends specified strings to overlapping column names from left and right DataFrames."
+  },
+  {
+    "id": "pandas-74",
+    "question": "What merge type keeps all rows from the left DataFrame and fills NaN for missing matches?",
+    "options": [
+      "left join",
+      "inner join",
+      "right join",
+      "outer join"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "A left join retains all rows from the left DataFrame and fills NaN for missing matches on the right."
+  },
+  {
+    "id": "pandas-75",
+    "question": "What is the difference between Pearson and Spearman correlation?",
+    "options": [
+      "Pearson measures linear relationships; Spearman measures monotonic relationships using ranks",
+      "Pearson is for categorical data; Spearman is for numeric",
+      "Spearman is always positive; Pearson can be negative",
+      "They are identical"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pearson measures linear relationships. Spearman measures monotonic relationships using ranks."
+  },
+  {
+    "id": "pandas-76",
+    "question": "What range can correlation values take?",
+    "options": [
+      "-1 to +1",
+      "0 to 1",
+      "-∞ to +∞",
+      "-100 to +100"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Correlation ranges from -1 (perfect negative) through 0 (none) to +1 (perfect positive linear)."
+  },
+  {
+    "id": "pandas-77",
+    "question": "What does df.cov() compute?",
+    "options": [
+      "Covariance matrix showing how variables co-vary (scale-dependent)",
+      "Correlation matrix",
+      "The variance of each column",
+      "The standard deviation"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "df.cov() computes the covariance matrix which is scale-dependent and not normalized."
+  },
+  {
+    "id": "pandas-78",
+    "question": "What is multicollinearity?",
+    "options": [
+      "When independent variables are highly correlated, inflating standard errors in regression",
+      "When two dependent variables are correlated",
+      "When data has missing values",
+      "When a model overfits"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Multicollinearity occurs when predictors are highly correlated, making coefficient estimates unstable."
+  },
+  {
+    "id": "pandas-79",
+    "question": "How do you find which column correlates most with a target column?",
+    "options": [
+      "df.corr()['target'].sort_values(ascending=False)",
+      "df['target'].corr(df)",
+      "df.max_corr('target')",
+      "df.corrwith('target')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Compute the correlation matrix, select the target column, and sort descending."
+  },
+  {
+    "id": "pandas-80",
+    "question": "Why might Pearson correlation be misleading for datasets with outliers?",
+    "options": [
+      "A single extreme outlier can dramatically change the Pearson correlation",
+      "Pearson ignores outliers",
+      "Outliers always reduce correlation to zero",
+      "Pearson is robust to outliers"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pearson correlation is sensitive to outliers — a single extreme value can inflate or deflate it."
+  },
+  {
+    "id": "pandas-81",
+    "question": "What types of plots can you create with df.plot(kind=...)?",
+    "options": [
+      "line, bar, barh, hist, box, scatter, area, pie, kde",
+      "line, bar, pie only",
+      "scatter, line, bar, 3d",
+      "bar, pie, donut, heatmap"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The kind parameter supports line, bar, barh, hist, box, scatter, area, pie, and kde."
+  },
+  {
+    "id": "pandas-82",
+    "question": "How do you create a scatter plot using pandas plotting?",
+    "options": [
+      "df.plot(kind='scatter', x='col1', y='col2')",
+      "df.scatter('col1', 'col2')",
+      "plt.scatter(df['col1'], df['col2']) but not via df.plot",
+      "df.plot.scatter(col1, col2)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use df.plot(kind='scatter', x='col_x', y='col_y') for scatter plots."
+  },
+  {
+    "id": "pandas-83",
+    "question": "How do you place multiple pandas plots in the same figure?",
+    "options": [
+      "Create subplots with plt.subplots() and pass axes via the ax parameter",
+      "Call df.plot() multiple times",
+      "Use pd.plot.multi()",
+      "Use the subplot=True parameter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Create subplots using plt.subplots(), then pass individual axes via df.plot(ax=ax)."
+  },
+  {
+    "id": "pandas-84",
+    "question": "What is the proper order for saving and showing a plot?",
+    "options": [
+      "savefig() before show()",
+      "show() before savefig()",
+      "Either order works",
+      "savefig() is called automatically"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.savefig() must be called before plt.show() because show() clears the figure."
+  },
+  {
+    "id": "pandas-85",
+    "question": "What does pd.plotting.scatter_matrix() do?",
+    "options": [
+      "Creates a matrix of scatter plots for all pairs of numeric columns with histograms on the diagonal",
+      "Creates a matrix of bar plots",
+      "Plots a single scatter plot",
+      "Creates correlation matrix visualization"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scatter_matrix() produces pairwise scatter plots for all numeric columns with histograms on the diagonal."
+  },
+  {
+    "id": "pandas-86",
+    "question": "What happens if you don't set a datetime column as the index for a time-series line plot?",
+    "options": [
+      "The plot may not use the date correctly as the x-axis",
+      "Nothing — pandas auto-detects dates",
+      "An error is raised",
+      "The plot uses row numbers instead"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Ensure your datetime column is set as the index or explicitly passed as the x parameter."
+  },
+  {
+    "id": "pandas-87",
+    "question": "How do you convert a string column to datetime in pandas?",
+    "options": [
+      "pd.to_datetime(df['col'])",
+      "df['col'].to_datetime()",
+      "df['col'].astype('datetime')",
+      "pd.datetime(df['col'])"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pd.to_datetime() converts string Series to pandas Timestamp objects (datetime64[ns] dtype)."
+  },
+  {
+    "id": "pandas-88",
+    "question": "What does the dt accessor provide?",
+    "options": [
+      "Access to datetime properties like .year, .month, .day, .weekday",
+      "Access to date ranges",
+      "Data transformation methods",
+      "Date arithmetic"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The .dt accessor exposes datetime properties such as year, month, day, weekday, and quarter."
+  },
+  {
+    "id": "pandas-89",
+    "question": "What frequency string is used for monthly resampling?",
+    "options": [
+      "'M'",
+      "'m'",
+      "'month'",
+      "'ME'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "'M' is the frequency string for month-end resampling."
+  },
+  {
+    "id": "pandas-90",
+    "question": "What is the difference between resample() and rolling()?",
+    "options": [
+      "resample() groups by time intervals; rolling() creates overlapping fixed-size windows",
+      "Both do the same thing",
+      "rolling() is for date ranges; resample() is for values",
+      "resample() is deprecated"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "resample() aggregates to different frequencies, while rolling() computes over sliding windows."
+  },
+  {
+    "id": "pandas-91",
+    "question": "How do you create a date range in pandas?",
+    "options": [
+      "pd.date_range(start, end, periods, freq)",
+      "pd.date_range() only accepts start and end",
+      "pd.RangeDate()",
+      "pd.DatetimeIndex()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pd.date_range() generates a fixed-frequency DatetimeIndex."
+  },
+  {
+    "id": "pandas-92",
+    "question": "What does df['value'].diff() compute?",
+    "options": [
+      "Difference between consecutive elements (value[i] - value[i-1])",
+      "First non-null value",
+      "Difference from the mean",
+      "Difference from the first value"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "diff() computes the difference between each element and the previous element."
+  },
+  {
+    "id": "pandas-93",
+    "question": "How do you read a specific sheet from an Excel file?",
+    "options": [
+      "pd.read_excel('file.xlsx', sheet_name='Sheet1')",
+      "pd.read_excel('file.xlsx', sheet=1)",
+      "pd.read_excel('file.xlsx', sheetname='Sheet1')",
+      "pd.read_excel('file.xlsx', 'Sheet1') only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use sheet_name parameter with the sheet name or index."
+  },
+  {
+    "id": "pandas-94",
+    "question": "How do you read multiple sheets from an Excel file at once?",
+    "options": [
+      "Pass a list to sheet_name: pd.read_excel('file.xlsx', sheet_name=['Sheet1','Sheet2'])",
+      "Use pd.read_excel with multiple=True",
+      "Loop and read each separately",
+      "pd.read_excel reads all sheets by default"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Passing a list of sheet names to sheet_name returns a dict of DataFrames."
+  },
+  {
+    "id": "pandas-95",
+    "question": "What is the advantage of using pd.ExcelFile?",
+    "options": [
+      "It parses the workbook once, allowing efficient reading of multiple sheets",
+      "It is required for Excel files",
+      "It provides better formatting",
+      "It is faster for single sheets"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ExcelFile parses the workbook once and enables multiple sheet reads without re-parsing."
+  },
+  {
+    "id": "pandas-96",
+    "question": "How do you write multiple DataFrames to different sheets?",
+    "options": [
+      "Use pd.ExcelWriter with a with statement, calling to_excel() for each DataFrame",
+      "Save each to separate files",
+      "Use pd.concat and write all together",
+      "Excel files can only hold one sheet"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use pd.ExcelWriter as a context manager and call to_excel() for each DataFrame with different sheet_name."
+  },
+  {
+    "id": "pandas-97",
+    "question": "Which engine is recommended for formatting Excel output?",
+    "options": [
+      "xlsxwriter",
+      "openpyxl",
+      "xlwt",
+      "xlrd"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The xlsxwriter engine provides rich formatting for Excel output."
+  },
+  {
+    "id": "pandas-98",
+    "question": "What does index=False do in df.to_excel()?",
+    "options": [
+      "Prevents writing the DataFrame index as an extra column",
+      "Excludes the first row",
+      "Removes column names",
+      "Writes only numeric columns"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "index=False prevents the DataFrame's row index from being written as a separate column."
+  },
+  {
+    "id": "pandas-99",
+    "question": "How do you use column letters to select columns when reading Excel?",
+    "options": [
+      "usecols='A,C,E' loads columns A, C, and E",
+      "columns='A,C'",
+      "select='A,E'",
+      "range='A:E'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "usecols accepts Excel column letters like 'A,C,E' to select specific columns."
+  },
+  {
+    "id": "pandas-100",
+    "question": "What parameter reads only the first 10 rows from an Excel sheet?",
+    "options": [
+      "nrows=10",
+      "rows=10",
+      "limit=10",
+      "max_rows=10"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "nrows limits the number of rows read from the Excel file."
+  },
+  {
+    "id": "scipy-1",
+    "question": "What is the primary relationship between NumPy and SciPy?",
+    "options": [
+      "NumPy provides array operations; SciPy adds higher-level scientific algorithms",
+      "SciPy replaces NumPy",
+      "NumPy is a subset of SciPy",
+      "They are unrelated"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "NumPy provides the foundational array object and basic operations; SciPy builds on NumPy with higher-level algorithms."
+  },
+  {
+    "id": "scipy-2",
+    "question": "Which SciPy submodule provides optimization algorithms?",
+    "options": [
+      "scipy.optimize",
+      "scipy.linalg",
+      "scipy.stats",
+      "scipy.signal"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.optimize provides function minimization, curve fitting, root finding, and linear programming."
+  },
+  {
+    "id": "scipy-3",
+    "question": "Which SciPy submodule is used for interpolation?",
+    "options": [
+      "scipy.interpolate",
+      "scipy.stats",
+      "scipy.optimize",
+      "scipy.integrate"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.interpolate provides tools like interp1d, UnivariateSpline, and griddata."
+  },
+  {
+    "id": "scipy-4",
+    "question": "Which SciPy submodule handles signal processing?",
+    "options": [
+      "scipy.signal",
+      "scipy.fft",
+      "scipy.stats",
+      "scipy.ndimage"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.signal provides convolution, filtering, spectral analysis, and peak detection."
+  },
+  {
+    "id": "scipy-5",
+    "question": "Which SciPy submodule is used for image processing?",
+    "options": [
+      "scipy.ndimage",
+      "scipy.signal",
+      "scipy.sparse",
+      "scipy.optimize"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.ndimage provides multi-dimensional image processing: filtering, morphology, and measurements."
+  },
+  {
+    "id": "scipy-6",
+    "question": "How do you import only a specific submodule from SciPy?",
+    "options": [
+      "from scipy import stats",
+      "import scipy.stats",
+      "scipy.import('stats')",
+      "import scipy as stats"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use 'from scipy import stats' to import a specific submodule."
+  },
+  {
+    "id": "scipy-7",
+    "question": "Which license is SciPy released under?",
+    "options": [
+      "BSD 3-Clause License",
+      "MIT License",
+      "GPL License",
+      "Apache License"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "SciPy uses the BSD 3-Clause License, permitting commercial use, modification, and redistribution."
+  },
+  {
+    "id": "scipy-8",
+    "question": "Does SciPy have compiled dependencies?",
+    "options": [
+      "Yes, it relies on optimized C, C++, and Fortran libraries (LAPACK, BLAS, etc.)",
+      "No, it is pure Python",
+      "It only depends on NumPy",
+      "It is written entirely in C"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "SciPy has compiled dependencies on optimized C, C++, and Fortran libraries for performance."
+  },
+  {
+    "id": "scipy-9",
+    "question": "Which submodule would you use for clustering?",
+    "options": [
+      "scipy.cluster",
+      "scipy.stats",
+      "scipy.optimize",
+      "scipy.spatial"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.cluster provides K-means and hierarchical clustering algorithms."
+  },
+  {
+    "id": "scipy-10",
+    "question": "What does scipy.linalg offer beyond numpy.linalg?",
+    "options": [
+      "More complete linear algebra routines including additional decompositions",
+      "Exactly the same functions",
+      "Faster array operations",
+      "Better array creation"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.linalg includes all numpy.linalg functions plus LU, QR, Schur, and other decompositions."
+  },
+  {
+    "id": "scipy-11",
+    "question": "Why does import scipy; scipy.linalg.eig() fail?",
+    "options": [
+      "Submodules are not automatically imported; they must be imported explicitly",
+      "scipy.linalg.eig does not exist",
+      "SciPy must be installed separately",
+      "The function name is different"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "SciPy submodules require explicit import. Use 'from scipy import linalg' first."
+  },
+  {
+    "id": "scipy-12",
+    "question": "How can you list all available submodules in SciPy?",
+    "options": [
+      "scipy.__all__",
+      "dir(scipy)",
+      "scipy.submodules()",
+      "help(scipy)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scipy.__all__ lists all public submodule names in the installation."
+  },
+  {
+    "id": "scipy-13",
+    "question": "What does constants.physical_constants contain?",
+    "options": [
+      "A dictionary with tuples of (value, unit, uncertainty) for each constant",
+      "A list of constant values",
+      "A DataFrame of constants",
+      "A NumPy array of constants"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "physical_constants is a dict where keys are names and values are (value, unit, error) tuples."
+  },
+  {
+    "id": "scipy-14",
+    "question": "How do you access the speed of light constant?",
+    "options": [
+      "constants.c",
+      "constants.speed_of_light",
+      "constants.light",
+      "constants.c_light"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The speed of light is available as constants.c in scipy.constants."
+  },
+  {
+    "id": "scipy-15",
+    "question": "What does constants.find() do?",
+    "options": [
+      "Searches for constants matching a substring in their names",
+      "Finds the file path of SciPy",
+      "Locates a constant by value",
+      "Searches for submodules"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "constants.find() searches the physical_constants dictionary for names containing the substring."
+  },
+  {
+    "id": "scipy-16",
+    "question": "How do you install a specific version of SciPy?",
+    "options": [
+      "pip install scipy==1.13.0",
+      "pip scipy version 1.13.0",
+      "pip install scipy -v 1.13.0",
+      "pip scipy==1.13.0"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use pip install scipy==version_number to install a specific version."
+  },
+  {
+    "id": "scipy-17",
+    "question": "What does constants.unit() do?",
+    "options": [
+      "Converts a human-readable unit string to its SI base value",
+      "Creates a new unit",
+      "Removes units from a value",
+      "Converts between units"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "constants.unit('year') returns the number of seconds in a year."
+  },
+  {
+    "id": "scipy-18",
+    "question": "What must you do to use a SciPy submodule?",
+    "options": [
+      "Explicitly import it (from scipy import submodule)",
+      "Call scipy.init()",
+      "Import scipy.full()",
+      "Use the importlib library"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Submodules require explicit import; import scipy alone is insufficient."
+  },
+  {
+    "id": "scipy-19",
+    "question": "What is the value of constants.e in SciPy?",
+    "options": [
+      "Elementary charge (1.602e-19 C)",
+      "Euler's number (2.718...)",
+      "Energy of an electron",
+      "The electric constant"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "In SciPy, constants.e is the elementary charge, NOT Euler's number."
+  },
+  {
+    "id": "scipy-20",
+    "question": "Which constant would you use for Avogadro's number?",
+    "options": [
+      "constants.N_A",
+      "constants.Avogadro",
+      "constants.avogadro",
+      "constants.Na"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Avogadro's number is available as constants.N_A."
+  },
+  {
+    "id": "scipy-21",
+    "question": "How do you convert 100 degrees Celsius to Fahrenheit?",
+    "options": [
+      "constants.convert_temperature(100, 'C', 'F')",
+      "constants.c_to_f(100)",
+      "constants.temperature(100, 'C', 'F')",
+      "constants.convert(100, 'C', 'F')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "convert_temperature(value, orig_scale, target_scale) converts between temperature scales."
+  },
+  {
+    "id": "scipy-22",
+    "question": "What is the Boltzmann constant symbol in SciPy?",
+    "options": [
+      "constants.k",
+      "constants.B",
+      "constants.kB",
+      "constants.boltzmann"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The Boltzmann constant is available as constants.k."
+  },
+  {
+    "id": "scipy-23",
+    "question": "How do you extract value, unit, and uncertainty from physical_constants?",
+    "options": [
+      "value, unit, error = constants.physical_constants['electron mass']",
+      "constants.physical_constants['electron mass'].value",
+      "Unpack as a tuple",
+      "Use .get() method"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "physical_constants entries are (value, unit, uncertainty) tuples."
+  },
+  {
+    "id": "scipy-24",
+    "question": "Which constant is used for standard gravity?",
+    "options": [
+      "constants.g",
+      "constants.gravity",
+      "constants.G",
+      "constants.g_standard"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Standard gravity (9.80665 m/s^2) is available as constants.g."
+  },
+  {
+    "id": "scipy-25",
+    "question": "How do you convert energy from eV to Joules?",
+    "options": [
+      "constants.convert_energy(1, 'eV', 'J')",
+      "constants.eV_to_J(1)",
+      "constants.e * 1",
+      "Use constants.energy_conversion"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "convert_energy(value, input_unit, output_unit) converts between energy units."
+  },
+  {
+    "id": "scipy-26",
+    "question": "What is the gas constant R related to?",
+    "options": [
+      "R = N_A * k (Avogadro's number times Boltzmann constant)",
+      "R = h * c",
+      "R = k / N_A",
+      "R = c * h"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The gas constant R = N_A * k (Avogadro's number times Boltzmann constant)."
+  },
+  {
+    "id": "scipy-27",
+    "question": "What is the gravitational constant symbol?",
+    "options": [
+      "constants.G",
+      "constants.g",
+      "constants.grav",
+      "constants.Gravitational"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The gravitational constant is available as constants.G."
+  },
+  {
+    "id": "scipy-28",
+    "question": "How would you find the value of 1 light-year in meters?",
+    "options": [
+      "constants.light_year or constants.unit('light year')",
+      "constants.c * 365.25 * 24 * 3600",
+      "Both A and B work",
+      "constants.ly"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Both constants.light_year and manual computation give the answer."
+  },
+  {
+    "id": "scipy-29",
+    "question": "What algorithm does minimize() use by default?",
+    "options": [
+      "BFGS",
+      "Nelder-Mead",
+      "SLSQP",
+      "L-BFGS-B"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The default method for minimize() is BFGS, a gradient-based quasi-Newton method."
+  },
+  {
+    "id": "scipy-30",
+    "question": "What does curve_fit() return?",
+    "options": [
+      "(popt, pcov) - optimal parameters and covariance matrix",
+      "(popt, perr) - parameters and errors",
+      "Just the optimal parameters",
+      "The fitted y values"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "curve_fit() returns popt (optimal parameters) and pcov (covariance matrix)."
+  },
+  {
+    "id": "scipy-31",
+    "question": "Which minimize method supports both bounds and constraints?",
+    "options": [
+      "SLSQP",
+      "BFGS",
+      "Nelder-Mead",
+      "Powell"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "SLSQP supports both bounds and constraints. L-BFGS-B supports bounds only."
+  },
+  {
+    "id": "scipy-32",
+    "question": "What is Nelder-Mead best suited for?",
+    "options": [
+      "Non-smooth functions where gradients are unavailable",
+      "Large-scale problems with gradients",
+      "Constrained optimization",
+      "Linear programming"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Nelder-Mead is a derivative-free direct search method for non-smooth functions."
+  },
+  {
+    "id": "scipy-33",
+    "question": "How do you find a root of f(x) = 0 over [a, b] where f(a) and f(b) have opposite signs?",
+    "options": [
+      "root_scalar(func, bracket=[a, b])",
+      "root(func, a, b)",
+      "find_root(func, a, b)",
+      "solve(func, a, b)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "root_scalar with the bracket parameter finds roots where the function changes sign."
+  },
+  {
+    "id": "scipy-34",
+    "question": "What does linprog() solve?",
+    "options": [
+      "Linear programming: minimize c@x subject to linear constraints",
+      "Nonlinear curve fitting",
+      "Systems of linear equations",
+      "Linear regression"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "linprog() solves linear programming problems: minimize c^T x subject to constraints."
+  },
+  {
+    "id": "scipy-35",
+    "question": "What happens with a poor initial guess in minimize()?",
+    "options": [
+      "It may converge to a local minimum or fail",
+      "It always finds the global minimum",
+      "It tries multiple starting points",
+      "An error is raised"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Poor initial guesses can lead to local minima. Use differential_evolution for global optimization."
+  },
+  {
+    "id": "scipy-36",
+    "question": "Which optimizer is used for global optimization?",
+    "options": [
+      "differential_evolution()",
+      "BFGS",
+      "Nelder-Mead",
+      "SLSQP"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "differential_evolution() finds the global minimum of functions with multiple local minima."
+  },
+  {
+    "id": "scipy-37",
+    "question": "How do you compute parameter uncertainties after curve_fit?",
+    "options": [
+      "np.sqrt(np.diag(pcov))",
+      "np.sqrt(pcov)",
+      "np.diag(pcov)",
+      "pcov.sum()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Standard errors are the square root of the diagonal elements of the covariance matrix."
+  },
+  {
+    "id": "scipy-38",
+    "question": "What condition must hold for bracket-based root finding?",
+    "options": [
+      "f(a) and f(b) must have opposite signs",
+      "f(a) and f(b) must be non-zero",
+      "The interval must be small",
+      "f must be continuous"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Bracket-based methods require f(a) and f(b) to have opposite signs."
+  },
+  {
+    "id": "scipy-39",
+    "question": "Which minimize method is recommended for large bounded problems?",
+    "options": [
+      "L-BFGS-B",
+      "BFGS",
+      "Nelder-Mead",
+      "SLSQP"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "L-BFGS-B is efficient for large problems with bounds, using limited memory."
+  },
+  {
+    "id": "scipy-40",
+    "question": "What is the Rosenbrock function used for?",
+    "options": [
+      "A standard test problem for optimization algorithms",
+      "A model for population growth",
+      "A signal processing benchmark",
+      "A statistical distribution"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The Rosenbrock function is a classic optimization test with a narrow valley."
+  },
+  {
+    "id": "scipy-41",
+    "question": "Which function is for an independent two-sample t-test?",
+    "options": [
+      "stats.ttest_ind()",
+      "stats.ttest_rel()",
+      "stats.ttest_1samp()",
+      "stats.ttest()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ttest_ind() tests if two independent samples have identical means."
+  },
+  {
+    "id": "scipy-42",
+    "question": "How do you generate 100 random samples from Normal(0,1)?",
+    "options": [
+      "stats.norm.rvs(size=100)",
+      "stats.norm(100)",
+      "stats.random.normal(100)",
+      "np.random.normal(0,1,100)"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Both stats.norm.rvs(size=100) and np.random.normal(0,1,100) work."
+  },
+  {
+    "id": "scipy-43",
+    "question": "Difference between ttest_ind and ttest_rel?",
+    "options": [
+      "ttest_ind is for independent samples; ttest_rel is for paired samples",
+      "ttest_ind is for one sample",
+      "They are identical",
+      "ttest_rel is for unequal variances"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ttest_ind compares independent groups; ttest_rel compares paired/matched samples."
+  },
+  {
+    "id": "scipy-44",
+    "question": "What does the ppf function return?",
+    "options": [
+      "The inverse CDF — value below which a given proportion falls",
+      "The probability density at a given value",
+      "The cumulative probability",
+      "The mean of the distribution"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ppf(q) is the inverse CDF: returns x such that P(X <= x) = q."
+  },
+  {
+    "id": "scipy-45",
+    "question": "Which test is for chi-square contingency tables?",
+    "options": [
+      "stats.chi2_contingency()",
+      "stats.chisquare()",
+      "stats.chi2()",
+      "stats.contingency()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "chi2_contingency() tests independence between categorical variables."
+  },
+  {
+    "id": "scipy-46",
+    "question": "What does normaltest test?",
+    "options": [
+      "H0: data comes from a normal distribution",
+      "H0: data is non-normal",
+      "H0: mean is zero",
+      "H0: variance is equal"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "normaltest tests whether data is normally distributed."
+  },
+  {
+    "id": "scipy-47",
+    "question": "Which function returns Pearson correlation and p-value?",
+    "options": [
+      "stats.pearsonr()",
+      "stats.corr()",
+      "stats.pearson()",
+      "stats.correlation()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pearsonr(x, y) returns (correlation, p-value) for testing non-correlation."
+  },
+  {
+    "id": "scipy-48",
+    "question": "Difference between PDF and PMF?",
+    "options": [
+      "PDF is for continuous distributions; PMF is for discrete distributions",
+      "PDF is for discrete; PMF is for continuous",
+      "They are identical",
+      "PMF is a subset of PDF"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use .pdf() for continuous and .pmf() for discrete distributions."
+  },
+  {
+    "id": "scipy-49",
+    "question": "How to compute 95% confidence interval for the mean?",
+    "options": [
+      "stats.t.interval(0.95, df=n-1, loc=mean, scale=se)",
+      "stats.norm.interval(0.95)",
+      "np.percentile(data, [2.5, 97.5])",
+      "A CI requires std only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use the t-distribution: t.interval(0.95, df, loc=mean, scale=std/sqrt(n))."
+  },
+  {
+    "id": "scipy-50",
+    "question": "What does ks_2samp test?",
+    "options": [
+      "If two samples come from the same distribution",
+      "If two means are equal",
+      "If two variances are equal",
+      "If two proportions are equal"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "KS test compares the full empirical distributions of two samples."
+  },
+  {
+    "id": "scipy-51",
+    "question": "Which non-parametric test is an alternative to the independent t-test?",
+    "options": [
+      "mannwhitneyu",
+      "wilcoxon",
+      "kruskal",
+      "chisquare"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Mann-Whitney U test is the non-parametric alternative to the independent t-test."
+  },
+  {
+    "id": "scipy-52",
+    "question": "What does stats.describe() return?",
+    "options": [
+      "Count, mean, variance, skewness, and kurtosis",
+      "Only mean and std",
+      "The full distribution",
+      "Only min and max"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "stats.describe() returns nobs, minmax, mean, variance, skewness, and kurtosis."
+  },
+  {
+    "id": "scipy-53",
+    "question": "What does interp1d(x, y, kind='cubic') return?",
+    "options": [
+      "A callable function for evaluation at new x points",
+      "An array of interpolated values",
+      "A cubic polynomial",
+      "A spline object"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "interp1d returns a callable function f that can be evaluated at any x within the range."
+  },
+  {
+    "id": "scipy-54",
+    "question": "Difference between interp1d and UnivariateSpline?",
+    "options": [
+      "interp1d interpolates exactly; UnivariateSpline can smooth noisy data",
+      "UnivariateSpline is for 2D data",
+      "interp1d is for 2D",
+      "They are identical"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "interp1d passes exactly through all data points; UnivariateSpline can smooth."
+  },
+  {
+    "id": "scipy-55",
+    "question": "How do you enable extrapolation in interp1d?",
+    "options": [
+      "Set fill_value='extrapolate'",
+      "Set extrapolate=True",
+      "Use the extend parameter",
+      "Extrapolation is automatic"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Set fill_value='extrapolate' for out-of-range evaluation."
+  },
+  {
+    "id": "scipy-56",
+    "question": "What does the s parameter in UnivariateSpline control?",
+    "options": [
+      "The smoothing factor; larger s = smoother curve",
+      "The starting point",
+      "The spline order",
+      "The step size"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "s controls smoothing: s=0 interpolates, larger values produce smoother curves."
+  },
+  {
+    "id": "scipy-57",
+    "question": "Which interpolation kind avoids overshooting?",
+    "options": [
+      "linear and nearest",
+      "cubic and quadratic",
+      "All methods overshoot",
+      "slinear"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Linear interpolation connects points with straight lines and does not overshoot."
+  },
+  {
+    "id": "scipy-58",
+    "question": "What does griddata() do?",
+    "options": [
+      "Interpolates unstructured scattered N-D data onto a grid",
+      "Creates a regular grid",
+      "Plots data on a grid",
+      "Fits a grid to data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "griddata() interpolates scattered data onto a regular grid."
+  },
+  {
+    "id": "scipy-59",
+    "question": "Default behavior of interp1d for out-of-range x?",
+    "options": [
+      "Raises a ValueError",
+      "Returns NaN",
+      "Extrapolates linearly",
+      "Returns the nearest boundary"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "By default, interp1d raises a ValueError for out-of-range values."
+  },
+  {
+    "id": "scipy-60",
+    "question": "Which interp1d kind is best for step-function data?",
+    "options": [
+      "'nearest'",
+      "'cubic'",
+      "'linear'",
+      "'quadratic'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "'nearest' returns the value of the nearest data point, creating a step function."
+  },
+  {
+    "id": "scipy-61",
+    "question": "What does UnivariateSpline with s=0 do?",
+    "options": [
+      "Interpolates all data points exactly",
+      "Creates a straight line",
+      "Returns the original data",
+      "Infers s automatically"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "s=0 forces exact interpolation through all data points."
+  },
+  {
+    "id": "scipy-62",
+    "question": "What is RBFInterpolator used for?",
+    "options": [
+      "Radial Basis Function interpolation for scattered N-D data",
+      "Interpolation on a regular grid",
+      "1D interpolation only",
+      "Polynomial interpolation"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "RBFInterpolator uses radial basis functions for scattered data interpolation."
+  },
+  {
+    "id": "scipy-63",
+    "question": "What does scipy.integrate.quad() compute?",
+    "options": [
+      "A definite integral using adaptive quadrature",
+      "An integral using Simpson's rule",
+      "An indefinite integral",
+      "A double integral"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "quad() performs adaptive Gauss-Kronrod quadrature for 1D definite integration."
+  },
+  {
+    "id": "scipy-64",
+    "question": "How do you integrate with infinite limits using quad()?",
+    "options": [
+      "Pass np.inf as the limit",
+      "Use quad_inf() instead",
+      "Set limit='inf'",
+      "SciPy cannot handle infinite limits"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Pass np.inf as the upper or lower limit, e.g., quad(f, 0, np.inf)."
+  },
+  {
+    "id": "scipy-65",
+    "question": "Difference between odeint and solve_ivp?",
+    "options": [
+      "odeint is older with func(y,t); solve_ivp is newer with func(t,y) and more methods",
+      "solve_ivp is deprecated",
+      "odeint supports more methods",
+      "They are the same"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "odeint has the older API (y, t); solve_ivp is modern with func(t, y) and more options."
+  },
+  {
+    "id": "scipy-66",
+    "question": "What method does solve_ivp use by default?",
+    "options": [
+      "RK45 (Runge-Kutta 4/5)",
+      "RK23",
+      "BDF",
+      "DOP853"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "solve_ivp defaults to RK45, an explicit Runge-Kutta method of order 5(4)."
+  },
+  {
+    "id": "scipy-67",
+    "question": "What does cumtrapz() return?",
+    "options": [
+      "Cumulative integral using the trapezoidal rule",
+      "The definite integral",
+      "The indefinite integral",
+      "The derivative"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "cumtrapz() computes the cumulative integral at each x point."
+  },
+  {
+    "id": "scipy-68",
+    "question": "How do you compute a double integral?",
+    "options": [
+      "scipy.integrate.dblquad(func, a, b, gfun, hfun)",
+      "scipy.integrate.quad2d(func, a, b, c, d)",
+      "scipy.integrate.double_quad(func, a, b)",
+      "Use quad() twice"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "dblquad computes double integrals over rectangular or function-defined regions."
+  },
+  {
+    "id": "scipy-69",
+    "question": "What does the points parameter in quad() do?",
+    "options": [
+      "Specifies singularity locations for better handling",
+      "Sets evaluation points",
+      "Limits function evaluations",
+      "Returns points from integration"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The points parameter tells quad() about singularities or discontinuities."
+  },
+  {
+    "id": "scipy-70",
+    "question": "Argument order difference: odeint vs solve_ivp?",
+    "options": [
+      "odeint: func(y, t); solve_ivp: func(t, y)",
+      "odeint: func(t, y); solve_ivp: func(y, t)",
+      "Both use func(t, y)",
+      "Both use func(y, t)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "odeint expects func(y, t) — state first; solve_ivp expects func(t, y) — time first."
+  },
+  {
+    "id": "scipy-71",
+    "question": "What does simpson() do?",
+    "options": [
+      "Integrates using Simpson's rule",
+      "Fits a spline",
+      "Computes cumulative sum",
+      "Smooths data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "simpson() integrates using Simpson's rule, more accurate than trapezoidal for smooth functions."
+  },
+  {
+    "id": "scipy-72",
+    "question": "What does solve_ivp return?",
+    "options": [
+      "A solution object with .y, .t, .success, .message",
+      "A tuple of (y, t)",
+      "A single array of final values",
+      "A boolean success flag"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "solve_ivp returns an OdeResult object with .y (solution), .t (time), .success."
+  },
+  {
+    "id": "scipy-73",
+    "question": "Difference between filtfilt and lfilter?",
+    "options": [
+      "filtfilt is zero-phase (forward-backward); lfilter is causal with phase delay",
+      "lfilter is zero-phase; filtfilt has phase delay",
+      "Both are identical",
+      "filtfilt is for FIR only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "filtfilt filters forward then backward, canceling phase distortion."
+  },
+  {
+    "id": "scipy-74",
+    "question": "What does signal.find_peaks() return?",
+    "options": [
+      "(peak_indices, properties_dict) with heights, prominences, widths",
+      "Only peak indices",
+      "Boolean array of peak locations",
+      "Heights of all peaks"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "find_peaks returns peak indices and a properties dict."
+  },
+  {
+    "id": "scipy-75",
+    "question": "How does Welch's method differ from the periodogram?",
+    "options": [
+      "Welch averages multiple periodograms from overlapping segments for lower variance",
+      "Welch uses a different algorithm",
+      "Welch is for 2D signals",
+      "Periodogram is always better"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Welch's method reduces variance by averaging periodograms of overlapping segments."
+  },
+  {
+    "id": "scipy-76",
+    "question": "What does signal.butter() design?",
+    "options": [
+      "Butterworth filter (lowpass, highpass, bandpass, bandstop)",
+      "Butterfly filter for images",
+      "A window function",
+      "A wavelet"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "butter() designs a Butterworth filter with maximally flat passband."
+  },
+  {
+    "id": "scipy-77",
+    "question": "What does signal.savgol_filter() do?",
+    "options": [
+      "Smooths data by fitting a polynomial to a sliding window",
+      "Applies a Butterworth filter",
+      "Computes the power spectrum",
+      "Detects peaks"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Savitzky-Golay fits a polynomial to a sliding window, preserving signal features."
+  },
+  {
+    "id": "scipy-78",
+    "question": "How are cutoff frequencies specified in butter()?",
+    "options": [
+      "Normalized by Nyquist: cutoff/(fs/2) or using the fs parameter",
+      "In absolute Hz only",
+      "As fractions of total bandwidth",
+      "As percentages"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Cutoffs must be normalized by Nyquist frequency or use the fs parameter."
+  },
+  {
+    "id": "scipy-79",
+    "question": "What does signal.spectrogram() return?",
+    "options": [
+      "(f, t, Sxx) - frequencies, time, and 2D spectrogram",
+      "(frequencies, power)",
+      "Only the spectrogram image",
+      "(time, frequency) pairs"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "spectrogram() returns f (frequencies), t (time), and Sxx (2D array)."
+  },
+  {
+    "id": "scipy-80",
+    "question": "What is find_peaks distance parameter in?",
+    "options": [
+      "Samples (not seconds)",
+      "Seconds",
+      "Hertz",
+      "Milliseconds"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The distance parameter is in samples. Convert from seconds: distance = min_seconds * fs."
+  },
+  {
+    "id": "scipy-81",
+    "question": "What does signal.fftconvolve() use?",
+    "options": [
+      "FFT for faster convolution, O(n log n) for large arrays",
+      "Direct convolution",
+      "Overlap-add method",
+      "Correlation instead"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "fftconvolve() uses the Fast Fourier Transform for efficient large-array convolution."
+  },
+  {
+    "id": "scipy-82",
+    "question": "How to design a bandpass Butterworth filter?",
+    "options": [
+      "signal.butter(N, [low, high], btype='band', fs=fs)",
+      "signal.butter_bandpass(N, low, high)",
+      "signal.bandpass(N, low, high)",
+      "signal.butter(N, low, high, btype='bp')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "For bandpass, pass a two-element list and btype='band'."
+  },
+  {
+    "id": "scipy-83",
+    "question": "What does ndimage.gaussian_filter() do?",
+    "options": [
+      "Applies Gaussian blur (smoothing) to an image",
+      "Detects edges",
+      "Applies median filter",
+      "Thresholds the image"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "gaussian_filter() convolves the image with a Gaussian kernel for smoothing."
+  },
+  {
+    "id": "scipy-84",
+    "question": "Which filter is best for salt-and-pepper noise?",
+    "options": [
+      "Median filter (ndimage.median_filter)",
+      "Gaussian filter",
+      "Sobel filter",
+      "Laplacian filter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Median filter removes salt-and-pepper noise while preserving edges."
+  },
+  {
+    "id": "scipy-85",
+    "question": "What does ndimage.label() return?",
+    "options": [
+      "(labeled_array, num_features) - component IDs and count",
+      "A single integer count",
+      "A list of bounding boxes",
+      "A binary mask"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "label() finds connected components, assigning unique IDs."
+  },
+  {
+    "id": "scipy-86",
+    "question": "Difference between binary_dilation and binary_erosion?",
+    "options": [
+      "Dilation expands foreground; erosion shrinks it",
+      "Erosion expands; dilation shrinks",
+      "Both expand",
+      "Dilation removes noise"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "binary_dilation expands foreground regions; binary_erosion shrinks them."
+  },
+  {
+    "id": "scipy-87",
+    "question": "How to compute centroid of each labeled region?",
+    "options": [
+      "ndimage.center_of_mass(image, labels, index)",
+      "ndimage.centroid(labels)",
+      "ndimage.mean_position(labels)",
+      "ndimage.center(labels)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "center_of_mass() computes centroids for specified labeled regions."
+  },
+  {
+    "id": "scipy-88",
+    "question": "What does binary_opening() do?",
+    "options": [
+      "Erosion then dilation - removes small foreground objects",
+      "Dilation then erosion - fills holes",
+      "Fills holes",
+      "Detects edges"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "binary_opening removes small objects and separates barely touching objects."
+  },
+  {
+    "id": "scipy-89",
+    "question": "What is affine_transform() used for?",
+    "options": [
+      "Applying affine transformations (rotation, scaling, translation, shear)",
+      "Only rotations",
+      "Resizing images",
+      "Edge detection"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "affine_transform() applies a general affine transformation via a matrix."
+  },
+  {
+    "id": "scipy-90",
+    "question": "What does sigma in gaussian_filter() represent?",
+    "options": [
+      "Standard deviation of the Gaussian kernel in pixel units",
+      "Kernel size in pixels",
+      "Filter order",
+      "Threshold value"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "sigma is the standard deviation of the Gaussian; larger sigma = more blurring."
+  },
+  {
+    "id": "scipy-91",
+    "question": "How to remove small objects by area?",
+    "options": [
+      "Label, compute areas, filter by threshold: mask[labeled]",
+      "Use ndimage.remove_small()",
+      "Use binary_opening() always",
+      "Use a minimum filter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Label components, compute areas, create a mask filtering by minimum area."
+  },
+  {
+    "id": "scipy-92",
+    "question": "Default connectivity for ndimage.label() in 2D?",
+    "options": [
+      "4-connectivity (shares edges)",
+      "8-connectivity (including diagonals)",
+      "6-connectivity",
+      "2-connectivity"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Default is 4-connectivity. Use a 3x3 structuring element for 8-connectivity."
+  },
+  {
+    "id": "scipy-93",
+    "question": "Which sparse format is best for row slicing?",
+    "options": [
+      "CSR (Compressed Sparse Row)",
+      "CSC (Compressed Sparse Column)",
+      "COO (Coordinate)",
+      "LIL (List of Lists)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "CSR is efficient for row slicing and matrix-vector multiplication."
+  },
+  {
+    "id": "scipy-94",
+    "question": "Which format is best for incremental construction?",
+    "options": [
+      "LIL or DOK",
+      "CSR",
+      "CSC",
+      "DIA"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "LIL and DOK are best for incremental construction; convert to CSR/CSC for computation."
+  },
+  {
+    "id": "scipy-95",
+    "question": "Best format for batch construction from (row,col,data) triplets?",
+    "options": [
+      "COO (Coordinate format)",
+      "CSR",
+      "CSC",
+      "DOK"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "COO efficiently accepts (row, col, data) arrays for batch construction."
+  },
+  {
+    "id": "scipy-96",
+    "question": "What does spsolve() do?",
+    "options": [
+      "Solves sparse linear system Ax = b via direct LU factorization",
+      "Solves iteratively",
+      "Computes eigenvalues",
+      "Performs SVD"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "spsolve() uses direct LU factorization for sparse linear systems."
+  },
+  {
+    "id": "scipy-97",
+    "question": "How to save/load sparse matrices efficiently?",
+    "options": [
+      "scipy.sparse.save_npz() and load_npz()",
+      "np.save() and np.load()",
+      "pickle",
+      "savemat/loadmat"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "save_npz() and load_npz() use compressed .npz format for sparse matrices."
+  },
+  {
+    "id": "scipy-98",
+    "question": "What does eigsh() compute?",
+    "options": [
+      "Eigenvalues of symmetric matrices using Arnoldi iteration",
+      "Eigenvalues of any matrix",
+      "Singular values",
+      "The determinant"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "eigsh() computes eigenvalues of symmetric sparse matrices."
+  },
+  {
+    "id": "scipy-99",
+    "question": "Difference between CSR and CSC?",
+    "options": [
+      "CSR optimized for row slicing; CSC for column slicing",
+      "CSR is always faster",
+      "CSC is for dense matrices",
+      "They are the same"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "CSR is for row access, CSC for column access."
+  },
+  {
+    "id": "scipy-100",
+    "question": "Why is converting large sparse to dense problematic?",
+    "options": [
+      "It can exhaust memory as dense storage is much larger",
+      "It is faster",
+      "It loses precision",
+      "It corrupts data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Dense conversion of large sparse matrices can cause MemoryError."
+  },
+  {
+    "id": "matplotlib-1",
+    "question": "What are the two main APIs in Matplotlib?",
+    "options": [
+      "pyplot API and OOP API",
+      "Line API and Bar API",
+      "Static API and Interactive API",
+      "MATLAB API and Python API"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Matplotlib has pyplot (state-machine) and OOP (explicit figure/axes objects) APIs."
+  },
+  {
+    "id": "matplotlib-2",
+    "question": "Difference between Figure and Axes?",
+    "options": [
+      "Figure is the top-level container; Axes is the plot area with data and labels",
+      "Figure is the plot area; Axes is the container",
+      "They are interchangeable",
+      "Figure is for subplots only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The Figure is the overall canvas; Axes is the actual plot area."
+  },
+  {
+    "id": "matplotlib-3",
+    "question": "What does plt.savefig('plot.png', bbox_inches='tight') do?",
+    "options": [
+      "Saves the figure with tight bounding box removing extra whitespace",
+      "Opens the saved figure",
+      "Shows figure properties",
+      "Prints the figure"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "bbox_inches='tight' removes excess whitespace around the plot."
+  },
+  {
+    "id": "matplotlib-4",
+    "question": "What does plt.figure() create?",
+    "options": [
+      "A new Figure object (top-level container)",
+      "A new plot",
+      "Adds a subplot",
+      "Shows the figure"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.figure() creates a new Figure, the top-level container for plot elements."
+  },
+  {
+    "id": "matplotlib-5",
+    "question": "How to integrate Matplotlib with Jupyter?",
+    "options": [
+      "Use %matplotlib inline at the top",
+      "Matplotlib works automatically",
+      "Use plt.jupyter()",
+      "Use plt.enable_notebook()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "%matplotlib inline renders plots below Jupyter cells."
+  },
+  {
+    "id": "matplotlib-6",
+    "question": "Difference between plt.show() and plt.draw()?",
+    "options": [
+      "show() blocks and displays; draw() renders without blocking",
+      "draw() blocks; show() doesn't",
+      "Both are identical",
+      "show() saves the figure"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "show() opens a GUI and blocks; draw() renders without blocking."
+  },
+  {
+    "id": "matplotlib-7",
+    "question": "What happens if you savefig() after show()?",
+    "options": [
+      "savefig() saves a blank image because show() clears the figure",
+      "It works correctly",
+      "An error is raised",
+      "The figure is saved twice"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "show() clears the figure, so savefig() after it saves a blank."
+  },
+  {
+    "id": "matplotlib-8",
+    "question": "What does plt.subplots() return?",
+    "options": [
+      "(Figure, Axes/Axes array) tuple",
+      "Only the Figure",
+      "Only the Axes",
+      "(Figure, GridSpec) tuple"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.subplots() returns (Figure, Axes). For multiple plots, Axes is an array."
+  },
+  {
+    "id": "matplotlib-9",
+    "question": "What does figsize parameter accept?",
+    "options": [
+      "A tuple (width, height) in inches",
+      "A single integer for size",
+      "Pixels",
+      "Centimeters"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "figsize is a (width, height) tuple in inches."
+  },
+  {
+    "id": "matplotlib-10",
+    "question": "How to add gridlines?",
+    "options": [
+      "plt.grid(True) or ax.grid(True)",
+      "plt.gridlines(True)",
+      "plt.show_grid(True)",
+      "plt.add_grid(True)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Call plt.grid(True) or ax.grid(True) for gridlines."
+  },
+  {
+    "id": "matplotlib-11",
+    "question": "What does sharex=True do?",
+    "options": [
+      "Synchronizes x-axis limits/ticks across subplots",
+      "Shares x data",
+      "Combines x-axes",
+      "Hides x-axis labels"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "sharex links x-axis limits and ticks across subplots."
+  },
+  {
+    "id": "matplotlib-12",
+    "question": "How to add grid only to x-axis?",
+    "options": [
+      "plt.grid(axis='x')",
+      "plt.grid('x')",
+      "plt.xgrid(True)",
+      "plt.grid(xaxis=True)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "axis='x' shows gridlines only on the x-axis."
+  },
+  {
+    "id": "matplotlib-13",
+    "question": "Why does fig.plot() fail?",
+    "options": [
+      "fig has no plot() method; plot on Axes objects",
+      "It's deprecated",
+      "It creates a new figure",
+      "It overwrites plots"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Plotting is done on Axes: ax.plot() or plt.plot(), not Figure.plot()."
+  },
+  {
+    "id": "matplotlib-14",
+    "question": "What does fig.add_subplot(1,2,1) do?",
+    "options": [
+      "Creates the first Axes in a 1x2 grid",
+      "Adds a subplot to a 2x1 grid",
+      "Creates 2 subplots",
+      "Adds a new figure"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "fig.add_subplot(nrows, ncols, index) creates an Axes at the given position."
+  },
+  {
+    "id": "matplotlib-15",
+    "question": "What is the pyplot 'state machine'?",
+    "options": [
+      "plt remembers the last-used Figure/Axes for implicit commands",
+      "Physical machine for plots",
+      "Threading mechanism",
+      "Rendering engine"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "pyplot tracks the current Figure/Axes so commands act on them implicitly."
+  },
+  {
+    "id": "matplotlib-16",
+    "question": "How to add a legend?",
+    "options": [
+      "Pass label in plot calls, then plt.legend()",
+      "Call plt.legend() with no setup",
+      "Labels are automatic",
+      "Use plt.legend_labels()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Set label parameter in plotting calls, then call plt.legend()."
+  },
+  {
+    "id": "matplotlib-17",
+    "question": "What does plt.subplot(2,3,4) select?",
+    "options": [
+      "4th axes in 2x3 grid (row 2, col 1, 1-indexed)",
+      "A 2x3 grid of 4 subplots",
+      "4th subplot in a single row",
+      "A subplot with 4 axes"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.subplot(2,3,4) selects position 4 in a 2x3 grid."
+  },
+  {
+    "id": "matplotlib-18",
+    "question": "How to create a scatter plot with pyplot?",
+    "options": [
+      "plt.scatter(x, y)",
+      "plt.plot(x, y, marker='o')",
+      "plt.scatterplot(x, y)",
+      "plt.points(x, y)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.scatter() creates a scatter plot with per-point size/color control."
+  },
+  {
+    "id": "matplotlib-19",
+    "question": "What does plt.tight_layout() do?",
+    "options": [
+      "Adjusts subplot spacing to prevent overlap",
+      "Makes subplots same size",
+      "Locks figure layout",
+      "Removes white space only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "tight_layout() prevents labels and titles from overlapping."
+  },
+  {
+    "id": "matplotlib-20",
+    "question": "What does autopct='%1.1f%%' do in pie?",
+    "options": [
+      "Formats percentage to 1 decimal with % sign",
+      "Shows absolute values",
+      "Removes percentages",
+      "Shows 1 decimal without %"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "autopct formats percentage labels; '%1.1f%%' = 1 decimal + %."
+  },
+  {
+    "id": "matplotlib-21",
+    "question": "Which function creates a histogram?",
+    "options": [
+      "plt.hist(data)",
+      "plt.bar(data, bins)",
+      "plt.histogram(data)",
+      "plt.dist(data)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.hist() bins data values and draws the frequency distribution."
+  },
+  {
+    "id": "matplotlib-22",
+    "question": "What does 'ro--' in plt.plot() mean?",
+    "options": [
+      "Red color, circle marker, dashed line",
+      "Round/Open/Dash",
+      "Red only, no marker",
+      "Random opacity, dash"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Format [color][marker][line]: 'ro--' = red, circle, dashed."
+  },
+  {
+    "id": "matplotlib-23",
+    "question": "How to plot multiple lines on the same axes?",
+    "options": [
+      "Call plt.plot() multiple times",
+      "Use plt.multiline()",
+      "Pass all data as a list",
+      "Use plt.lines()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Each plt.plot() call adds a line to the current axes."
+  },
+  {
+    "id": "matplotlib-24",
+    "question": "What controls line transparency?",
+    "options": [
+      "alpha (0 to 1)",
+      "opacity",
+      "transparent",
+      "blend"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "alpha ranges from 0 (invisible) to 1 (opaque)."
+  },
+  {
+    "id": "matplotlib-25",
+    "question": "What does markevery do?",
+    "options": [
+      "Controls which markers render (e.g., every Nth point)",
+      "Sets max markers",
+      "Removes out-of-range markers",
+      "Makes all markers same size"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "markevery controls marker frequency to avoid clutter."
+  },
+  {
+    "id": "matplotlib-26",
+    "question": "What line style does '--' represent?",
+    "options": [
+      "Dashed",
+      "Solid",
+      "Dotted",
+      "Dash-dot"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "'--' is dashed, '-' is solid, ':' is dotted, '-.' is dash-dot."
+  },
+  {
+    "id": "matplotlib-27",
+    "question": "How to set line width?",
+    "options": [
+      "linewidth or lw parameter",
+      "width or w",
+      "thickness or t",
+      "size or sz"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use linewidth (or shorthand lw) to set line thickness."
+  },
+  {
+    "id": "matplotlib-28",
+    "question": "What does color=(0.1,0.5,0.9) represent?",
+    "options": [
+      "RGB tuple with values in [0,1]",
+      "Hex color code",
+      "Colormap reference",
+      "Color name"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "RGB tuples have three values 0-1 for red, green, blue."
+  },
+  {
+    "id": "matplotlib-29",
+    "question": "How to hide the line but keep markers?",
+    "options": [
+      "Set linestyle='' or linestyle='None'",
+      "Set linewidth=0",
+      "Set markeronly=True",
+      "Use plt.scatter instead"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Setting linestyle='' removes the connecting line but keeps markers."
+  },
+  {
+    "id": "matplotlib-30",
+    "question": "Difference between mfc and mec?",
+    "options": [
+      "mfc fills marker interior; mec colors the outline",
+      "mfc colors edge; mec fills interior",
+      "Both are the same",
+      "mfc is for scatter only"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "markerfacecolor fills inside; markeredgecolor colors the border."
+  },
+  {
+    "id": "matplotlib-31",
+    "question": "What does ',' marker look like?",
+    "options": [
+      "A single pixel (smaller than '.')",
+      "A comma symbol",
+      "A small dash",
+      "A cross"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The ',' marker renders as a single pixel, very small."
+  },
+  {
+    "id": "matplotlib-32",
+    "question": "How to create a custom marker?",
+    "options": [
+      "Use matplotlib.path.Path and pass as marker",
+      "Use plt.custom_marker()",
+      "Use a Unicode character",
+      "Markers cannot be customized"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Define a Path and pass it as the marker parameter."
+  },
+  {
+    "id": "matplotlib-33",
+    "question": "What code represents a square marker?",
+    "options": [
+      "'s'",
+      "'S'",
+      "'q'",
+      "'sq'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "'s' is square. 'D' = diamond, 'o' = circle, '^' = triangle."
+  },
+  {
+    "id": "matplotlib-34",
+    "question": "What does markevery=5 do?",
+    "options": [
+      "Shows marker on every 5th data point",
+      "Shows exactly 5 markers",
+      "Shows markers at 0 and 5",
+      "Sets marker size to 5"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "markevery=5 places a marker on every 5th point."
+  },
+  {
+    "id": "matplotlib-35",
+    "question": "What code represents a pentagon marker?",
+    "options": [
+      "'p'",
+      "'P'",
+      "'5'",
+      "'pentagon'"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "'p' is the pentagon marker code."
+  },
+  {
+    "id": "matplotlib-36",
+    "question": "Default marker for plt.plot()?",
+    "options": [
+      "No marker (line only)",
+      "'o' circle",
+      "'.' point",
+      "',' pixel"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "By default, plt.plot() draws only the line without markers."
+  },
+  {
+    "id": "matplotlib-37",
+    "question": "What are the four basic linestyles?",
+    "options": [
+      "solid (-), dashed (--), dotted (:), dash-dot (-.)",
+      "thick, thin, dashed, dotted",
+      "solid, dashed, dotted, double",
+      "solid, dashed, dash-dot, wave"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The four basic linestyles are -, --, :, and -.."
+  },
+  {
+    "id": "matplotlib-38",
+    "question": "How to create a custom dash pattern?",
+    "options": [
+      "Use dashes parameter with on/off sequence",
+      "Use custom_dashes=True",
+      "Use linestyle='custom'",
+      "Use dash_pattern"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "dashes accepts (offset, (on1, off1, on2, off2, ...))."
+  },
+  {
+    "id": "matplotlib-39",
+    "question": "How to create a gradient-colored line?",
+    "options": [
+      "Split into segments and use LineCollection with colormap",
+      "Set gradient=True",
+      "Use color='gradient'",
+      "Use special marker"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "LineCollection draws multi-colored segments for gradient effects."
+  },
+  {
+    "id": "matplotlib-40",
+    "question": "What does alpha=0.5 do?",
+    "options": [
+      "50% transparent",
+      "Sets line width to 0.5",
+      "Sets z-order to 0.5",
+      "Reduces marker size 50%"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "alpha=0.5 makes plot elements semi-transparent."
+  },
+  {
+    "id": "matplotlib-41",
+    "question": "How to make line invisible but keep markers?",
+    "options": [
+      "Set linestyle='' and specify a marker",
+      "Set alpha=0",
+      "Set linewidth=0",
+      "All of the above work"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Any of these approaches removes the line while keeping markers."
+  },
+  {
+    "id": "matplotlib-42",
+    "question": "What does zorder control?",
+    "options": [
+      "Drawing order (lower = behind, higher = front)",
+      "Zoom level",
+      "Z-axis limit",
+      "Line sharpness"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "zorder controls which elements appear on top of others."
+  },
+  {
+    "id": "matplotlib-43",
+    "question": "What does LineCollection enable?",
+    "options": [
+      "Multi-colored segments for gradient effects",
+      "Grouped line plots",
+      "Saving multiple lines",
+      "Converting lines to markers"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "LineCollection draws line segments with individual colors."
+  },
+  {
+    "id": "matplotlib-44",
+    "question": "How to make axis labels bold?",
+    "options": [
+      "fontweight='bold' in xlabel()/ylabel()",
+      "bold=True",
+      "weight='bold'",
+      "plt.bold_labels()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The fontweight parameter accepts 'bold', 'normal', etc."
+  },
+  {
+    "id": "matplotlib-45",
+    "question": "Difference between title() and suptitle()?",
+    "options": [
+      "title() sets axes title; suptitle() sets figure-level title above all subplots",
+      "title() is for x-axis",
+      "Both are the same",
+      "suptitle() is deprecated"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "suptitle() adds a title above all subplots at the figure level."
+  },
+  {
+    "id": "matplotlib-46",
+    "question": "How to render Greek letters in a title?",
+    "options": [
+      "Use TeX: r'$\\alpha + \\beta$'",
+      "Use Unicode directly",
+      "Use plt.greek()",
+      "Not supported"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Matplotlib's built-in TeX parser renders math inside $...$ in raw strings."
+  },
+  {
+    "id": "matplotlib-47",
+    "question": "What does labelpad control?",
+    "options": [
+      "Spacing between axis label and tick labels",
+      "Label font size",
+      "Label rotation",
+      "Label color"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "labelpad adds padding between the axis label and ticks."
+  },
+  {
+    "id": "matplotlib-48",
+    "question": "How to rotate x-axis tick labels?",
+    "options": [
+      "plt.xticks(rotation=45)",
+      "plt.xlabel(rotation=45)",
+      "plt.rotate_xticks(45)",
+      "plt.tick_params(x_rotation=45)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.xticks(rotation=45) rotates tick labels, not axis labels."
+  },
+  {
+    "id": "matplotlib-49",
+    "question": "What is required for TeX rendering?",
+    "options": [
+      "Raw strings r'...' and $...$ delimiters",
+      "External LaTeX installation",
+      "renderer='tex' parameter",
+      "Import tex module"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Use raw strings to prevent backslash interpretation and $...$ delimiters."
+  },
+  {
+    "id": "matplotlib-50",
+    "question": "What does plt.text(2, 0.3, 'text') do?",
+    "options": [
+      "Adds text at data coordinates (2, 0.3)",
+      "At figure position (2, 0.3)",
+      "Creates a text box",
+      "Prints to console"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.text(x, y, s) adds text at data coordinates."
+  },
+  {
+    "id": "matplotlib-51",
+    "question": "How to show gridlines only on y-axis?",
+    "options": [
+      "plt.grid(True, axis='y')",
+      "plt.ygrid(True)",
+      "plt.grid('y')",
+      "plt.grid(axis='y', True)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "axis='y' limits gridlines to the y-axis."
+  },
+  {
+    "id": "matplotlib-52",
+    "question": "What does which parameter in grid() control?",
+    "options": [
+      "major, minor, or both tick types get gridlines",
+      "Which axes",
+      "Which plot",
+      "Which grid style"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "which='major', 'minor', or 'both' selects which ticks get gridlines."
+  },
+  {
+    "id": "matplotlib-53",
+    "question": "Default z-order of gridlines?",
+    "options": [
+      "2.5 (below lines, above axes)",
+      "1 (behind everything)",
+      "10 (on top)",
+      "0 (bottom)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Gridlines default to z-order 2.5, below data lines (z=2)."
+  },
+  {
+    "id": "matplotlib-54",
+    "question": "How to set custom grid intervals?",
+    "options": [
+      "Use MultipleLocator from matplotlib.ticker",
+      "Set grid_interval",
+      "Use custom_grid()",
+      "Set grid_step"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "MultipleLocator sets tick spacing to multiples of a base value."
+  },
+  {
+    "id": "matplotlib-55",
+    "question": "What must you do for minor gridlines to appear?",
+    "options": [
+      "Enable minor ticks via set_minor_locator() first",
+      "Just call grid(which='minor')",
+      "Minor grids are automatic",
+      "Enable plt.minor_grid()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Minor ticks must be enabled with a locator before minor grids appear."
+  },
+  {
+    "id": "matplotlib-56",
+    "question": "How to make gridlines appear on top of data?",
+    "options": [
+      "Set higher zorder in grid() than data",
+      "Set grid_on_top=True",
+      "Use layer='top'",
+      "Grid always on top"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Set zorder in grid() higher than data's zorder (default line z=2)."
+  },
+  {
+    "id": "matplotlib-57",
+    "question": "What does ax.axhline(y=0) do?",
+    "options": [
+      "Draws a horizontal line at y=0 across the axes",
+      "Creates new axis at y=0",
+      "Highlights y=0 tick",
+      "Sets y-axis limit to 0"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "axhline() draws a single horizontal line spanning the axes."
+  },
+  {
+    "id": "matplotlib-58",
+    "question": "Difference between subplot() and subplots()?",
+    "options": [
+      "subplot() creates one axes; subplots() creates all at once",
+      "subplots() is for 3D",
+      "subplot() is OOP",
+      "They are the same"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "subplot() selects/creates one axes; subplots() creates all at once."
+  },
+  {
+    "id": "matplotlib-59",
+    "question": "What does GridSpec offer over subplots()?",
+    "options": [
+      "Non-uniform grids with different sizes and spanning",
+      "3D plots",
+      "Better performance",
+      "Animation support"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "GridSpec allows different row heights, column widths, and spanning."
+  },
+  {
+    "id": "matplotlib-60",
+    "question": "Why is indexing different between subplot and subplots()?",
+    "options": [
+      "subplot uses 1-indexing; subplots uses 0-indexed arrays",
+      "Both use 1-indexing",
+      "Both use 0-indexing",
+      "subplots uses letters"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "subplot(2,2,3) is 1-indexed; axes[1,0] in subplots() is 0-indexed for the same cell."
+  },
+  {
+    "id": "matplotlib-61",
+    "question": "How to create a subplot spanning multiple columns?",
+    "options": [
+      "GridSpec: gs[0, :] spans all columns in row 0",
+      "Use colspan in subplots()",
+      "Use plt.subplot(span=2)",
+      "Use merge=True"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "With GridSpec, gs[row, start:end] or gs[row, :] spans columns."
+  },
+  {
+    "id": "matplotlib-62",
+    "question": "What does sharey='row' do?",
+    "options": [
+      "Shares y-axis within each row",
+      "Shares y-axis within each column",
+      "Across all subplots",
+      "Shares y-data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "sharey='row' synchronizes y-axis limits across subplots in the same row."
+  },
+  {
+    "id": "matplotlib-63",
+    "question": "What does tight_layout() prevent?",
+    "options": [
+      "Labels, titles, and subplots overlapping",
+      "All subplots being tight",
+      "Increased figure size",
+      "Zero margins"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "tight_layout() adjusts spacing to prevent overlapping elements."
+  },
+  {
+    "id": "matplotlib-64",
+    "question": "How to iterate over a 2D axes array?",
+    "options": [
+      "axes.flat (iterator)",
+      "axes.flatten()",
+      "axes.ravel()",
+      "All of the above work"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "axes.flat, axes.flatten(), and axes.ravel() all work."
+  },
+  {
+    "id": "matplotlib-65",
+    "question": "What does subplot2grid allow?",
+    "options": [
+      "Create axes spanning multiple grid cells",
+      "2D plots on a grid",
+      "Animation grid",
+      "Plot 2D functions"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "subplot2grid creates axes spanning multiple rows/columns."
+  },
+  {
+    "id": "matplotlib-66",
+    "question": "Advantage of plt.scatter() over plt.plot() with markers?",
+    "options": [
+      "Per-point control over size, color, and alpha",
+      "Faster rendering",
+      "Better for line plots",
+      "More marker types"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "scatter() allows per-point customization through arrays for s, c, alpha."
+  },
+  {
+    "id": "matplotlib-67",
+    "question": "How does s parameter work in scatter()?",
+    "options": [
+      "Defines marker area in points^2 (scalar or array)",
+      "Sets marker shape",
+      "Sets marker edge width",
+      "Sets transparency"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "s controls marker area. An array varies size per point."
+  },
+  {
+    "id": "matplotlib-68",
+    "question": "How to add a colorbar to scatter?",
+    "options": [
+      "Store scatter return and pass to plt.colorbar(sc)",
+      "Use plt.show_colorbar()",
+      "Colorbar is automatic",
+      "Use plt.add_colorbar()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Store the PathCollection from scatter() and pass to colorbar()."
+  },
+  {
+    "id": "matplotlib-69",
+    "question": "What does cmap do in scatter()?",
+    "options": [
+      "Specifies colormap for mapping numeric c values to colors",
+      "Controls marker shape",
+      "Sets background",
+      "Changes figure colormap"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "cmap maps numeric values in c to colors using the specified colormap."
+  },
+  {
+    "id": "matplotlib-70",
+    "question": "How to create scatter with legend for groups?",
+    "options": [
+      "Call scatter() separately per group with label, then legend()",
+      "Single scatter with labels",
+      "Groups cannot be differentiated",
+      "Use plt.legend_groups()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Call scatter() for each group with different settings and label, then legend()."
+  },
+  {
+    "id": "matplotlib-71",
+    "question": "What happens if s values are too large?",
+    "options": [
+      "Points blob together obscuring data",
+      "Points disappear",
+      "Error is raised",
+      "Plot slows down"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Overly large markers cause overlap and clutter."
+  },
+  {
+    "id": "matplotlib-72",
+    "question": "What does scatter(x,y,c=colors,alpha=0.7) do?",
+    "options": [
+      "Per-point colors from array, 70% transparency",
+      "70 random points",
+      "70% marker size",
+      "0.7 line width"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "c controls per-point colors; alpha=0.7 makes points semi-transparent."
+  },
+  {
+    "id": "matplotlib-73",
+    "question": "How to create proxy artists for custom legend?",
+    "options": [
+      "Use Line2D objects as handles in plt.legend()",
+      "Scatter handles are automatic",
+      "Create a dummy scatter",
+      "Use custom_legend()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Create Line2D proxy artists with desired properties for legend entries."
+  },
+  {
+    "id": "matplotlib-74",
+    "question": "Function for vertical bar charts?",
+    "options": [
+      "plt.bar(x, height)",
+      "plt.barh(x, height)",
+      "plt.bar_vertical()",
+      "plt.vbar()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.bar() creates vertical bars; plt.barh() for horizontal."
+  },
+  {
+    "id": "matplotlib-75",
+    "question": "How to create a horizontal bar chart?",
+    "options": [
+      "plt.barh(y, width)",
+      "plt.bar(orientation='horizontal')",
+      "plt.hbar(y, width)",
+      "plt.barh(x, height)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.barh() creates horizontal bars."
+  },
+  {
+    "id": "matplotlib-76",
+    "question": "How to add error bars to bar chart?",
+    "options": [
+      "yerr or xerr parameters with error values",
+      "Use plt.errorbar() on bars",
+      "Automatic",
+      "Error parameter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "yerr (vertical) or xerr (horizontal) adds error bars."
+  },
+  {
+    "id": "matplotlib-77",
+    "question": "How does bottom work in stacked bars?",
+    "options": [
+      "Sets starting y-position for stacking",
+      "Sets bottom margin",
+      "Hides bottom of bars",
+      "Sets baseline"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "bottom sets where the next set of bars starts (cumulative sum of previous)."
+  },
+  {
+    "id": "matplotlib-78",
+    "question": "How to create grouped bar chart?",
+    "options": [
+      "Use numeric x positions, offset bars by width/2",
+      "Use groupby on categories",
+      "Use plt.grouped_bar()",
+      "Use group parameter"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Create numeric positions with arange(), offset by +/-width/2."
+  },
+  {
+    "id": "matplotlib-79",
+    "question": "Why use plt.xticks() with grouped bars?",
+    "options": [
+      "To map numeric positions back to category labels",
+      "To rotate labels",
+      "To hide labels",
+      "To set frequency"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Grouped bars use numeric positions; xticks maps them to category names."
+  },
+  {
+    "id": "matplotlib-80",
+    "question": "What does plt.cm.Blues(linspace(0.3,1,5)) produce?",
+    "options": [
+      "5 shades of blue from light to dark",
+      "A blue colormap",
+      "A single blue color",
+      "A white-to-blue gradient"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "It samples 5 evenly spaced values from the Blues colormap."
+  },
+  {
+    "id": "matplotlib-81",
+    "question": "How to set different colors per bar?",
+    "options": [
+      "Pass a list of colors to the color parameter",
+      "Use multiple bar() calls",
+      "Set color='multi'",
+      "Use a colormap"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "The color parameter accepts a list matching the data length."
+  },
+  {
+    "id": "matplotlib-82",
+    "question": "What does plt.hist(data, bins=30) do?",
+    "options": [
+      "Bins data into 30 intervals and draws frequency distribution",
+      "Creates 30 histograms",
+      "Sets width to 30",
+      "Creates 30 bars"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.hist() bins data and plots the frequency distribution."
+  },
+  {
+    "id": "matplotlib-83",
+    "question": "Return value of plt.hist()?",
+    "options": [
+      "(n, bins, patches): counts, edges, bar containers",
+      "Only counts",
+      "(counts, edges)",
+      "List of patches"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.hist() returns (n, bins, patches)."
+  },
+  {
+    "id": "matplotlib-84",
+    "question": "What does density=True do?",
+    "options": [
+      "Normalizes area to 1 (probability density)",
+      "Converts to percentages",
+      "Changes bin width",
+      "Log scale y-axis"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "density=True makes the histogram area equal 1."
+  },
+  {
+    "id": "matplotlib-85",
+    "question": "How to create overlapping histograms?",
+    "options": [
+      "Multiple hist() calls with alpha < 1",
+      "Use overlap_hist()",
+      "Stack with bottom",
+      "Use compare_hist()"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Call hist() multiple times with alpha transparency for overlap."
+  },
+  {
+    "id": "matplotlib-86",
+    "question": "What does bins='auto' do?",
+    "options": [
+      "Uses Freedman-Diaconis rule for optimal bin count",
+      "Creates no bins",
+      "Minimum bins",
+      "Maximum bins"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "bins='auto' uses 2*IQR*n^(-1/3) to choose bin count."
+  },
+  {
+    "id": "matplotlib-87",
+    "question": "What does histtype='step' produce?",
+    "options": [
+      "Unfilled histogram showing only the outline",
+      "Bar chart with steps",
+      "Cumulative step",
+      "Staircase plot"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "histtype='step' draws only the outline without fill."
+  },
+  {
+    "id": "matplotlib-88",
+    "question": "How to create a 2D histogram?",
+    "options": [
+      "plt.hist2d(x, y, bins=40, cmap='viridis')",
+      "plt.hist(x, y) for 2D",
+      "plt.heatmap(x, y)",
+      "plt.bivariate_hist(x, y)"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "plt.hist2d() bins both x and y and displays as colored heatmap."
+  },
+  {
+    "id": "matplotlib-89",
+    "question": "What does cumulative=True do?",
+    "options": [
+      "Computes and draws cumulative distribution",
+      "Adds bin counts",
+      "Creates cumulative array",
+      "Accumulates plots"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "cumulative=True produces a running total histogram."
+  },
+  {
+    "id": "matplotlib-90",
+    "question": "How to create a donut chart?",
+    "options": [
+      "wedgeprops={'width': 0.4} in pie()",
+      "Set donut=True in pie()",
+      "Use plt.donut()",
+      "Add a circle over pie"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Set wedgeprops width to create a donut hole."
+  },
+  {
+    "id": "matplotlib-91",
+    "question": "What does explode do in pie?",
+    "options": [
+      "Offsets slices from center to highlight them",
+      "Animates the pie",
+      "Makes slices larger",
+      "Rotates slices"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "explode pulls slices out by a fraction of the radius."
+  },
+  {
+    "id": "matplotlib-92",
+    "question": "Why is plt.axis('equal') important for pie?",
+    "options": [
+      "Ensures pie appears as a circle, not an oval",
+      "Makes all pies same size",
+      "Equal tick spacing",
+      "Normalizes data"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Equal aspect ratio prevents elliptical distortion of the pie."
+  },
+  {
+    "id": "matplotlib-93",
+    "question": "What does startangle=90 do?",
+    "options": [
+      "Rotates pie so first slice starts at the top",
+      "Sets angle of all slices",
+      "Sets first slice angle only",
+      "Rotates entire chart 90 degrees"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "startangle=90 places the first slice at 12 o'clock."
+  },
+  {
+    "id": "matplotlib-94",
+    "question": "How to add text in donut center?",
+    "options": [
+      "ax.text(0, 0, 'text', ha='center', va='center')",
+      "Use plt.donut_center()",
+      "Add text as a parameter",
+      "Use pie(center_text='text')"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "After pie(), use ax.text() at center coordinates."
+  },
+  {
+    "id": "matplotlib-95",
+    "question": "What does shadow=True do in pie?",
+    "options": [
+      "Adds drop shadow effect below the pie",
+      "Shadows the figure",
+      "Adds shadows to labels",
+      "Creates 3D effect"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "shadow=True adds a drop shadow beneath the pie chart."
+  },
+  {
+    "id": "matplotlib-96",
+    "question": "How to customize pie percentage text?",
+    "options": [
+      "Use textprops dict, autopct format, or autotexts objects",
+      "Use autopct_format only",
+      "Only autopct",
+      "autopct alone"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "textprops applies to all text; autopct controls formatting; autotexts allow per-label customization."
+  },
+  {
+    "id": "matplotlib-97",
+    "question": "What happens with too many pie slices?",
+    "options": [
+      "Chart becomes hard to read; group small categories into 'Other'",
+      "More informative",
+      "Auto converts to bar",
+      "Pie explodes"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "More than 5-6 slices makes comparisons difficult."
+  },
+  {
+    "id": "matplotlib-98",
+    "question": "What does plt.subplots_adjust(wspace=0, hspace=0) do?",
+    "options": [
+      "Removes all space between subplots",
+      "Sets white space background",
+      "Adjusts figure margins",
+      "Sets subplot size to zero"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "wspace and hspace control width and height spacing between subplots. Zero removes all gaps."
+  },
+  {
+    "id": "matplotlib-99",
+    "question": "How do you add minor ticks without gridlines?",
+    "options": [
+      "Use ax.minorticks_on() or set_minor_locator()",
+      "Minor ticks are automatic",
+      "Use plt.minor_ticks(True)",
+      "Cannot show minor ticks without grid"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Call ax.minorticks_on() or set a minor locator to enable minor ticks independently of gridlines."
+  },
+  {
+    "id": "matplotlib-100",
+    "question": "What is the purpose of plt.gca() and plt.gcf()?",
+    "options": [
+      "Get current axes and current figure respectively",
+      "Create new axes and figure",
+      "Save and load figures",
+      "Grid and colorbar access"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "gca() returns the current Axes, gcf() returns the current Figure for the pyplot state machine."
+  }
+]

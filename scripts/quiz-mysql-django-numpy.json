@@ -1,0 +1,3902 @@
+[
+  {
+    "id": "mysql-1",
+    "question": "⚠ Common Errors / Mistakes Using = NULL or != NULL instead of IS NULL / IS NOT NULL Forgetting parentheses when mixing AND and OR — produces wrong logic Using LIKE without wildcards (use = instead for exact match) Comparing strings case-sensitively when collation is _ci (case-insensitive) Using BETWEEN ______ BETWEEN '2026-01-01' AND '2026-01-31' excludes 2026-01-31 12:00:00 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "when running scripts idempotently\n- Thinking",
+      "for dates with time components —",
+      "Prepared",
+      "— skips"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "for dates with time components — refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-2",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT ______: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Session Isolation",
+      "matches exactly one character.\n4. **Q**: Is",
+      "Concepts",
+      "for dates with time components —"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Session Isolation refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-3",
+    "question": "A: WHERE ______ HAVING filters groups after aggregation.",
+    "options": [
+      "Rows",
+      "filters rows before aggregation;",
+      "Problem",
+      "Case"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "filters rows before aggregation; refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-4",
+    "question": "SQL Query: Output: Explanation: The SELECT ______",
+    "options": [
+      "constraints where supported.\n8. Write a",
+      "Exercises",
+      "What",
+      "clause formats the output with calculated columns."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "clause formats the output with calculated columns. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-5",
+    "question": "SET: Changes column values in matching rows UPDATE with WHERE: Only updates rows that satisfy the condition Updating Multiple Columns: SET col1 = val1, col2 = val2 UPDATE with JOIN: Updates rows in one table based on values in another table UPDATE with Subquery: Uses a subquery to determine the new value ______: Controls how many rows are updated Safe Update Mode: MySQL's sql_safe_updates prevents UPDATE/DELETE without WHERE or LIMIT 💻 Syntax ✅ Example 1 Basic Problem: Give a 10% salary increase to all employees in the Engineering department.",
+    "options": [
+      "Connect",
+      "Mode",
+      "LIMIT with UPDATE",
+      "column\n- Violating"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "LIMIT with UPDATE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-6",
+    "question": "SQL Query: Output: Explanation: ORDER BY salary DESC LIMIT 5 ______",
+    "options": [
+      "returns the top 5 salaries.",
+      "— causes data loss for 4-byte characters\n- Forgetting",
+      "Write",
+      "for dates with time components —"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "returns the top 5 salaries. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-7",
+    "question": "Using PDO prepared statements, the server inserts new users with parameterized queries — preventing SQL injection from malicious registration data and reducing CPU overhead from repeated query parsing.",
+    "options": [
+      "Write",
+      "Parameterized Queries",
+      "Create",
+      ".\n5. Delete all customers from"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Parameterized Queries refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-8",
+    "question": "MySQL vs NoSQL: MySQL uses fixed schemas and joins; NoSQL (MongoDB) uses flexible documents and scales horizontally ______: MySQL is faster for read-heavy workloads; PostgreSQL supports advanced data types and better concurrency MySQL vs SQLite: MySQL is client-server with multi-user support; SQLite is embedded file-based, single-user 💻 Syntax ✅ Example 1 Basic Problem: Connect to MySQL server and verify the installation.",
+    "options": [
+      "MySQL vs PostgreSQL",
+      "Calling",
+      "Tables",
+      ": How do you connect to a remote MySQL server from the CLI?"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "MySQL vs PostgreSQL refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-9",
+    "question": "salary  12 ______",
+    "options": [
+      "is fixed-length (padded with spaces);",
+      "is between '2026-01-01' and '2026-03-31' AND",
+      "computes annual salary.",
+      "LIKE"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "computes annual salary. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-10",
+    "question": "Create a trigger that, after INSERT on orders______ order_log using NEW.id — and compare this approach with manual LAST_INSERT_ID() usage.",
+    "options": [
+      "MySQL vs NoSQL",
+      ", automatically inserts a log entry into",
+      "and unique). A table can have multiple",
+      "Thinking"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": ", automatically inserts a log entry into refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-11",
+    "question": "⚠ Common Errors / Mistakes Exceeding max_allowed_packet with enormous INSERT statements Not wrapping batch inserts in transactions (each row auto-commits) Using LOAD DATA INFILE ______ LOCAL option Forgetting IGNORE 1 ROWS when CSV has a header row Mixing column order between the INSERT clause and VALUES tuples 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "Creates",
+      "without proper file permissions or",
+      "Case",
+      ".\n2. Run"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "without proper file permissions or refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-12",
+    "question": "Different programming interfaces have their own methods (PHP's mysqli_insert_id______ lastInsertId).",
+    "options": [
+      ", PDO's",
+      "Mistakes",
+      "World",
+      "to find the 5 most recent orders.\n6. Write a"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", PDO's refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-13",
+    "question": "MySQL supports inserting single rows, multiple rows in one statement, conditional inserts with INSERT IGNORE______ ON DUPLICATE KEY UPDATE.",
+    "options": [
+      ", and upsert behavior with",
+      "Returns",
+      ", select it, and verify it is active.\n\n**SQL Query**:",
+      "preferred over"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", and upsert behavior with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-14",
+    "question": "It supports comparison operators, logical operators, pattern matching with LIKE, range checks with BETWEEN, set membership with IN, and NULL checking with IS NULL.",
+    "options": [
+      "Beginner",
+      "Example",
+      "Logical Operators",
+      "Alias"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Logical Operators refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-15",
+    "question": "ON DUPLICATE KEY UPDATE ______ last_login column when a user already exists.",
+    "options": [
+      "that updates a",
+      "PDO lastInsertId()",
+      "MySQLi / PDO",
+      "Controls"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "that updates a refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-16",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection ______: Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Keyset",
+      ", and",
+      "PDO lastInsertId()",
+      "What"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "PDO lastInsertId() refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-17",
+    "question": "A: They improve performance when the same query is executed many times with different parameters.",
+    "options": [
+      "EXECUTE",
+      ": Renames a column or table in the result set\n-",
+      "(or",
+      "Problem"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "EXECUTE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-18",
+    "question": "Create a table project_assignments ______employee_id, project_id) and foreign keys to both employees and projects.",
+    "options": [
+      "with a composite primary key (",
+      "Beginner",
+      "matches zero or more characters;",
+      "Beginner"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "with a composite primary key ( refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-19",
+    "question": "SQL Query: Output (after SHOW TABLES and DESC orders): Explanation: orders references customers ______",
+    "options": [
+      "via a foreign key.",
+      "Problem",
+      "York",
+      "modifies existing rows in a table. The"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "via a foreign key. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-20",
+    "question": "SQL Query: Output: Explanation: ORDER BY price DESC ______",
+    "options": [
+      "Errors",
+      "Delete",
+      "sorts products from most to least expensive.",
+      "Engineering"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "sorts products from most to least expensive. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-21",
+    "question": "🧠 Key Concepts Data Types: INT (integer), VARCHAR (variable string), TEXT (large text), DECIMAL (exact decimal), DATE, DATETIME, BOOLEAN (TINYINT(1)) NOT NULL: Column must have a value DEFAULT: Default value if none provided AUTO_INCREMENT: Automatically generates sequential integers PRIMARY KEY: Uniquely identifies each row UNIQUE: Ensures all values in a column are distinct SHOW TABLES: Lists all tables in the current database ______: Shows table structure 💻 Syntax ✅ Example 1 Basic Problem: Create a students table with id, name, email, age, and enrollment date.",
+    "options": [
+      "DESC / EXPLAIN table",
+      "This",
+      "Using",
+      "Ascending"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "DESC / EXPLAIN table refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-22",
+    "question": "MySQL offers several approaches: multi-row VALUES ______ LOAD DATA INFILE for bulk imports.",
+    "options": [
+      "Mistakes",
+      "lists, prepared statements with batch execution, and",
+      "Sorting",
+      "Twitter"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "lists, prepared statements with batch execution, and refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-23",
+    "question": "______ LAST_INSERT_ID(), then that ID is used for INSERT INTO order_items (order_id, product_id, qty) VALUES (...).",
+    "options": [
+      "Each",
+      "Data",
+      "gets its ID via",
+      "Handling"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "gets its ID via refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-24",
+    "question": "Select the library ______ SELECT DATABASE();.",
+    "options": [
+      "Returns",
+      "database and run",
+      "and",
+      "Fetch"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "database and run refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-25",
+    "question": "SET: Changes column values in matching rows UPDATE with WHERE: Only updates rows that satisfy the condition ______: SET col1 = val1, col2 = val2 UPDATE with JOIN: Updates rows in one table based on values in another table UPDATE with Subquery: Uses a subquery to determine the new value LIMIT with UPDATE: Controls how many rows are updated Safe Update Mode: MySQL's sql_safe_updates prevents UPDATE/DELETE without WHERE or LIMIT 💻 Syntax ✅ Example 1 Basic Problem: Give a 10% salary increase to all employees in the Engineering department.",
+    "options": [
+      "Updating Multiple Columns",
+      "Concepts",
+      "Example",
+      "Should"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Updating Multiple Columns refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-26",
+    "question": "Each ______ returns the ID generated by the immediately preceding INSERT.",
+    "options": [
+      "vs keyset pagination (",
+      "LAST_INSERT_ID()",
+      "Problem",
+      "Output"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "LAST_INSERT_ID() refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-27",
+    "question": "A: localhost ______ 127.0.0.1 forces TCP/IP.",
+    "options": [
+      "uses a Unix socket (or Windows named pipe);",
+      "What",
+      "Automatically",
+      "Case"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "uses a Unix socket (or Windows named pipe); refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-28",
+    "question": "Write a safe delete pattern: first SELECT the rows to delete, then DELETE ______ WHERE, using LIMIT 100.",
+    "options": [
+      "with the same",
+      "Sorting",
+      "— and compare this approach with manual",
+      "Common"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "with the same refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-29",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection ______: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Insert",
+      "Multiple Rows",
+      "Explanation",
+      "Real"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Multiple Rows refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-30",
+    "question": "Q: What is MySQL and how does it ______ SQL?",
+    "options": [
+      "differ from",
+      "What",
+      "Corporation",
+      "Using"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "differ from refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-31",
+    "question": "⚠ Common Errors / Mistakes Forgetting WHERE — accidentally updating all rows Using WHERE with wrong condition — updating unintended rows Updating a column used in the WHERE clause (e.g., UPDATE t SET id = id + 1 WHERE id = 5) Not testing with SELECT first to verify which rows match Updating without considering foreign key constraints 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "Foreign Key Constraints",
+      "Operators",
+      "(or",
+      "Forgetting"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Foreign Key Constraints refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-32",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from ______ procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Very",
+      "Create",
+      "rows, then returns",
+      "MySQLi"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "MySQLi refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-33",
+    "question": "SQL Query: Output (truncated): Explanation: SHOW ENGINES lists every available storage engine and whether it's supported.",
+    "options": [
+      "This",
+      "TRUNCATE",
+      "Write",
+      "— accidentally updating all rows\n- Using"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "TRUNCATE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-34",
+    "question": "The counter starts at 1 and increments by 1 by default.",
+    "options": [
+      "DEFAULT",
+      "Columns",
+      "statement for",
+      "Delete"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "DEFAULT refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-35",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic ______: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Mastering",
+      ": Shows the exact statement used to create the database\n-",
+      "Problem",
+      "Basic"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Problem refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-36",
+    "question": "A: MySQL's utf8 ______",
+    "options": [
+      "only supports up to 3-byte characters (no emoji).",
+      "Real",
+      "Pagination",
+      "Beginner"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "only supports up to 3-byte characters (no emoji). refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-37",
+    "question": "SQL Query: Output (truncated): ______: SHOW ENGINES lists every available storage engine and whether it's supported.",
+    "options": [
+      "Explanation",
+      "Returns",
+      "Basic",
+      "Perform"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Explanation refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-38",
+    "question": "Find all orders where order_date ______ status is 'pending'.",
+    "options": [
+      ": What does \"Can't connect to MySQL server\" typically mean?",
+      "AUTO_INCREMENT",
+      "is between '2026-01-01' and '2026-03-31' AND",
+      "Example"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "is between '2026-01-01' and '2026-03-31' AND refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-39",
+    "question": "🧠 Key Concepts LIMIT: LIMIT count — returns at most count rows LIMIT with OFFSET: LIMIT offset, count or LIMIT count OFFSET offset — skips offset rows, then returns count rows Pagination: LIMIT 10 OFFSET 0 ______ LIMIT 10 OFFSET 10 = page 2, etc.",
+    "options": [
+      "= page 1,",
+      "Logical",
+      ") on a table with 1 million rows. Use",
+      "Comparison Operators"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "= page 1, refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-40",
+    "question": "⚠ Common Errors / Mistakes Inserting a NULL into a NOT NULL column Violating UNIQUE or PRIMARY KEY ______ IGNORE or ON DUPLICATE KEY) String values not quoted — MySQL treats unquoted tokens as column names Date values in wrong format (use 'YYYY-MM-DD') Forgetting column list order — relying on column order is fragile 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "constraints (unless using",
+      "Create",
+      ", and",
+      "Output"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "constraints (unless using refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-41",
+    "question": "Select employees where department_id IS NULL OR manager_id IS ______.",
+    "options": [
+      "Fetch",
+      "Database",
+      "- Forgetting parentheses when mixing",
+      "NOT NULL"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "NOT NULL refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-42",
+    "question": "Create a table employees ______ id (INT AUTO_INCREMENT PK), name (VARCHAR(100) NOT NULL), salary (DECIMAL(10,2)), hire_date (DATE).",
+    "options": [
+      "Concepts",
+      "with columns:",
+      "User/Pasword",
+      "Engineering"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "with columns: refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-43",
+    "question": "Compare performance of LIMIT 10 OFFSET 100000 ______WHERE id > 100000 LIMIT 10) on a table with 1 million rows.",
+    "options": [
+      "Query",
+      "vs keyset pagination (",
+      "in MySQL connections?  \n   **A**:",
+      "Case"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "vs keyset pagination ( refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-44",
+    "question": "A: ______ returns NULL if any argument is NULL.",
+    "options": [
+      "Write",
+      "NOT NULL",
+      "Write",
+      "CONCAT()"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "CONCAT() refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-45",
+    "question": "SET: Changes column values in matching rows UPDATE with WHERE: Only updates rows that satisfy the condition Updating ______: SET col1 = val1, col2 = val2 UPDATE with JOIN: Updates rows in one table based on values in another table UPDATE with Subquery: Uses a subquery to determine the new value LIMIT with UPDATE: Controls how many rows are updated Safe Update Mode: MySQL's sql_safe_updates prevents UPDATE/DELETE without WHERE or LIMIT 💻 Syntax ✅ Example 1 Basic Problem: Give a 10% salary increase to all employees in the Engineering department.",
+    "options": [
+      "Example",
+      "Syntax",
+      "Multiple Columns",
+      "What"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Multiple Columns refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-46",
+    "question": "MySQL Limit Data 📘 Introduction ______ restricts the number of rows returned by a query.",
+    "options": [
+      "Default",
+      "LIMIT",
+      "Write",
+      "Using"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "LIMIT refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-47",
+    "question": "Write an UPDATE with a JOIN ______ customers.total_spent to the sum of their orders (aggregate from orders table).",
+    "options": [
+      "Compare",
+      "Connected",
+      "to set",
+      "Output"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "to set refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-48",
+    "question": "⚠ Common Errors / Mistakes Using utf8 ______ utf8mb4 — causes data loss for 4-byte characters Forgetting IF NOT EXISTS when running scripts idempotently Thinking ALTER DATABASE charset changes existing tables Using case-sensitive collation (_cs) by mistake when case-insensitive (_ci) is intended 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "Search",
+      "(alias for utf8mb3) instead of",
+      "LIMIT with UPDATE",
+      "who have not logged in since '2025-01-01' (use a"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "(alias for utf8mb3) instead of refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-49",
+    "question": "SQL Query: Output (after DESC students): Explanation: id ______",
+    "options": [
+      "Create",
+      "is an auto-incrementing primary key.",
+      "Concepts",
+      "Exercises"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "is an auto-incrementing primary key. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-50",
+    "question": "After an INSERT, run SELECT @@identity; and compare with LAST_INSERT_ID().",
+    "options": [
+      "after an",
+      "Example",
+      "Parentheses",
+      "Syntax"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "after an refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-51",
+    "question": "A: It sets the default database for subsequent SQL statements ______ requiring schema-qualified table names.",
+    "options": [
+      "Concepts",
+      "However",
+      "without",
+      "Results"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "without refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-52",
+    "question": "After an INSERT, run SELECT @@identity; ______ LAST_INSERT_ID().",
+    "options": [
+      "SHOW DATABASES",
+      "Removes",
+      "Select",
+      "and compare with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "and compare with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-53",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID ______ last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "Command",
+      "Find",
+      "from the",
+      "Insert"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "from the refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-54",
+    "question": "⚠ Common Errors / Mistakes Using VARCHAR(255) for every string without considering actual data size Forgetting PRIMARY KEY or AUTO_INCREMENT on an id column Using FLOAT/DOUBLE for monetary values instead of DECIMAL Creating circular foreign key ______ Not setting ON DELETE/ON UPDATE actions on foreign keys 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "Case",
+      "references",
+      "Change",
+      ".\n2. Run"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "references refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-55",
+    "question": "Using multi-row INSERT (INSERT INTO logs (event, ts) VALUES ('login', NOW()), ('logout', NOW()) ...______",
+    "options": [
+      "Checks",
+      "Real",
+      ") reduces round-trips.",
+      "Explanation"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": ") reduces round-trips. refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-56",
+    "question": "Querying information_schema.SCHEMATA provides metadata — showing this database inherited the server's default utf8mb4 character set and utf8mb4_0900_ai_ci collation.",
+    "options": [
+      "Write",
+      "Only",
+      "Collation",
+      "filters categories, and"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Collation refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-57",
+    "question": "It supports comparison operators, logical operators, pattern matching with LIKE, range checks with BETWEEN, set membership with IN______ IS NULL.",
+    "options": [
+      ", and NULL checking with",
+      "What",
+      "Problem",
+      "Create"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", and NULL checking with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-58",
+    "question": "🚀 Example 2 Intermediate Problem: Update product prices based on supplier price changes______ a JOIN.",
+    "options": [
+      "Concepts",
+      "Engines",
+      ", using",
+      "Changes"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": ", using refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-59",
+    "question": "LIKE matches partial names, BETWEEN ______ IN filters categories, and IS NOT NULL ensures stock data exists.",
+    "options": [
+      "Case",
+      "Explanation",
+      "checks price range,",
+      "Access"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "checks price range, refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-60",
+    "question": "______ matches partial names, BETWEEN checks price range, IN filters categories, and IS NOT NULL ensures stock data exists.",
+    "options": [
+      "LIKE",
+      "Using",
+      "World",
+      "Create"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "LIKE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-61",
+    "question": "🧠 Key Concepts ASC / DESC: Ascending (default A-Z, 0-9) or descending (Z-A, 9-0) Multiple Columns: ORDER BY col1 ASC, col2 DESC — sorts by col1, then by col2 within ties Expressions: Sort by computed values (ORDER BY salary  12 DESC) NULL Handling: By default NULLs sort before non-NULLs in ASC, after in DESC NULLS FIRST / LAST: MySQL-specific syntax to control NULL placement (ORDER BY col ASC NULLS LAST) ORDER BY with LIMIT: Returns top or bottom N rows ______: Allowed in MySQL (ORDER BY annual_salary DESC) 💻 Syntax ✅ Example 1 Basic Problem: List employees sorted by department (ascending) and salary (descending within the same department).",
+    "options": [
+      "Real",
+      "Sorting by Alias",
+      "Facebook",
+      "What"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Sorting by Alias refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-62",
+    "question": "⚠ Common Errors / Mistakes Exceeding max_allowed_packet with enormous INSERT statements Not wrapping batch inserts in transactions (each row auto-commits) Using LOAD DATA INFILE without proper file permissions or LOCAL option Forgetting IGNORE 1 ROWS when CSV ______ header row Mixing column order between the INSERT clause and VALUES tuples 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "has a",
+      "Increase",
+      "Query",
+      "Practice"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "has a refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-63",
+    "question": "Create a table projects with id PK, title ______ budget DECIMAL(12,2), dept_id INT with a foreign key referencing departments(id) ON DELETE CASCADE.",
+    "options": [
+      "**Output** (truncated):",
+      "Common",
+      "Prevention",
+      "VARCHAR(200),"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "VARCHAR(200), refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-64",
+    "question": "🧠 Key Concepts ASC / DESC: Ascending (default A-Z, 0-9) or descending (Z-A, 9-0) Multiple Columns: ORDER BY col1 ASC, col2 DESC — sorts by col1, then by col2 within ties Expressions: Sort by computed values (ORDER BY salary  12 DESC) NULL Handling: By default NULLs sort before non-NULLs in ASC, after in DESC ______: MySQL-specific syntax to control NULL placement (ORDER BY col ASC NULLS LAST) ORDER BY with LIMIT: Returns top or bottom N rows Sorting by Alias: Allowed in MySQL (ORDER BY annual_salary DESC) 💻 Syntax ✅ Example 1 Basic Problem: List employees sorted by department (ascending) and salary (descending within the same department).",
+    "options": [
+      "Port",
+      "NULLS FIRST / LAST",
+      "Syntax",
+      "Workbench"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "NULLS FIRST / LAST refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-65",
+    "question": "Querying information_schema.SCHEMATA provides metadata — showing this database inherited the server's default utf8mb4 ______ utf8mb4_0900_ai_ci collation.",
+    "options": [
+      "fire triggers?  \n   **A**: No —",
+      "character set and",
+      "Intermediate",
+      "Standard"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "character set and refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-66",
+    "question": "A: CHAR is fixed-length (padded with spaces); VARCHAR ______",
+    "options": [
+      "Query",
+      "Automatically",
+      "is variable-length (1-2 extra bytes for length).",
+      "constraint to prevent duplicates."
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "is variable-length (1-2 extra bytes for length). refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-67",
+    "question": "SQL Query: Output: Explanation: The first query relies on ______ on the order_items foreign key — deleting parent orders automatically removes child items.",
+    "options": [
+      "ON DELETE CASCADE",
+      "Case",
+      "Exercises",
+      "is faster but less accurate.\n3. **Q**: Does"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "ON DELETE CASCADE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-68",
+    "question": "🧠 Key Concepts Comparison Operators: =, != (or <>), >, <, >=, <= Logical Operators: AND, OR, NOT — combine multiple conditions IN: Checks if a value matches any in a list BETWEEN: Checks if a value falls within a range (inclusive) LIKE: Pattern matching with % (any sequence) and _ (single character) IS NULL / IS NOT NULL: Checks for NULL values (cannot use = NULL) ______: MySQL allows DATE, DATETIME column comparisons with string literals in 'YYYY-MM-DD' format 💻 Syntax ✅ Example 1 Basic Problem: Find all active customers in New York who spent more than $100.",
+    "options": [
+      "Beginner",
+      "Access",
+      "Date Comparisons",
+      "Returns"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Date Comparisons refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-69",
+    "question": "Create a table employees with columns: id ______ name (VARCHAR(100) NOT NULL), salary (DECIMAL(10,2)), hire_date (DATE).",
+    "options": [
+      "checks price range,",
+      "Give",
+      "(INT AUTO_INCREMENT PK),",
+      "Large"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(INT AUTO_INCREMENT PK), refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-70",
+    "question": "per value) Forgetting to DEALLOCATE PREPARE (resources freed on connection close, but good practice) Using EXECUTE ______ @variables Assuming LIMIT ?",
+    "options": [
+      "MySQL vs NoSQL",
+      "Returns",
+      "Syntax",
+      "without setting all"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "without setting all refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-71",
+    "question": "______: Required for consistent pagination — without ORDER BY, which rows are returned is undefined LIMIT with DELETE/UPDATE: Restricts the number of rows affected Performance Optimization: Large OFFSET values are slow — use keyset pagination (WHERE id > last_seen) for better performance 💻 Syntax ✅ Example 1 Basic Problem: Fetch the 5 most expensive products for a \"Top Products\" widget.",
+    "options": [
+      "('low', 'medium', 'high', 'critical') to the",
+      "returns NULL if any argument is NULL. Use",
+      "World",
+      "ORDER BY with LIMIT"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "ORDER BY with LIMIT refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-72",
+    "question": "Write a PHP class SafeQuery that automatically binds all named parameters ______n associative array and logs the query for debugging.",
+    "options": [
+      "Limit",
+      "(alias for utf8mb3) instead of",
+      "from a",
+      "Using"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "from a refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-73",
+    "question": "Select only name and salary from employees______ salary as Income.",
+    "options": [
+      "Syntax",
+      "NULLS FIRST / LAST",
+      "without wildcards (use",
+      ", renaming"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": ", renaming refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-74",
+    "question": "Use INSERT IGNORE ______ customers table and observe how many rows were affected.",
+    "options": [
+      "Lists",
+      ": Case-insensitive comparison based on Unicode rules\n-",
+      "to insert a duplicate email into the",
+      "Ensures"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "to insert a duplicate email into the refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-75",
+    "question": "Create a procedure that accepts a database name, checks charset via information_schema______ utf8mb4.",
+    "options": [
+      "Diana",
+      "Explanation",
+      ", and prints a warning if the charset is not",
+      "Explanation"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": ", and prints a warning if the charset is not refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-76",
+    "question": "List all databases currently available on the server using ______;.",
+    "options": [
+      "London",
+      "Query",
+      "SHOW DATABASES",
+      "Concepts"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "SHOW DATABASES refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-77",
+    "question": "Add an ENUM column priority ______ projects table with default 'medium'.",
+    "options": [
+      "(DECIMAL(10,2)),",
+      "the rows to delete, then",
+      "('low', 'medium', 'high', 'critical') to the",
+      "Columns"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "('low', 'medium', 'high', 'critical') to the refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-78",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it ______: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred PHP mysqli_insert_id(): Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "NULLS FIRST / LAST",
+      "After",
+      "@@identity",
+      "UNIQUE"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "@@identity refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-79",
+    "question": "Include ENUM ______ DECIMAL for fines, and CHECK constraints where supported.",
+    "options": [
+      "for book status,",
+      "Default",
+      "without wildcards (use",
+      "Write"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "for book status, refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-80",
+    "question": "SET: Changes column values in matching rows ______: Only updates rows that satisfy the condition Updating Multiple Columns: SET col1 = val1, col2 = val2 UPDATE with JOIN: Updates rows in one table based on values in another table UPDATE with Subquery: Uses a subquery to determine the new value LIMIT with UPDATE: Controls how many rows are updated Safe Update Mode: MySQL's sql_safe_updates prevents UPDATE/DELETE without WHERE or LIMIT 💻 Syntax ✅ Example 1 Basic Problem: Give a 10% salary increase to all employees in the Engineering department.",
+    "options": [
+      "each (in MySQL).\n4. **Q**: What is",
+      "UPDATE with WHERE",
+      "**Explanation**: The first query relies on",
+      "Isolation"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "UPDATE with WHERE refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-81",
+    "question": "Because email ______ UPDATE clause — visits increments from 1 to 2.",
+    "options": [
+      "Query",
+      "SQL Injection Prevention",
+      "Named",
+      "is UNIQUE, the duplicate key triggers the"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "is UNIQUE, the duplicate key triggers the refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-82",
+    "question": "⚠ ______ / Mistakes Forgetting WHERE — accidentally updating all rows Using WHERE with wrong condition — updating unintended rows Updating a column used in the WHERE clause (e.g., UPDATE t SET id = id + 1 WHERE id = 5) Not testing with SELECT first to verify which rows match Updating without considering foreign key constraints 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "Common Errors",
+      "Common",
+      "Multi-row INSERT",
+      "Prepared"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Common Errors refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-83",
+    "question": "Use SHOW DATABASES ______ library appears in the list.",
+    "options": [
+      "— inconsistent results\n- Confusing",
+      "Select",
+      "and confirm",
+      "Tables"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "and confirm refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-84",
+    "question": "🧠 Key Concepts LAST_INSERT_ID(): Session-scoped function returning the first auto-generated ID from the last INSERT Session Isolation: LAST_INSERT_ID() is per-connection — concurrent inserts by other users do not affect it @@identity: A session variable in some SQL databases; MySQL supports it but LAST_INSERT_ID() is preferred ______: Returns last ID from MySQLi procedural/OOP connection PDO lastInsertId(): Returns last ID from PDO connection Multiple Rows: LAST_INSERT_ID() returns the first ID generated; subsequent IDs are sequential 💻 Syntax ✅ Example 1 Basic Problem: Insert a new customer, retrieve the new ID, and use it to create a related order.",
+    "options": [
+      "PHP mysqli_insert_id()",
+      "Create",
+      "Real",
+      "affect"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "PHP mysqli_insert_id() refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-85",
+    "question": "Create two databases — one with latin1 ______ utf8mb4.",
+    "options": [
+      "Compare",
+      "and one with",
+      "Query",
+      "They"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "and one with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-86",
+    "question": "Use TRUNCATE ______ temp_log table.",
+    "options": [
+      "Forgetting",
+      "What",
+      "to remove all rows from a temporary",
+      "without"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "to remove all rows from a temporary refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-87",
+    "question": "🧠 Key Concepts Data Types: INT (integer), VARCHAR (variable string), TEXT (large text), DECIMAL (exact decimal), DATE, DATETIME, BOOLEAN (TINYINT(1)) NOT NULL: Column must have a value DEFAULT: Default value if none provided AUTO_INCREMENT: Automatically generates sequential integers PRIMARY KEY: Uniquely identifies each row UNIQUE: Ensures all values in a column are distinct SHOW TABLES: Lists all tables in the current database DESC / EXPLAIN table: Shows table structure 💻 Syntax ✅ Example 1 Basic Problem: Create a students ______ id, name, email, age, and enrollment date.",
+    "options": [
+      ", and a composite",
+      "table with",
+      "Electronics",
+      "Syntax"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "table with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-88",
+    "question": "LIKE ______ BETWEEN checks price range, IN filters categories, and IS NOT NULL ensures stock data exists.",
+    "options": [
+      "matches partial names,",
+      "Relational Database",
+      "Case",
+      "What"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "matches partial names, refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-89",
+    "question": "It supports comparison operators, logical operators, pattern matching with LIKE______ BETWEEN, set membership with IN, and NULL checking with IS NULL.",
+    "options": [
+      "Introduction",
+      "is 0.\n3. Use",
+      "Logical",
+      ", range checks with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": ", range checks with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-90",
+    "question": "InnoDB is the default with full ACID compliance, foreign key support, and crash recovery.",
+    "options": [
+      "Only",
+      "ACID Compliance",
+      "Insert",
+      "Data"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "ACID Compliance refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-91",
+    "question": "🚀 Example 2 Intermediate Problem: Create an orders table with foreign key referencing customers______ UNIQUE constraint.",
+    "options": [
+      ", and a composite",
+      "Case",
+      "to identify the default storage engine.\n6. Query",
+      "Transaction"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", and a composite refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-92",
+    "question": "Include ENUM for book status, DECIMAL ______ CHECK constraints where supported.",
+    "options": [
+      "Execute",
+      "Example",
+      "column\n- Violating",
+      "for fines, and"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "for fines, and refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-93",
+    "question": "LIMIT is also useful with ORDER BY ______ UPDATE and DELETE for batch processing.",
+    "options": [
+      "Basic",
+      "for top-N queries and can be applied to",
+      "Query",
+      "Corporation"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "for top-N queries and can be applied to refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-94",
+    "question": "⚠ Common Errors / Mistakes Using = NULL or != NULL instead of ______ Forgetting parentheses when mixing AND and OR — produces wrong logic Using LIKE without wildcards (use = instead for exact match) Comparing strings case-sensitively when collation is _ci (case-insensitive) Using BETWEEN for dates with time components — BETWEEN '2026-01-01' AND '2026-01-31' excludes 2026-01-31 12:00:00 📝 Practice Exercises Beginner 1.",
+    "options": [
+      "IS NULL / IS NOT NULL",
+      "has a",
+      "Inserting",
+      "to remove all rows from a temporary"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "IS NULL / IS NOT NULL refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-95",
+    "question": "A: A table can have only one PRIMARY KEY ______ NOT NULL and unique).",
+    "options": [
+      "**Explanation**: The database was created with",
+      "(which is implicitly",
+      "Practice",
+      "Problem"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "(which is implicitly refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-96",
+    "question": "Write an UPDATE with a JOIN to set customers.total_spent ______ orders table).",
+    "options": [
+      "Real",
+      "to the sum of their orders (aggregate from",
+      "Create",
+      "Exercises"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "to the sum of their orders (aggregate from refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-97",
+    "question": "______ :name named placeholders?",
+    "options": [
+      ". After page 10, the app switches to keyset pagination (",
+      "Errors",
+      "Example",
+      "positional and"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "positional and refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-98",
+    "question": "Q: How does LIMIT ______ UPDATE?",
+    "options": [
+      "NULL Handling",
+      "Case",
+      "Intermediate",
+      "interact with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "interact with refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-99",
+    "question": "🧠 Key Concepts Relational Database: Data organized into tables with relationships defined via foreign keys SQL: Standard language for querying and managing relational databases ACID Compliance: Atomicity, Consistency, Isolation, Durability ______: MySQL server manages data; clients connect to query Storage Engines: InnoDB (default), MyISAM, Memory, etc.",
+    "options": [
+      "Client-Server Model",
+      "prevents UPDATE/DELETE without WHERE or LIMIT\n\n## 💻 Syntax",
+      "(defaults to 18) and",
+      "Mistakes"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Client-Server Model refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "mysql-100",
+    "question": "A: It ______ you use LAST_INSERT_ID(expr) in the UPDATE clause.",
+    "options": [
+      ". Pagination with",
+      "This",
+      ".\n3. After an INSERT, run",
+      "returns 0 unless"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "returns 0 unless refers to the concept described in the context of mysql."
+  },
+  {
+    "id": "django-1",
+    "question": "django-admin startproject myblog creates a myblog/ ______ manage.py and an inner myblog/ package with settings files.",
+    "options": [
+      "(WSGI server entry),",
+      "Build",
+      "directory containing",
+      "**Output/Description:** Three tables are created:"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "directory containing refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-2",
+    "question": "______: Forgetting to exclude password hashes, API keys, or internal fields from serializers.",
+    "options": [
+      "runs on views returning",
+      "Exposing sensitive fields",
+      "Beginner",
+      "or add more constraints.\n- **Not handling"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Exposing sensitive fields refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-3",
+    "question": "m2m_changed ______",
+    "options": [
+      "creates a",
+      "Forms",
+      "Q2: Why is it important to keep SECRET_KEY secret?",
+      "on Product.categories updates search indexes."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "on Product.categories updates search indexes. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-4",
+    "question": "Create an AuditLog ______ action (created/updated/deleted), model_name, object_id, changed_fields (JSON), and timestamp.",
+    "options": [
+      "model that records",
+      "Q2: What does \"batteries-included\" mean in Django?",
+      "Case",
+      "is always unique and not null.\n- **Setting"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "model that records refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-5",
+    "question": "⚠ Common Errors / Mistakes Forgetting the trailing slash: Django's APPEND_SLASH ______ /blog to /blog/.",
+    "options": [
+      "Django",
+      "Form",
+      "Django",
+      "setting (default True) redirects"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "setting (default True) redirects refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-6",
+    "question": "For ModelForms, ______ in the model automatically handle this.",
+    "options": [
+      "Practice",
+      "Discuss",
+      "FileField/ImageField",
+      "Django"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "FileField/ImageField refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-7",
+    "question": "Register each and verify that python manage.py ______ lists all three after adding a model to each.",
+    "options": [
+      "Cart",
+      "Real",
+      "showmigrations",
+      "Authentication"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "showmigrations refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-8",
+    "question": "______: Use the string form 'app.Model' for ForeignKeys to models in other apps or self-referencing.",
+    "options": [
+      "What",
+      "Django",
+      "Circular import with ForeignKey strings",
+      "Base"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Circular import with ForeignKey strings refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-9",
+    "question": "______: {comment #} — not rendered in output.",
+    "options": [
+      "True",
+      "DTL Comments",
+      "Case",
+      "Template"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "DTL Comments refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-10",
+    "question": "⚠ Common Errors / Mistakes ______: Extremely difficult to migrate.",
+    "options": [
+      "Adding a custom user model after migrations run",
+      "pip install django",
+      "Missing",
+      "Concepts"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Adding a custom user model after migrations run refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-11",
+    "question": "ModelAdmin methods like has_add_permission(), has_change_permission(), has_delete_permission(), and has_view_permission() ______ request.user.",
+    "options": [
+      "None",
+      "Implement",
+      "can be overridden to implement custom access logic based on",
+      "Storage"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "can be overridden to implement custom access logic based on refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-12",
+    "question": "@login_required ______",
+    "options": [
+      "Create",
+      "protects dashboard views.",
+      "Code",
+      "Book"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "protects dashboard views. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-13",
+    "question": "Create a Category model with a ForeignKey to Book ______ TabularInline on the Book admin so editors can add categories inline.",
+    "options": [
+      "(subscriptions), and",
+      "and add a",
+      "Modify",
+      "Development Serving"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "and add a refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-14",
+    "question": "Q Objects: Complex queries with OR (|), AND (&______~) logic combinations.",
+    "options": [
+      ".\n\n## 💻 Syntax",
+      "), and NOT (",
+      "(HTTPS redirect),",
+      "Template"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "), and NOT ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-15",
+    "question": "Write a custom management command (python manage.py check_settings______ settings.py and reports security issues (DEBUG=True, hardcoded SECRET_KEY, empty ALLOWED_HOSTS, SQLite in production).",
+    "options": [
+      ") that reads",
+      "Django",
+      "Options",
+      "Python"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ") that reads refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-16",
+    "question": "Build a multi-factor authentication system: after password login, users must enter a TOTP code ______ an authenticator app (use django-otp or implement RFC 6238).",
+    "options": [
+      "Setup",
+      "Django",
+      "from",
+      "showmigrations"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "from refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-17",
+    "question": "Explanation: ModelViewSet provides ______ create, retrieve, update, partial_update, and destroy actions automatically.",
+    "options": [
+      "Python",
+      "Loan",
+      "Code:",
+      "list,"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "list, refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-18",
+    "question": "Resolve by: (1) run makemigrations --merge to create a merge migration that depends on both conflicting migrations, or (2) manually edit migration dependencies to create a linear chain.",
+    "options": [
+      "Python",
+      "when multiple objects exist**: Raises",
+      "Migration Dependencies",
+      "Problem:"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Migration Dependencies refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-19",
+    "question": "Create a HeaderInjectMiddleware ______ X-Server: Django header to every response.",
+    "options": [
+      "that adds a custom",
+      "Write",
+      "Article",
+      "World"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "that adds a custom refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-20",
+    "question": "Code: Output/Description: This model creates a database table myapp_book ______ id (auto-generated primary key), title (varchar 200), author (varchar 100), price (decimal 6,2), published_date (date).",
+    "options": [
+      "What",
+      ". Article pages extend",
+      "Filesystem",
+      "with columns:"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "with columns: refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-21",
+    "question": "A: ______ is the URL prefix for static files (e.g., /static/).",
+    "options": [
+      "Relationship Fields",
+      "STATIC_URL",
+      "Chart",
+      "can be overridden to implement custom access logic based on"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "STATIC_URL refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-22",
+    "question": "A: null=True allows the database column to store NULL ______",
+    "options": [
+      "Software",
+      "Meta",
+      "values (database-level).",
+      "Custom"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "values (database-level). refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-23",
+    "question": "Q2: What is the difference between login() and ______ in Django?",
+    "options": [
+      "Disconnecting",
+      "authenticate()",
+      "File",
+      "Python"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "authenticate() refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-24",
+    "question": "______: Always return proper error responses with field-specific messages.",
+    "options": [
+      "Not handling validation errors properly",
+      "View",
+      "model that records",
+      "Common"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Not handling validation errors properly refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-25",
+    "question": "get() raises Model.DoesNotExist if no match or Model.MultipleObjectsReturned ______",
+    "options": [
+      "Three",
+      "Compare",
+      "if multiple matches.",
+      "Build"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "if multiple matches. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-26",
+    "question": "Built by experienced developers at the Lawrence Journal-World newspaper in 2003–2005 and released publicly under a BSD license in 2005, Django follows the \"batteries-included\" philosophy — providing almost everything developers need out of the box.",
+    "options": [
+      "Django",
+      ", running",
+      "Batteries-Included",
+      "Journal"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Batteries-Included refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-27",
+    "question": "process_template_response(self, request, response) ______ TemplateResponse (not regular HttpResponse), allowing post-processing of template context.",
+    "options": [
+      "Django",
+      "runs on views returning",
+      "Django",
+      "View"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "runs on views returning refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-28",
+    "question": "A: SecurityMiddleware provides security enhancements: (1) HTTP -> HTTPS redirect when SECURE_SSL_REDIRECT ______ X-Content-Type-Options: nosniff header, (3) X-XSS-Protection header, (4) strict transport security (Strict-Transport-Security) header, (5) secure cookies for session/csrf when using HTTPS, (6) referrer policy header.",
+    "options": [
+      "Not calling `get_response` in exception handlers",
+      ".\n\n**Advanced (2):**\n1. Write a custom management command (",
+      "Practice",
+      "is True, (2)"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "is True, (2) refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-29",
+    "question": "A: Define methods on the ModelAdmin and add them to ______.",
+    "options": [
+      "Code",
+      "Assuming",
+      "list_display",
+      "Practice"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "list_display refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-30",
+    "question": "For example, a Person can join multiple Groups, and Membership ______ date_joined and invite_reason for each person-group pair.",
+    "options": [
+      "Question",
+      "Annotations",
+      "Description",
+      "tracks the"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "tracks the refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-31",
+    "question": "Custom permissions check user roles: IsAdminUser for product management, IsOwner ______",
+    "options": [
+      ", etc.) manually.",
+      "With",
+      "Write",
+      "for order access."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "for order access. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-32",
+    "question": "Creating infinite loops: A post_save ______ post_save.",
+    "options": [
+      "Example",
+      "that saves the model again triggers another",
+      "Docker",
+      "method runs for cross-field validation, (3) if all pass,"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "that saves the model again triggers another refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-33",
+    "question": "______: Automatically generated, customizable admin panel from model definitions.",
+    "options": [
+      "Many",
+      "Form",
+      "Admin Interface",
+      "Loading"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Admin Interface refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-34",
+    "question": "Missing LOGIN_URL setting: @login_required ______ /accounts/login/ by default.",
+    "options": [
+      "pip install django",
+      "What",
+      "redirects to",
+      "Introduction"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "redirects to refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-35",
+    "question": "______: Adds filter sidebar for specified fields.",
+    "options": [
+      "Django",
+      "Return",
+      "list_filter",
+      "Signal"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "list_filter refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-36",
+    "question": "DefaultRouter generates URL patterns: /api/books/ (GET/POST), /api/books/{id}/ ______",
+    "options": [
+      "Case",
+      "Django",
+      "(GET/PUT/PATCH/DELETE).",
+      "Post"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(GET/PUT/PATCH/DELETE). refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-37",
+    "question": "A: path() uses Django's built-in path converters (str, int, slug, uuid, path______",
+    "options": [
+      "Intermediate",
+      "model with a self-referencing",
+      "When",
+      ") for simple, readable URL patterns."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": ") for simple, readable URL patterns. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-38",
+    "question": "Add views for listing posts (/blog/______/blog/<int:pk>/), and viewing posts by category (/blog/category/<slug:category>/).",
+    "options": [
+      "Description",
+      "), viewing a single post (",
+      "Code:",
+      "Installing"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "), viewing a single post ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-39",
+    "question": "Create a migration that splits a full_name ______ first_name and last_name fields.",
+    "options": [
+      "field into",
+      "Article",
+      "Creating",
+      "sends branded password reset emails. API tokens (via"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "field into refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-40",
+    "question": "TokenAuthentication ______",
+    "options": [
+      "This",
+      "Documentation",
+      "Interview",
+      "(via JWT) secures user-specific endpoints."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(via JWT) secures user-specific endpoints. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-41",
+    "question": "Explanation: post_save ______ save() method completes.",
+    "options": [
+      "(subscriptions), and",
+      "fires after the model's",
+      ". In production,",
+      "Concepts"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "fires after the model's refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-42",
+    "question": "Install DRF and create a simple API for a Task ______ ModelViewSet and DefaultRouter.",
+    "options": [
+      "model (title, description, completed, created_at) using",
+      "rejects URLs.\n\n**Explanation:**",
+      "allows the database column to store",
+      "Django"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "model (title, description, completed, created_at) using refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-43",
+    "question": "Django provides two form base classes: ______ for custom forms and forms.ModelForm for forms tied to model instances.",
+    "options": [
+      "list, custom clean_<field>), (2)",
+      "forms.Form",
+      "model with a",
+      "Implement"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "forms.Form refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-44",
+    "question": "User Model: Default fields include username, password, email, first_name, last_name, is_staff, is_superuser, is_active, date_joined.",
+    "options": [
+      "(not regular",
+      "foreign key). The",
+      "Superuser",
+      "Users"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Superuser refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-45",
+    "question": "@admin.action ______",
+    "options": [
+      "DTL Comments",
+      "expressions reference model fields in queries.",
+      "creates custom bulk operations with user feedback messages.",
+      "actions automatically."
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "creates custom bulk operations with user feedback messages. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-46",
+    "question": "______: The outer directory is a container; the inner directory (same name as project) is the Python package.",
+    "options": [
+      "Practice",
+      "Confusing the outer and inner project directories",
+      "to the",
+      "model and migrate it to the database.\n\n**Code:**"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Confusing the outer and inner project directories refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-47",
+    "question": "Q3: What is the difference between aggregate() and an______ate()?",
+    "options": [
+      "not",
+      "User",
+      "Foundation",
+      "that checks the request's"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "not refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-48",
+    "question": "MaintenanceModeMiddleware uses request.user ______ AuthenticationMiddleware to have run — so it must be placed after it.",
+    "options": [
+      "Build",
+      "which requires",
+      "Create",
+      "**: Use"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "which requires refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-49",
+    "question": "Question ______ ForeignKey to Quiz with on_delete=models.CASCADE.",
+    "options": [
+      "Mistakes",
+      "Custom",
+      "has",
+      "What"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "has refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-50",
+    "question": "A: CASCADE deletes related objects, PROTECT prevents deletion with a ProtectedError, SET_NULL sets the foreign key to NULL (requires null=True), SET_DEFAULT sets to default value, SET() ______ DO_NOTHING takes no action (may cause database integrity errors), RESTRICT (Django 3.1+) prevents deletion if there are restricted relationships.",
+    "options": [
+      "allows a custom function,",
+      "Django",
+      "Code",
+      "Description"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "allows a custom function, refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-51",
+    "question": "A: SecurityMiddleware provides security enhancements: (1) HTTP -> HTTPS redirect when SECURE_SSL_REDIRECT is True, (2) X-Content-Type-Options: nosniff header, (3) X-XSS-Protection ______Strict-Transport-Security) header, (5) secure cookies for session/csrf when using HTTPS, (6) referrer policy header.",
+    "options": [
+      "Questions",
+      "File",
+      "header, (4) strict transport security (",
+      "Using"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "header, (4) strict transport security ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-52",
+    "question": "A: STATIC_URL ______ /static/).",
+    "options": [
+      "returns a QuerySet;",
+      "is the URL prefix for static files (e.g.,",
+      "What",
+      "Questions"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "is the URL prefix for static files (e.g., refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-53",
+    "question": "Django provides two form base classes: forms.Form ______ forms.ModelForm for forms tied to model instances.",
+    "options": [
+      "for custom forms and",
+      "(unique),",
+      "Both",
+      "Django"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "for custom forms and refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-54",
+    "question": "______: {{ variable }} — outputs the value.",
+    "options": [
+      "Perform",
+      "DTL Variables",
+      "Type",
+      "Forgetting"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "DTL Variables refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-55",
+    "question": "Project Structure: Django generates a package with settings.py ______ urls.py (URL declarations), wsgi.py (WSGI server entry), asgi.py (ASGI server entry), and manage.py.",
+    "options": [
+      "(configuration),",
+      "Both",
+      "Logging",
+      "Object"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "(configuration), refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-56",
+    "question": "Q5: Can middleware return a response ______ get_response?",
+    "options": [
+      "Exercises",
+      "without calling",
+      "ModelViewSet",
+      "Model"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "without calling refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-57",
+    "question": "A: path() ______str, int, slug, uuid, path) for simple, readable URL patterns.",
+    "options": [
+      "uses Django's built-in path converters (",
+      "Server",
+      "**Output/Description:** Every time a new User is saved with",
+      "Problem:"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "uses Django's built-in path converters ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-58",
+    "question": "______: Using fields = '__all__' may expose sensitive fields.",
+    "options": [
+      "(nginx) or",
+      "Objects",
+      "to match your login URL.\n- **Not using",
+      "Exposing all model fields in Meta.fields"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Exposing all model fields in Meta.fields refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-59",
+    "question": "A: SecurityMiddleware provides security enhancements: (1) HTTP -> HTTPS redirect when SECURE_SSL_REDIRECT is True, (2) X-Content-Type-Options: nosniff ______ X-XSS-Protection header, (4) strict transport security (Strict-Transport-Security) header, (5) secure cookies for session/csrf when using HTTPS, (6) referrer policy header.",
+    "options": [
+      "(HTTPS redirect),",
+      "Research",
+      "Explanation",
+      "header, (3)"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "header, (3) refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-60",
+    "question": "Combine with & ______ ~ for NOT.",
+    "options": [
+      "Beginner",
+      "for AND and",
+      "model has the additional",
+      "(not regular"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "for AND and refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-61",
+    "question": "SECRET_KEY ______",
+    "options": [
+      "Practice",
+      "is stored in the deployment platform's secrets manager.",
+      "Groups",
+      "Model"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "is stored in the deployment platform's secrets manager. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-62",
+    "question": "______: Django provides signals for model lifecycle: pre_save, post_save, pre_delete, post_delete, m2m_changed, class_prepared, and request signals: request_started, request_finished, got_request_exception.",
+    "options": [
+      "Profile",
+      "Built-in Signals",
+      "Decorator",
+      "returns an unsaved instance — you must eventually call"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Built-in Signals refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-63",
+    "question": "🚀 Example 2 Intermediate: Understanding settings.py in Depth Problem: Analyze and configure multiple settings in settings.py ______ ecommerce.",
+    "options": [
+      "Installing Django globally without a virtual environment",
+      "Migrations",
+      "Forgetting to `{% load %}` custom tags",
+      "for a project named"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "for a project named refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-64",
+    "question": "CustomPagination ______",
+    "options": [
+      "for date-organized storage. A",
+      "returns page metadata alongside results.",
+      "Problem",
+      "Code"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "returns page metadata alongside results. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-65",
+    "question": "Customize via the widget ______ widgets dict in ModelForm.Meta.",
+    "options": [
+      ". Article pages extend",
+      "Example",
+      "with multiple nested URL namespaces:",
+      "argument in field definition or the"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "argument in field definition or the refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-66",
+    "question": "Common options: ordering (default ordering for queries), verbose_name/verbose_name_plural (human-readable names), db_table ______ unique_together/constraints (composite constraints), indexes (custom indexes), abstract (makes model abstract), permissions (custom permissions).",
+    "options": [
+      "Book",
+      "Static",
+      "Code",
+      "(custom table name),"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(custom table name), refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-67",
+    "question": "Explanation: @action(detail=True) ______ /api/books/{pk}/action_name/.",
+    "options": [
+      "). Use",
+      "Single",
+      "creates custom endpoints under",
+      "Authentication"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "creates custom endpoints under refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-68",
+    "question": "______: When True, shows detailed error pages with stack traces.",
+    "options": [
+      "Implement",
+      "DEBUG Mode",
+      "Django",
+      "This"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "DEBUG Mode refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-69",
+    "question": "get() raises Model.DoesNotExist ______ Model.MultipleObjectsReturned if multiple matches.",
+    "options": [
+      "if no match or",
+      "Load",
+      "Actions",
+      "Django"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "if no match or refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-70",
+    "question": "______: A serializer with nested serializers triggers a query per parent.",
+    "options": [
+      "Explanation",
+      "Example",
+      "Python",
+      "Ignoring N+1 queries in serializer relations"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Ignoring N+1 queries in serializer relations refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-71",
+    "question": "A: null=True ______ NULL values (database-level).",
+    "options": [
+      "Django",
+      "True",
+      "dict with",
+      "allows the database column to store"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "allows the database column to store refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-72",
+    "question": "Create a Product model with name, description (TextField), price (DecimalField), quantity_in_stock ______ available (BooleanField default True).",
+    "options": [
+      "(IntegerField with default 0), and",
+      "Built",
+      "Django",
+      "(UUID), and"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "(IntegerField with default 0), and refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-73",
+    "question": "Customize via the widget argument in field definition or the widgets dict in ModelForm.Meta.",
+    "options": [
+      "Built",
+      "Widgets",
+      "Django",
+      "Passing"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Widgets refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-74",
+    "question": "Use update() ______if not kwargs.get('raw')).",
+    "options": [
+      "Build",
+      "Decorators",
+      "Implement",
+      "or guards ("
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "or guards ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-75",
+    "question": "prepopulated_fields ______",
+    "options": [
+      "Based",
+      "auto-fills slug from title.",
+      "Django",
+      "objects combine OR conditions."
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "auto-fills slug from title. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-76",
+    "question": "⚠ Common Errors / Mistakes ______: Placing AuthenticationMiddleware before SessionMiddleware causes errors since session data isn't available yet.",
+    "options": [
+      "Q4: How does Django's ORM help prevent SQL injection?",
+      "Wrong middleware order",
+      "True",
+      "Django"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Wrong middleware order refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-77",
+    "question": "Register each and verify that python ______ showmigrations lists all three after adding a model to each.",
+    "options": [
+      "Django",
+      "Wrong order of URL patterns",
+      "Parameters",
+      "manage.py"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "manage.py refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-78",
+    "question": "{% block %} ______",
+    "options": [
+      "Cloud",
+      "tags in the child replace matching blocks in the parent.",
+      "Django",
+      "Django"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "tags in the child replace matching blocks in the parent. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-79",
+    "question": "💻 Syntax ✅ Example 1 Basic: Creating and Registering a Blog App Problem: Create a blog ______ myblog and register it in INSTALLED_APPS.",
+    "options": [
+      "app within a project called",
+      "operator:",
+      "Project",
+      "Middleware"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "app within a project called refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-80",
+    "question": "Build a URL router system that uses include() ______ shop/ → includes products/ URLs, products/ → includes reviews/ URLs.",
+    "options": [
+      "model, run",
+      "with multiple nested URL namespaces:",
+      "Django",
+      "fails silently.\n- **Missing"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "with multiple nested URL namespaces: refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-81",
+    "question": "______: admin.site.register(Model) adds a model to the admin interface.",
+    "options": [
+      "Model Registration",
+      "Django",
+      "Base",
+      "Project"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Model Registration refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-82",
+    "question": "process_exception(self, request, exception) ______",
+    "options": [
+      "False",
+      "Then",
+      "runs when a view raises an exception.",
+      "Exercises"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "runs when a view raises an exception. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-83",
+    "question": "A: {{ block.super }} ______ {% block %}, allowing you to append to the parent's content rather than completely overriding it.",
+    "options": [
+      "Django",
+      "Django",
+      "includes the parent block's content within a child's",
+      "and"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "includes the parent block's content within a child's refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-84",
+    "question": "The {% static %} ______ STATIC_URL.",
+    "options": [
+      "Groups",
+      "template tag generates the correct URL by prefixing",
+      ". Optionally",
+      "Signals"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "template tag generates the correct URL by prefixing refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-85",
+    "question": "Code: Output/Description: Explanation: pip install django ______",
+    "options": [
+      "Code",
+      ".\n\n**Code:**",
+      "downloads and installs the latest Django version from PyPI.",
+      "Code"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "downloads and installs the latest Django version from PyPI. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-86",
+    "question": "DefaultRouter ______ /api/books/ (GET/POST), /api/books/{id}/ (GET/PUT/PATCH/DELETE).",
+    "options": [
+      "Django",
+      "Register",
+      "Options",
+      "generates URL patterns:"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "generates URL patterns: refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-87",
+    "question": "date_hierarchy ______",
+    "options": [
+      "Captured",
+      "What",
+      "adds a date-based drill-down navigation.",
+      "model (ForeignKey to Product). Use"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "adds a date-based drill-down navigation. refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-88",
+    "question": "______: Returning all records without pagination causes performance issues and slow responses.",
+    "options": [
+      "Django",
+      "Missing pagination",
+      "Category",
+      "is populated with Python types; if any fail,"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Missing pagination refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-89",
+    "question": "A: When is_valid() is called: (1) field-specific validation runs (built-in validators, validators ______ clean() method runs for cross-field validation, (3) if all pass, cleaned_data is populated with Python types; if any fail, errors dict is populated.",
+    "options": [
+      "Practice",
+      "Confusing",
+      "Create",
+      "list, custom clean_<field>), (2)"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "list, custom clean_<field>), (2) refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-90",
+    "question": "⚠ Common Errors / Mistakes ______: DTL uses {% endif %} not {% end if %}, {% empty %} not {% else %}, and .",
+    "options": [
+      "object and must return an",
+      "Using Python syntax in templates",
+      "list,",
+      "Forgetting"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Using Python syntax in templates refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-91",
+    "question": "Q3: What is the difference between aggregate() ______nnotate()?",
+    "options": [
+      "first.\n- **Forgetting to run",
+      "and a",
+      "ModelAdmin",
+      "Exercises"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "and a refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-92",
+    "question": "Add a published_date ______ Book model, run makemigrations, and note the auto-generated migration file contents.",
+    "options": [
+      "Concepts",
+      "Python",
+      "field to the",
+      "Not using `db_index` on frequently queried fields"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "field to the refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-93",
+    "question": "A: Django's template engine auto-es______ HTML special characters (<, >, &, \", ') in all variable output unless the variable is marked with the safe filter or {% autoescape off %} block.",
+    "options": [
+      "— maps URLs to view functions\n-",
+      "Missing context keys",
+      ". Set",
+      "calls"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "calls refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-94",
+    "question": "______: Don't Repeat Yourself — Django encourages reusable apps, template inheritance, and code reuse.",
+    "options": [
+      "DRY Principle",
+      "Home",
+      "Widgets",
+      "operator:"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "DRY Principle refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-95",
+    "question": "Journalists (______ staff status) log in to write articles using a customized admin ______ TinyMCE or CKEditor widget for rich text.",
+    "options": [
+      "Examine",
+      "Widget",
+      "Model",
+      "with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "with refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-96",
+    "question": "Each response should include links ______ self, next, prev, and action URLs.",
+    "options": [
+      "Concepts",
+      "dict with",
+      "Each",
+      "Django"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "dict with refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-97",
+    "question": "A: @login_required ______request.user.is_authenticated).",
+    "options": [
+      ".\n\n**Advanced (2):**\n1. Write a custom management command (",
+      "Django",
+      "Example",
+      "checks if the user is authenticated ("
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "checks if the user is authenticated ( refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-98",
+    "question": "Calling form.save(commit=False) without calling save(): commit=False ______ save().",
+    "options": [
+      "Base",
+      "Adds",
+      "Lookups",
+      "returns an unsaved instance — you must eventually call"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "returns an unsaved instance — you must eventually call refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-99",
+    "question": "It provides action (pre_add, post_add, pre_remove, post_remove, pre_clear, post_clear), pk_set ______ reverse (whether the reverse relation is being modified).",
+    "options": [
+      "World",
+      "Optionally",
+      "Syntax",
+      "(primary keys being added/removed), and"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(primary keys being added/removed), and refers to the concept described in the context of django."
+  },
+  {
+    "id": "django-100",
+    "question": "The related_name ______ author.books.all() and book.reviews.all().",
+    "options": [
+      "in ForeignKey fields enables reverse queries:",
+      "Framework",
+      "Alice",
+      "Syntax"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "in ForeignKey fields enables reverse queries: refers to the concept described in the context of django."
+  },
+  {
+    "id": "numpy-1",
+    "question": "For a 1D array it returns 1______ 2, etc.",
+    "options": [
+      ", for a 2D array",
+      "Using `shuffle` on a multi-dimensional array",
+      "Example",
+      "Splitting arrays"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", for a 2D array refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-2",
+    "question": "______: complex64 (two float32), complex128 (two float64).",
+    "options": [
+      "Complex types",
+      "Exploring",
+      "What does `arr.itemsize` return?",
+      "Forgetting that slicing returns a view"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Complex types refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-3",
+    "question": "______ — NumPy applies type promotion rules (e.g., int + float → float) which may not be expected.",
+    "options": [
+      "Initialization",
+      "Common",
+      "Mixing dtypes in operations",
+      "Introduction"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Mixing dtypes in operations refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-4",
+    "question": "Float types: float16 ______ float32 (single), float64 (double, default).",
+    "options": [
+      "**: Returns a **shuffled copy** (or permuted indices).\n- **",
+      "Errors",
+      "(half),",
+      "These"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(half), refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-5",
+    "question": "Endianness: < (little-endian) or > ______ >f8 for big-endian float64.",
+    "options": [
+      "Real",
+      "Exercises",
+      "(big-endian) prefix, e.g.,",
+      "Common"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(big-endian) prefix, e.g., refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-6",
+    "question": "Split np.arange(100) ______ np.split.",
+    "options": [
+      "From",
+      "into 10 equal parts using",
+      "Syntax",
+      "**Explanation:** Each array's shape grows in dimensions."
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "into 10 equal parts using refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-7",
+    "question": "______ Explanation: Boolean indexing evaluates the condition element-wise and returns a 1D array of matching values.",
+    "options": [
+      "Singular",
+      "Global",
+      "Forgetting",
+      "Output:"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Output: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-8",
+    "question": "______: np.nansum(), np.nanmean(), np.nanstd() etc.",
+    "options": [
+      "Using",
+      "NaN-safe versions",
+      "What does `np.squeeze()` do?",
+      "and verify"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "NaN-safe versions refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-9",
+    "question": "Write a script to compare execution time of sum() ______ np.sum() on the equivalent NumPy array.",
+    "options": [
+      "Axis",
+      "on a Python list of 100,000 integers vs",
+      "returns a **view**. Changing",
+      "Machine"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "on a Python list of 100,000 integers vs refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-10",
+    "question": "🏢 Real World Use Case ______ A batch of 64 RGB images of size 32×32 arrives as shape (64, 32, 32, 3).",
+    "options": [
+      "behave differently for >2D (stacked matrices).\n\n2. **Why is",
+      "Computes",
+      "Deep Learning Batch Processing:",
+      "Creating"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Deep Learning Batch Processing: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-11",
+    "question": "First is int64 ______ float64 (inferred from Python floats).",
+    "options": [
+      ". Using",
+      "for big-endian float64.\n\n## 💻 Syntax",
+      "(inferred from Python ints), second is",
+      "Celsius"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(inferred from Python ints), second is refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-12",
+    "question": "Call np.random.seed(seed) before generating random numbers, or use the modern API: rng = np.random.default_rng(42).",
+    "options": [
+      "From",
+      "Example",
+      "Modern API",
+      "accepts nested lists to create a 2D array."
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Modern API refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-13",
+    "question": "Beyond standard Python indexing, NumPy supports boolean indexing, fancy indexing with integer arrays, and np.where() for conditional selection.",
+    "options": [
+      ". To feed into a fully connected layer, it's flattened to",
+      "Introduction",
+      "Fancy Indexing",
+      "** on arrays —"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Fancy Indexing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-14",
+    "question": "______: normal(), uniform(), binomial(), poisson(), exponential(), beta(), gamma().",
+    "options": [
+      "Demonstration",
+      "Confusing",
+      "on a Python list of 100,000 integers vs",
+      "Distributions"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Distributions refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-15",
+    "question": "🧠 Key Concepts ______: arr[2:5] — elements from index 2 to 4.",
+    "options": [
+      "— elements from index 2 to 4.\n- **2D Slicing**:",
+      "Introduction",
+      "Linear",
+      "1D Slicing"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "1D Slicing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-16",
+    "question": "______: arr.dtype attribute (returns a numpy.dtype object).",
+    "options": [
+      ".\n- **Modifying a",
+      "Product",
+      "How do you install NumPy?",
+      "Checking dtype"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Checking dtype refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-17",
+    "question": "______: You can chain .reshape() on a slice.",
+    "options": [
+      "Beginner:",
+      "Reshaping after slicing",
+      "Example",
+      "Solving `Ax = b` with `inv(A) @ b` instead of `solve(A, b)`"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Reshaping after slicing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-18",
+    "question": "______ for very large or very small numbers.",
+    "options": [
+      "Assuming",
+      "Losing precision when converting float64 → float32",
+      "Using",
+      "Beginner"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Losing precision when converting float64 → float32 refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-19",
+    "question": "*Using  for matrix multiplication—  is element-wise multiplication______ matrix multiplication.",
+    "options": [
+      ".\n2. Compute the determinant of",
+      "Explanation",
+      "Default",
+      ", not"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": ", not refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-20",
+    "question": "______: bool, object, str_, bytes_.",
+    "options": [
+      "Other types",
+      "Intermediate",
+      "Given",
+      "**: Reverses or permutes axes.\n- **"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Other types refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-21",
+    "question": "np.random.shuffle(arr) shuffles the array ______ and returns None.",
+    "options": [
+      "**: Random integers in [low, high).\n- **",
+      "Initialization",
+      ".\n3. Create a 2D array of shape",
+      "in-place"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "in-place refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-22",
+    "question": "Changing view_slice[0] ______ original[1].",
+    "options": [
+      "— rows 0–1, columns 1–2.\n- **Step Slicing**:",
+      "before generating random numbers, or use the modern API:",
+      "alters",
+      "attribute (returns a"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "alters refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-23",
+    "question": "| Feature | Python List | NumPy ndarray | |---|---|---| | Homogeneity | Can mix types | Single dtype | | Memory | Fragmented, larger | Contiguous, compact | | Speed | Slow (Python loops) | Fast (C + vectorization) | | Math ops | Element-wise requires loops | Element-wise by default | 💻 Syntax ✅ Example 1 Basic: Creating and Inspecting a 1D Array ______ Create a 1D NumPy array from [10, 20, 30, 40, 50] and display its attributes.",
+    "options": [
+      "down",
+      "Problem:",
+      ", not",
+      "**: Returns a **copy** of the array collapsed to 1D.\n- **"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Problem: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-24",
+    "question": "🏢 Real World Use Case ______ A computer vision pipeline loads an image as a uint8 array (0–255).",
+    "options": [
+      "Fast",
+      "Problem:",
+      "Intermediate",
+      "Image Brightness and Contrast Adjustment:"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Image Brightness and Contrast Adjustment: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-25",
+    "question": "______ — they have fixed size; use np.append() or np.resize() carefully.",
+    "options": [
+      "Verify",
+      "`np.split` raises an error for uneven splits",
+      "Always",
+      "Assuming NumPy arrays are resizeable like lists"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Assuming NumPy arrays are resizeable like lists refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-26",
+    "question": "______: Every ndarray has shape, dtype, size, ndim, itemsize, and nbytes.",
+    "options": [
+      "Dtypes",
+      "Statistical",
+      "Array Attributes",
+      "Compute"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Array Attributes refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-27",
+    "question": "Call np.random.seed(seed) ______ rng = np.random.default_rng(42).",
+    "options": [
+      "before generating random numbers, or use the modern API:",
+      ", compute",
+      "Math",
+      "Python"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "before generating random numbers, or use the modern API: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-28",
+    "question": ".size ______ .nbytes is the total memory consumed (size  itemsize).",
+    "options": [
+      "Difference between `arr.size` and `arr.nbytes`?",
+      "Joining arrays",
+      "joins arrays horizontally (along columns). The",
+      "is the total number of elements;"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "is the total number of elements; refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-29",
+    "question": "np.where(condition, x, y) returns elements from x ______ y.",
+    "options": [
+      "True",
+      "where True, else from",
+      "When",
+      "Random"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "where True, else from refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-30",
+    "question": "______: axis=0 operates column-wise (along rows), axis=1 operates row-wise (along columns).",
+    "options": [
+      "Axis parameter",
+      "Basic",
+      "Installation",
+      "From"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Axis parameter refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-31",
+    "question": "np.arange() ______ range), while np.linspace() creates a specified number of evenly spaced values over an interval.",
+    "options": [
+      "How do you ensure reproducible random arrays?",
+      "Errors",
+      "creates values with a given step size (like",
+      "Python"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "creates values with a given step size (like refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-32",
+    "question": "Endianness: < ______ > (big-endian) prefix, e.g., >f8 for big-endian float64.",
+    "options": [
+      "What",
+      "with two source arrays (",
+      "(little-endian) or",
+      "Generate"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "(little-endian) or refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-33",
+    "question": "Explain vectorization in NumPy.",
+    "options": [
+      "Seed",
+      "What is the ndarray object?",
+      ", and dimension manipulation with",
+      "Vectorization"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Vectorization refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-34",
+    "question": "📝 Practice Exercises ______ 1.",
+    "options": [
+      "Assuming",
+      "Explanation",
+      "Beginner:",
+      "Identity"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Beginner: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-35",
+    "question": "Checking dtype: arr.dtype ______ numpy.dtype object).",
+    "options": [
+      "Convention",
+      "attribute (returns a",
+      "** — slower and less numerically stable.\n- **Assuming",
+      "Create"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "attribute (returns a refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-36",
+    "question": "This is a community convention followed in virtually all production code and documentation.",
+    "options": [
+      "Specified",
+      "World",
+      "Step Slicing",
+      "Documentation"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Documentation refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-37",
+    "question": "Why is np.linalg.solve ______ np.linalg.inv for solving linear equations?",
+    "options": [
+      "Portfolio",
+      "preferred over",
+      "How do you add an extra dimension to a 1D array?",
+      "Element"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "preferred over refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-38",
+    "question": "U (left singular vectors) and Vh ______",
+    "options": [
+      "Write",
+      "2\nprint(\"Squared:\", squared)\n```",
+      "module**: Legacy random functions (still widely used).\n- **",
+      "(right singular vectors transposed) are orthogonal."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(right singular vectors transposed) are orthogonal. refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-39",
+    "question": "Output: Explanation: np.__version__ confirms installation.",
+    "options": [
+      "returns elements from",
+      "Using",
+      "Installation",
+      "Split"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Installation refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-40",
+    "question": "np.linalg.eig(a): Eigenvalues and eigenvectors of a square matrix ______ (eigenvalues, eigenvectors)).",
+    "options": [
+      "What",
+      "Complex types",
+      "Why is NumPy faster than Python lists?",
+      "(returns"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(returns refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-41",
+    "question": "🚀 Example 2 Intermediate: Array Initialization Comparison Problem: Compare np.zeros, np.ones, np.full, and np.empty ______ (3, 4).",
+    "options": [
+      "Data",
+      "by creating arrays of shape",
+      "Generate",
+      "Syntax"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "by creating arrays of shape refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-42",
+    "question": "Operations like color normalization, thresholding, and convolution are applied ______ vectorized NumPy functions, processing millions of pixels in milliseconds — impossible with pure Python loops at real-time frame rates.",
+    "options": [
+      "via",
+      "Problem",
+      "— comma-separated indices.\n- **Negative Indexing**:",
+      "Practice"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "via refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-43",
+    "question": "Use np.where() ______x and y) to create a new array that takes values from x where a condition is True and from y otherwise (vectorized conditional).",
+    "options": [
+      "with two source arrays (",
+      "Case",
+      "Joining",
+      "Array"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "with two source arrays ( refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-44",
+    "question": "______: np.diff() — computes discrete differences along a given axis.",
+    "options": [
+      "Using",
+      "Using incorrect index with `np.where`",
+      "Introduction",
+      "Differences"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Differences refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-45",
+    "question": "Use np.array([1, 2, 3], dtype=np.complex128) ______ each element has real and imaginary parts.",
+    "options": [
+      "and verify",
+      "Report",
+      "World",
+      "Eigenvalues"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "and verify refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-46",
+    "question": "______: np.unique() returns sorted unique elements, with optional return_index, return_counts, return_inverse.",
+    "options": [
+      "Create",
+      "and verify",
+      "Unique values",
+      "Carlo"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Unique values refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-47",
+    "question": "Integers → int64, floats → float64______ complex128.",
+    "options": [
+      ", complex →",
+      "Explanation",
+      "Chaining",
+      "Singular"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": ", complex → refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-48",
+    "question": "______: All manipulation functions accept an axis parameter to control along which dimension to operate.",
+    "options": [
+      "Axis control",
+      "and slicing.\n8. Use",
+      "Import",
+      "Introduction"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Axis control refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-49",
+    "question": "______: arr[::2] — every second element.",
+    "options": [
+      "Example",
+      "Example",
+      "Step Slicing",
+      "if singular).\n- **"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Step Slicing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-50",
+    "question": "How does np.array_split ______ np.split?",
+    "options": [
+      "Introduction",
+      "Indexing",
+      "differ from",
+      "Value"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "differ from refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-51",
+    "question": "Write a function to_channels_last(arr) ______ (batch, channels, height, width) to (batch, height, width, channels) using transpose.",
+    "options": [
+      "Operations",
+      "that converts from",
+      "int64\nfloat64\ncomplex128\nbool\n<U1",
+      "What is the difference between `flatten()` and `ravel()`?"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "that converts from refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-52",
+    "question": "💻 Syntax ✅ Example 1 Basic: 1D and ______ Problem: Access specific elements from 1D and 2D arrays using positive and negative indices.",
+    "options": [
+      "Introduction",
+      "Syntax",
+      "2D Indexing",
+      "Inspecting"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "2D Indexing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-53",
+    "question": ".shape returns a tuple of dimension sizes, .dtype ______ .size is the total element count, and .ndim is the number of axes.",
+    "options": [
+      "Initialization",
+      "modifies in-place** — unlike",
+      "reveals the inferred data type,",
+      "Errors"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "reveals the inferred data type, refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-54",
+    "question": "🏢 Real World Use Case ______ A financial analyst computes daily returns as np.diff(prices) / prices[:-1], then computes annualized volatility as np.std(daily_returns)  np.sqrt(252).",
+    "options": [
+      "Using",
+      "Given",
+      "Convert",
+      "Portfolio Risk Analysis:"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "Portfolio Risk Analysis: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-55",
+    "question": "Use np.squeeze ______ (1, 5, 1, 1, 3, 1) and confirm the result shape.",
+    "options": [
+      "Exercises",
+      "Output",
+      "to remove all size-1 dimensions from an array of shape",
+      "Step"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "to remove all size-1 dimensions from an array of shape refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-56",
+    "question": "Use np.sqrt() on np.array([0, 1, 4, 9, 16]) ______  0.5.",
+    "options": [
+      "True",
+      "Common",
+      "and compare with",
+      "Alternatively"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "and compare with refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-57",
+    "question": "Use np.unique with return_counts ______ [1, 1, 1, 2, 3, 3, 4, 4, 4, 4].",
+    "options": [
+      "to find the most frequent element in",
+      "Indexing",
+      "Exercises",
+      "True"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "to find the most frequent element in refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-58",
+    "question": "Fancy indexing and boolean indexing return ______.",
+    "options": [
+      "Numerical",
+      "copies",
+      "Element",
+      ".\n- **Using"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "copies refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-59",
+    "question": "They center the data, compute the covariance matrix via X.T @ X / (n-1)______ np.linalg.svd(cov_matrix) to get the principal components.",
+    "options": [
+      "attribute. For a 1D array it returns",
+      "Python",
+      ", then use",
+      "From"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": ", then use refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-60",
+    "question": "⚠ Common Errors / Mistakes Using and / or instead of & / | on arrays — and/or ______ &/| with parentheses.",
+    "options": [
+      "Forgetting `import numpy as np`",
+      "are Python keywords that don't work element-wise; use",
+      "World",
+      "Simulate"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "are Python keywords that don't work element-wise; use refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-61",
+    "question": "From a 4x4 array, use slicing to extract the 2x2 sub-array in the center (rows 1–2, cols 1–2) as a ______, then reshape it to 4 elements.",
+    "options": [
+      "view",
+      "From",
+      "Does slicing a NumPy array return a view or a copy?",
+      "Initialization"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "view refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-62",
+    "question": "Output: Explanation: Boolean indexing evaluates the condition element-wise and returns a 1D array of matching values.",
+    "options": [
+      "Boolean Indexing",
+      ". The eigenvalue decomposition satisfies",
+      "Changing",
+      "Splitting arrays"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Boolean Indexing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-63",
+    "question": "⚠ Common Errors / Mistakes Passing shape as separate arguments to np.zeros: Correct is np.zeros((2, 3)) ______ np.zeros(2, 3).",
+    "options": [
+      "Create",
+      "Modifying",
+      "Checking",
+      "with a tuple, not"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "with a tuple, not refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-64",
+    "question": "🚀 Example 2 Intermediate: Type Conversion and Precision Problem: Create a float64 array, convert to float32 and int32, observe precision loss.",
+    "options": [
+      "Introduction",
+      "Type conversion",
+      "into 10 equal parts using",
+      "Case"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Type conversion refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-65",
+    "question": "Using -1 ______ 2  -1 = 12 → -1 = 6.",
+    "options": [
+      "Compute",
+      "lets NumPy compute the missing dimension:",
+      "Modifying a fancy-indexed copy",
+      ". To feed into a fully connected layer, it's flattened to"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "lets NumPy compute the missing dimension: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-66",
+    "question": "Use np.where() with two source arrays (x and y) to create a new array that takes values from x ______ y otherwise (vectorized conditional).",
+    "options": [
+      "Joins",
+      "Case",
+      "where a condition is True and from",
+      "Example"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "where a condition is True and from refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-67",
+    "question": "🏢 Real World Use Case ______ A data scientist sets up a new Python environment and runs pip install numpy pandas matplotlib scikit-learn in a Docker container.",
+    "options": [
+      "Concepts",
+      "Data Science Environment Setup:",
+      "Array",
+      "property or"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Data Science Environment Setup: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-68",
+    "question": "Output: Explanation: np.arange(0, 20, 2) ______",
+    "options": [
+      "(uneven splits).\n- **Adding/removing elements**:",
+      "Specified",
+      "Real",
+      "is exclusive of stop (20)."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "is exclusive of stop (20). refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-69",
+    "question": "🚀 Example 2 Intermediate: View vs Copy Demonstration Problem: Show that modifying a slice modifies the original______ how to avoid it with .copy().",
+    "options": [
+      "view",
+      ", and",
+      "Performing",
+      "What is the difference between `flatten()` and `ravel()`?"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": ", and refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-70",
+    "question": "int32 uses 4 bytes per element (range -2³¹ to 2³¹-1), int64 ______",
+    "options": [
+      "Common",
+      "What does `arr.itemsize` return?",
+      "Using",
+      "uses 8 bytes."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "uses 8 bytes. refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-71",
+    "question": "The operation is executed in compiled C code, providing massive performance gains.",
+    "options": [
+      "Setup",
+      "Solve",
+      "Performance",
+      "From"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Performance refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-72",
+    "question": "______ — different processes can get identical random streams.",
+    "options": [
+      "Not seeding before distributed/parallel code",
+      "Generate",
+      "Using Python lists for large numerical computations",
+      "Explanation"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Not seeding before distributed/parallel code refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-73",
+    "question": "np.split raises an error for uneven splits ______ np.array_split instead.",
+    "options": [
+      "**Explanation:** The expression",
+      "Contiguous",
+      "— use",
+      "Errors"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "— use refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-74",
+    "question": "🧠 Key Concepts ______: np.sum(), np.mean(), np.median(), np.min(), np.max(), np.std(), np.var().",
+    "options": [
+      "Aggregation functions",
+      "Case",
+      "Take",
+      "View vs Copy"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Aggregation functions refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-75",
+    "question": "Output: Explanation: np.unique with return_counts=True ______",
+    "options": [
+      "gives frequency analysis.",
+      "Write",
+      "is exclusive of stop (20).",
+      "Assuming `.astype()` modifies in-place"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "gives frequency analysis. refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-76",
+    "question": "np.logical_and(a, b) ______",
+    "options": [
+      ".\n- **Type conversion**:",
+      "is the explicit function.",
+      "(right singular vectors transposed) are orthogonal.",
+      "Type"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "is the explicit function. refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-77",
+    "question": "Create a float32 ______ .nbytes.",
+    "options": [
+      "Numerical",
+      "accesses the last element.\n- **Boolean Indexing**:",
+      "Real",
+      "array of 1 million elements and measure its memory with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "array of 1 million elements and measure its memory with refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-78",
+    "question": "Setting np.random.seed(42) ensures reproducible results ______ audit.",
+    "options": [
+      "for",
+      "Errors",
+      "Confusing",
+      "is reshaped back to"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "for refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-79",
+    "question": "Forgetting parentheses in compound comparisons: arr > 0 & arr < 10 ______ arr > (0 & arr) < 10 — use (arr > 0) & (arr < 10).",
+    "options": [
+      "Precision",
+      ".\n- **Chaining boolean conditions with",
+      "Indexing",
+      "is parsed as"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "is parsed as refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-80",
+    "question": "a & b is shorthand that works for NumPy arrays but requires parentheses ______ combining with comparisons: (a > 0) & (a < 10).",
+    "options": [
+      "Losing",
+      "Intermediate",
+      "uses 8 bytes.",
+      "when"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "when refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-81",
+    "question": "⚠ Common Errors / Mistakes ______ — raises np.linalg.LinAlgError: Singular matrix.",
+    "options": [
+      "Real",
+      "Default",
+      "Trying to invert a singular matrix",
+      "Forgetting"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Trying to invert a singular matrix refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-82",
+    "question": "🚀 Example 2 Intermediate: Array Initialization Comparison Problem: Compare np.zeros, np.ones, np.full, and np.empty by creating arrays of shape (3, 4).",
+    "options": [
+      "Creating Arrays",
+      "What is the difference between `flatten()` and `ravel()`?",
+      "to avoid namespace pollution.\n- **Creating Arrays**:",
+      "**: Explicitly create an independent copy:"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "Creating Arrays refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-83",
+    "question": "Using .copy() unnecessarily — it wastes memory if you're only reading the slice.",
+    "options": [
+      "using",
+      "True",
+      "Changes",
+      "World"
+    ],
+    "correct_index": 0,
+    "marks": 1,
+    "explanation": "using refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-84",
+    "question": "Given a 2D array of shape (100, 5)______ np.split and verify the shapes.",
+    "options": [
+      "Transpose",
+      "Basic",
+      "Case",
+      ", split into training (80%) and testing (20%) using"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": ", split into training (80%) and testing (20%) using refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-85",
+    "question": "______: import numpy as np — never use from numpy import  to avoid namespace pollution.",
+    "options": [
+      "Negative Indexing",
+      ": Fill with a specified constant value.\n-",
+      "Import Convention",
+      "What does `np.unique(arr, return_counts=True)` return?"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Import Convention refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-86",
+    "question": "Use reshape with -1 to convert an array of 20 elements into 5 rows (infer ______).",
+    "options": [
+      "**: Determinant of a square matrix.\n- **",
+      "columns",
+      "True",
+      "(view) and transpose a 2D array."
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "columns refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-87",
+    "question": "🧠 Key Concepts ______: arr[i] — zero-based, works like Python lists.",
+    "options": [
+      "preferred over",
+      "Slicing",
+      "Syntax",
+      "1D Indexing"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "1D Indexing refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-88",
+    "question": "Insert the value 99 ______ [1, 2, 3, 4, 5].",
+    "options": [
+      "Detail",
+      "Using",
+      "at every even index of",
+      ".\n5. Demonstrate integer overflow by creating"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "at every even index of refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-89",
+    "question": "⚠ Common Errors / Mistakes ______: np.int8([127]) + 1 wraps to -128 (silent overflow).",
+    "options": [
+      "Beginner",
+      "Chaining boolean conditions with `and` / `or`",
+      "Overflow with integer types",
+      "Negative Step"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Overflow with integer types refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-90",
+    "question": "Output: Explanation: axis=1 ______",
+    "options": [
+      "and reshape it to 4x4.\n2. From a 4x4 array, use",
+      "Create",
+      "ensures reproducible results for audit. The modern",
+      "collapses columns → one result per row (product)."
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "collapses columns → one result per row (product). refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-91",
+    "question": "Confusing arr[:2] ______ arr[2:] (elements from index 2 onward).",
+    "options": [
+      "produce?**\n   A 3×4 array where every element is",
+      "Weight",
+      "How can you force a copy when slicing?",
+      "(first 2 elements) with"
+    ],
+    "correct_index": 3,
+    "marks": 1,
+    "explanation": "(first 2 elements) with refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-92",
+    "question": "🏢 Real World Use Case ______ A data scientist merges three CSV files: features (1000×20), labels (1000×1), and metadata (1000×5).",
+    "options": [
+      "Other",
+      "Adds",
+      "Data Preprocessing for Machine Learning:",
+      ".\n2. Vertically stack"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Data Preprocessing for Machine Learning: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-93",
+    "question": "Install NumPy in a fresh virtual environment ______ its version.",
+    "options": [
+      "Singular",
+      "Evenly",
+      "and print",
+      "Intermediate"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "and print refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-94",
+    "question": "______: np.append(), np.insert(), np.delete().",
+    "options": [
+      "returns a single total;",
+      "Adding/removing elements",
+      "** —",
+      "— applies the ufunc to every element. Also works as"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Adding/removing elements refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-95",
+    "question": "🚀 Example 2 ______ View vs Copy Demonstration Problem: Show that modifying a slice modifies the original, and how to avoid it with .copy().",
+    "options": [
+      "What is the output of `np.arange(10)[2:9:3]`?",
+      "What does `np.sum(arr, axis=0)` do?",
+      "Intermediate:",
+      "Outlier"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "Intermediate: refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-96",
+    "question": "To increase brightness by 20% ______n clip to valid range, one uses: img_adjusted = np.clip(img  1.2, 0, 255).astype(np.uint8).",
+    "options": [
+      "Basic",
+      "and the",
+      "What is the output of `np.arange(10)[2:9:3]`?",
+      "What"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "and the refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-97",
+    "question": "______: < (little-endian) or > (big-endian) prefix, e.g., >f8 for big-endian float64.",
+    "options": [
+      "Brightness",
+      "Endianness",
+      "What",
+      "Weight"
+    ],
+    "correct_index": 1,
+    "marks": 1,
+    "explanation": "Endianness refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-98",
+    "question": "Using .______() unnecessarily — it wastes memory if you're only reading the slice.",
+    "options": [
+      "Find",
+      "Exercises",
+      "copy",
+      "Forgetting `import numpy as np`"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "copy refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-99",
+    "question": "Incompatible shapes for broadcasting: e.g., (3, 4) and (3,) ______ (3, 4) and (4,) cannot.",
+    "options": [
+      "`np.split` raises an error for uneven splits",
+      "and slicing.\n8. Use",
+      "can broadcast, but",
+      ".\n\n## 🧠 Key Concepts\n\n- **"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "can broadcast, but refers to the concept described in the context of numpy."
+  },
+  {
+    "id": "numpy-100",
+    "question": "Use arr[np.newaxis, :] ______ (1, n), or arr[:, np.newaxis] ______ (n, 1).",
+    "options": [
+      "Preprocessing",
+      "Forgetting",
+      "to get shape",
+      "How do you add an extra dimension to a 1D array?"
+    ],
+    "correct_index": 2,
+    "marks": 1,
+    "explanation": "to get shape refers to the concept described in the context of numpy."
+  }
+]
