@@ -42,7 +42,7 @@ const s = StyleSheet.create({
   topBand: { position: "absolute", top: 0, left: 0, right: 0, height: 4, backgroundColor: C.brand },
   bottomBand: { position: "absolute", bottom: 0, left: 0, right: 0, height: 2, backgroundColor: C.brand, opacity: 0.6 },
 
-  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginTop: 12, marginBottom: 8, paddingBottom: 6, borderBottomWidth: 1.5, borderBottomColor: C.brand },
+  header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 12, marginBottom: 8, paddingBottom: 6, borderBottomWidth: 1.5, borderBottomColor: C.brand },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 8 },
   brand: { fontSize: 15, fontWeight: 700, color: C.brand, letterSpacing: 0.8 },
   headerSmall: { fontSize: 6.5, color: C.muted, marginTop: 1 },
@@ -123,14 +123,14 @@ export function OfferLetterDoc({ fullName, internId, domain, issuedAt, duration 
         <View style={s.header}>
           <View style={s.headerLeft}>
             <Image src={imageAssets?.logo ?? logoImg} style={{ width: 32, height: 32 }} />
-            <Image src={imageAssets?.vinix ?? vinixImg} style={{ height: 26, width: 64 }} />
-            <View style={{ marginLeft: 4 }}>
+            <View style={{ marginLeft: 2 }}>
               <Text style={s.brand}>{COMPANY.name}</Text>
               <Text style={s.headerSmall}>{COMPANY.tagline} · {COMPANY.website}</Text>
             </View>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Image src={imageAssets?.yrTech ?? yrTechImg} style={{ height: 26, width: 39 }} />
+            <Image src={imageAssets?.vinix ?? vinixImg} style={{ height: 24, width: 58 }} />
+            <Image src={imageAssets?.yrTech ?? yrTechImg} style={{ height: 22, width: 34 }} />
             <View style={s.refBox}>
               <Text style={s.refLabel}>INTERN ID</Text>
               <Text style={s.refValue}>{internId}</Text>
