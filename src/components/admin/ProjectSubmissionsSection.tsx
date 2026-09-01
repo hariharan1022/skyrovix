@@ -552,9 +552,9 @@ export function ProjectSubmissionsSection() {
       )}
 
       {/* ─── Grading Modal ─── */}
-      {gradingSub && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="w-full max-w-2xl rounded-3xl border border-border/40 bg-white dark:bg-[#0F172A] p-6 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col">
+      {gradingSub && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-3xl border border-border/40 bg-white dark:bg-[#0F172A] p-6 shadow-2xl animate-in zoom-in-95 max-h-[90vh] flex flex-col my-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-border/10 pb-3 shrink-0">
               <div>
                 <h3 className="text-base font-bold">Grade & Evaluate Project</h3>
@@ -618,7 +618,8 @@ export function ProjectSubmissionsSection() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ─── Rejection Modal ─── */}
@@ -656,9 +657,9 @@ export function ProjectSubmissionsSection() {
       )}
 
       {/* ─── Award Certificate Issuing Modal ─── */}
-      {awardingSub && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-2xl border border-border/40 bg-white dark:bg-[#0F172A] p-5 shadow-2xl animate-in zoom-in-95">
+      {awardingSub && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setAwardingSub(null)}>
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/40 bg-white dark:bg-[#0F172A] p-5 shadow-2xl animate-in zoom-in-95 my-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-start justify-between border-b border-border/10 pb-2">
               <h3 className="text-sm font-bold">Issue Best Performer Award</h3>
               <button onClick={() => setAwardingSub(null)} className="text-muted-foreground hover:text-foreground">
@@ -698,7 +699,8 @@ export function ProjectSubmissionsSection() {
               </Button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

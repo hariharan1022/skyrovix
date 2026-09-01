@@ -44,6 +44,16 @@ export const Route = createFileRoute("/admin")({
   component: AdminPanel,
 });
 
+function Portal({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(children, document.body);
+}
+
 const SIDEBAR_GROUPS = [
   {
     title: "MAIN",
@@ -1059,80 +1069,84 @@ function ApplicationsSection() {
 
       {/* Delete Confirmation Dialog */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => !deleting && setDeleteTarget(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="grid size-10 place-items-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/30"><AlertTriangle className="size-5" /></div>
-              <div>
-                <h3 className="font-bold text-lg">Delete Internship Application?</h3>
-                <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4" onClick={() => !deleting && setDeleteTarget(null)}>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 my-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="grid size-10 place-items-center rounded-xl bg-red-100 text-red-600 dark:bg-red-900/30"><AlertTriangle className="size-5" /></div>
+                <div>
+                  <h3 className="font-bold text-lg">Delete Internship Application?</h3>
+                  <p className="text-sm text-muted-foreground">This action cannot be undone.</p>
+                </div>
               </div>
-            </div>
-            <div className="rounded-xl bg-accent/30 p-4 text-sm space-y-1 mb-4">
-              <p><span className="font-medium">Student:</span> {deleteTarget.full_name}</p>
-              <p><span className="font-medium">Domain:</span> {getDomain(deleteTarget.domain)?.name ?? deleteTarget.domain}</p>
-              <p><span className="font-medium">Duration:</span> {deleteTarget.duration ?? 1} Month(s)</p>
-            </div>
-            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-3 text-xs text-amber-700 dark:text-amber-400 mb-4">
-              <p className="font-medium mb-1">This will remove:</p>
-              <ul className="list-disc pl-4 space-y-0.5">
-                <li>Internship enrollment</li>
-                <li>Assigned tasks</li>
-                <li>Task submissions</li>
-                <li>Progress tracking</li>
-                <li>Internship certificate (if exists)</li>
-              </ul>
-              <p className="mt-2 font-medium text-green-600 dark:text-green-400">Student account will NOT be deleted.</p>
-            </div>
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" className="border-border/60" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
-              <Button className="bg-red-600 hover:bg-red-700 text-white border-0" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Deleting..." : "Delete Application"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Detail Modal */}
-      {selectedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setSelectedApp(null)}>
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-          <div className="relative w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-bold text-lg">{selectedApp.full_name}</h3>
-              <button onClick={() => setSelectedApp(null)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-            </div>
-            <div className="space-y-3 text-sm">
-              <div className="grid grid-cols-2 gap-3">
-                <div><p className="text-muted-foreground text-xs">Email</p><p>{selectedApp.email}</p></div>
-                <div><p className="text-muted-foreground text-xs">Phone</p><p>{selectedApp.phone ?? "—"}</p></div>
-                <div><p className="text-muted-foreground text-xs">Domain</p><p>{getDomain(selectedApp.domain)?.name ?? selectedApp.domain}</p></div>
-                <div><p className="text-muted-foreground text-xs">Status</p><Badge className="text-xs">{selectedApp.status}</Badge></div>
-                <div className="col-span-2"><p className="text-muted-foreground text-xs">College</p><p>{selectedApp.college} · {selectedApp.course} ({selectedApp.year})</p></div>
-                <div className="col-span-2"><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-mono text-xs">{selectedApp.intern_id ?? "—"}</p></div>
-                <div><p className="text-muted-foreground text-xs">Applied</p><p>{new Date(selectedApp.created_at).toLocaleDateString("en-IN")}</p></div>
-                <div><p className="text-muted-foreground text-xs">Offer Issued</p><p>{selectedApp.offer_issued_at ? new Date(selectedApp.offer_issued_at).toLocaleDateString("en-IN") : "—"}</p></div>
+              <div className="rounded-xl bg-accent/30 p-4 text-sm space-y-1 mb-4">
+                <p><span className="font-medium">Student:</span> {deleteTarget.full_name}</p>
+                <p><span className="font-medium">Domain:</span> {getDomain(deleteTarget.domain)?.name ?? deleteTarget.domain}</p>
+                <p><span className="font-medium">Duration:</span> {deleteTarget.duration ?? 1} Month(s)</p>
               </div>
-              <div className="flex gap-2 pt-2 flex-wrap">
-                {selectedApp.status === "approved" && (
-                  <Button size="sm" className="brand-gradient text-white border-0 flex-1" onClick={() => { updateStatus(selectedApp.id, "ongoing"); setSelectedApp(null); }}>
-                    Mark Ongoing
-                  </Button>
-                )}
-                {selectedApp.status === "ongoing" && (
-                  <Button size="sm" className="brand-gradient text-white border-0 flex-1" onClick={() => { updateStatus(selectedApp.id, "completed"); setSelectedApp(null); }}>
-                    Mark Completed
-                  </Button>
-                )}
-                <Button size="sm" variant="outline" className="border-border/60" asChild>
-                  <a href={`mailto:${selectedApp.email}`}><Mail className="mr-1 size-3.5" /> Email</a>
+              <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-3 text-xs text-amber-700 dark:text-amber-400 mb-4">
+                <p className="font-medium mb-1">This will remove:</p>
+                <ul className="list-disc pl-4 space-y-0.5">
+                  <li>Internship enrollment</li>
+                  <li>Assigned tasks</li>
+                  <li>Task submissions</li>
+                  <li>Progress tracking</li>
+                  <li>Internship certificate (if exists)</li>
+                </ul>
+                <p className="mt-2 font-medium text-green-600 dark:text-green-400">Student account will NOT be deleted.</p>
+              </div>
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" className="border-border/60" onClick={() => setDeleteTarget(null)} disabled={deleting}>Cancel</Button>
+                <Button className="bg-red-600 hover:bg-red-700 text-white border-0" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Deleting..." : "Delete Application"}
                 </Button>
               </div>
             </div>
           </div>
-        </div>
+        </Portal>
+      )}
+
+      {/* Detail Modal */}
+      {selectedApp && (
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4" onClick={() => setSelectedApp(null)}>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="relative w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 max-h-[85vh] overflow-y-auto my-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-lg">{selectedApp.full_name}</h3>
+                <button onClick={() => setSelectedApp(null)} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><p className="text-muted-foreground text-xs">Email</p><p>{selectedApp.email}</p></div>
+                  <div><p className="text-muted-foreground text-xs">Phone</p><p>{selectedApp.phone ?? "—"}</p></div>
+                  <div><p className="text-muted-foreground text-xs">Domain</p><p>{getDomain(selectedApp.domain)?.name ?? selectedApp.domain}</p></div>
+                  <div><p className="text-muted-foreground text-xs">Status</p><Badge className="text-xs">{selectedApp.status}</Badge></div>
+                  <div className="col-span-2"><p className="text-muted-foreground text-xs">College</p><p>{selectedApp.college} · {selectedApp.course} ({selectedApp.year})</p></div>
+                  <div className="col-span-2"><p className="text-muted-foreground text-xs">Intern ID</p><p className="font-mono text-xs">{selectedApp.intern_id ?? "—"}</p></div>
+                  <div><p className="text-muted-foreground text-xs">Applied</p><p>{new Date(selectedApp.created_at).toLocaleDateString("en-IN")}</p></div>
+                  <div><p className="text-muted-foreground text-xs">Offer Issued</p><p>{selectedApp.offer_issued_at ? new Date(selectedApp.offer_issued_at).toLocaleDateString("en-IN") : "—"}</p></div>
+                </div>
+                <div className="flex gap-2 pt-2 flex-wrap">
+                  {selectedApp.status === "approved" && (
+                    <Button size="sm" className="brand-gradient text-white border-0 flex-1" onClick={() => { updateStatus(selectedApp.id, "ongoing"); setSelectedApp(null); }}>
+                      Mark Ongoing
+                    </Button>
+                  )}
+                  {selectedApp.status === "ongoing" && (
+                    <Button size="sm" className="brand-gradient text-white border-0 flex-1" onClick={() => { updateStatus(selectedApp.id, "completed"); setSelectedApp(null); }}>
+                      Mark Completed
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline" className="border-border/60" asChild>
+                    <a href={`mailto:${selectedApp.email}`}><Mail className="mr-1 size-3.5" /> Email</a>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Portal>
       )}
 
       <div className="overflow-x-auto rounded-2xl border border-border/50 bg-white/60 backdrop-blur dark:bg-[#1E293B]/60">
@@ -1292,42 +1306,43 @@ function SubmissionsSection() {
       {!data?.length && <p className="text-center text-muted-foreground py-12">No submissions yet.</p>}
 
       {/* Confirmation Dialog */}
-      {confirmAction && createPortal(
-        <div
-          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
-          onClick={() => setConfirmAction(null)}
-          onWheel={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
-        >
+      {confirmAction && (
+        <Portal>
           <div
-            className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 my-auto"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+            onClick={() => setConfirmAction(null)}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
           >
-            <h3 className="text-lg font-bold">Confirm Action</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Are you sure you want to <span className="font-semibold text-foreground">{confirmAction.label}</span> this submission?</p>
-            {confirmAction.status === "rejected" && (
-              <div className="mt-4">
-                <Label className="text-xs">Reason for rejection</Label>
-                <Textarea
-                  placeholder="Provide a reason for rejection..."
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  rows={3}
-                  className="mt-1 text-xs"
-                />
+            <div
+              className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-lg font-bold">Confirm Action</h3>
+              <p className="mt-2 text-sm text-muted-foreground">Are you sure you want to <span className="font-semibold text-foreground">{confirmAction.label}</span> this submission?</p>
+              {confirmAction.status === "rejected" && (
+                <div className="mt-4">
+                  <Label className="text-xs">Reason for rejection</Label>
+                  <Textarea
+                    placeholder="Provide a reason for rejection..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    rows={3}
+                    className="mt-1 text-xs"
+                  />
+                </div>
+              )}
+              <div className="mt-6 flex gap-3 justify-end">
+                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setConfirmAction(null); setRejectReason(""); }}>Cancel</Button>
+                <Button size="sm" className={`rounded-xl text-white border-0 ${confirmAction.status === "approved" ? "bg-green-600 hover:bg-green-700" : confirmAction.status === "rejected" ? "bg-red-600 hover:bg-red-700" : "bg-amber-600 hover:bg-amber-700"}`}
+                  disabled={loadingId === confirmAction.id}
+                  onClick={() => changeStatus(confirmAction.id, confirmAction.status)}>
+                  {loadingId === confirmAction.id ? "Saving..." : `Yes, ${confirmAction.label}`}
+                </Button>
               </div>
-            )}
-            <div className="mt-6 flex gap-3 justify-end">
-              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setConfirmAction(null); setRejectReason(""); }}>Cancel</Button>
-              <Button size="sm" className={`rounded-xl text-white border-0 ${confirmAction.status === "approved" ? "bg-green-600 hover:bg-green-700" : confirmAction.status === "rejected" ? "bg-red-600 hover:bg-red-700" : "bg-amber-600 hover:bg-amber-700"}`}
-                disabled={loadingId === confirmAction.id}
-                onClick={() => changeStatus(confirmAction.id, confirmAction.status)}>
-                {loadingId === confirmAction.id ? "Saving..." : `Yes, ${confirmAction.label}`}
-              </Button>
             </div>
           </div>
-        </div>,
-        document.body
+        </Portal>
       )}
     </div>
   );
@@ -1834,31 +1849,33 @@ function VerificationSection() {
 
       {/* Reject Dialog */}
       {rejectDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => !actionLoading && setRejectDialog(null)}>
-          <div className="w-full max-w-md rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">Reject Internship</h3>
-            <p className="mt-2 text-sm text-muted-foreground">Reject internship for <span className="font-semibold text-foreground">{rejectDialog.full_name}</span>.</p>
-            <div className="mt-4">
-              <Label className="text-xs">Reason for rejection</Label>
-              <Textarea
-                placeholder="Provide feedback — student will see this..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                rows={4}
-                className="mt-1 text-xs"
-              />
-              <p className="mt-1 text-[10px] text-muted-foreground">Common reasons: Missing files, Incomplete project, Incorrect GitHub repo, Project not working</p>
-            </div>
-            <div className="mt-6 flex gap-3 justify-end">
-              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setRejectDialog(null); setRejectReason(""); }} disabled={actionLoading === rejectDialog.id}>Cancel</Button>
-              <Button size="sm" className="rounded-xl bg-red-600 hover:bg-red-700 text-white border-0"
-                disabled={actionLoading === rejectDialog.id || !rejectReason.trim()}
-                onClick={handleReject}>
-                {actionLoading === rejectDialog.id ? "Rejecting..." : "Reject Submission"}
-              </Button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => !actionLoading && setRejectDialog(null)}>
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 my-auto" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold">Reject Internship</h3>
+              <p className="mt-2 text-sm text-muted-foreground">Reject internship for <span className="font-semibold text-foreground">{rejectDialog.full_name}</span>.</p>
+              <div className="mt-4">
+                <Label className="text-xs">Reason for rejection</Label>
+                <Textarea
+                  placeholder="Provide feedback — student will see this..."
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  rows={4}
+                  className="mt-1 text-xs"
+                />
+                <p className="mt-1 text-[10px] text-muted-foreground">Common reasons: Missing files, Incomplete project, Incorrect GitHub repo, Project not working</p>
+              </div>
+              <div className="mt-6 flex gap-3 justify-end">
+                <Button variant="outline" size="sm" className="rounded-xl" onClick={() => { setRejectDialog(null); setRejectReason(""); }} disabled={actionLoading === rejectDialog.id}>Cancel</Button>
+                <Button size="sm" className="rounded-xl bg-red-600 hover:bg-red-700 text-white border-0"
+                  disabled={actionLoading === rejectDialog.id || !rejectReason.trim()}
+                  onClick={handleReject}>
+                  {actionLoading === rejectDialog.id ? "Rejecting..." : "Reject Submission"}
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );
@@ -2048,8 +2065,8 @@ function StudentsSection() {
                 <tr key={s.id} className="border-b border-border/30 transition hover:bg-accent/20">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="grid size-8 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{s.full_name.charAt(0)}</div>
-                      <div><p className="font-medium text-sm">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.email}</p></div>
+                      <div className="grid size-8 place-items-center rounded-full brand-gradient text-[10px] font-bold text-white">{s.full_name ? String(s.full_name).charAt(0).toUpperCase() : "S"}</div>
+                      <div><p className="font-medium text-sm">{s.full_name ?? "—"}</p><p className="text-xs text-muted-foreground">{s.email ?? "—"}</p></div>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -2814,38 +2831,47 @@ function LoginHistorySection() {
 function StudentDetailModal({ student, onClose }: { student: any; onClose: () => void }) {
   const [tab, setTab] = useState<"profile" | "payments" | "submissions" | "certificates" | "login-history">("profile");
 
+  if (!student) return null;
+
+  const userId = student.user_id || student.id || "";
+  const appId = student.id || "";
+
   const { data: payments } = useQuery({
-    queryKey: ["admin-student-payments", student.user_id],
-    enabled: tab === "payments",
+    queryKey: ["admin-student-payments", userId, appId],
+    enabled: tab === "payments" && Boolean(appId),
     queryFn: async () => {
-      const { data } = await supabase.from("payments").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      if (!appId) return [];
+      const { data } = await supabase.from("payments").select("*").eq("application_id", appId).order("created_at", { ascending: false });
       return data ?? [];
     },
   });
 
   const { data: submissions } = useQuery({
-    queryKey: ["admin-student-submissions", student.user_id],
-    enabled: tab === "submissions",
+    queryKey: ["admin-student-submissions", userId, appId],
+    enabled: tab === "submissions" && Boolean(appId),
     queryFn: async () => {
-      const { data } = await supabase.from("submissions").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      if (!appId) return [];
+      const { data } = await supabase.from("submissions").select("*").eq("application_id", appId).order("created_at", { ascending: false });
       return data ?? [];
     },
   });
 
   const { data: certificates } = useQuery({
-    queryKey: ["admin-student-certificates", student.user_id],
-    enabled: tab === "certificates",
+    queryKey: ["admin-student-certificates", userId, appId],
+    enabled: tab === "certificates" && Boolean(appId),
     queryFn: async () => {
-      const { data } = await supabase.from("certificates").select("*").eq("application_id", student.id).order("created_at", { ascending: false });
+      if (!appId) return [];
+      const { data } = await supabase.from("certificates").select("*").eq("application_id", appId).order("created_at", { ascending: false });
       return data ?? [];
     },
   });
 
   const { data: loginSessions } = useQuery({
-    queryKey: ["admin-student-login-sessions", student.user_id],
-    enabled: tab === "login-history",
+    queryKey: ["admin-student-login-sessions", userId],
+    enabled: tab === "login-history" && Boolean(userId),
     queryFn: async () => {
-      const { data } = await (supabase as any).from("login_sessions").select("*").eq("student_id", student.user_id).order("last_active", { ascending: false });
+      if (!userId) return [];
+      const { data } = await (supabase as any).from("login_sessions").select("*").eq("student_id", userId).order("last_active", { ascending: false });
       return data ?? [];
     },
   });
@@ -2858,197 +2884,213 @@ function StudentDetailModal({ student, onClose }: { student: any; onClose: () =>
     { id: "login-history" as const, label: "Login History", icon: Activity },
   ];
 
+  const formatDate = (d: any) => {
+    if (!d) return "—";
+    try {
+      const dt = new Date(d);
+      return isNaN(dt.getTime()) ? "—" : dt.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+    } catch {
+      return "—";
+    }
+  };
+
+  const initialLetter = student.full_name ? String(student.full_name).charAt(0).toUpperCase() : "S";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-full brand-gradient text-sm font-bold text-white">{student.full_name?.charAt(0)}</div>
-            <div>
-              <h3 className="font-bold text-lg">{student.full_name}</h3>
-              <p className="text-xs text-muted-foreground">{student.email} · {student.intern_id}</p>
+    <Portal>
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4" onClick={onClose}>
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 my-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="grid size-10 place-items-center rounded-full brand-gradient text-sm font-bold text-white">{initialLetter}</div>
+              <div>
+                <h3 className="font-bold text-lg">{student.full_name ?? "Student Details"}</h3>
+                <p className="text-xs text-muted-foreground">{student.email ?? "—"} · {student.intern_id ?? "—"}</p>
+              </div>
             </div>
+            <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
           </div>
-          <button onClick={onClose} className="grid size-8 place-items-center rounded-lg hover:bg-accent/50"><X className="size-4" /></button>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 rounded-xl bg-muted/50 p-1 mb-6 overflow-x-auto">
-          {tabs.map((t) => {
-            const Icon = t.icon;
-            return (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${
-                  tab === t.id ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Icon className="size-3.5" /> {t.label}
-              </button>
-            );
-          })}
-        </div>
+          {/* Tabs */}
+          <div className="flex gap-1 rounded-xl bg-muted/50 p-1 mb-6 overflow-x-auto">
+            {tabs.map((t) => {
+              const Icon = t.icon;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap transition ${
+                    tab === t.id ? "bg-white text-foreground shadow-sm dark:bg-[#1E293B]" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="size-3.5" /> {t.label}
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Profile Tab */}
-        {tab === "profile" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Domain</p><p className="font-medium">{getDomain(student.domain)?.name ?? student.domain}</p></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">College</p><p className="font-medium">{student.college ?? "—"}</p></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Course</p><p className="font-medium">{student.course ?? "—"} ({student.year ?? "—"})</p></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Phone</p><p className="font-medium">{student.phone ?? "—"}</p></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Status</p><Badge>{student.status ?? "Active"}</Badge></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Joined</p><p className="font-medium">{new Date(student.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p></div>
-              <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Offer Issued</p><p className="font-medium">{student.offer_issued_at ? new Date(student.offer_issued_at).toLocaleDateString("en-IN") : "—"}</p></div>
+          {/* Profile Tab */}
+          {tab === "profile" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Domain</p><p className="font-medium">{getDomain(student.domain)?.name ?? student.domain ?? "—"}</p></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">College</p><p className="font-medium">{student.college ?? "—"}</p></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Course</p><p className="font-medium">{student.course ?? "—"} ({student.year ?? "—"})</p></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Phone</p><p className="font-medium">{student.phone ?? "—"}</p></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Status</p><Badge>{student.status ?? "Active"}</Badge></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Joined</p><p className="font-medium">{formatDate(student.created_at)}</p></div>
+                <div className="rounded-xl bg-accent/20 p-4"><p className="text-xs text-muted-foreground mb-1">Offer Issued</p><p className="font-medium">{formatDate(student.offer_issued_at)}</p></div>
+              </div>
+              {student.email && (
+                <a href={`mailto:${student.email}`} className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"><Mail className="size-3.5" /> Send Email</a>
+              )}
             </div>
-            <a href={`mailto:${student.email}`} className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"><Mail className="size-3.5" /> Send Email</a>
-          </div>
-        )}
+          )}
 
-        {/* Payments Tab */}
-        {tab === "payments" && (
-          <div className="space-y-3">
-            {(!payments || payments.length === 0) ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No payment records found.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-xl border border-border/40">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
-                    <th className="px-3 py-2 text-left">Amount</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Method</th>
-                    <th className="px-3 py-2 text-left">UTR</th>
-                    <th className="px-3 py-2 text-left">Date</th>
-                  </tr></thead>
-                  <tbody>
-                    {payments.map((p: any) => (
-                      <tr key={p.id} className="border-b border-border/20 hover:bg-accent/20">
-                        <td className="px-3 py-2 font-medium">{p.amount ? `₹${p.amount.toLocaleString("en-IN")}` : "—"}</td>
-                        <td className="px-3 py-2"><Badge className={`text-xs ${p.status === "verified" ? "bg-green-100 text-green-700" : p.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{p.status}</Badge></td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">{p.payment_method ?? "—"}</td>
-                        <td className="px-3 py-2 font-mono text-[10px] text-muted-foreground">{p.utr ?? "—"}</td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(p.created_at).toLocaleDateString("en-IN")}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Submissions Tab */}
-        {tab === "submissions" && (
-          <div className="space-y-3">
-            {(!submissions || submissions.length === 0) ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No task submissions found.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-xl border border-border/40">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
-                    <th className="px-3 py-2 text-left">Task</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Submitted</th>
-                    <th className="px-3 py-2 text-left">URL</th>
-                  </tr></thead>
-                  <tbody>
-                    {submissions.map((s: any) => (
-                      <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
-                        <td className="px-3 py-2 text-xs">{s.task_name ?? `Task #${s.task_index ?? ""}`}</td>
-                        <td className="px-3 py-2"><Badge className={`text-xs ${s.status === "approved" ? "bg-green-100 text-green-700" : s.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{s.status}</Badge></td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(s.created_at).toLocaleDateString("en-IN")}</td>
-                        <td className="px-3 py-2 text-xs">{s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate block max-w-[200px]">{s.url}</a> : "—"}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Certificates Tab */}
-        {tab === "certificates" && (
-          <div className="space-y-3">
-            {(!certificates || certificates.length === 0) ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No certificates issued yet.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-xl border border-border/40">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
-                    <th className="px-3 py-2 text-left">Type</th>
-                    <th className="px-3 py-2 text-left">Cert ID</th>
-                    <th className="px-3 py-2 text-left">Issued</th>
-                    <th className="px-3 py-2 text-left">Status</th>
-                  </tr></thead>
-                  <tbody>
-                    {certificates.map((c: any) => (
-                      <tr key={c.id} className="border-b border-border/20 hover:bg-accent/20">
-                        <td className="px-3 py-2 text-xs capitalize">{c.type ?? "Certificate"}</td>
-                        <td className="px-3 py-2 font-mono text-[10px]">{c.certificate_id ?? "—"}</td>
-                        <td className="px-3 py-2 text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("en-IN")}</td>
-                        <td className="px-3 py-2"><Badge className="text-xs bg-green-100 text-green-700">Issued</Badge></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Login History Tab */}
-        {tab === "login-history" && (
-          <div className="space-y-3">
-            {(!loginSessions || loginSessions.length === 0) ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No login sessions recorded.</p>
-            ) : (
-              <div className="overflow-x-auto rounded-xl border border-border/40">
-                <table className="w-full text-sm">
-                  <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
-                    <th className="px-3 py-2 text-left">Status</th>
-                    <th className="px-3 py-2 text-left">Device</th>
-                    <th className="px-3 py-2 text-left">Browser</th>
-                    <th className="px-3 py-2 text-left">Location</th>
-                    <th className="px-3 py-2 text-left">Logged In</th>
-                    <th className="px-3 py-2 text-left">Last Active</th>
-                    <th className="px-3 py-2 text-left">Duration</th>
-                  </tr></thead>
-                  <tbody>
-                    {loginSessions.map((s: any) => {
-                      const duration = s.login_time && s.logout_time
-                        ? Math.round((new Date(s.logout_time).getTime() - new Date(s.login_time).getTime()) / 60000)
-                        : s.login_time && s.last_active
-                        ? Math.round((new Date(s.last_active).getTime() - new Date(s.login_time).getTime()) / 60000)
-                        : null;
-                      return (
-                        <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
-                          <td className="px-3 py-2">
-                            {s.status === "online" ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700"><Wifi className="size-3" /> Online</span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500"><WifiOff className="size-3" /> Offline</span>
-                            )}
-                          </td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground capitalize">{s.device ?? "—"}</td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">{s.browser ?? "—"}{s.os ? ` (${s.os})` : ""}</td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">{[s.city, s.state, s.country].filter(Boolean).join(", ") || "—"}</td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.login_time ? new Date(s.login_time).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.last_active ? new Date(s.last_active).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
-                          <td className="px-3 py-2 text-xs text-muted-foreground">{duration !== null ? `${duration} min` : "—"}</td>
+          {/* Payments Tab */}
+          {tab === "payments" && (
+            <div className="space-y-3">
+              {(!payments || payments.length === 0) ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">No payment records found.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border/40">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-left">Amount</th>
+                      <th className="px-3 py-2 text-left">Status</th>
+                      <th className="px-3 py-2 text-left">Method</th>
+                      <th className="px-3 py-2 text-left">UTR</th>
+                      <th className="px-3 py-2 text-left">Date</th>
+                    </tr></thead>
+                    <tbody>
+                      {payments.map((p: any) => (
+                        <tr key={p.id} className="border-b border-border/20 hover:bg-accent/20">
+                          <td className="px-3 py-2 font-medium">{p.amount ? `₹${p.amount.toLocaleString("en-IN")}` : "—"}</td>
+                          <td className="px-3 py-2"><Badge className={`text-xs ${p.status === "verified" ? "bg-green-100 text-green-700" : p.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{p.status}</Badge></td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{p.payment_method ?? "—"}</td>
+                          <td className="px-3 py-2 font-mono text-[10px] text-muted-foreground">{p.utr ?? "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{formatDate(p.created_at)}</td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Submissions Tab */}
+          {tab === "submissions" && (
+            <div className="space-y-3">
+              {(!submissions || submissions.length === 0) ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">No task submissions found.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border/40">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-left">Task</th>
+                      <th className="px-3 py-2 text-left">Status</th>
+                      <th className="px-3 py-2 text-left">Submitted</th>
+                      <th className="px-3 py-2 text-left">URL</th>
+                    </tr></thead>
+                    <tbody>
+                      {submissions.map((s: any) => (
+                        <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
+                          <td className="px-3 py-2 text-xs">{s.task_name ?? `Task #${s.task_index ?? ""}`}</td>
+                          <td className="px-3 py-2"><Badge className={`text-xs ${s.status === "approved" ? "bg-green-100 text-green-700" : s.status === "rejected" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{s.status}</Badge></td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{formatDate(s.created_at)}</td>
+                          <td className="px-3 py-2 text-xs">{s.url ? <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate block max-w-[200px]">{s.url}</a> : "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Certificates Tab */}
+          {tab === "certificates" && (
+            <div className="space-y-3">
+              {(!certificates || certificates.length === 0) ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">No certificates issued yet.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border/40">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-left">Type</th>
+                      <th className="px-3 py-2 text-left">Cert ID</th>
+                      <th className="px-3 py-2 text-left">Issued</th>
+                      <th className="px-3 py-2 text-left">Status</th>
+                    </tr></thead>
+                    <tbody>
+                      {certificates.map((c: any) => (
+                        <tr key={c.id} className="border-b border-border/20 hover:bg-accent/20">
+                          <td className="px-3 py-2 text-xs capitalize">{c.type ?? "Certificate"}</td>
+                          <td className="px-3 py-2 font-mono text-[10px]">{c.certificate_id ?? "—"}</td>
+                          <td className="px-3 py-2 text-xs text-muted-foreground">{formatDate(c.created_at)}</td>
+                          <td className="px-3 py-2"><Badge className="text-xs bg-green-100 text-green-700">Issued</Badge></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Login History Tab */}
+          {tab === "login-history" && (
+            <div className="space-y-3">
+              {(!loginSessions || loginSessions.length === 0) ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">No login sessions recorded.</p>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border/40">
+                  <table className="w-full text-sm">
+                    <thead><tr className="border-b border-border/30 text-xs uppercase text-muted-foreground">
+                      <th className="px-3 py-2 text-left">Status</th>
+                      <th className="px-3 py-2 text-left">Device</th>
+                      <th className="px-3 py-2 text-left">Browser</th>
+                      <th className="px-3 py-2 text-left">Location</th>
+                      <th className="px-3 py-2 text-left">Logged In</th>
+                      <th className="px-3 py-2 text-left">Last Active</th>
+                      <th className="px-3 py-2 text-left">Duration</th>
+                    </tr></thead>
+                    <tbody>
+                      {loginSessions.map((s: any) => {
+                        const duration = s.login_time && s.logout_time
+                          ? Math.round((new Date(s.logout_time).getTime() - new Date(s.login_time).getTime()) / 60000)
+                          : s.login_time && s.last_active
+                          ? Math.round((new Date(s.last_active).getTime() - new Date(s.login_time).getTime()) / 60000)
+                          : null;
+                        return (
+                          <tr key={s.id} className="border-b border-border/20 hover:bg-accent/20">
+                            <td className="px-3 py-2">
+                              {s.status === "online" ? (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700"><Wifi className="size-3" /> Online</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-500"><WifiOff className="size-3" /> Offline</span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground capitalize">{s.device ?? "—"}</td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground">{s.browser ?? "—"}{s.os ? ` (${s.os})` : ""}</td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground">{[s.city, s.state, s.country].filter(Boolean).join(", ") || "—"}</td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.login_time ? new Date(s.login_time).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground whitespace-nowrap">{s.last_active ? new Date(s.last_active).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "—"}</td>
+                            <td className="px-3 py-2 text-xs text-muted-foreground">{duration !== null ? `${duration} min` : "—"}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </Portal>
   );
 }
 
@@ -3337,57 +3379,61 @@ function DomainsSection() {
 
       {/* Form Dialog */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4">{editingDomain ? "Edit Domain" : "Add Domain"}</h3>
-            <form onSubmit={save} className="space-y-4">
-              <div>
-                <Label className="text-xs">Domain Name</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. MERN Stack Development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowForm(false)}>
+            <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto my-auto" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-4">{editingDomain ? "Edit Domain" : "Add Domain"}</h3>
+              <form onSubmit={save} className="space-y-4">
                 <div>
-                  <Label className="text-xs">Domain Code</Label>
-                  <Input value={domainCode} onChange={(e) => setDomainCode(e.target.value)} placeholder="e.g. mern" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" disabled={!!editingDomain} />
+                  <Label className="text-xs">Domain Name</Label>
+                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. MERN Stack Development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs">Domain Code</Label>
+                    <Input value={domainCode} onChange={(e) => setDomainCode(e.target.value)} placeholder="e.g. mern" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" disabled={!!editingDomain} />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Slug</Label>
+                    <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. mern-stack-development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                  </div>
                 </div>
                 <div>
-                  <Label className="text-xs">Slug</Label>
-                  <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="e.g. mern-stack-development" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                  <Label className="text-xs">Icon (emoji)</Label>
+                  <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="e.g. 🛠️" className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
                 </div>
-              </div>
-              <div>
-                <Label className="text-xs">Icon (emoji)</Label>
-                <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="e.g. 🛠️" className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
-              </div>
-              <div>
-                <Label className="text-xs">Description</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide short details about the track..." rows={3} className="mt-1 text-xs rounded-xl border-slate-200" />
-              </div>
-              <div className="flex items-center gap-2 pt-2">
-                <input type="checkbox" id="isPublished" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="rounded border-slate-200" />
-                <Label htmlFor="isPublished" className="text-xs font-semibold select-none cursor-pointer">Publish and make active for internship applications</Label>
-              </div>
-              <div className="flex gap-3 justify-end pt-4">
-                <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
-                <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
-              </div>
-            </form>
+                <div>
+                  <Label className="text-xs">Description</Label>
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Provide short details about the track..." rows={3} className="mt-1 text-xs rounded-xl border-slate-200" />
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <input type="checkbox" id="isPublished" checked={isPublished} onChange={(e) => setIsPublished(e.target.checked)} className="rounded border-slate-200" />
+                  <Label htmlFor="isPublished" className="text-xs font-semibold select-none cursor-pointer">Publish and make active for internship applications</Label>
+                </div>
+                <div className="flex gap-3 justify-end pt-4">
+                  <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
+                  <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Delete Confirmation */}
       {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
-          <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">Delete Domain</h3>
-            <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this domain? This action is permanent and might fail if there are dependent user enrollments.</p>
-            <div className="mt-6 flex gap-3 justify-end">
-              <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
-              <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDeletingId(null)}>
+            <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 my-auto" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold">Delete Domain</h3>
+              <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this domain? This action is permanent and might fail if there are dependent user enrollments.</p>
+              <div className="mt-6 flex gap-3 justify-end">
+                <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
+                <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );
@@ -3633,55 +3679,59 @@ function TasksSection() {
 
       {/* Form Dialog */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowForm(false)}>
-          <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold mb-4">{editingTask ? "Edit Task" : "Add Task"}</h3>
-            <form onSubmit={save} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-xs text-slate-500">Domain</Label>
-                  <div className="mt-1 w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                    {activeDomainInfo?.name} ({viewingDomain})
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setShowForm(false)}>
+            <div className="w-full max-w-lg rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 max-h-[90vh] overflow-y-auto my-auto" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-4">{editingTask ? "Edit Task" : "Add Task"}</h3>
+              <form onSubmit={save} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-slate-500">Domain</Label>
+                    <div className="mt-1 w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                      {activeDomainInfo?.name} ({viewingDomain})
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Task Number</Label>
+                    <Input type="number" value={taskNumber} onChange={(e) => setTaskNumber(Number(e.target.value))} min={1} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
                   </div>
                 </div>
                 <div>
-                  <Label className="text-xs">Task Number</Label>
-                  <Input type="number" value={taskNumber} onChange={(e) => setTaskNumber(Number(e.target.value))} min={1} required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
+                  <Label className="text-xs">Task Title</Label>
+                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build an Intent Recognition Chatbot" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
                 </div>
-              </div>
-              <div>
-                <Label className="text-xs">Task Title</Label>
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build an Intent Recognition Chatbot" required className="mt-1 text-xs h-9 rounded-xl border-slate-200" />
-              </div>
-              <div>
-                <Label className="text-xs">Task Description</Label>
-                <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter details about requirements, expected outcome..." rows={5} className="mt-1 text-xs rounded-xl border-slate-200" required />
-              </div>
-              <div>
-                <Label className="text-xs">Resources (Optional)</Label>
-                <Textarea value={resources} onChange={(e) => setResources(e.target.value)} placeholder="e.g. https://python.org/docs, https://react.dev" rows={2} className="mt-1 text-xs rounded-xl border-slate-200" />
-              </div>
-              <div className="flex gap-3 justify-end pt-4">
-                <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
-                <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
-              </div>
-            </form>
+                <div>
+                  <Label className="text-xs">Task Description</Label>
+                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Enter details about requirements, expected outcome..." rows={5} className="mt-1 text-xs rounded-xl border-slate-200" required />
+                </div>
+                <div>
+                  <Label className="text-xs">Resources (Optional)</Label>
+                  <Textarea value={resources} onChange={(e) => setResources(e.target.value)} placeholder="e.g. https://python.org/docs, https://react.dev" rows={2} className="mt-1 text-xs rounded-xl border-slate-200" />
+                </div>
+                <div className="flex gap-3 justify-end pt-4">
+                  <Button type="button" variant="outline" className="text-xs rounded-xl h-9" onClick={() => setShowForm(false)}>Cancel</Button>
+                  <Button type="submit" disabled={saving} className="brand-gradient text-white border-0 text-xs rounded-xl h-9 px-4">{saving ? "Saving..." : "Save Changes"}</Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
+        </Portal>
       )}
 
       {/* Delete Confirmation */}
       {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setDeletingId(null)}>
-          <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95" onClick={(e) => e.stopPropagation()}>
-            <h3 className="text-lg font-bold">Delete Task</h3>
-            <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this task? This action is permanent.</p>
-            <div className="mt-6 flex gap-3 justify-end">
-              <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
-              <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+        <Portal>
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDeletingId(null)}>
+            <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl dark:bg-[#1E293B]/95 dark:border-white/10 animate-in zoom-in-95 my-auto" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-lg font-bold">Delete Task</h3>
+              <p className="mt-2 text-sm text-slate-500">Are you sure you want to delete this task? This action is permanent.</p>
+              <div className="mt-6 flex gap-3 justify-end">
+                <Button variant="outline" className="text-xs rounded-xl h-9" onClick={() => setDeletingId(null)}>Cancel</Button>
+                <Button onClick={handleDelete} className="bg-rose-600 hover:bg-rose-700 text-white border-0 text-xs rounded-xl h-9 px-4">Delete</Button>
+              </div>
             </div>
           </div>
-        </div>
+        </Portal>
       )}
     </div>
   );

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,10 +25,10 @@ export function PromotionalPopup() {
 
   if (!popup || dismissed) return null;
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDismissed(true)}>
+  return createPortal(
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4" onClick={() => setDismissed(true)}>
       <div
-        className="relative w-full max-w-md animate-in zoom-in-95 fade-in duration-300 rounded-2xl border border-border/50 bg-white shadow-2xl dark:bg-[#1E293B] dark:border-white/10 overflow-hidden"
+        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto animate-in zoom-in-95 fade-in duration-300 rounded-2xl border border-border/50 bg-white shadow-2xl dark:bg-[#1E293B] dark:border-white/10 overflow-hidden my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -67,6 +68,8 @@ export function PromotionalPopup() {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+
