@@ -126,6 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:image:alt", content: "Skyrovix Virtual Internship with Certificate & Real Projects" },
       { name: "twitter:site", content: "@skyrovix" },
       { name: "twitter:creator", content: "@skyrovix" },
+      { name: "google-adsense-account", content: "ca-pub-5755024838228586" },
       { rel: "canonical", href: SITE_URL },
     ],
     links: [
@@ -133,6 +134,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
       { rel: "preconnect", href: "https://www.googletagmanager.com", crossOrigin: "" },
+      { rel: "preconnect", href: "https://pagead2.googlesyndication.com", crossOrigin: "" },
+      { rel: "dns-prefetch", href: "https://pagead2.googlesyndication.com" },
       { rel: "dns-prefetch", href: "https://www.clarity.ms" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" },
       { rel: "icon", href: "/favicon.ico", sizes: "48x48" },
@@ -160,6 +163,12 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en" dir="ltr" className="bg-[#f8fafc] dark:bg-[#070b19]">
       <head>
         <HeadContent />
+        <meta name="google-adsense-account" content="ca-pub-5755024838228586" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5755024838228586"
+          crossOrigin="anonymous"
+        />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-FD15M64DX5" />
         <script
           dangerouslySetInnerHTML={{

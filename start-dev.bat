@@ -1,3 +1,3 @@
 @echo off
-cd /d "C:\Users\HARIHARAN S\OneDrive\Desktop\inten hub\skyrovix-pathway"
+cd /d "%~dp0"
 npm run dev

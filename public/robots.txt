@@ -10,6 +10,11 @@ Disallow: /api/
 
 Sitemap: https://skyrovix.online/sitemap.xml
 
+# Google AdSense Crawler
+User-agent: Mediapartners-Google
+Allow: /
+
+
 # Allow AI indexing bots
 User-agent: GPTBot
 Allow: /
